@@ -1,15 +1,25 @@
 {
   "name": "bot-anime-fight",
   "version": "1.0.0",
-  "description": "",
-  "main": "bot.js",
+  "description": "Bot criado por @Ávila#8509",
+  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node .",
+    "lint": "eslint src --fix"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "BOT"
+  ],
+  "author": "Ávila#8509",
+  "license": "MIT",
   "dependencies": {
-    "discord.js": "^14.7.1"
+    "discord.js": "^14.7.1",
+    "dotenv": "^16.0.3",
+    "mongoose": "^6.8.4",
+    "transform-props": "^1.0.1"
+  },
+  "engines": {
+    "npm": ">=8.x",
+    "node": "18.12.1"
   }
 }
