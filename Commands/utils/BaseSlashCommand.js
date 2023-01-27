@@ -6,6 +6,6 @@ module.exports = class BaseSlashCommand {
 
     get name() {
     return this._name;
- }
+  }
 };
 

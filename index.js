@@ -1,10 +1,9 @@
-const { Client, GatewayIntentBits, Partials } = require('discord.js')
+const { Client, GatewayIntentBits, Partials, Collection } = require('discord.js')
 const mongoose = require('mongoose')
 require('dotenv/config')
 
-const WhoisSlashCommand = require('./commands/whois');
-const messageCountSchema = require("./TestFiles/message-count-schema")
-const commands = require('./Commands/register')
+const { REST, Routes } = require('discord.js');
+const { registerCommands } = require('./commands/utils/registry');
 
 const client = new Client ({
   intents: [
@@ -18,6 +17,25 @@ const client = new Client ({
     Partials.Reaction,
   ]
 })
+
+const CLIENT_ID = process.env.CLIENT_ID;
+
+const rest = new REST({ version: '10' }).setToken(process.env.TOKEN);
+
+(async () => {
+  try {
+    client.slashCommands = new Collection();
+    await registerCommands(client, '../commands');
+
+    console.log('Started refreshing application (/) commands.');
+
+    // await rest.put(Routes.applicationCommands(CLIENT_ID), { body: [] });
+
+    console.log('Successfully reloaded application (/) commands.');
+  } catch (error) {
+    console.error(error);
+  }
+})();
 
 client.on('ready', () => {
   console.log("The bot is ready")
