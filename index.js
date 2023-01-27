@@ -1,5 +1,5 @@
-const { Client, GatewayIntentBits, Partials, Collection } = require('discord.js')
-const mongoose = require('mongoose')
+const { Client, GatewayIntentBits, Partials, Collection } = require("discord.js");
+const mongoose = require('mongoose');
 require('dotenv/config')
 
 const { REST, Routes } = require('discord.js');
@@ -22,15 +22,34 @@ const CLIENT_ID = process.env.CLIENT_ID;
 
 const rest = new REST({ version: '10' }).setToken(process.env.TOKEN);
 
+client.on('interactionCreate', (interaction) => {
+  if (interaction.isChatInputCommand()) {
+    const { commandName } = interaction;
+    const cmd = client.slashCommands.get(commandName);
+    if (cmd) {
+      cmd.run(client, interaction);
+    } else {
+      interaction.reply({ content: 'This command has no run method.'});
+    }
+  }
+});
+
+
 (async () => {
   try {
     client.slashCommands = new Collection();
     await registerCommands(client, '../commands');
-
+    console.log(client.slashCommands);
+    const slashCommandsJson = client.slashCommands.map(
+      (cmd) => cmd.getSlashCommandJSON()
+      );
+      console.log(slashCommandsJson);
     console.log('Started refreshing application (/) commands.');
-
-    // await rest.put(Routes.applicationCommands(CLIENT_ID), { body: [] });
-
+    await rest.put(Routes.applicationCommands(CLIENT_ID), { body: slashCommandsJson });
+    const registeredSlashCommands = await client.rest.get(
+      Routes.applicationCommands(CLIENT_ID)
+    );
+    console.log(registeredSlashCommands);
     console.log('Successfully reloaded application (/) commands.');
   } catch (error) {
     console.error(error);
@@ -43,15 +62,6 @@ client.on('ready', () => {
   mongoose.connect(process.env.MONGODB_URI, {
     keepAlive: true,
   });
-})
-
-client.on('interactionCreate', (interaction) => {
-  if(interaction.isChatInputCommand()) {
-    console.log('Pong!');
-    interaction.reply({ content: 'Pong!'})
-    console.log(interaction);
-  }
-
 })
 
 // client.on('messageCreate', async (message) => {

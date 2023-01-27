@@ -1,4 +1,5 @@
 const BaseSlashCommand = require('../utils/BaseSlashCommand');
+const { SlashCommandBuilder } = require('discord.js');
 
 module.exports = class PingSlashCommand extends BaseSlashCommand {
     constructor() {
@@ -8,5 +9,12 @@ module.exports = class PingSlashCommand extends BaseSlashCommand {
     run(client, interaction) {
         return interaction.reply({ content: 'Ping Slash Command'});
 
+    }
+
+    getSlashCommandJSON() {
+        return new SlashCommandBuilder()
+        .setName(this.name)
+        .setDescription('ping command')
+        .toJSON();
     }
 }
