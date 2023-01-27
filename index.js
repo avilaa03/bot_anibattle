@@ -39,17 +39,25 @@ client.on('interactionCreate', (interaction) => {
   try {
     client.slashCommands = new Collection();
     await registerCommands(client, '../commands');
-    console.log(client.slashCommands);
+    // console.log(client.slashCommands);
     const slashCommandsJson = client.slashCommands.map(
       (cmd) => cmd.getSlashCommandJSON()
       );
-      console.log(slashCommandsJson);
+      // console.log(slashCommandsJson);
     console.log('Started refreshing application (/) commands.');
-    await rest.put(Routes.applicationCommands(CLIENT_ID), { body: slashCommandsJson });
+    await rest.put(Routes.applicationCommands(CLIENT_ID), { 
+      body: [
+        ...slashCommandsJson, 
+        {
+      name: 'testcmd',
+      description: 'hello world',
+        },
+      ],
+     });
     const registeredSlashCommands = await client.rest.get(
       Routes.applicationCommands(CLIENT_ID)
     );
-    console.log(registeredSlashCommands);
+    // console.log(registeredSlashCommands);
     console.log('Successfully reloaded application (/) commands.');
   } catch (error) {
     console.error(error);

@@ -7,8 +7,7 @@ module.exports = class PingSlashCommand extends BaseSlashCommand {
     }
 
     run(client, interaction) {
-        return interaction.reply({ content: 'Ping Slash Command'});
-
+        return interaction.reply({ content: 'Pong!'});
     }
 
     getSlashCommandJSON() {
