@@ -2,7 +2,7 @@ const fs = require("fs");
 const BaseSlashCommand = require("../utils/BaseSlashCommand");
 const { SlashCommandBuilder } = require("discord.js");
 
-module.exports = class BalanceSlashCommand extends BaseSlashCommand {
+module.exports = class DailySlashCommand extends BaseSlashCommand {
   constructor() {
     super("daily");
   }

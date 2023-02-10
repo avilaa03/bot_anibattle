@@ -7,46 +7,52 @@ module.exports = class GiveSlashCommand extends BaseSlashCommand {
     super('give');
   }
   run(client, interaction) {
-    let content = interaction.message ? interaction.message.content : '';
-    if (!content) {
-      return interaction.reply({ content: 'Não foi possível ler o conteúdo da mensagem.' });
+    const amount = interaction.options.getNumber('amount');
+    const recipient = interaction.options.getUser('user');
+
+    let userData = {};
+    try {
+        userData = JSON.parse(fs.readFileSync('userData.json', 'utf-8'));
+    } catch (e) {
+        console.error(e);
     }
 
-    let input = content.split(' ');
-    let recipientId = input[1];
-    let amount = input[2];
-
-    if (!recipientId || !amount) {
-        return interaction.reply({ content: 'Você precisa especificar um usuário e uma quantia válida.'});
+    const senderId = interaction.user.id;
+    if (!userData[senderId]) {
+        userData[senderId] = { money: 0 };
     }
 
-    let giverData = this.getUserData(interaction.user.id);
-    let recipientData = this.getUserData(recipientId);
-
-    if (amount > giverData.balance) {
-        return interaction.reply({ content: 'Você não tem moedas suficientes para fazer essa transferência.'});
+    if (userData[senderId].money < amount) {
+        return interaction.reply({ content: 'Você não tem dinheiro suficiente!'});
     }
 
-    giverData.balance -= amount;
-    recipientData.balance += amount;
+    if (!userData[recipient.id]) {
+        userData[recipient.id] = { money: 0 };
+    }
+
+    userData[senderId].money -= amount;
+    userData[recipient.id].money += amount;
+
     fs.writeFileSync('userData.json', JSON.stringify(userData));
 
-    return interaction.reply({ content: `Você deu ${amount} moedas para o usuário ${recipientId}.`});
-  }
-
-  getUserData(userId) {
-    let userData = JSON.parse(fs.readFileSync('userData.json'));
-    if (!userData[userId]) {
-        userData[userId] = { balance: 0 };
-        fs.writeFileSync('userData.json', JSON.stringify(userData));
-    }
-    return userData[userId];
-  }
+    return interaction.reply({ content: `Você deu ${amount} para o usuário ${recipient.username}!`});
+}
 
   getSlashCommandJSON() {
     return new SlashCommandBuilder()
     .setName(this.name)
     .setDescription('Dá moedas para outro usuário')
-    .toJSON();
+    .addUserOption( option =>
+      option
+      .setName('user')
+      .setDescription('Usuário que deseja mencionar')
+      .setRequired(true))
+    .addNumberOption( option =>
+      option
+      .setName('amount')
+      .setDescription('Quantidade de dinheiro')
+      .setMinValue(0)
+      .setMaxValue(9999999999)
+      .setRequired(true));
   }
 }
