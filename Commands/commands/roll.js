@@ -1,19 +1,19 @@
 const BaseSlashCommand = require('../utils/BaseSlashCommand');
 const { SlashCommandBuilder } = require('discord.js');
 
-module.exports = class PingSlashCommand extends BaseSlashCommand {
+module.exports = class RollSlashCommand extends BaseSlashCommand {
     constructor() {
-        super('ping');
+        super('roll');
     }
 
     run(client, interaction) {
-        return interaction.reply({ content: 'Pong!'});''
+        return interaction.reply({ content: 'Roll Command, Em Desenvolvimento!'});
     }
 
     getSlashCommandJSON() {
         return new SlashCommandBuilder()
         .setName(this.name)
-        .setDescription('ping command')
+        .setDescription('roll command')
         .toJSON();
     }
 }

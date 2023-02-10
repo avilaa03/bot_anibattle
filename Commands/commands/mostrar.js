@@ -1,20 +1,19 @@
 const BaseSlashCommand = require('../utils/BaseSlashCommand');
 const { SlashCommandBuilder } = require('discord.js');
 
-module.exports = class StatsSlashCommand extends BaseSlashCommand {
+module.exports = class ShowSlashCommand extends BaseSlashCommand {
     constructor() {
-        super('stats');
+        super('show');
     }
 
     run(client, interaction) {
-        return interaction.reply({ content: 'Stats Slash Command'});
-
+        return interaction.reply({ content: 'Show Card Command, Em Desenvolvimento!'});
     }
 
     getSlashCommandJSON() {
         return new SlashCommandBuilder()
         .setName(this.name)
-        .setDescription('stats command')
+        .setDescription('show card command')
         .toJSON();
     }
 }

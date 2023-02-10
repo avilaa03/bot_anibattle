@@ -1,4 +1,4 @@
-const BaseSlashCommand = require('../../utils/BaseSlashCommand');
+const BaseSlashCommand = require('../utils/BaseSlashCommand');
 const { SlashCommandBuilder } = require('discord.js');
 
 function rollDice() {

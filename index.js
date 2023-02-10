@@ -1,9 +1,12 @@
-const { Client, GatewayIntentBits, Partials, Collection } = require("discord.js");
+const { Client, GatewayIntentBits, Partials, Collection, resolveColor } = require("discord.js");
 const mongoose = require('mongoose');
-require('dotenv/config')
+require('dotenv/config');
+const fs = require("fs");
 
 const { REST, Routes } = require('discord.js');
 const { registerCommands } = require('./commands/utils/registry');
+// const { GiveMoneySlashCommand } = require('./Commands/commands/give.js');
+
 
 const client = new Client ({
   intents: [
@@ -17,6 +20,10 @@ const client = new Client ({
     Partials.Reaction,
   ]
 })
+
+// const giveMoneyCommand = new GiveMoneySlashCommand(client);
+// const dailyCommand = new DailyCommand(client);
+// const balanceCommand = new BalanceCommand(client);
 
 const CLIENT_ID = process.env.CLIENT_ID;
 
@@ -33,6 +40,8 @@ client.on('interactionCreate', (interaction) => {
     }
   }
 });
+
+
 
 
 (async () => {
@@ -72,6 +81,12 @@ client.on('ready', () => {
   });
 })
 
+// client.on("message", async (message) => {
+//   giveMoneyCommand.handle(message);
+//   dailyCommand.handle(message);
+//   balanceCommand.handle(message);
+// });
+
 // client.on('messageCreate', async (message) => {
 //   await messageCountSchema.findOneAndUpdate({
 //     _id: message.author.id
@@ -84,6 +99,29 @@ client.on('ready', () => {
 //     upsert: true
 //   })
 // });
+
+var express = require('express');
+var app = express();
+
+app.get('/', function(req, res){
+   res.send("Hello world!");
+});
+
+app.listen(3000);
+
+app.post('/inserir', function(req, res){
+  console.log(req);
+  res.send({
+    "nome": req.body
+  });
+});
+
+const bodyParser = require('body-parser');
+
+app.use(express.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+
 
 // client.on('messageCreate', async (message) => {
 //   if (message.content === "ping") {
@@ -98,5 +136,6 @@ client.on('ready', () => {
 //   }
 //   console.log(reaction)
 // })
+
 
 client.login(process.env.TOKEN)
