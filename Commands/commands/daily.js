@@ -4,7 +4,7 @@ const { SlashCommandBuilder } = require("discord.js");
 
 module.exports = class BalanceSlashCommand extends BaseSlashCommand {
   constructor() {
-    super("balance");
+    super("daily");
   }
 
   run(client, interaction) {
