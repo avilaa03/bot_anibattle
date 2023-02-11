@@ -20,7 +20,7 @@ module.exports = class BalanceSlashCommand extends BaseSlashCommand {
             let userId = mentionedUser.id;
             let userData = this.getUserData(userId);
             let balance = userData.money;
-            if (balance == undefined) {
+            if (balance == undefined || balance == null || balance == 0) {
             return interaction.reply({ content: `O usuário <@${mentionedUser.id}> tem 0 moedas.`});
             } else {
                 return interaction.reply({ content: `O usuário <@${mentionedUser.id}> tem ${balance} moedas.`});
@@ -31,7 +31,7 @@ module.exports = class BalanceSlashCommand extends BaseSlashCommand {
     getUserData(userId) {
         let userData = JSON.parse(fs.readFileSync('userData.json'));
         if (!userData[userId]) {
-            userData[userId] = { balance: 0 };
+            userData[userId] = { money: 0 };
             fs.writeFileSync('userData.json', JSON.stringify(userData));
         }
         return userData[userId];
