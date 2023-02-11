@@ -1,19 +1,19 @@
 const BaseSlashCommand = require('../utils/BaseSlashCommand');
 const { SlashCommandBuilder } = require('discord.js');
 
-function rollDice() {
+function Dice() {
     return 1 + Math.floor(Math.random() * 6);
 }
 
 
-module.exports = class RollDiceSlashCommand extends BaseSlashCommand {
+module.exports = class DiceSlashCommand extends BaseSlashCommand {
     constructor() {
-        super('rolldice');
+        super('dice');
         
     }
 
     run(client, interaction) {
-        const dice = rollDice();
+        const dice = Dice();
         return interaction.reply({ content: String(dice) })
 
     }
