@@ -1,7 +1,7 @@
 const BaseSlashCommand = require('../utils/BaseSlashCommand');
 const { SlashCommandBuilder } = require('discord.js');
 const Card = require('../utils/cardSchema.js');
-const messageCountSchema = require('../../TestFiles/message-count-schema');
+const { EmbedBuilder } = require("discord.js");
 module.exports = class ShowSlashCommand extends BaseSlashCommand {
     constructor() {
         super('show');
@@ -14,18 +14,23 @@ module.exports = class ShowSlashCommand extends BaseSlashCommand {
                 return interaction.reply('Personagem não encontrado');
             }
             else {
-            let reply = '';
+                const embed = new EmbedBuilder()
+                .setTitle('Anime Fight')
             for(const card of cards) {
-                reply += `Nome: ${card.name}\n`;
-                reply += `Imagem: ${card.image}\n`;
-                reply += `Raridade: ${card.rarity}\n`;
-                reply += `Ataque: ${card.attack}\n`;
-                reply += `Defesa: ${card.defense}\n`;
-                reply += `Vida: ${card.health}\n`;
-                reply += `Poder: ${card.power}\n\n`;
+                let words = card.name.split(" ");
+                if (words.length >= 2) {
+                    words.splice(1);
+                  }
+                card.name = words.join(" ");
+                embed.addFields(
+                {name: "Nome", value: card.name.charAt(0).toUpperCase() + card.name.slice(1)},
+                {name: "Série", value: card.series},
+                {name: "Raridade", value: card.rarity}
+                )
+                .setImage(card.image);
             }
 
-            return interaction.reply(reply);
+            return interaction.reply({embeds: [embed]});
         }
         });
     }

@@ -1,7 +1,7 @@
 const BaseSlashCommand = require('../utils/BaseSlashCommand');
 const { SlashCommandBuilder } = require('discord.js');
 const Card = require('../utils/cardSchema.js');
-const messageCountSchema = require('../../TestFiles/message-count-schema');
+
 module.exports = class ShowSlashCommand extends BaseSlashCommand {
     constructor() {
         super('showall');
@@ -15,7 +15,7 @@ module.exports = class ShowSlashCommand extends BaseSlashCommand {
             else {
             let reply = '';
             for(const card of cards) {
-                reply += `${card.number}: ${card.name}\n`;
+                reply += `${card.number}: ${card.name.charAt(0).toUpperCase() + card.name.slice(1)}\n`;
             }
 
             return interaction.reply(reply);
