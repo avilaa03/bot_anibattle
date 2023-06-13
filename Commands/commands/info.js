@@ -1,7 +1,7 @@
 const BaseSlashCommand = require('../utils/BaseSlashCommand');
 const { SlashCommandBuilder } = require('discord.js');
 
-module.exports = class PingSlashCommand extends BaseSlashCommand {
+module.exports = class InfoSlashCommand extends BaseSlashCommand {
     constructor() {
         super('info');
     }

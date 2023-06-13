@@ -10,6 +10,10 @@ const cardSchema = new Schema({
         type: String,
         required: true
     },
+    series: {
+        type: String,
+        required: true
+    },
     image: {
         type: String,
         required: true
@@ -18,19 +22,31 @@ const cardSchema = new Schema({
         type: String,
         required: true
     },
-    attack: {
+    ovr: {
         type: Number,
         required: true
     },
-    defense: {
+    ata: {
         type: Number,
         required: true
     },
-    health: {
+    int: {
         type: Number,
         required: true
     },
-    power: {
+    def: {
+        type: Number,
+        required: true
+    },
+    des: {
+        type: Number,
+        required: true
+    },
+    pow: {
+        type: Number,
+        required: true
+    },
+    res: {
         type: Number,
         required: true
     }
