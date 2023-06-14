@@ -17,8 +17,8 @@ module.exports = class RollSlashCommand extends BaseSlashCommand {
         }
         
         const now = Date.now();
-        if (user && user.lastRoll && now - user.lastRoll < 15 * 60 * 1000) {
-            return interaction.reply('Você só pode rolar uma vez a cada 15 minutos.');
+        if (user && user.lastRoll && now - user.lastRoll < 1 * 60 * 1000) {
+            return interaction.reply('Você só pode rolar uma vez a cada 1 minutos.');
         }
 
         const rarities = [
@@ -56,7 +56,7 @@ module.exports = class RollSlashCommand extends BaseSlashCommand {
         const row = new ActionRowBuilder()
           .addComponents(
             new ButtonBuilder()
-                .setCustomId('primary')
+                .setCustomId('enviarInventario')
                 .setLabel('Enviar ao Inventário')
                 .setStyle(ButtonStyle.Primary)
                 
@@ -68,10 +68,6 @@ module.exports = class RollSlashCommand extends BaseSlashCommand {
           .setImage(card.image) // Define a imagem da carta usando o método setImage
           ;
           
-        const primary = () => {
-          interaction.send('ok');
-        }
-
         interaction.reply({ embeds: [embed], components: [row] });
 
         

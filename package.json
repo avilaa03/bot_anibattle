@@ -4,6 +4,7 @@
   "description": "Bot criado por @Ávila#8509",
   "main": "index.js",
   "scripts": {
+    "dev": "node index.js",
     "test": "node .",
     "lint": "eslint src --fix"
   },

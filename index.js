@@ -38,6 +38,11 @@ client.on('interactionCreate', (interaction) => {
     } else {
       interaction.reply({ content: 'This command has no run method.'});
     }
+  } else if (interaction.isButton())  {    
+    if (interaction.customId === 'enviarInventario') {
+      interaction.reply('enviado essa budega')
+    }
+
   }
 });
 
