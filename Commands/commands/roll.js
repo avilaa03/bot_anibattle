@@ -59,6 +59,7 @@ module.exports = class RollSlashCommand extends BaseSlashCommand {
                 .setCustomId('primary')
                 .setLabel('Enviar ao Inventário')
                 .setStyle(ButtonStyle.Primary)
+                
           )
         const embed = new EmbedBuilder()
           .setTitle('Carta Sorteada')
@@ -67,9 +68,13 @@ module.exports = class RollSlashCommand extends BaseSlashCommand {
           .setImage(card.image) // Define a imagem da carta usando o método setImage
           ;
           
+        const primary = () => {
+          interaction.send('ok');
+        }
 
         interaction.reply({ embeds: [embed], components: [row] });
 
+        
         // const filter = (interaction) => {
         //     return interaction.customId === 'add-to-inventory' && interaction.user.id === user.id;
         //   };
