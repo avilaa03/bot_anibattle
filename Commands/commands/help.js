@@ -14,6 +14,7 @@ module.exports = class HelpSlashCommand extends BaseSlashCommand {
           .addFields({name: "/roll", value: "Comando para roletar um personagem aleatório"},
             {name: "/show", value: "Comando para mostrar um personagem, colocando o nome dele depois do /show"},
             {name: "/showall", value: "Mostra todos os nomes de todos os personagens listados no Bot"},
+            {name: "/inventory", value: "Mostra o inventário com todas as cartas armazenadas"},
             {name: "/balance", value: "Utilizado para ver quanto tem no seu cofre, ou no de outro usuário, marcando-o depois de /balance"},
             {name: "/daily", value: "Resgatar recompensa diária"},
             {name: "/give", value: "Comando para dar dinheiro para outro usuário, marcando-o e escrevendo a quantia."},
