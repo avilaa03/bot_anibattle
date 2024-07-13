@@ -74,19 +74,29 @@ module.exports = class RollSlashCommand extends BaseSlashCommand {
                         return interaction.reply('Nenhuma carta encontrada com a raridade especificada.');
                     }
 
+                    const marketValue = (card.ata + card.int + card.def + card.des + card.pow + card.res) * 10;
+                    const valueToSell = marketValue / 2;
+
                     const row = new ActionRowBuilder()
                         .addComponents(
                             new ButtonBuilder()
                                 .setCustomId(`enviarInventario_${card._id}_${interaction.user.id}`)
                                 .setLabel('Enviar ao Inventário')
                                 .setStyle(ButtonStyle.Primary)
+                        )
+                        .addComponents(
+                            new ButtonBuilder()
+                                .setCustomId(`vender_${card._id}_${interaction.user.id}`)
+                                .setLabel(`Vender por ${valueToSell} moedas`)
+                                .setStyle(ButtonStyle.Secondary)
                         );
 
                     const embed = new EmbedBuilder()
                         .setTitle('Carta Sorteada')
                         .addFields(
                             { name: "Nome", value: card.name.charAt(0).toUpperCase() + card.name.slice(1) },
-                            { name: "Raridade", value: card.rarity }
+                            { name: "Raridade", value: card.rarity },
+                            { name: "Valor de Mercado", value: marketValue.toString() }
                         )
                         .setImage(card.image);
 
@@ -99,32 +109,38 @@ module.exports = class RollSlashCommand extends BaseSlashCommand {
                     user.lastRoll = now;
                     user.save();
 
-                    const filter = (i) => i.customId.startsWith(`enviarInventario_${card._id}`) && i.user.id === interaction.user.id;
+                    const filter = (i) => (i.customId.startsWith(`enviarInventario_${card._id}`) || i.customId.startsWith(`vender_${card._id}`)) && i.user.id === interaction.user.id;
                     const collector = interaction.channel.createMessageComponentCollector({ filter, time: 30000 });
 
                     collector.on('collect', async (i) => {
+                        if (i.customId.startsWith('enviarInventario_')) {
+                            const clonedCard = {
+                                cardId: new mongoose.Types.ObjectId(),
+                                originalCardId: card._id,
+                                name: card.name,
+                                series: card.series,
+                                image: card.image,
+                                rarity: card.rarity,
+                                ovr: card.ovr,
+                                ata: card.ata,
+                                int: card.int,
+                                def: card.def,
+                                des: card.des,
+                                pow: card.pow,
+                                res: card.res,
+                                obtainedAt: new Date(),
+                                marketValue: marketValue,
+                                valueToSell: valueToSell
+                            };
 
-                        const clonedCard = {
-                            cardId: new mongoose.Types.ObjectId(),
-                            originalCardId: card._id,
-                            number: card.number,
-                            name: card.name,
-                            series: card.series,
-                            image: card.image,
-                            rarity: card.rarity,
-                            ovr: card.ovr,
-                            ata: card.ata,
-                            int: card.int,
-                            def: card.def,
-                            des: card.des,
-                            pow: card.pow,
-                            res: card.res,
-                            obtainedAt: new Date()
-                        };
-
-                        user.inventory.push(clonedCard);
-                        await user.save();
-                        await i.update({ content: 'Carta enviada ao seu inventário!', components: [] });
+                            user.inventory.push(clonedCard);
+                            await user.save();
+                            await i.update({ content: 'Carta enviada ao seu inventário!', components: [] });
+                        } else if (i.customId.startsWith('vender_')) {
+                            user.balance += valueToSell;
+                            await user.save();
+                            await i.update({ content: `Você vendeu a carta por ${valueToSell} moedas!`, components: [] });
+                        }
                         collector.stop('collected');
                     });
 
