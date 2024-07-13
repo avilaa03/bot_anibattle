@@ -14,7 +14,6 @@ const UserSchema = new Schema({
     inventory: [{
         cardId: mongoose.Schema.Types.ObjectId,
         originalCardId: mongoose.Schema.Types.ObjectId,
-        number: Number,
         name: String,
         series: String,
         image: String,
@@ -26,8 +25,17 @@ const UserSchema = new Schema({
         des: Number,
         pow: Number,
         res: Number,
-        obtainedAt: { type: Date, default: Date.now } 
-    }]
+        obtainedAt: { type: Date, default: Date.now },
+        marketValue: Number,
+        valueToSell: Number
+    }],
+    balance: {
+        type: Number,
+        default: 0
+    },
+    lastDaily: {
+        type: Date,
+    }
 });
 
 const User = mongoose.model('User', UserSchema);
