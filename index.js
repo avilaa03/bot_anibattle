@@ -7,6 +7,7 @@ const { REST, Routes } = require('discord.js');
 const { registerCommands } = require('./commands/utils/registry');
 // const { GiveMoneySlashCommand } = require('./Commands/commands/give.js');
 
+mongoose.set('strictQuery', false);
 
 const client = new Client ({
   intents: [
