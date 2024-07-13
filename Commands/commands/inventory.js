@@ -15,7 +15,7 @@ module.exports = class InventorySlashCommand extends BaseSlashCommand {
             return interaction.reply({ content: 'Seu inventário está vazio.', ephemeral: true }); 
         }
 
-        const cardsPerPage = 8;
+        const cardsPerPage = 6;
         let currentPage = 0;
 
         const generateEmbed = (page) => {
@@ -29,8 +29,7 @@ module.exports = class InventorySlashCommand extends BaseSlashCommand {
                 .setFooter({ text: `Página ${page + 1} de ${Math.ceil(user.inventory.length / cardsPerPage)}` });
 
             currentCards.forEach(card => {
-                embed.addFields({ name: card.name, value: `Raridade: ${card.rarity}`, inline: true });
-                embed.setImage(card.image);
+                embed.addFields({ name: card.name, value: `OVR: ${card.ovr}`, inline: false});
             });
 
             return embed;
