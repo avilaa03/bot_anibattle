@@ -1,50 +1,44 @@
 const BaseSlashCommand = require('../utils/BaseSlashCommand');
 const { SlashCommandBuilder } = require('discord.js');
-const fs = require('fs');
-const messageCountSchema = require('../../TestFiles/message-count-schema');
+const User = require('../utils/userSchema');
 
 module.exports = class BalanceSlashCommand extends BaseSlashCommand {
     constructor() {
         super('balance');
     }
 
-    run(client, interaction) {
+    async run(client, interaction) {
+        let userId;
         if (interaction.options.getUser('user') == null) {
-            let userId = interaction.user.id;
-            let userData = this.getUserData(userId);
-            let balance = userData.money;
-            return interaction.reply({ content: `Você tem ${balance} moedas.`});
+            userId = interaction.user.id;
+        } else {
+            const mentionedUser = interaction.options.getUser('user');
+            userId = mentionedUser.id;
         }
-        else {
-            let mentionedUser = interaction.options.getUser('user');
-            let userId = mentionedUser.id;
-            let userData = this.getUserData(userId);
-            let balance = userData.money;
-            if (balance == undefined || balance == null || balance == 0) {
-            return interaction.reply({ content: `O usuário <@${mentionedUser.id}> tem 0 moedas.`});
-            } else {
-                return interaction.reply({ content: `O usuário <@${mentionedUser.id}> tem ${balance} moedas.`});
-            }
-        }
-    }
 
-    getUserData(userId) {
-        let userData = JSON.parse(fs.readFileSync('userData.json'));
-        if (!userData[userId]) {
-            userData[userId] = { money: 0 };
-            fs.writeFileSync('userData.json', JSON.stringify(userData));
+        try {
+            
+            const user = await User.findOne({ id: userId });
+
+            if (!user || user.balance === undefined) {
+                return interaction.reply({ content: `O usuário <@${userId}> não foi encontrado ou não possui saldo registrado.` });
+            }
+
+            return interaction.reply({ content: `O usuário <@${userId}> tem ${user.balance} moedas.` });
+        } catch (err) {
+            console.error('Erro ao buscar o saldo do usuário:', err);
+            return interaction.reply('Houve um erro ao buscar o saldo do usuário.');
         }
-        return userData[userId];
     }
 
     getSlashCommandJSON() {
         return new SlashCommandBuilder()
-        .setName(this.name)
-        .setDescription('Mostra a quantidade de moedas do usuário')
-        .addUserOption(option =>
-            option
-            .setName('user')
-            .setDescription('Usuário que deseja mencionar')
-            .setRequired(false));
+            .setName(this.name)
+            .setDescription('Mostra a quantidade de moedas do usuário')
+            .addUserOption(option =>
+                option
+                    .setName('user')
+                    .setDescription('Usuário que deseja mencionar')
+                    .setRequired(false));
     }
 }
