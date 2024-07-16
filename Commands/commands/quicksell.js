@@ -83,7 +83,7 @@ module.exports = class QuickSellSlashCommand extends BaseSlashCommand {
             } else if (i.customId === 'confirm_sell') {
                 const card = matchingCards[currentIndex];
                 user.balance += card.valueToSell;
-                user.inventory = user.inventory.filter(c => c.name.toLowerCase() !== card.name.toLowerCase());
+                user.inventory = user.inventory.filter(c => c._id.toString() !== card._id.toString());
                 await user.save();
                 await i.update({ content: `Você vendeu a carta por ${card.valueToSell} moedas!`, embeds: [], components: [] });
                 collector.stop('collected');
