@@ -8,13 +8,13 @@ module.exports = class InventorySlashCommand extends BaseSlashCommand {
     }
 
     async run(client, interaction) {
-        
         const user = await User.findOne({ id: interaction.user.id });
 
         if (!user || user.inventory.length === 0) {
-            return interaction.reply({ content: 'Seu inventário está vazio.', ephemeral: true }); 
+            return interaction.reply({ content: 'Seu inventário está vazio.', ephemeral: true });
         }
 
+        const favCard = user.inventory.find(card => card.cardId.equals(user.favCard));
         const cardsPerPage = 6;
         let currentPage = 0;
 
@@ -28,8 +28,12 @@ module.exports = class InventorySlashCommand extends BaseSlashCommand {
                 .setDescription('Aqui estão as cartas do seu inventário.')
                 .setFooter({ text: `Página ${page + 1} de ${Math.ceil(user.inventory.length / cardsPerPage)}` });
 
+            if (favCard) {
+                embed.setThumbnail(favCard.image);
+            }
+
             currentCards.forEach(card => {
-                embed.addFields({ name: card.name, value: `OVR: ${card.ovr}`, inline: false});
+                embed.addFields({ name: card.name, value: `OVR: ${card.ovr}`, inline: false });
             });
 
             return embed;
