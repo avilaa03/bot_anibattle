@@ -35,6 +35,10 @@ const UserSchema = new Schema({
     },
     lastDaily: {
         type: Date,
+    },
+    favCard: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Card'
     }
 });
 
