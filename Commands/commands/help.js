@@ -10,12 +10,12 @@ module.exports = class HelpSlashCommand extends BaseSlashCommand {
     run(client, interaction) {
         
         const embed = new EmbedBuilder()
-          .setTitle('Comandos')
+          .setTitle('Comandos do AniBattle')
           .addFields({name: "/roll", value: "Comando para roletar um personagem aleatório, podendo coletar para o inventário ou vender rapidamente"},
             {name: "/show", value: "Comando para mostrar uma carta do seu inventário, utilize o nome da carta para procurá-la"},
             {name: "/inventory", value: "Mostra o inventário com todas as cartas armazenadas"},
             {name: "/favcard", value: "Selecionar carta favorita, para aparecer no inventário e no perfil"},
-            {name: "/profile", value: "Perfil no AnimeFight do usuário"},
+            {name: "/profile", value: "Perfil no AniBattle do usuário"},
             {name: "/sell", value: "Vender carta no mercado de usuários"},
             {name: "/undosell", value: "Cancelar anúncio de carta no mercado do usuários"},
             {name: "/market", value: "Comprar ou procurar por cartas anunciadas no mercado de usuários"},

@@ -27,7 +27,7 @@ module.exports = class QuickSellSlashCommand extends BaseSlashCommand {
         const updateEmbed = () => {
             const card = matchingCards[currentIndex];
             const embed = new EmbedBuilder()
-                .setTitle('Anime Fight')
+                .setTitle('AniBattle')
                 .setImage(card.image)
                 .addFields(
                     { name: "Nome", value: card.name.charAt(0).toUpperCase() + card.name.slice(1) },
