@@ -4,6 +4,9 @@ const User = require('../../utils/userSchema');
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 let currentCollector = null;
 
+// Temporário para testes: 10 segundos. Produção: 15 * 60 * 1000 (15 min)
+const ROLL_COOLDOWN_MS = 10 * 1000;
+
 function errorEmbed(description) {
     return new EmbedBuilder().setTitle('❌ Erro').setDescription(description).setColor('#E53935');
 }
@@ -17,14 +20,15 @@ module.exports = async (client, interaction, rollCollect, rollEnd) => {
 
         const now = Date.now();
 
-        if (user && user.lastRoll && now - user.lastRoll < 15 * 60 * 1000) {
-            const timeRemaining = 15 * 60 * 1000 - (now - user.lastRoll);
+        if (user && user.lastRoll && now - user.lastRoll < ROLL_COOLDOWN_MS) {
+            const timeRemaining = ROLL_COOLDOWN_MS - (now - user.lastRoll);
             const minutes = Math.floor(timeRemaining / (60 * 1000));
             const seconds = Math.floor((timeRemaining % (60 * 1000)) / 1000);
+            const timeStr = ROLL_COOLDOWN_MS >= 60000 ? `${minutes} min e ${seconds} s` : `${seconds} s`;
             const embed = new EmbedBuilder()
                 .setTitle('⏱️ Cooldown')
-                .setDescription(`Você só pode rolar uma vez a cada **15 minutos**.`)
-                .addFields({ name: 'Tempo restante', value: `${minutes} min e ${seconds} s`, inline: true })
+                .setDescription(`Você só pode rolar uma vez a cada **${ROLL_COOLDOWN_MS >= 60000 ? '15 minutos' : '10 segundos'}**.`)
+                .addFields({ name: 'Tempo restante', value: timeStr, inline: true })
                 .setColor('#FF9800');
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }

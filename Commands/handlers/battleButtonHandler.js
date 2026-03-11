@@ -1,6 +1,6 @@
 const { EmbedBuilder } = require('discord.js');
 const User = require('../utils/userSchema');
-const { getBattle, addCardToDeck, bothDecksReady, finishBattle, COIN_WINNER, COIN_LOSER } = require('../utils/battleState');
+const { getBattle, getBattleByUserId, addCardToDeck, bothDecksReady, finishBattle, COIN_WINNER, COIN_LOSER } = require('../utils/battleState');
 const { runBattle } = require('../utils/battleEngine');
 const { buildDeckChoiceMessage } = require('../actions/collect/battleCollect');
 
@@ -10,20 +10,30 @@ const { buildDeckChoiceMessage } = require('../actions/collect/battleCollect');
 async function handleBattlePick(client, interaction) {
     const parts = interaction.customId.split('_');
     if (parts.length < 5) return false;
-    const battleId = parts[2];
+    const battleId = String(parts[2]);
     const side = parts[3];
     const index = parseInt(parts[4], 10);
 
-    const state = getBattle(battleId);
+    let state = getBattle(battleId);
     if (!state) {
-        await interaction.reply({ content: 'Esta batalha expirou ou já foi concluída.', ephemeral: true }).catch(() => {});
-        return true;
+        state = getBattleByUserId(interaction.user.id);
+        if (!state) {
+            await interaction.reply({ content: 'Esta batalha expirou ou já foi concluída.', ephemeral: true }).catch(() => {});
+            return true;
+        }
     }
+    const effectiveBattleId = state.battleId;
 
     const isX = side === 'X';
     const userId = interaction.user.id;
-    if (isX && state.userX.id !== userId) return false;
-    if (!isX && state.userY.id !== userId) return false;
+    if (isX && state.userX.id !== userId) {
+        await interaction.reply({ content: 'Você não é um dos jogadores desta batalha.', ephemeral: true }).catch(() => {});
+        return true;
+    }
+    if (!isX && state.userY.id !== userId) {
+        await interaction.reply({ content: 'Você não é um dos jogadores desta batalha.', ephemeral: true }).catch(() => {});
+        return true;
+    }
 
     const selectedIndices = isX ? state.selectedIndicesX : state.selectedIndicesY;
     const inventory = isX ? state.userXData.inventory : state.userYData.inventory;
@@ -43,14 +53,16 @@ async function handleBattlePick(client, interaction) {
         return true;
     }
 
+    await interaction.deferUpdate();
+
     const card = inventory[index];
-    addCardToDeck(battleId, side, card);
+    addCardToDeck(effectiveBattleId, side, card);
     selectedIndices.add(index);
 
     const invX = state.userXData.inventory;
     const invY = state.userYData.inventory;
-    const msgXContent = buildDeckChoiceMessage(battleId, 'X', invX, state.selectedIndicesX, state.deckX);
-    const msgYContent = buildDeckChoiceMessage(battleId, 'Y', invY, state.selectedIndicesY, state.deckY);
+    const msgXContent = buildDeckChoiceMessage(effectiveBattleId, 'X', invX, state.selectedIndicesX, state.deckX);
+    const msgYContent = buildDeckChoiceMessage(effectiveBattleId, 'Y', invY, state.selectedIndicesY, state.deckY);
 
     try {
         if (isX) {
@@ -70,7 +82,7 @@ async function handleBattlePick(client, interaction) {
         console.error('Erro ao atualizar mensagem de escolha:', err);
     }
 
-    await interaction.reply({
+    await interaction.followUp({
         content: `**${card.name}** adicionada ao deck! (${deck.length}/3)`,
         ephemeral: true
     }).catch(() => {});
@@ -137,7 +149,7 @@ async function handleBattlePick(client, interaction) {
         // ignore DM errors
     }
 
-    finishBattle(battleId);
+    finishBattle(effectiveBattleId);
     return true;
 }
 

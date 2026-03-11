@@ -1,5 +1,5 @@
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } = require('discord.js');
-const { createBattle } = require('../../utils/battleState');
+const { createBattle, generateBattleId } = require('../../utils/battleState');
 
 const MAX_CARDS_SHOWN = 25;
 const CARDS_PER_ROW = 5;
@@ -56,7 +56,7 @@ async function battleCollect(interaction, userX, userY, userXData, userYData, ch
             components: []
         });
 
-        const battleId = challengeMessage.id;
+        const battleId = generateBattleId();
         const state = createBattle(
             battleId,
             userX,

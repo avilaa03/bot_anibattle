@@ -5,6 +5,9 @@ require('dotenv/config');
 const { REST, Routes, EmbedBuilder } = require('discord.js');
 const { registerCommands } = require('./commands/utils/registry');
 
+// Garante que o estado de batalha seja o mesmo Map em todo o processo (evita cache de módulo diferente)
+require('./Commands/utils/battleState');
+
 mongoose.set('strictQuery', false);
 
 const client = new Client ({
@@ -13,6 +16,7 @@ const client = new Client ({
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent,
     GatewayIntentBits.GuildMessageReactions,
+    GatewayIntentBits.DirectMessages,
   ],
   partials: [
     Partials.Message,
