@@ -27,6 +27,8 @@ function buildConfirmationRow(card) {
 }
 
 async function quicksellRun(client, interaction, user, matchingCards) {
+    await interaction.deferReply();
+
     const indexRef = { currentIndex: 0 };
 
     const rowNavigation = new ActionRowBuilder()
@@ -35,10 +37,9 @@ async function quicksellRun(client, interaction, user, matchingCards) {
             new ButtonBuilder().setCustomId('next').setLabel('Próximo').setStyle(ButtonStyle.Primary).setDisabled(matchingCards.length === 1)
         );
 
-    const message = await interaction.reply({
+    const message = await interaction.editReply({
         embeds: [updateEmbed(matchingCards[0])],
-        components: [rowNavigation, buildConfirmationRow(matchingCards[0])],
-        fetchReply: true
+        components: [rowNavigation, buildConfirmationRow(matchingCards[0])]
     });
 
     return { message, indexRef, rowNavigation };

@@ -1,11 +1,9 @@
-const { Client, GatewayIntentBits, Partials, Collection, resolveColor } = require("discord.js");
+const { Client, GatewayIntentBits, Partials, Collection } = require("discord.js");
 const mongoose = require('mongoose');
 require('dotenv/config');
-const fs = require("fs");
 
-const { REST, Routes } = require('discord.js');
+const { REST, Routes, EmbedBuilder } = require('discord.js');
 const { registerCommands } = require('./commands/utils/registry');
-// const { GiveMoneySlashCommand } = require('./Commands/commands/give.js');
 
 mongoose.set('strictQuery', false);
 
@@ -20,14 +18,9 @@ const client = new Client ({
     Partials.Message,
     Partials.Reaction,
   ]
-})
-
-// const giveMoneyCommand = new GiveMoneySlashCommand(client);
-// const dailyCommand = new DailyCommand(client);
-// const balanceCommand = new BalanceCommand(client);
+});
 
 const CLIENT_ID = process.env.CLIENT_ID;
-
 const rest = new REST({ version: '10' }).setToken(process.env.TOKEN);
 
 client.on('interactionCreate', async (interaction) => {
@@ -38,7 +31,11 @@ client.on('interactionCreate', async (interaction) => {
       if (cmd) {
         cmd.run(client, interaction);
       } else {
-        interaction.reply({ content: 'This command has no run method.'});
+        const embed = new EmbedBuilder()
+          .setTitle('❌ Comando indisponível')
+          .setDescription('Este comando não está disponível no momento.')
+          .setColor('#E53935');
+        interaction.reply({ embeds: [embed], ephemeral: true });
       }
     } else if (interaction.isButton()) {
       if (interaction.customId.startsWith('battle_pick_')) {
@@ -46,14 +43,15 @@ client.on('interactionCreate', async (interaction) => {
         const handled = await handleBattlePick(client, interaction);
         if (handled) return;
       }
-      if (interaction.customId === 'enviarInventario') {
-        interaction.reply('enviado essa budega');
-      }
     }
   } catch (err) {
     console.error('interactionCreate error:', err);
     if (interaction.isRepliable() && !interaction.replied) {
-      interaction.reply({ content: 'Ocorreu um erro.', ephemeral: true }).catch(() => {});
+      const embed = new EmbedBuilder()
+        .setTitle('❌ Erro')
+        .setDescription('Ocorreu um erro ao processar sua ação. Tente novamente.')
+        .setColor('#E53935');
+      interaction.reply({ embeds: [embed], ephemeral: true }).catch(() => {});
     }
   }
 });
@@ -71,15 +69,9 @@ client.on('interactionCreate', async (interaction) => {
       );
       // console.log(slashCommandsJson);
     console.log('Started refreshing application (/) commands.');
-    await rest.put(Routes.applicationCommands(CLIENT_ID), { 
-      body: [
-        ...slashCommandsJson, 
-        {
-      name: 'testcmd',
-      description: 'hello world',
-        },
-      ],
-     });
+    await rest.put(Routes.applicationCommands(CLIENT_ID), {
+      body: slashCommandsJson
+    });
     const registeredSlashCommands = await client.rest.get(
       Routes.applicationCommands(CLIENT_ID)
     );

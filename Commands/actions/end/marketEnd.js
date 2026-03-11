@@ -26,13 +26,13 @@ module.exports = async (message, selectedCard, interaction) => {
                     baseImage: selectedCard.baseImage,
                     characterImage: selectedCard.characterImage,
                     rarity: selectedCard.rarity,
-                    overall: selectedCard.overall,
-                    ATA: selectedCard.ATA,
-                    LIF: selectedCard.LIF,
-                    POW: selectedCard.POW,
+                    overall: selectedCard.overall ?? selectedCard.ovr ?? (selectedCard.marketValue != null ? Math.round(selectedCard.marketValue / 10) : 0),
+                    ATA: selectedCard.ATA ?? selectedCard.ata ?? 0,
+                    LIF: selectedCard.LIF ?? selectedCard.lif ?? 0,
+                    POW: selectedCard.POW ?? selectedCard.pow ?? 0,
                     obtainedAt: selectedCard.obtainedAt,
                     marketValue: selectedCard.marketValue,
-                    valueToSell: selectedCard.marketValue / 2
+                    valueToSell: selectedCard.marketValue ? Math.floor(selectedCard.marketValue / 2) : 0
                 };
 
                 buyer.inventory.push(cardToAdd);

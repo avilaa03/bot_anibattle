@@ -4,23 +4,32 @@ const User = require('../../utils/userSchema');
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 let currentCollector = null;
 
+function errorEmbed(description) {
+    return new EmbedBuilder().setTitle('❌ Erro').setDescription(description).setColor('#E53935');
+}
+
 module.exports = async (client, interaction, rollCollect, rollEnd) => {
     User.findOne({ id: interaction.user.id }, async (err, user) => {
         if (err) {
             console.error('Erro ao buscar as informações do usuário:', err);
-            return interaction.reply('Houve um erro ao buscar as informações do usuário.');
+            return interaction.reply({ embeds: [errorEmbed('Houve um erro ao buscar suas informações. Tente novamente.')], ephemeral: true });
         }
 
         const now = Date.now();
 
         if (user && user.lastRoll && now - user.lastRoll < 15 * 60 * 1000) {
-            const timeElapsed = now - user.lastRoll;
-            const timeRemaining = 15 * 60 * 1000 - timeElapsed;
-
+            const timeRemaining = 15 * 60 * 1000 - (now - user.lastRoll);
             const minutes = Math.floor(timeRemaining / (60 * 1000));
             const seconds = Math.floor((timeRemaining % (60 * 1000)) / 1000);
-            return interaction.reply(`Você só pode rolar uma vez a cada 15 minutos. Faltam ${minutes} minutos e ${seconds} segundos para você roletar novamente.`);
+            const embed = new EmbedBuilder()
+                .setTitle('⏱️ Cooldown')
+                .setDescription(`Você só pode rolar uma vez a cada **15 minutos**.`)
+                .addFields({ name: 'Tempo restante', value: `${minutes} min e ${seconds} s`, inline: true })
+                .setColor('#FF9800');
+            return interaction.reply({ embeds: [embed], ephemeral: true });
         }
+
+        await interaction.deferReply();
 
         const rarities = [
             { rarity: 'common', percentage: 55 },
@@ -47,14 +56,14 @@ module.exports = async (client, interaction, rollCollect, rollEnd) => {
             cards = await Card.find({ rarity: 'common' }).exec();
         }
         if (!cards || cards.length === 0) {
-            return interaction.reply('Nenhuma carta encontrada no banco de dados.');
+            return interaction.editReply({ embeds: [errorEmbed('Nenhuma carta encontrada no banco de dados.')] });
         }
 
         const card = cards[Math.floor(Math.random() * cards.length)];
         const marketValue = card.overall * 10;
         const valueToSell = marketValue / 2;
 
-        const cardBuilder = new CardBuilder(card)
+        const cardBuilder = new CardBuilder(card);
         const cardImageBuffer = await cardBuilder.build();
 
         const row = new ActionRowBuilder()
@@ -72,15 +81,16 @@ module.exports = async (client, interaction, rollCollect, rollEnd) => {
             );
 
         const embed = new EmbedBuilder()
-            .setTitle('Carta Sorteada')
+            .setTitle('🎴 Carta Sorteada')
             .addFields(
                 { name: "Nome", value: card.name },
                 { name: "Raridade", value: card.rarity },
                 { name: "Valor de Mercado", value: marketValue.toString() }
             )
-            .setImage('attachment://cardImage.png');
+            .setImage('attachment://cardImage.png')
+            .setFooter({ text: 'AniBattle' });
 
-        interaction.reply({ embeds: [embed], components: [row], files: [{ attachment: cardImageBuffer, name: 'cardImage.png' }] });
+        const message = await interaction.editReply({ embeds: [embed], components: [row], files: [{ attachment: cardImageBuffer, name: 'cardImage.png' }] });
 
         if (!user) {
             user = new User({ id: interaction.user.id });

@@ -49,6 +49,8 @@ const UserSchema = new Schema({
     }
 });
 
+UserSchema.index({ balance: -1 });
+
 const User = mongoose.model('User', UserSchema);
 
 module.exports = User;

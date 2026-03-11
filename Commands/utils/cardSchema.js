@@ -44,6 +44,8 @@ const cardSchema = new Schema({
     }
 }, { collection: 'new-cards' });
 
+cardSchema.index({ rarity: 1 });
+
 const Card = mongoose.model('Card', cardSchema);
 
 module.exports = Card;

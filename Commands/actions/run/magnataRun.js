@@ -3,6 +3,8 @@ const { EmbedBuilder } = require('discord.js');
 
 async function magnataRun(client, interaction) {
     try {
+        await interaction.deferReply();
+
         const users = await User.find({})
             .sort({ balance: -1 })
             .limit(10)
@@ -15,7 +17,7 @@ async function magnataRun(client, interaction) {
 
         if (!users || users.length === 0) {
             embed.addFields({ name: '\u200b', value: 'Nenhum jogador com saldo registrado ainda.' });
-            return interaction.reply({ embeds: [embed] });
+            return interaction.editReply({ embeds: [embed] });
         }
 
         const list = users.map((u, i) => {
@@ -26,10 +28,14 @@ async function magnataRun(client, interaction) {
 
         embed.addFields({ name: '\u200b', value: list });
 
-        return interaction.reply({ embeds: [embed] });
+        return interaction.editReply({ embeds: [embed] });
     } catch (err) {
         console.error('Erro ao buscar magnatas:', err);
-        return interaction.reply({ content: 'Houve um erro ao buscar o ranking.', ephemeral: true });
+        const embed = new EmbedBuilder().setTitle('❌ Erro').setDescription('Houve um erro ao buscar o ranking.').setColor('#E53935');
+        try {
+            if (interaction.deferred) await interaction.editReply({ embeds: [embed] });
+            else await interaction.reply({ embeds: [embed], ephemeral: true });
+        } catch (e) {}
     }
 }
 

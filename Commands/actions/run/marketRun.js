@@ -31,6 +31,8 @@ module.exports = async (client, interaction, marketCollect, marketEnd) => {
         return interaction.reply({ embeds: [embed], ephemeral: true });
     }
 
+    await interaction.deferReply();
+
     let currentPage = 0;
     const cardsPerPage = 9;
 
@@ -75,7 +77,7 @@ module.exports = async (client, interaction, marketCollect, marketEnd) => {
         return buttons.components.length > 0 ? [buttons] : [];
     };
 
-    const embedMessage = await interaction.reply({
+    const embedMessage = await interaction.editReply({
         embeds: [generateEmbed(currentPage)],
         components: generateButtons(currentPage),
         fetchReply: true

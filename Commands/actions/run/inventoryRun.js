@@ -5,9 +5,13 @@ let currentCollector = null;
 module.exports = async (client, interaction, inventoryCollect, inventoryEnd) => {
     const user = await User.findOne({ id: interaction.user.id });
 
-    if (!user || user.inventory.length === 0) {
-        return interaction.reply({ content: 'Seu inventário está vazio.', ephemeral: true });
-    }
+        if (!user || user.inventory.length === 0) {
+            const embed = new EmbedBuilder()
+                .setTitle('📋 Inventário vazio')
+                .setDescription('Seu inventário está vazio. Use /roll para ganhar cartas!')
+                .setColor('#9E9E9E');
+            return interaction.reply({ embeds: [embed], ephemeral: true });
+        }
 
     const favCard = user.inventory.find(card => card.cardId.equals(user.favCard));
     const cardsPerPage = 6;
@@ -28,7 +32,7 @@ module.exports = async (client, interaction, inventoryCollect, inventoryEnd) => 
         }
 
         currentCards.forEach(card => {
-            embed.addFields({ name: card.name, value: `OVR: ${card.overall}`, inline: false });
+            embed.addFields({ name: card.name, value: `OVR: ${card.overall ?? (card.marketValue != null ? Math.round(card.marketValue / 10) : 0)}`, inline: false });
         });
 
         return embed;

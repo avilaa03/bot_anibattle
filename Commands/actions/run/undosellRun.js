@@ -1,6 +1,7 @@
 const User = require('../../utils/userSchema.js');
 const Market = require('../../utils/marketSchema.js');
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, AttachmentBuilder } = require('discord.js');
+const CardBuilder = require('../../utils/cardBuilder.js');
 
 function escapeRegex(str) {
     return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -30,10 +31,28 @@ async function undosellRun(client, interaction) {
         return interaction.reply({ embeds: [embed], ephemeral: true });
     }
 
+    await interaction.deferReply();
+
     const indexRef = { currentIndex: 0 };
 
-    function buildEmbed(listing) {
+    async function buildEmbed(listing) {
         const price = listing.listingPrice ?? listing.marketValue ?? 0;
+        const cardData = {
+            name: listing.cardName,
+            series: listing.series,
+            seriesImage: listing.seriesImage,
+            baseImage: listing.baseImage,
+            characterImage: listing.characterImage,
+            rarity: listing.rarity,
+            overall: listing.overall ?? listing.ovr ?? (listing.marketValue != null ? Math.round(listing.marketValue / 10) : 0),
+            ATA: listing.ATA ?? listing.ata ?? 0,
+            LIF: listing.LIF ?? listing.lif ?? 0,
+            POW: listing.POW ?? listing.pow ?? 0
+        };
+        const cardBuilder = new CardBuilder(cardData);
+        const cardImageBuffer = await cardBuilder.build();
+        const attachment = new AttachmentBuilder(cardImageBuffer, { name: 'cardImage.png' });
+
         const embed = new EmbedBuilder()
             .setTitle('📋 Retirar carta do mercado')
             .setDescription('Confirme que é esta carta que deseja retirar do mercado. Ela voltará ao seu inventário.')
@@ -43,10 +62,9 @@ async function undosellRun(client, interaction) {
                 { name: 'Preço no anúncio', value: `${price} moedas`, inline: true },
                 { name: 'Raridade', value: listing.rarity || '—', inline: true }
             )
+            .setImage('attachment://cardImage.png')
             .setFooter({ text: listings.length > 1 ? `Mostrando ${indexRef.currentIndex + 1} de ${listings.length} • Use os botões para trocar` : 'AniBattle' });
-        if (listing.characterImage) embed.setImage(listing.characterImage);
-        else if (listing.baseImage) embed.setThumbnail(listing.baseImage);
-        return embed;
+        return { embed, attachment };
     }
 
     function buildRows() {
@@ -68,10 +86,11 @@ async function undosellRun(client, interaction) {
         return rows;
     }
 
-    const reply = await interaction.reply({
-        embeds: [buildEmbed(listings[0])],
+    const first = await buildEmbed(listings[0]);
+    const reply = await interaction.editReply({
+        embeds: [first.embed],
         components: buildRows(),
-        fetchReply: true
+        files: [first.attachment]
     });
 
     const filter = i => i.user.id === interaction.user.id && ['undosell_prev', 'undosell_next', 'undosell_confirm', 'undosell_cancel'].includes(i.customId);
@@ -80,12 +99,16 @@ async function undosellRun(client, interaction) {
     collector.on('collect', async (i) => {
         if (i.customId === 'undosell_prev') {
             indexRef.currentIndex = (indexRef.currentIndex - 1 + listings.length) % listings.length;
-            await i.update({ embeds: [buildEmbed(listings[indexRef.currentIndex])], components: buildRows() });
+            await i.deferUpdate();
+            const { embed, attachment } = await buildEmbed(listings[indexRef.currentIndex]);
+            await i.editReply({ embeds: [embed], components: buildRows(), files: [attachment] });
             return;
         }
         if (i.customId === 'undosell_next') {
             indexRef.currentIndex = (indexRef.currentIndex + 1) % listings.length;
-            await i.update({ embeds: [buildEmbed(listings[indexRef.currentIndex])], components: buildRows() });
+            await i.deferUpdate();
+            const { embed, attachment } = await buildEmbed(listings[indexRef.currentIndex]);
+            await i.editReply({ embeds: [embed], components: buildRows(), files: [attachment] });
             return;
         }
         if (i.customId === 'undosell_cancel') {
@@ -114,10 +137,10 @@ async function undosellRun(client, interaction) {
                 baseImage: listing.baseImage,
                 characterImage: listing.characterImage,
                 rarity: listing.rarity,
-                overall: listing.overall,
-                ATA: listing.ATA,
-                LIF: listing.LIF,
-                POW: listing.POW,
+                overall: listing.overall ?? listing.ovr ?? (listing.marketValue != null ? Math.round(listing.marketValue / 10) : 0),
+                ATA: listing.ATA ?? listing.ata ?? 0,
+                LIF: listing.LIF ?? listing.lif ?? 0,
+                POW: listing.POW ?? listing.pow ?? 0,
                 obtainedAt: listing.obtainedAt,
                 marketValue: listing.marketValue,
                 valueToSell: listing.marketValue ? Math.floor(listing.marketValue / 2) : 0

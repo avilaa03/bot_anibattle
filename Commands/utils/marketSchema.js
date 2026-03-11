@@ -20,4 +20,7 @@ const marketSchema = new Schema({
     status: { type: String, default: 'available' }
 });
 
+marketSchema.index({ status: 1, listingPrice: 1 });
+marketSchema.index({ sellerId: 1, status: 1 });
+
 module.exports = mongoose.model('Market', marketSchema);

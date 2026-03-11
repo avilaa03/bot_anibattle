@@ -1,11 +1,15 @@
 const { EmbedBuilder } = require('discord.js');
-const User = require('../../utils/userSchema')
+const User = require('../../utils/userSchema');
+
+function getCardOvr(card) {
+    return card.overall ?? (card.marketValue != null ? Math.round(card.marketValue / 10) : 0);
+}
 
 async function profileRun(client, interaction) {
     const user = await User.findOne({ id: interaction.user.id });
 
     if (!user) {
-        return interaction.reply({ content: 'Perfil não encontrado.', ephemeral: true });
+        return interaction.reply({ embeds: [new EmbedBuilder().setTitle('❌ Perfil não encontrado').setDescription('Crie um perfil jogando (ex.: /roll, /daily).').setColor('#E53935')], ephemeral: true });
     }
 
     const favCard = user.favCard
@@ -17,9 +21,7 @@ async function profileRun(client, interaction) {
     let highestOvrCard = null;
     if (user.inventory.length > 0) {
         highestOvrCard = user.inventory.reduce((max, card) => {
-            const ovr = card.overall ?? 0;
-            const maxOvr = max.overall ?? 0;
-            return ovr > maxOvr ? card : max;
+            return getCardOvr(card) > getCardOvr(max) ? card : max;
         }, user.inventory[0]);
     }
 
@@ -31,7 +33,7 @@ async function profileRun(client, interaction) {
             { name: 'Tamanho do Inventário', value: `${totalCards} cartas`, inline: true },
             { name: 'Valor Total das Cartas', value: `${totalValue} moedas`, inline: true },
             { name: 'Carta Favorita', value: favCard ? favCard.name : 'Nenhuma', inline: false },
-            { name: 'Carta com Maior OVR', value: highestOvrCard ? `${highestOvrCard.name} (OVR: ${highestOvrCard.overall ?? 0})` : 'Nenhuma carta no inventário', inline: false }
+            { name: 'Carta com Maior OVR', value: highestOvrCard ? `${highestOvrCard.name} (OVR: ${getCardOvr(highestOvrCard)})` : 'Nenhuma carta no inventário', inline: false }
         );
 
     if (favCard && (favCard.characterImage || favCard.baseImage)) {

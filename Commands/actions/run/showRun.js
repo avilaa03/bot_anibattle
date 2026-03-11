@@ -10,13 +10,21 @@ async function showRun(client, interaction) {
     const user = await User.findOne({ id: interaction.user.id });
 
     if (!user || user.inventory.length === 0) {
-        return interaction.reply('Seu inventário está vazio ou o usuário não foi encontrado.');
+        const embed = new EmbedBuilder()
+            .setTitle('📋 Inventário vazio')
+            .setDescription('Seu inventário está vazio ou você ainda não foi encontrado no sistema.')
+            .setColor('#9E9E9E');
+        return interaction.reply({ embeds: [embed], ephemeral: true });
     }
 
     const matchingCards = user.inventory.filter(c => c.name.toLowerCase().includes(name));
 
     if (matchingCards.length === 0) {
-        return interaction.reply('Nenhuma carta encontrada com esse nome.');
+        const embed = new EmbedBuilder()
+            .setTitle('❌ Carta não encontrada')
+            .setDescription('Nenhuma carta no seu inventário corresponde a esse nome.')
+            .setColor('#E53935');
+        return interaction.reply({ embeds: [embed], ephemeral: true });
     }
 
     await interaction.deferReply();

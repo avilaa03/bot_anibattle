@@ -91,18 +91,22 @@ class CardBuilder {
     setRarity(rarity) { this.cardData.rarity = rarity; }
 
     async loadImages() {
+        const url = (u) => (typeof u === 'string' && u.trim().length > 0) ? u.trim() : null;
         try {
-            this.baseImage = await loadImage(this.cardData.baseImage);
+            const u = url(this.cardData.baseImage);
+            this.baseImage = u ? await loadImage(u) : null;
         } catch (e) {
             this.baseImage = null;
         }
         try {
-            this.characterImage = await loadImage(this.cardData.characterImage);
+            const u = url(this.cardData.characterImage);
+            this.characterImage = u ? await loadImage(u) : null;
         } catch (e) {
             this.characterImage = null;
         }
         try {
-            this.seriesImage = await loadImage(this.cardData.seriesImage);
+            const u = url(this.cardData.seriesImage);
+            this.seriesImage = u ? await loadImage(u) : null;
         } catch (e) {
             this.seriesImage = null;
         }
