@@ -19,6 +19,8 @@ async function showRun(client, interaction) {
         return interaction.reply('Nenhuma carta encontrada com esse nome.');
     }
 
+    await interaction.deferReply();
+
     let currentIndex = 0;
     const indexRef = { currentIndex };
 
@@ -60,7 +62,7 @@ async function showRun(client, interaction) {
         );
 
     const { embed, attachment } = await updateEmbed(indexRef.currentIndex, matchingCards, true);
-    const message = await interaction.reply({ embeds: [embed], components: [row], files: [attachment], fetchReply: true });
+    const message = await interaction.editReply({ embeds: [embed], components: [row], files: [attachment] });
     
     const filter = i => i.user.id === interaction.user.id;
     const collector = message.createMessageComponentCollector({ filter, time: 60000 });
