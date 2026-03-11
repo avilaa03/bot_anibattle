@@ -42,12 +42,12 @@ async function battleRun(interaction) {
 
     const actionRow = new ActionRowBuilder().addComponents(acceptButton);
 
-    const challengeMessage = await interaction.reply({
+    await interaction.reply({
         content: `${userY}, você foi desafiado por ${userX}!`,
         embeds: [challengeEmbed],
-        components: [actionRow],
-        fetchReply: true
+        components: [actionRow]
     });
+    const challengeMessage = await interaction.fetchReply();
 
     return { userX, userY, userXData, userYData, challengeMessage };
 }
