@@ -1,3 +1,6 @@
+const User = require('../../utils/userSchema');
+const CardBuilder = require('../../utils/cardBuilder.js');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, AttachmentBuilder } = require('discord.js');
 let currentCollector = null
 
 module.exports = async (client, interaction, favCardCollect, favCardEnd) => {
@@ -16,17 +19,21 @@ module.exports = async (client, interaction, favCardCollect, favCardEnd) => {
 
     let currentIndex = 0;
 
-    const updateEmbed = () => {
-        const card = matchingCards[currentIndex];
+    const updateEmbed = async (index) => {
+        const card = matchingCards[index];
+        const cardBuilder = new CardBuilder(card);
+        const cardImageBuffer = await cardBuilder.build();
+        const attachment = new AttachmentBuilder(cardImageBuffer, { name: 'cardImage.png' });
+
         const embed = new EmbedBuilder()
             .setTitle('AniBattle')
-            .setImage(card.image)
+            .setImage('attachment://cardImage.png')
             .addFields(
                 { name: "Nome", value: card.name.charAt(0).toUpperCase() + card.name.slice(1) },
                 { name: "Série", value: card.series },
                 { name: "Raridade", value: card.rarity }
             );
-        return embed;
+        return { embed, attachment };
     };
 
     const createRow = () => {
@@ -57,7 +64,8 @@ module.exports = async (client, interaction, favCardCollect, favCardEnd) => {
         currentCollector.stop();
     }
 
-    const message = await interaction.reply({ embeds: [updateEmbed()], components: [createRow()], fetchReply: true });
+    const { embed, attachment } = await updateEmbed(0);
+    const message = await interaction.reply({ embeds: [embed], components: [createRow()], files: [attachment], fetchReply: true });
 
-    currentCollector = favCardCollect(interaction, message, currentIndex, matchingCards, user, favCardEnd);
+    currentCollector = favCardCollect(interaction, message, { currentIndex }, matchingCards, user, favCardEnd, updateEmbed, createRow);
 };

@@ -16,20 +16,27 @@ const UserSchema = new Schema({
         originalCardId: mongoose.Schema.Types.ObjectId,
         name: String,
         series: String,
-        image: String,
+        seriesImage: String,
+        baseImage: String,
+        characterImage: String,
         rarity: String,
-        ovr: Number,
-        ata: Number,
-        int: Number,
-        def: Number,
-        des: Number,
-        pow: Number,
-        res: Number,
+        overall: Number,
+        ATA: Number,
+        LIF: Number,
+        POW: Number,
         obtainedAt: { type: Date, default: Date.now },
         marketValue: Number,
         valueToSell: Number
     }],
     balance: {
+        type: Number,
+        default: 0
+    },
+    wins: {
+        type: Number,
+        default: 0
+    },
+    losses: {
         type: Number,
         default: 0
     },

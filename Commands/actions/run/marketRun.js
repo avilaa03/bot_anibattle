@@ -14,7 +14,11 @@ module.exports = async (client, interaction, marketCollect, marketEnd) => {
     };
 
     if (rarity) {
-        query.rarity = rarity;
+        query.rarity = new RegExp(`^${rarity}$`, 'i');
+    }
+    const series = interaction.options.getString('series') || '';
+    if (series) {
+        query.series = new RegExp(series, 'i');
     }
 
     const listings = await Market.find(query);

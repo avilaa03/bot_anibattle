@@ -1,3 +1,5 @@
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const User = require('../../utils/userSchema');
 let currentCollector = null;
 
 module.exports = async (client, interaction, inventoryCollect, inventoryEnd) => {
@@ -26,7 +28,7 @@ module.exports = async (client, interaction, inventoryCollect, inventoryEnd) => 
         }
 
         currentCards.forEach(card => {
-            embed.addFields({ name: card.name, value: `OVR: ${card.ovr}`, inline: false });
+            embed.addFields({ name: card.name, value: `OVR: ${card.overall}`, inline: false });
         });
 
         return embed;
@@ -66,9 +68,9 @@ module.exports = async (client, interaction, inventoryCollect, inventoryEnd) => 
         return buttons;
     };
 
-    if (currentCollector) {
-        currentCollector.stop();
-    }
+    // if (currentCollector) {
+    //     currentCollector.stop();
+    // }
 
     const embedMessage = await interaction.reply({
         embeds: [generateEmbed(currentPage)],

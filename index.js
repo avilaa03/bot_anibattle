@@ -30,20 +30,31 @@ const CLIENT_ID = process.env.CLIENT_ID;
 
 const rest = new REST({ version: '10' }).setToken(process.env.TOKEN);
 
-client.on('interactionCreate', (interaction) => {
-  if (interaction.isChatInputCommand()) {
-    const { commandName } = interaction;
-    const cmd = client.slashCommands.get(commandName);
-    if (cmd) {
-      cmd.run(client, interaction);
-    } else {
-      interaction.reply({ content: 'This command has no run method.'});
+client.on('interactionCreate', async (interaction) => {
+  try {
+    if (interaction.isChatInputCommand()) {
+      const { commandName } = interaction;
+      const cmd = client.slashCommands.get(commandName);
+      if (cmd) {
+        cmd.run(client, interaction);
+      } else {
+        interaction.reply({ content: 'This command has no run method.'});
+      }
+    } else if (interaction.isButton()) {
+      if (interaction.customId.startsWith('battle_pick_')) {
+        const { handleBattlePick } = require('./Commands/handlers/battleButtonHandler');
+        const handled = await handleBattlePick(client, interaction);
+        if (handled) return;
+      }
+      if (interaction.customId === 'enviarInventario') {
+        interaction.reply('enviado essa budega');
+      }
     }
-  } else if (interaction.isButton())  {    
-    if (interaction.customId === 'enviarInventario') {
-      interaction.reply('enviado essa budega')
+  } catch (err) {
+    console.error('interactionCreate error:', err);
+    if (interaction.isRepliable() && !interaction.replied) {
+      interaction.reply({ content: 'Ocorreu um erro.', ephemeral: true }).catch(() => {});
     }
-
   }
 });
 

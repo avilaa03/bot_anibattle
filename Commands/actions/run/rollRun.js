@@ -1,3 +1,7 @@
+const CardBuilder = require('../../utils/cardBuilder');
+const Card = require('../../utils/cardSchema');
+const User = require('../../utils/userSchema');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 let currentCollector = null;
 
 module.exports = async (client, interaction, rollCollect, rollEnd) => {
@@ -9,14 +13,6 @@ module.exports = async (client, interaction, rollCollect, rollEnd) => {
 
         const now = Date.now();
 
-        // if (user && user.lastRoll && now - user.lastRoll < 1 * 60 * 1000) {
-        //     const timeElapsed = now - user.lastRoll;
-        //     const timeRemaining = 1 * 60 * 1000 - timeElapsed;
-
-        //     const seconds = Math.floor((timeRemaining % (60 * 1000)) / 1000);
-        //     return interaction.reply(`Você só pode rolar uma vez a cada 1 minuto (TEMPO DE TESTES). Faltam ${seconds} segundos para você roletar novamente.`);
-        // }
-
         if (user && user.lastRoll && now - user.lastRoll < 15 * 60 * 1000) {
             const timeElapsed = now - user.lastRoll;
             const timeRemaining = 15 * 60 * 1000 - timeElapsed;
@@ -27,11 +23,11 @@ module.exports = async (client, interaction, rollCollect, rollEnd) => {
         }
 
         const rarities = [
-            { rarity: 'Common', percentage: 70 },
-            { rarity: 'Rare', percentage: 20 },
-            { rarity: 'Ultra Rare', percentage: 8 },
-            { rarity: 'Legendary', percentage: 1.5 },
-            { rarity: 'Master', percentage: 0.5 }
+            { rarity: 'common', percentage: 55 },
+            { rarity: 'rare', percentage: 28 },
+            { rarity: 'ultra rare', percentage: 12 },
+            { rarity: 'legendary', percentage: 4 },
+            { rarity: 'master', percentage: 1 }
         ];
 
         const random = Math.random() * 100;
@@ -44,15 +40,22 @@ module.exports = async (client, interaction, rollCollect, rollEnd) => {
                 break;
             }
         }
+        if (!rarity) rarity = 'common';
 
-        const cards = await Card.find({ rarity: rarity }).exec();
+        let cards = await Card.find({ rarity: rarity }).exec();
         if (!cards || cards.length === 0) {
-            return interaction.reply('Nenhuma carta encontrada com a raridade especificada.');
+            cards = await Card.find({ rarity: 'common' }).exec();
+        }
+        if (!cards || cards.length === 0) {
+            return interaction.reply('Nenhuma carta encontrada no banco de dados.');
         }
 
         const card = cards[Math.floor(Math.random() * cards.length)];
-        const marketValue = (card.ata + card.int + card.def + card.des + card.pow + card.res) * 10;
+        const marketValue = card.overall * 10;
         const valueToSell = marketValue / 2;
+
+        const cardBuilder = new CardBuilder(card)
+        const cardImageBuffer = await cardBuilder.build();
 
         const row = new ActionRowBuilder()
             .addComponents(
@@ -71,13 +74,13 @@ module.exports = async (client, interaction, rollCollect, rollEnd) => {
         const embed = new EmbedBuilder()
             .setTitle('Carta Sorteada')
             .addFields(
-                { name: "Nome", value: card.name.charAt(0).toUpperCase() + card.name.slice(1) },
+                { name: "Nome", value: card.name },
                 { name: "Raridade", value: card.rarity },
                 { name: "Valor de Mercado", value: marketValue.toString() }
             )
-            .setImage(card.image);
+            .setImage('attachment://cardImage.png');
 
-        interaction.reply({ embeds: [embed], components: [row] });
+        interaction.reply({ embeds: [embed], components: [row], files: [{ attachment: cardImageBuffer, name: 'cardImage.png' }] });
 
         if (!user) {
             user = new User({ id: interaction.user.id });

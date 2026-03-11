@@ -18,8 +18,17 @@ module.exports = class MarketSlashCommand extends BaseSlashCommand {
             .setName(this.name)
             .setDescription('Procura por cartas no mercado e permite a compra')
             .addStringOption(option => option.setName('cardname').setDescription('Nome da carta').setRequired(false))
+            .addStringOption(option => option.setName('series').setDescription('Filtrar por série').setRequired(false))
+            .addStringOption(option =>
+                option.setName('rarity').setDescription('Raridade da carta').setRequired(false)
+                    .addChoices(
+                        { name: 'Common', value: 'common' },
+                        { name: 'Rare', value: 'rare' },
+                        { name: 'Ultra Rare', value: 'ultra rare' },
+                        { name: 'Legendary', value: 'legendary' },
+                        { name: 'Master', value: 'master' }
+                    ))
             .addIntegerOption(option => option.setName('minvalue').setDescription('Valor mínimo').setRequired(false))
-            .addIntegerOption(option => option.setName('maxvalue').setDescription('Valor máximo').setRequired(false))
-            .addStringOption(option => option.setName('rarity').setDescription('Raridade da carta').setRequired(false));
+            .addIntegerOption(option => option.setName('maxvalue').setDescription('Valor máximo').setRequired(false));
     }
 };

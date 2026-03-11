@@ -10,7 +10,15 @@ const cardSchema = new Schema({
         type: String,
         required: true
     },
-    image: {
+    seriesImage: {
+        type: String,
+        required: true
+    },
+    baseImage: {
+        type: String,
+        required: true
+    },
+    characterImage: {
         type: String,
         required: true
     },
@@ -18,35 +26,23 @@ const cardSchema = new Schema({
         type: String,
         required: true
     },
-    ovr: {
+    overall: {
         type: Number,
         required: true
     },
-    ata: {
+    ATA: {
         type: Number,
         required: true
     },
-    int: {
+    LIF: {
         type: Number,
         required: true
     },
-    def: {
-        type: Number,
-        required: true
-    },
-    des: {
-        type: Number,
-        required: true
-    },
-    pow: {
-        type: Number,
-        required: true
-    },
-    res: {
+    POW: {
         type: Number,
         required: true
     }
-});
+}, { collection: 'new-cards' });
 
 const Card = mongoose.model('Card', cardSchema);
 
