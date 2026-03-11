@@ -1,7 +1,7 @@
 const BaseSlashCommand = require('../utils/BaseSlashCommand.js');
 const { SlashCommandBuilder } = require('discord.js');
 const User = require('../utils/userSchema.js');
-const quicksellRun = require('../actions/run/quicksellRun.js');
+const { quicksellRun } = require('../actions/run/quicksellRun.js');
 const quicksellCollect = require('../actions/collect/quicksellCollect.js');
 const quicksellEnd = require('../actions/end/quicksellEnd.js');
 
@@ -24,14 +24,13 @@ module.exports = class QuickSellSlashCommand extends BaseSlashCommand {
             return interaction.reply('Nenhuma carta encontrada com esse nome.');
         }
 
-        const { message, currentIndex, rowNavigation, rowConfirmation } = await quicksellRun(client, interaction, user, matchingCards);
+        const { message, indexRef, rowNavigation } = await quicksellRun(client, interaction, user, matchingCards);
 
         const filter = i => ['prev', 'next', 'confirm_sell', 'cancel_sell'].includes(i.customId) && i.user.id === interaction.user.id;
         const collector = message.createMessageComponentCollector({ filter, time: 30000 });
 
-
         collector.on('collect', async i => {
-            const result = await quicksellCollect(i, currentIndex, matchingCards, user, rowNavigation, rowConfirmation);
+            const result = await quicksellCollect(i, indexRef, matchingCards, user, rowNavigation);
             if (result === 'collected') collector.stop('collected');
         });
 
