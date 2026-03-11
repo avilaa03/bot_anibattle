@@ -1,5 +1,6 @@
-const User = require('../../utils/userSchema.js')
-const Market = require('../../utils/marketSchema.js')
+const User = require('../../utils/userSchema.js');
+const Market = require('../../utils/marketSchema.js');
+const { EmbedBuilder } = require('discord.js');
 
 async function undosellRun(client, interaction) {
     const cardName = interaction.options.getString('cardname');
@@ -7,7 +8,11 @@ async function undosellRun(client, interaction) {
     const listing = await Market.findOne({ cardName: cardName, sellerId: interaction.user.id, status: 'available' });
 
     if (!listing) {
-        return interaction.reply({ content: 'Anúncio não encontrado ou já foi vendido.', ephemeral: true });
+        const embed = new EmbedBuilder()
+            .setTitle('❌ Anúncio não encontrado')
+            .setDescription('Anúncio não encontrado ou esta carta já foi vendida.')
+            .setColor('#E53935');
+        return interaction.reply({ embeds: [embed], ephemeral: true });
     }
 
     await listing.remove();
@@ -28,12 +33,16 @@ async function undosellRun(client, interaction) {
         POW: listing.def,
         obtainedAt: listing.obtainedAt,
         marketValue: listing.marketValue,
-        valueToSell: listing.valueToSell 
+        valueToSell: listing.valueToSell
     };
     user.inventory.push(card);
     await user.save();
 
-    return interaction.reply({ content: 'Anúncio removido com sucesso.', ephemeral: true });
+    const embed = new EmbedBuilder()
+        .setTitle('✅ Anúncio removido')
+        .setDescription(`**${listing.cardName}** foi removida do mercado e devolvida ao seu inventário.`)
+        .setColor('#4CAF50');
+    return interaction.reply({ embeds: [embed], ephemeral: true });
 }
 
-module.exports = undosellRun
+module.exports = undosellRun;

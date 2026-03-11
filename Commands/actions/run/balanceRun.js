@@ -1,4 +1,5 @@
 const User = require('../../utils/userSchema');
+const { EmbedBuilder } = require('discord.js');
 
 async function balanceRun(client, interaction) {
     let userId;
@@ -14,13 +15,27 @@ async function balanceRun(client, interaction) {
         const user = await User.findOne({ id: userId });
 
         if (!user || user.balance === undefined) {
-            return interaction.reply({ content: `O usuário <@${userId}> não foi encontrado ou não possui saldo registrado.` });
+            const embed = new EmbedBuilder()
+                .setTitle('💰 Saldo')
+                .setDescription(`O usuário <@${userId}> não foi encontrado ou não possui saldo registrado.`)
+                .setColor('#9E9E9E');
+            return interaction.reply({ embeds: [embed], ephemeral: true });
         }
 
-        return interaction.reply({ content: `O usuário <@${userId}> tem ${user.balance} moedas.` });
+        const embed = new EmbedBuilder()
+            .setTitle('💰 Saldo')
+            .setColor('#FFD700')
+            .setDescription(`Saldo de <@${userId}>`)
+            .addFields({ name: 'Moedas', value: `**${user.balance}**`, inline: true })
+            .setFooter({ text: 'AniBattle' });
+        return interaction.reply({ embeds: [embed] });
     } catch (err) {
         console.error('Erro ao buscar o saldo do usuário:', err);
-        return interaction.reply('Houve um erro ao buscar o saldo do usuário.');
+        const embed = new EmbedBuilder()
+            .setTitle('❌ Erro')
+            .setDescription('Houve um erro ao buscar o saldo do usuário.')
+            .setColor('#E53935');
+        return interaction.reply({ embeds: [embed], ephemeral: true });
     }
 }
 

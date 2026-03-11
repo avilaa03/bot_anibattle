@@ -9,7 +9,7 @@ async function helpRun(client, interaction) {
       { name: "/show", value: "Mostrar uma carta do inventário pelo nome (com paginação)." },
       { name: "/inventory", value: "Listar todas as cartas do seu inventário." },
       { name: "/battle", value: "Desafiar outro usuário para uma batalha 3v3. Escolha 3 cartas no privado; ATA, LIF e POW definem o combate." },
-      { name: "/ranking", value: "Top 10 por vitórias em batalhas ou por moedas. Use o parâmetro para escolher o tipo." },
+      { name: "/magnata", value: "Ranking dos 10 jogadores mais ricos do bot (por saldo em moedas)." },
       { name: "/favcard", value: "Definir uma carta como favorita (aparece no perfil)." },
       { name: "/profile", value: "Ver seu perfil no AniBattle." },
       { name: "/sell", value: "Anunciar uma carta no mercado." },

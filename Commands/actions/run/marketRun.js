@@ -24,7 +24,11 @@ module.exports = async (client, interaction, marketCollect, marketEnd) => {
     const listings = await Market.find(query);
 
     if (listings.length === 0) {
-        return interaction.reply({ content: 'Nenhuma carta encontrada.', ephemeral: true });
+        const embed = new EmbedBuilder()
+            .setTitle('🛒 Mercado')
+            .setDescription('Nenhuma carta encontrada com os filtros informados.')
+            .setColor('#9E9E9E');
+        return interaction.reply({ embeds: [embed], ephemeral: true });
     }
 
     let currentPage = 0;

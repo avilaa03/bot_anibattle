@@ -5,7 +5,11 @@ async function mymarketRun(client, interaction) {
     const listings = await Market.find({ sellerId: interaction.user.id });
 
     if (listings.length === 0) {
-        return interaction.reply({ content: 'Você não tem cartas anunciadas no mercado.', ephemeral: true });
+        const emptyEmbed = new EmbedBuilder()
+            .setTitle('📋 Seu mercado')
+            .setDescription('Você não tem cartas anunciadas no mercado.')
+            .setColor('#9E9E9E');
+        return interaction.reply({ embeds: [emptyEmbed], ephemeral: true });
     }
 
     const embed = new EmbedBuilder()
