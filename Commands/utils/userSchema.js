@@ -46,10 +46,18 @@ const UserSchema = new Schema({
     favCard: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Card'
-    }
+    },
+    // Pokédex: ids das cartas do catálogo que o jogador já teve em mãos
+    // pelo menos uma vez. É um registro permanente — vender a carta não
+    // apaga a descoberta, igual à Pokédex de Pokémon.
+    discovered: [{
+        cardId: { type: mongoose.Schema.Types.ObjectId, ref: 'Card' },
+        firstObtainedAt: { type: Date, default: Date.now }
+    }]
 });
 
 UserSchema.index({ balance: -1 });
+UserSchema.index({ 'discovered.cardId': 1 });
 
 const User = mongoose.models.User || mongoose.model('User', UserSchema);
 

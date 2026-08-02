@@ -3,6 +3,10 @@ const Schema = mongoose.Schema;
 
 const marketSchema = new Schema({
     cardId: String,
+    // Referência à carta no catálogo (coleção new-cards). Sem isto, a carta
+    // perdia o vínculo com o catálogo ao passar pelo mercado e o comprador
+    // não conseguia registrá-la na Pokédex.
+    originalCardId: { type: Schema.Types.ObjectId, ref: 'Card' },
     sellerId: String,
     cardName: String,
     series: String,

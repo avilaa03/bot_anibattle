@@ -1,6 +1,8 @@
 const User = require('../../utils/userSchema');
 const Market = require('../../utils/marketSchema');
-const { trySpend, addBalance } = require('../../utils/economy');
+const { trySpend, addBalance, applyMarketTax, MARKET_TAX_RATE } = require('../../utils/economy');
+const { registerDiscovery } = require('../../utils/discovery');
+const ui = require('../../utils/embeds');
 
 module.exports = async (message, selectedCard, interaction) => {
     if (selectedCard) {
@@ -18,21 +20,27 @@ module.exports = async (message, selectedCard, interaction) => {
                     { new: true }
                 );
                 if (!reserved) {
-                    return i.update({ content: 'Esta carta já foi vendida para outro jogador.', embeds: [], components: [] });
+                    return i.update({ embeds: [ui.error('Carta indisponível', 'Esta carta já foi vendida para outro jogador.')], components: [] });
                 }
 
                 const buyer = await trySpend(interaction.user.id, reserved.listingPrice);
                 if (!buyer) {
                     // Desfaz a reserva se o comprador não tiver saldo suficiente.
                     await Market.findOneAndUpdate({ _id: reserved._id }, { status: 'available' });
-                    return i.update({ content: 'Você não tem dinheiro suficiente para comprar esta carta.', embeds: [], components: [] });
+                    return i.update({ embeds: [ui.error('Saldo insuficiente', `Esta carta custa ${ui.coins(reserved.listingPrice)} e você não tem esse valor.`)], components: [] });
                 }
 
-                await addBalance(reserved.sellerId, reserved.listingPrice);
+                // O vendedor recebe o preço menos a taxa. A taxa não vai
+                // para ninguém — ela é destruída, e é justamente esse sink
+                // que segura a inflação da economia do bot.
+                const { tax, sellerReceives } = applyMarketTax(reserved.listingPrice);
+                await addBalance(reserved.sellerId, sellerReceives);
+
+                const catalogoId = reserved.originalCardId || reserved.cardId;
 
                 const cardToAdd = {
                     cardId: reserved.cardId,
-                    originalCardId: reserved.cardId,
+                    originalCardId: catalogoId,
                     name: reserved.cardName,
                     series: reserved.series,
                     seriesImage: reserved.seriesImage,
@@ -54,9 +62,22 @@ module.exports = async (message, selectedCard, interaction) => {
                     { upsert: true, setDefaultsOnInsert: true }
                 );
 
-                return i.update({ content: 'Compra realizada com sucesso!', embeds: [], components: [] });
+                const inedita = catalogoId ? await registerDiscovery(interaction.user.id, catalogoId) : false;
+
+                const embed = ui.success('Compra realizada', `${ui.getRarity(reserved.rarity).emoji} **${ui.cardName(reserved.cardName)}** agora é sua!`)
+                    .addFields(
+                        { name: 'Você pagou', value: ui.coins(reserved.listingPrice), inline: true },
+                        { name: 'Vendedor recebeu', value: ui.coins(sellerReceives), inline: true },
+                        { name: `Taxa (${Math.round(MARKET_TAX_RATE * 100)}%)`, value: ui.coins(tax), inline: true },
+                        { name: 'Seu saldo', value: ui.coins(buyer.balance), inline: true }
+                    );
+                if (inedita) {
+                    embed.setDescription(`${embed.data.description}\n\n📖 **Nova entrada na Pokédex!**`);
+                }
+
+                return i.update({ embeds: [embed], components: [] });
             } else if (i.customId === 'cancel_buy') {
-                return i.update({ content: 'Compra cancelada.', embeds: [], components: [] });
+                return i.update({ embeds: [ui.neutral('Compra cancelada', 'Nenhuma moeda foi gasta.')], components: [] });
             }
         });
 

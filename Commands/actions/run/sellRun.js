@@ -1,5 +1,6 @@
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle, AttachmentBuilder } = require('discord.js');
 const ui = require('../../utils/embeds');
+const { applyMarketTax, MARKET_TAX_RATE } = require('../../utils/economy');
 const User = require('../../utils/userSchema');
 const { sellCollect } = require('../collect/sellCollect.js');
 const { sellEnd } = require('../end/sellEnd.js');
@@ -32,7 +33,7 @@ async function buildSellEmbed(card, listingPrice) {
             ui.statLines(card),
             '',
             `Preço do anúncio: ${ui.coins(listingPrice)}`,
-            `Valor de mercado: ${ui.coins(card.marketValue || 0)}`
+            `Você recebe: ${ui.coins(applyMarketTax(listingPrice).sellerReceives)} *(taxa de ${Math.round(MARKET_TAX_RATE * 100)}%)*`
         ].join('\n'))
         .setImage('attachment://cardImage.png');
 

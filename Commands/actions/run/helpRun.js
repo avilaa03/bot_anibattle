@@ -10,16 +10,26 @@ const PAGES = [
       { nome: '/inventory', desc: 'Sua coleção completa, ordenada das cartas mais raras para as mais comuns.' },
       { nome: '/show', desc: 'Mostra uma carta específica do seu inventário, com a arte completa.' },
       { nome: '/favcard', desc: 'Define sua carta favorita — ela aparece no seu perfil.' },
-      { nome: '/profile', desc: 'Seu perfil: saldo, coleção, retrospecto de batalhas e melhor carta.' }
+      { nome: '/profile', desc: 'Seu perfil: saldo, coleção, Pokédex e retrospecto de batalhas.' }
+    ]
+  },
+  {
+    titulo: '📖 Pokédex',
+    descricao: 'Todo carta que passa pelo seu inventário fica registrada para sempre — mesmo que você venda depois.',
+    comandos: [
+      { nome: '/pokedex', desc: 'Mostra o que você já descobriu e o que ainda falta. Filtra por série, raridade, ou só o que falta.' },
+      { nome: '/colecionadores', desc: 'Ranking de quem já descobriu mais cartas.' },
+      { nome: '​', desc: '💡 *Cartas não descobertas aparecem como* ⬛ **???** *— vá atrás delas no `/market` ou no `/roll`.*' }
     ]
   },
   {
     titulo: '⚔️ Batalhas',
-    descricao: 'Desafie outros jogadores em duelos 3 vs 3.',
+    descricao: 'Desafie outros jogadores em duelos 3 vs 3 apostando moedas.',
     comandos: [
-      { nome: '/battle', desc: 'Desafia outro jogador. Cada um monta um time de 3 cartas no privado.' },
-      { nome: '​', desc: '**Como funciona:** cada rodada é um 1 vs 1. Sua 1ª carta enfrenta a 1ª do oponente, a 2ª contra a 2ª, e assim por diante. Quem vencer 2 das 3 rodadas leva o duelo.' },
-      { nome: '​', desc: '**Atributos:** ⚔️ `ATA` define quem ataca primeiro · ❤️ `LIF` é a vida · 💥 `POW` é o dano por golpe.' }
+      { nome: '/battle', desc: 'Desafia outro jogador. A aposta mínima é de 10 moedas, e o vencedor leva o dobro.' },
+      { nome: '​', desc: '**Como funciona:** cada rodada é um 1 vs 1. Sua 1ª carta enfrenta a 1ª do oponente, a 2ª contra a 2ª, e assim por diante. Quem vencer 2 das 3 rodadas leva o duelo e o pote.' },
+      { nome: '​', desc: '**Atributos:** ⚔️ `ATA` pesa na ordem dos turnos, no crítico e na esquiva · ❤️ `LIF` é a vida · 💥 `POW` é o dano.' },
+      { nome: '​', desc: '**Sorte:** existe dano variável, crítico e esquiva — mas tudo pende para a carta melhor. E quem cai abaixo de 40% de vida entra em **modo desespero**, com muito mais chance de crítico. Viradas acontecem.' }
     ]
   },
   {
@@ -31,7 +41,7 @@ const PAGES = [
       { nome: '/magnata', desc: 'Ranking dos 10 jogadores mais ricos.' },
       { nome: '/give', desc: 'Transfere moedas para outro jogador.' },
       { nome: '/quicksell', desc: 'Vende uma carta na hora, pelo valor base.' },
-      { nome: '/sell', desc: 'Anuncia uma carta no mercado pelo preço que você quiser.' },
+      { nome: '/sell', desc: 'Anuncia uma carta no mercado pelo preço que você quiser (o mercado cobra 5% de taxa na venda).' },
       { nome: '/market', desc: 'Procura e compra cartas anunciadas por outros jogadores.' },
       { nome: '/mymarket', desc: 'Seus anúncios ativos e histórico de vendas.' },
       { nome: '/undosell', desc: 'Retira um anúncio do mercado e devolve a carta ao inventário.' }

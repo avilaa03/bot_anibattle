@@ -1,5 +1,6 @@
 const User = require('../../utils/userSchema');
 const ui = require('../../utils/embeds');
+const { getProgress } = require('../../utils/discovery');
 
 function getCardOvr(card) {
     return card.overall ?? (card.marketValue != null ? Math.round(card.marketValue / 10) : 0);
@@ -41,6 +42,8 @@ async function profileRun(client, interaction) {
         .map((key) => `${ui.RARITIES[key].emoji} ${ui.RARITIES[key].label}: **${byRarity[key] || 0}**`)
         .join('\n');
 
+    const pokedex = await getProgress(alvo.id);
+
     // A cor do perfil acompanha a raridade da carta favorita — dá uma
     // sensação de identidade para quem tem cartas boas.
     const cor = favCard ? ui.rarityColor(favCard.rarity) : ui.STATUS_COLORS.info;
@@ -52,6 +55,11 @@ async function profileRun(client, interaction) {
             { name: '🎴 Cartas', value: `**${ui.number(totalCards)}**`, inline: true },
             { name: '💎 Patrimônio', value: ui.coins(totalValue + (user.balance || 0)), inline: true },
             { name: '⚔️ Batalhas', value: totalBattles > 0 ? `**${wins}**V — **${losses}**D  (${winRate}% de vitórias)\n${ui.progressBar(winRate, 100)}` : 'Nenhuma batalha ainda', inline: false },
+            {
+                name: '📖 Pokédex',
+                value: `**${ui.number(pokedex.descobertas)}** / ${ui.number(pokedex.total)} cartas descobertas (${pokedex.percentual.toFixed(1)}%)\n${ui.progressBar(pokedex.percentual, 100, 12)}`,
+                inline: false
+            },
             { name: '📚 Coleção', value: colecao, inline: true },
             {
                 name: '🏆 Melhor carta',

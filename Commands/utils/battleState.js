@@ -1,17 +1,50 @@
 /**
- * Estado ativo das batalhas. battleId = id único gerado por nós (não depende do Discord).
+ * Estado das batalhas em andamento.
+ *
+ * Fica em memória do processo: se o bot reiniciar, as batalhas em curso se
+ * perdem (e as apostas precisam ser devolvidas — ver refundAllPending).
+ * Migrar isso para Redis/Mongo é um item do roadmap.
  */
 const activeBattles = new Map();
 
-const COIN_WINNER = 50;
-const COIN_LOSER = 10;
+// Cooldown entre batalhas do mesmo par de jogadores. Sem isso, dois amigos
+// (ou duas contas do mesmo dono) conseguem duelar em loop e farmar moeda.
+const BATTLE_COOLDOWN_MS = Number(process.env.BATTLE_COOLDOWN_MS) > 0
+    ? Number(process.env.BATTLE_COOLDOWN_MS)
+    : 60 * 1000;
 
-/** Gera um ID único curto para a batalha (evita depender do id da mensagem do Discord). */
+const ultimoDueloPorPar = new Map();
+
+/** Gera um ID único curto para a batalha. */
 function generateBattleId() {
     return 'b' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 }
 
-function createBattle(battleId, userX, userY, userXData, userYData, challengeChannelId) {
+function chaveDoPar(idA, idB) {
+    return [idA, idB].sort().join(':');
+}
+
+/** Quanto falta do cooldown entre esses dois jogadores (0 = liberado). */
+function cooldownRestante(idA, idB) {
+    const ultimo = ultimoDueloPorPar.get(chaveDoPar(idA, idB));
+    if (!ultimo) return 0;
+    const passou = Date.now() - ultimo;
+    return passou >= BATTLE_COOLDOWN_MS ? 0 : BATTLE_COOLDOWN_MS - passou;
+}
+
+function registrarDuelo(idA, idB) {
+    ultimoDueloPorPar.set(chaveDoPar(idA, idB), Date.now());
+}
+
+/** Já existe uma batalha em andamento envolvendo esse jogador? */
+function temBatalhaAtiva(userId) {
+    for (const state of activeBattles.values()) {
+        if (state.userX.id === userId || state.userY.id === userId) return true;
+    }
+    return false;
+}
+
+function createBattle(battleId, userX, userY, userXData, userYData, challengeChannelId, wager = 0) {
     const key = String(battleId);
     const state = {
         battleId: key,
@@ -20,15 +53,19 @@ function createBattle(battleId, userX, userY, userXData, userYData, challengeCha
         userXData,
         userYData,
         challengeChannelId,
+        wager,
+        // Guardamos o _id da carta escolhida (não só o índice), para
+        // conseguirmos revalidar a posse no banco antes de resolver.
         deckX: [],
         deckY: [],
-        selectedIndicesX: new Set(),
-        selectedIndicesY: new Set(),
+        selectedIdsX: new Set(),
+        selectedIdsY: new Set(),
         messageXId: null,
         channelXId: null,
         messageYId: null,
         channelYId: null,
-        phase: 'choosing'
+        phase: 'choosing',
+        criadoEm: Date.now()
     };
     activeBattles.set(key, state);
     return state;
@@ -38,7 +75,7 @@ function getBattle(battleId) {
     return activeBattles.get(String(battleId));
 }
 
-/** Encontra batalha ativa em que o usuário é jogador (fallback se o id do botão não bater). */
+/** Encontra batalha ativa em que o usuário é jogador (fallback). */
 function getBattleByUserId(userId) {
     for (const state of activeBattles.values()) {
         if (state.phase === 'choosing' && (state.userX.id === userId || state.userY.id === userId)) {
@@ -67,7 +104,16 @@ function bothDecksReady(state) {
 }
 
 function finishBattle(battleId) {
+    const state = activeBattles.get(String(battleId));
+    if (state) {
+        registrarDuelo(state.userX.id, state.userY.id);
+    }
     activeBattles.delete(String(battleId));
+}
+
+/** Lista batalhas pendentes — usado para devolver apostas em caso de erro. */
+function listPending() {
+    return [...activeBattles.values()];
 }
 
 module.exports = {
@@ -80,6 +126,9 @@ module.exports = {
     isDeckComplete,
     bothDecksReady,
     finishBattle,
-    COIN_WINNER,
-    COIN_LOSER
+    listPending,
+    temBatalhaAtiva,
+    cooldownRestante,
+    registrarDuelo,
+    BATTLE_COOLDOWN_MS
 };

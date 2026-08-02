@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const User = require('../../utils/userSchema');
 const { addBalance } = require('../../utils/economy');
 const ui = require('../../utils/embeds');
+const { registerDiscovery } = require('../../utils/discovery');
 
 module.exports = (interaction, card, user, marketValue, valueToSell, rollEnd) => {
     const filter = (i) => (i.customId.startsWith(`enviarInventario_${card._id}`) || i.customId.startsWith(`vender_${card._id}`)) && i.user.id === interaction.user.id;
@@ -40,8 +41,13 @@ module.exports = (interaction, card, user, marketValue, valueToSell, rollEnd) =>
                 await updatedUser.save();
             }
 
+            // Pokédex: registra a descoberta e avisa se for inédita.
+            const inedita = await registerDiscovery(interaction.user.id, card._id);
+
             await i.update({
-                content: `🎴 **${ui.cardName(card.name)}** foi guardada no seu inventário.`,
+                content: inedita
+                    ? `🎴 **${ui.cardName(card.name)}** foi guardada no seu inventário.\n📖 **Nova entrada na Pokédex!** Veja em \`/pokedex\`.`
+                    : `🎴 **${ui.cardName(card.name)}** foi guardada no seu inventário.`,
                 components: []
             });
         } else if (i.customId.startsWith('vender_')) {

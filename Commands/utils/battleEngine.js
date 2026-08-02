@@ -1,78 +1,172 @@
 /**
- * Motor de combate 1v1 usando ATA (velocidade), LIF (vida) e POW (dano).
- * Quem tem mais ATA ataca primeiro no turno; em caso de empate, ataque simultâneo.
+ * Motor de combate 1v1 e 3v3.
+ *
+ * Atributos:
+ *   ATA — velocidade. Pesa na ordem dos turnos, no crítico e na esquiva.
+ *   LIF — vida.
+ *   POW — dano base por golpe.
+ *
+ * Filosofia do balanceamento: a sorte existe, mas é *enviesada a favor da
+ * carta melhor*. Os números abaixo foram calibrados por simulação para que:
+ *
+ *   - cartas da mesma raridade fiquem em ~50% (moeda ao alto, emocionante)
+ *   - uma raridade acima vença ~70-89% (vantagem clara, mas não garantida)
+ *   - duas raridades acima vença ~90%+ (praticamente decidido)
+ *
+ * Se fosse puramente determinístico (quem tem mais atributo sempre ganha),
+ * a batalha viraria consulta de tabela e o jogador perderia a graça de
+ * torcer. Se fosse pura sorte, colecionar cartas boas não teria sentido.
  */
 
-function runRound(cardA, cardB, roundIndex) {
-    let lifeA = cardA.LIF;
-    let lifeB = cardB.LIF;
-    const log = [];
+// Variação do dano a cada golpe: dois confrontos iguais nunca saem idênticos.
+const DAMAGE_VARIANCE = 0.45;
 
-    while (lifeA > 0 && lifeB > 0) {
-        const ataA = cardA.ATA ?? 0;
-        const ataB = cardB.ATA ?? 0;
-        const powA = cardA.POW ?? 0;
-        const powB = cardB.POW ?? 0;
+// Crítico: chance base, ajustada pela vantagem de ATA sobre o defensor.
+const CRIT_BASE = 0.12;
+const CRIT_PER_ATA = 0.0008;
+const CRIT_MIN = 0.07;
+const CRIT_MAX = 0.18;
+const CRIT_MULTIPLIER = 2.0;
 
-        if (ataA > ataB) {
-            lifeB -= powA;
-            log.push(`${cardA.name} ataca primeiro! ${cardB.name} sofre ${powA} de dano.`);
-            if (lifeB <= 0) {
-                log.push(`${cardB.name} foi derrotado!`);
-                return { winner: 'A', loser: 'B', log };
-            }
-            lifeA -= powB;
-            log.push(`${cardB.name} contra-ataca! ${cardA.name} sofre ${powB} de dano.`);
-            if (lifeA <= 0) {
-                log.push(`${cardA.name} foi derrotado!`);
-                return { winner: 'B', loser: 'A', log };
-            }
-        } else if (ataB > ataA) {
-            lifeA -= powB;
-            log.push(`${cardB.name} ataca primeiro! ${cardA.name} sofre ${powB} de dano.`);
-            if (lifeA <= 0) {
-                log.push(`${cardA.name} foi derrotado!`);
-                return { winner: 'B', loser: 'A', log };
-            }
-            lifeB -= powA;
-            log.push(`${cardA.name} contra-ataca! ${cardB.name} sofre ${powA} de dano.`);
-            if (lifeB <= 0) {
-                log.push(`${cardB.name} foi derrotado!`);
-                return { winner: 'A', loser: 'B', log };
-            }
-        } else {
-            lifeA -= powB;
-            lifeB -= powA;
-            log.push(`Ataque simultâneo! ${cardA.name} sofre ${powB}, ${cardB.name} sofre ${powA}.`);
-            if (lifeA <= 0 && lifeB <= 0) {
-                log.push(`Empate na rodada! Vitória para quem tem mais POW.`);
-                return { winner: (cardA.POW >= cardB.POW ? 'A' : 'B'), loser: (cardA.POW >= cardB.POW ? 'B' : 'A'), log };
-            }
-            if (lifeA <= 0) {
-                log.push(`${cardA.name} foi derrotado!`);
-                return { winner: 'B', loser: 'A', log };
-            }
-            if (lifeB <= 0) {
-                log.push(`${cardB.name} foi derrotado!`);
-                return { winner: 'A', loser: 'B', log };
-            }
-        }
+// Esquiva: quem é mais rápido que o atacante desvia mais.
+const DODGE_BASE = 0.09;
+const DODGE_PER_ATA = 0.0006;
+const DODGE_MIN = 0.05;
+const DODGE_MAX = 0.14;
+
+// "Modo desespero": encurralado, o personagem luta melhor — clássico de
+// anime e, na prática, o que dá chance real de virada para o azarão.
+const DESPERATION_THRESHOLD = 0.40;
+const DESPERATION_MULTIPLIER = 3.0;
+const CRIT_CEILING = 0.60;
+
+// Ordem do turno é probabilística, não absoluta: ter mais ATA aumenta a
+// chance de começar atacando, mas não garante.
+const ORDER_PER_ATA = 0.002;
+const ORDER_MIN = 0.40;
+const ORDER_MAX = 0.60;
+
+// Trava de segurança: sem isto, duas cartas com POW 0 entrariam em loop
+// infinito e travariam o processo do bot inteiro.
+const MAX_TURNS = 50;
+const MIN_DAMAGE = 1;
+
+function clamp(value, min, max) {
+    return Math.max(min, Math.min(max, value));
+}
+
+/** Chance de crítico do atacante, já considerando o modo desespero. */
+function critChance(ataAtacante, ataDefensor, vidaPercentualAtacante = 1) {
+    let chance = clamp(CRIT_BASE + (ataAtacante - ataDefensor) * CRIT_PER_ATA, CRIT_MIN, CRIT_MAX);
+    if (vidaPercentualAtacante <= DESPERATION_THRESHOLD) {
+        chance *= DESPERATION_MULTIPLIER;
+    }
+    return clamp(chance, 0, CRIT_CEILING);
+}
+
+/** Chance de o defensor esquivar do golpe. */
+function dodgeChance(ataDefensor, ataAtacante) {
+    return clamp(DODGE_BASE + (ataDefensor - ataAtacante) * DODGE_PER_ATA, DODGE_MIN, DODGE_MAX);
+}
+
+/** Probabilidade de a carta A começar atacando. */
+function firstStrikeChance(ataA, ataB) {
+    return clamp(0.5 + (ataA - ataB) * ORDER_PER_ATA, ORDER_MIN, ORDER_MAX);
+}
+
+/** Resolve um golpe e devolve o que aconteceu, para conseguirmos narrar. */
+function resolveAttack(atacante, defensor, vidaPercentualAtacante, rng) {
+    const ataA = atacante.ATA ?? 0;
+    const ataD = defensor.ATA ?? 0;
+    const pow = atacante.POW ?? 0;
+
+    if (rng() < dodgeChance(ataD, ataA)) {
+        return { damage: 0, dodged: true, crit: false, desperate: false };
     }
 
-    if (lifeA <= 0) return { winner: 'B', loser: 'A', log };
-    return { winner: 'A', loser: 'B', log };
+    const desperate = vidaPercentualAtacante <= DESPERATION_THRESHOLD;
+    const variacao = 1 + (rng() * 2 - 1) * DAMAGE_VARIANCE;
+    const crit = rng() < critChance(ataA, ataD, vidaPercentualAtacante);
+    const bruto = pow * variacao * (crit ? CRIT_MULTIPLIER : 1);
+
+    return {
+        damage: Math.max(MIN_DAMAGE, Math.round(bruto)),
+        dodged: false,
+        crit,
+        desperate: desperate && crit
+    };
+}
+
+function descreverGolpe(atacante, defensor, resultado, vidaRestante) {
+    if (resultado.dodged) {
+        return `💨 **${defensor.name}** esquivou do ataque de **${atacante.name}**!`;
+    }
+    let prefixo = '';
+    if (resultado.desperate) prefixo = '🔥 **VIRADA!** ';
+    else if (resultado.crit) prefixo = '💥 **CRÍTICO!** ';
+    return `${prefixo}**${atacante.name}** causou **${resultado.damage}** de dano — **${defensor.name}** ficou com **${Math.max(0, vidaRestante)}** de vida.`;
+}
+
+/** Duelo 1v1 entre duas cartas. Retorna vencedor ('A' ou 'B') e o log. */
+function runRound(cardA, cardB, roundIndex, rng = Math.random) {
+    const maxA = Math.max(1, cardA.LIF ?? 1);
+    const maxB = Math.max(1, cardB.LIF ?? 1);
+    let lifeA = cardA.LIF ?? 0;
+    let lifeB = cardB.LIF ?? 0;
+    const log = [];
+
+    let vezDeA = rng() < firstStrikeChance(cardA.ATA ?? 0, cardB.ATA ?? 0);
+    log.push(`⚡ **${vezDeA ? cardA.name : cardB.name}** foi mais rápido e atacou primeiro.`);
+
+    for (let turno = 0; turno < MAX_TURNS; turno++) {
+        const atacante = vezDeA ? cardA : cardB;
+        const defensor = vezDeA ? cardB : cardA;
+        const vidaPercentual = vezDeA ? lifeA / maxA : lifeB / maxB;
+
+        const resultado = resolveAttack(atacante, defensor, vidaPercentual, rng);
+
+        if (vezDeA) lifeB -= resultado.damage;
+        else lifeA -= resultado.damage;
+
+        log.push(descreverGolpe(atacante, defensor, resultado, vezDeA ? lifeB : lifeA));
+
+        if (lifeB <= 0) {
+            log.push(`🏆 **${cardA.name}** venceu o confronto!`);
+            return { winner: 'A', loser: 'B', log, lifeA, lifeB: 0 };
+        }
+        if (lifeA <= 0) {
+            log.push(`🏆 **${cardB.name}** venceu o confronto!`);
+            return { winner: 'B', loser: 'A', log, lifeA: 0, lifeB };
+        }
+
+        vezDeA = !vezDeA;
+    }
+
+    // Estourou o limite de turnos: decide por percentual de vida restante.
+    const percentA = lifeA / maxA;
+    const percentB = lifeB / maxB;
+    log.push('⏱️ O confronto se estendeu — vence quem está em melhor estado.');
+
+    if (percentA === percentB) {
+        const vencedor = (cardA.POW ?? 0) >= (cardB.POW ?? 0) ? 'A' : 'B';
+        return { winner: vencedor, loser: vencedor === 'A' ? 'B' : 'A', log, lifeA, lifeB };
+    }
+
+    const vencedor = percentA > percentB ? 'A' : 'B';
+    return { winner: vencedor, loser: vencedor === 'A' ? 'B' : 'A', log, lifeA, lifeB };
 }
 
 /**
- * Batalha 3v3: três rodadas, cada rodada é um 1v1. Quem ganhar mais rodadas vence.
+ * Batalha 3v3: três confrontos 1v1, na ordem em que cada jogador escolheu
+ * suas cartas. Quem vencer mais confrontos leva a batalha.
  */
-function runBattle(deckX, deckY) {
+function runBattle(deckX, deckY, rng = Math.random) {
     const rounds = [];
     let winsX = 0;
     let winsY = 0;
 
     for (let i = 0; i < 3; i++) {
-        const result = runRound(deckX[i], deckY[i], i);
+        const result = runRound(deckX[i], deckY[i], i, rng);
         rounds.push({
             round: i + 1,
             cardX: deckX[i].name,
@@ -85,12 +179,17 @@ function runBattle(deckX, deckY) {
     }
 
     const winner = winsX > winsY ? 'X' : winsX < winsY ? 'Y' : null;
-    return {
-        winner,
-        winsX,
-        winsY,
-        rounds
-    };
+    return { winner, winsX, winsY, rounds };
 }
 
-module.exports = { runRound, runBattle };
+module.exports = {
+    runRound,
+    runBattle,
+    resolveAttack,
+    critChance,
+    dodgeChance,
+    firstStrikeChance,
+    MAX_TURNS,
+    CRIT_MULTIPLIER,
+    DESPERATION_THRESHOLD
+};

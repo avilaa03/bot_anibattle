@@ -1,6 +1,7 @@
 const Market = require('../../utils/marketSchema');
 const User = require('../../utils/userSchema');
 const ui = require('../../utils/embeds');
+const { applyMarketTax, MARKET_TAX_RATE } = require('../../utils/economy');
 
 async function sellCollect(interaction, collector, matchingCards, indexRef, listingPrice, user, rowNavigation, rowConfirmation, buildSellEmbed) {
     collector.on('collect', async (i) => {
@@ -37,6 +38,9 @@ async function sellCollect(interaction, collector, matchingCards, indexRef, list
 
             const listing = new Market({
                 cardId: card._id,
+                // Sem isto a carta perde o vínculo com o catálogo ao passar
+                // pelo mercado, e o comprador não consegue registrá-la na Pokédex.
+                originalCardId: card.originalCardId,
                 sellerId: interaction.user.id,
                 cardName: card.name,
                 series: card.series,
@@ -56,7 +60,12 @@ async function sellCollect(interaction, collector, matchingCards, indexRef, list
 
             await listing.save();
 
+            const { tax, sellerReceives } = applyMarketTax(listingPrice);
             const successEmbed = ui.success('Carta anunciada', `${ui.getRarity(card.rarity).emoji} **${ui.cardName(card.name)}** está à venda por ${ui.coins(listingPrice)}.`)
+                .addFields(
+                    { name: 'Você recebe na venda', value: ui.coins(sellerReceives), inline: true },
+                    { name: `Taxa do mercado (${Math.round(MARKET_TAX_RATE * 100)}%)`, value: ui.coins(tax), inline: true }
+                )
                 .setFooter({ text: `${ui.BRAND} • Use /undosell para retirar o anúncio` });
             await i.update({ embeds: [successEmbed], components: [], files: [] });
             collector.stop('collected');
