@@ -9,6 +9,8 @@ config.json
 scripts/preview/
 # Manifestos grandes gerados pelo importador do AniList
 scripts/cards.anilist.json
+# Backups do banco — NUNCA versionar, contêm dados de jogadores
+backups/
 
 tmp/uploads/*
 #!tpm/

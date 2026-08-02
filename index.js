@@ -6,10 +6,14 @@ const { REST, Routes, EmbedBuilder } = require('discord.js');
 const { registerCommands } = require('./commands/utils/registry');
 
 const { recoverPendingBattles, sweepStaleBattles } = require('./Commands/utils/battleState');
+const monitoring = require('./Commands/utils/monitoring');
+
+// Iniciar o monitoramento antes de tudo, para capturar até erro de boot.
+monitoring.iniciar();
 
 mongoose.set('strictQuery', false);
 mongoose.connection.on('error', (err) => {
-  console.error('Erro de conexão com o MongoDB:', err);
+  monitoring.capturarErro(err, { origem: 'mongodb' });
 });
 
 // Nenhum intent privilegiado aqui de propósito.
@@ -58,7 +62,12 @@ client.on('interactionCreate', async (interaction) => {
       }
     }
   } catch (err) {
-    console.error('interactionCreate error:', err);
+    monitoring.capturarErro(err, {
+      origem: 'interactionCreate',
+      comando: interaction.isChatInputCommand?.() ? interaction.commandName : interaction.customId,
+      usuarioId: interaction.user?.id,
+      guildId: interaction.guildId
+    });
     if (interaction.isRepliable() && !interaction.replied) {
       const embed = new EmbedBuilder()
         .setTitle('❌ Erro')
@@ -81,8 +90,27 @@ client.on('ready', () => {
 // Rede de segurança: nunca deixar uma rejeição de Promise sem tratamento
 // derrubar o processo inteiro (o bug do /roll acima era exatamente isso).
 process.on('unhandledRejection', (err) => {
-  console.error('Unhandled promise rejection:', err);
+  monitoring.capturarErro(err, { origem: 'unhandledRejection' });
 });
+
+// Exceção não tratada é grave: registramos, damos tempo de enviar e saímos.
+// O gerenciador de processo (PM2/systemd) reinicia o bot.
+process.on('uncaughtException', async (err) => {
+  monitoring.capturarErro(err, { origem: 'uncaughtException' });
+  await monitoring.encerrar(2000);
+  process.exit(1);
+});
+
+// Encerramento limpo: fecha a conexão do banco e envia o que estiver
+// pendente no monitoramento antes de morrer.
+for (const sinal of ['SIGINT', 'SIGTERM']) {
+  process.on(sinal, async () => {
+    console.log(`\nRecebido ${sinal}, encerrando...`);
+    await monitoring.encerrar(2000);
+    await mongoose.connection.close().catch(() => {});
+    process.exit(0);
+  });
+}
 
 // Servidor HTTP mínimo, só para health-check (útil em plataformas de host
 // que exigem uma porta aberta para considerar o serviço "vivo").
@@ -129,7 +157,7 @@ async function start() {
         console.log(`Varredura: ${resultado.canceladas} batalha(s) abandonada(s), ${resultado.devolvido} moeda(s) devolvida(s).`);
       }
     } catch (err) {
-      console.error('Erro na varredura de batalhas:', err);
+      monitoring.capturarErro(err, { origem: 'sweepStaleBattles' });
     }
   }, 5 * 60 * 1000);
 
@@ -147,7 +175,8 @@ async function start() {
   await client.login(process.env.TOKEN);
 }
 
-start().catch((err) => {
-  console.error('Erro ao iniciar o bot:', err);
+start().catch(async (err) => {
+  monitoring.capturarErro(err, { origem: 'boot' });
+  await monitoring.encerrar(2000);
   process.exit(1);
 });

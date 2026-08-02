@@ -1,4 +1,4 @@
-const CardBuilder = require('../../utils/cardBuilder');
+const { renderCard } = require('../../utils/cardRenderer');
 const Card = require('../../utils/cardSchema');
 const User = require('../../utils/userSchema');
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
@@ -96,8 +96,7 @@ module.exports = async (client, interaction, rollCollect, rollEnd) => {
     const marketValue = card.overall * 10;
     const valueToSell = marketValue / 2;
 
-    const cardBuilder = new CardBuilder(card, { moldura: molduraEfetiva(user) });
-    const cardImageBuffer = await cardBuilder.build();
+    const render = await renderCard(card, { moldura: molduraEfetiva(user) });
 
     const rarityMeta = ui.getRarity(card.rarity);
 
@@ -131,9 +130,9 @@ module.exports = async (client, interaction, rollCollect, rollEnd) => {
             { name: 'Valor de mercado', value: ui.coins(marketValue), inline: true },
             { name: 'Venda rápida', value: ui.coins(valueToSell), inline: true }
         )
-        .setImage('attachment://cardImage.png');
+        .setImage(render.url);
 
-    await interaction.editReply({ embeds: [embed], components: [row], files: [{ attachment: cardImageBuffer, name: 'cardImage.png' }] });
+    await interaction.editReply({ embeds: [embed], components: [row], files: [render.attachment] });
 
     if (!user) {
         user = new User({ id: interaction.user.id });

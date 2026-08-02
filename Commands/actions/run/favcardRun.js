@@ -1,6 +1,6 @@
 const User = require('../../utils/userSchema');
-const CardBuilder = require('../../utils/cardBuilder.js');
-const { ActionRowBuilder, ButtonBuilder, ButtonStyle, AttachmentBuilder } = require('discord.js');
+const { renderCard } = require('../../utils/cardRenderer.js');
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const ui = require('../../utils/embeds');
 const { molduraEfetiva } = require('../../utils/vip');
 
@@ -30,9 +30,8 @@ module.exports = async (client, interaction, favCardCollect, favCardEnd) => {
 
     const updateEmbed = async (index) => {
         const card = matchingCards[index];
-        const cardBuilder = new CardBuilder(card, { moldura: molduraEfetiva(user) });
-        const cardImageBuffer = await cardBuilder.build();
-        const attachment = new AttachmentBuilder(cardImageBuffer, { name: 'cardImage.png' });
+        const render = await renderCard(card, { moldura: molduraEfetiva(user) });
+        const attachment = render.attachment;
 
         const meta = ui.getRarity(card.rarity);
         const embed = ui.base(meta.color)
@@ -46,7 +45,7 @@ module.exports = async (client, interaction, favCardCollect, favCardEnd) => {
                 '',
                 'Clique em **Favoritar** para deixar esta carta no seu perfil.'
             ].join('\n'))
-            .setImage('attachment://cardImage.png')
+            .setImage(render.url)
             .setFooter({ text: `${ui.BRAND} • Carta ${index + 1} de ${matchingCards.length}` });
         return { embed, attachment };
     };

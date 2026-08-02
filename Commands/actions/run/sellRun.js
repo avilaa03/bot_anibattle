@@ -1,10 +1,10 @@
-const { ActionRowBuilder, ButtonBuilder, ButtonStyle, AttachmentBuilder } = require('discord.js');
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const ui = require('../../utils/embeds');
 const { applyMarketTax, MARKET_TAX_RATE } = require('../../utils/economy');
 const User = require('../../utils/userSchema');
 const { sellCollect } = require('../collect/sellCollect.js');
 const { sellEnd } = require('../end/sellEnd.js');
-const CardBuilder = require('../../utils/cardBuilder.js');
+const { renderCard } = require('../../utils/cardRenderer.js');
 const { molduraEfetiva } = require('../../utils/vip');
 
 async function buildSellEmbed(card, listingPrice, moldura = 'nenhuma') {
@@ -21,9 +21,8 @@ async function buildSellEmbed(card, listingPrice, moldura = 'nenhuma') {
         LIF: card.LIF ?? 0,
         POW: card.POW ?? 0
     };
-    const cardBuilder = new CardBuilder(cardData, { moldura });
-    const cardImageBuffer = await cardBuilder.build();
-    const attachment = new AttachmentBuilder(cardImageBuffer, { name: 'cardImage.png' });
+    const render = await renderCard(cardData, { moldura });
+    const attachment = render.attachment;
 
     const meta = ui.getRarity(card.rarity);
     const embed = ui.base(meta.color)
@@ -36,7 +35,7 @@ async function buildSellEmbed(card, listingPrice, moldura = 'nenhuma') {
             `Preço do anúncio: ${ui.coins(listingPrice)}`,
             `Você recebe: ${ui.coins(applyMarketTax(listingPrice).sellerReceives)} *(taxa de ${Math.round(MARKET_TAX_RATE * 100)}%)*`
         ].join('\n'))
-        .setImage('attachment://cardImage.png');
+        .setImage(render.url);
 
     return { embed, attachment };
 }

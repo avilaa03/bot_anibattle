@@ -1,8 +1,8 @@
-const { ActionRowBuilder, ButtonBuilder, ButtonStyle, AttachmentBuilder } = require('discord.js');
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { showCollect } = require('../collect/showCollect.js');
 const User = require('../../utils/userSchema.js');
 const { showEnd } = require('../end/showEnd.js');
-const CardBuilder = require('../../utils/cardBuilder.js');
+const { renderCard } = require('../../utils/cardRenderer.js');
 const ui = require('../../utils/embeds.js');
 const { molduraEfetiva } = require('../../utils/vip.js');
 
@@ -28,9 +28,13 @@ async function showRun(client, interaction) {
     let currentIndex = 0;
     const indexRef = { currentIndex };
 
+    const moldura = molduraEfetiva(user);
+    // Molduras animadas geram .gif, as demais .png — o embed precisa citar
+    // o nome certo do anexo, senão a imagem não aparece.
+    let ultimoArquivo = 'cardImage.png';
+
     const updateEmbed = async (index, cards, includeImage = false) => {
         const card = cards[index];
-        const cardBuilder = new CardBuilder(card, { moldura: molduraEfetiva(user) });
         const meta = ui.getRarity(card.rarity);
 
         const embed = ui.base(meta.color)
@@ -50,13 +54,15 @@ async function showRun(client, interaction) {
             .setFooter({ text: `${ui.BRAND} • Carta ${index + 1} de ${cards.length}` });
 
         if (includeImage) {
-            const cardImageBuffer = await cardBuilder.build();
-            const attachment = new AttachmentBuilder(cardImageBuffer, { name: 'cardImage.png' });
-            embed.setImage('attachment://cardImage.png');
-            return { embed, attachment };
+            const render = await renderCard(card, { moldura });
+            ultimoArquivo = render.filename;
+            embed.setImage(render.url);
+            return { embed, attachment: render.attachment };
         }
 
-        embed.setImage('attachment://cardImage.png');
+        // Sem imagem nova: o embed continua apontando para o anexo que já
+        // está na mensagem, então precisa manter o mesmo nome de arquivo.
+        embed.setImage(`attachment://${ultimoArquivo}`);
         return { embed };
     };
 

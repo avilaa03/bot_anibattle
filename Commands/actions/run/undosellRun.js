@@ -1,8 +1,8 @@
 const User = require('../../utils/userSchema.js');
 const Market = require('../../utils/marketSchema.js');
-const { ActionRowBuilder, ButtonBuilder, ButtonStyle, AttachmentBuilder } = require('discord.js');
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const ui = require('../../utils/embeds.js');
-const CardBuilder = require('../../utils/cardBuilder.js');
+const { renderCard } = require('../../utils/cardRenderer.js');
 const { escapeRegex } = require('../../utils/regexUtils.js');
 const { molduraEfetiva } = require('../../utils/vip.js');
 
@@ -44,9 +44,8 @@ async function undosellRun(client, interaction) {
             LIF: listing.LIF ?? listing.lif ?? 0,
             POW: listing.POW ?? listing.pow ?? 0
         };
-        const cardBuilder = new CardBuilder(cardData, { moldura });
-        const cardImageBuffer = await cardBuilder.build();
-        const attachment = new AttachmentBuilder(cardImageBuffer, { name: 'cardImage.png' });
+        const render = await renderCard(cardData, { moldura });
+        const attachment = render.attachment;
 
         const embed = ui.base(ui.getRarity(listing.rarity).color)
             .setTitle('📋 Retirar do mercado')
@@ -56,7 +55,7 @@ async function undosellRun(client, interaction) {
                 { name: 'Preço no anúncio', value: ui.coins(price), inline: true },
                 { name: 'Raridade', value: ui.rarityTag(listing.rarity), inline: true }
             )
-            .setImage('attachment://cardImage.png')
+            .setImage(render.url)
             .setFooter({ text: listings.length > 1 ? `${ui.BRAND} • Anúncio ${indexRef.currentIndex + 1} de ${listings.length}` : ui.BRAND });
         return { embed, attachment };
     }
