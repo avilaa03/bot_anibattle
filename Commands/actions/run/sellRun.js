@@ -5,8 +5,9 @@ const User = require('../../utils/userSchema');
 const { sellCollect } = require('../collect/sellCollect.js');
 const { sellEnd } = require('../end/sellEnd.js');
 const CardBuilder = require('../../utils/cardBuilder.js');
+const { molduraEfetiva } = require('../../utils/vip');
 
-async function buildSellEmbed(card, listingPrice) {
+async function buildSellEmbed(card, listingPrice, moldura = 'nenhuma') {
     // Copiar campos explicitamente do subdocument (como no /show), sem spread que perde characterImage/baseImage
     const cardData = {
         name: card.name,
@@ -20,7 +21,7 @@ async function buildSellEmbed(card, listingPrice) {
         LIF: card.LIF ?? 0,
         POW: card.POW ?? 0
     };
-    const cardBuilder = new CardBuilder(cardData);
+    const cardBuilder = new CardBuilder(cardData, { moldura });
     const cardImageBuffer = await cardBuilder.build();
     const attachment = new AttachmentBuilder(cardImageBuffer, { name: 'cardImage.png' });
 
@@ -59,11 +60,13 @@ async function sellRun(client, interaction) {
     await interaction.deferReply();
 
     let indexRef = { currentIndex: 0 };
+    const moldura = molduraEfetiva(user);
+    const montarEmbed = (card, preco) => buildSellEmbed(card, preco, moldura);
 
     let embed, attachment;
     try {
         const result = await Promise.race([
-            buildSellEmbed(matchingCards[indexRef.currentIndex], listingPrice),
+            montarEmbed(matchingCards[indexRef.currentIndex], listingPrice),
             new Promise((_, reject) => setTimeout(() => reject(new Error('TIMEOUT')), 12000))
         ]);
         embed = result.embed;
@@ -109,7 +112,7 @@ async function sellRun(client, interaction) {
     const filter = i => ['prev', 'next', 'confirm_sell', 'cancel_sell'].includes(i.customId) && i.user.id === interaction.user.id;
     const collector = message.createMessageComponentCollector({ filter, time: 30000 });
 
-    await sellCollect(interaction, collector, matchingCards, indexRef, listingPrice, user, rowNavigation, rowConfirmation, buildSellEmbed);
+    await sellCollect(interaction, collector, matchingCards, indexRef, listingPrice, user, rowNavigation, rowConfirmation, montarEmbed);
     collector.on('end', async (collected, reason) => {
         if (reason === 'time') {
             await sellEnd(interaction);

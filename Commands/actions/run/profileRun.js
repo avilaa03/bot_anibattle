@@ -1,6 +1,7 @@
 const User = require('../../utils/userSchema');
 const ui = require('../../utils/embeds');
 const { getProgress } = require('../../utils/discovery');
+const { getTier, corPerfilEfetiva, isVipAtivo } = require('../../utils/vip');
 
 function getCardOvr(card) {
     return card.overall ?? (card.marketValue != null ? Math.round(card.marketValue / 10) : 0);
@@ -44,12 +45,16 @@ async function profileRun(client, interaction) {
 
     const pokedex = await getProgress(alvo.id);
 
-    // A cor do perfil acompanha a raridade da carta favorita — dá uma
-    // sensação de identidade para quem tem cartas boas.
-    const cor = favCard ? ui.rarityColor(favCard.rarity) : ui.STATUS_COLORS.info;
+    const tierVip = getTier(user);
+
+    // Prioridade da cor: escolha do VIP > raridade da carta favorita > padrão.
+    const cor = corPerfilEfetiva(user)
+        ?? (favCard ? ui.rarityColor(favCard.rarity) : ui.STATUS_COLORS.info);
+
+    const emblema = tierVip ? `${tierVip.emoji} ` : '';
 
     const embed = ui.base(cor)
-        .setAuthor({ name: `Perfil de ${alvo.username}`, iconURL: alvo.displayAvatarURL() })
+        .setAuthor({ name: `${emblema}Perfil de ${alvo.username}`, iconURL: alvo.displayAvatarURL() })
         .addFields(
             { name: '🪙 Saldo', value: ui.coins(user.balance || 0), inline: true },
             { name: '🎴 Cartas', value: `**${ui.number(totalCards)}**`, inline: true },
@@ -69,6 +74,13 @@ async function profileRun(client, interaction) {
                 inline: true
             }
         );
+
+    if (tierVip) {
+        const expira = user.vip.expiresAt
+            ? `<t:${Math.floor(new Date(user.vip.expiresAt).getTime() / 1000)}:R>`
+            : 'vitalício';
+        embed.addFields({ name: '✨ Assinatura', value: `${tierVip.emoji} **${tierVip.nome}** — renova ${expira}`, inline: false });
+    }
 
     if (favCard) {
         embed.setDescription(`⭐ Carta favorita: ${ui.getRarity(favCard.rarity).emoji} **${ui.cardName(favCard.name)}** — *${favCard.series || '—'}*`);

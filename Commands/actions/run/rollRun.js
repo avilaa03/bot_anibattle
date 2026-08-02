@@ -3,6 +3,7 @@ const Card = require('../../utils/cardSchema');
 const User = require('../../utils/userSchema');
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const ui = require('../../utils/embeds');
+const { getPerks, molduraEfetiva } = require('../../utils/vip');
 
 // Coletores ativos por usuário — antes isto era uma única variável de módulo
 // compartilhada por TODOS os usuários, o que fazia o /roll de um jogador
@@ -40,14 +41,25 @@ module.exports = async (client, interaction, rollCollect, rollEnd) => {
 
     const now = Date.now();
 
-    if (user && user.lastRoll && now - user.lastRoll < ROLL_COOLDOWN_MS) {
-        const timeRemaining = ROLL_COOLDOWN_MS - (now - user.lastRoll);
+    // VIP encurta o cooldown. É a única vantagem paga que encosta na
+    // economia, por isso é modesta (no máximo -40%) e nunca mexe na
+    // chance de raridade — o sorteio é igual para todo mundo.
+    const perks = getPerks(user);
+    const cooldownEfetivo = Math.round(ROLL_COOLDOWN_MS * perks.rollCooldownMultiplier);
+
+    if (user && user.lastRoll && now - user.lastRoll < cooldownEfetivo) {
+        const timeRemaining = cooldownEfetivo - (now - user.lastRoll);
         const readyAt = Math.floor((now + timeRemaining) / 1000);
         const embed = ui.warning('Ainda no cooldown', `Você poderá rolar de novo <t:${readyAt}:R>.`)
             .addFields(
                 { name: 'Tempo restante', value: ui.duration(timeRemaining), inline: true },
-                { name: 'Intervalo', value: ui.duration(ROLL_COOLDOWN_MS), inline: true }
+                { name: 'Seu intervalo', value: ui.duration(cooldownEfetivo), inline: true }
             );
+        if (perks.vip) {
+            embed.setFooter({ text: `${ui.BRAND} • ${perks.tier.emoji} ${perks.tier.nome}: cooldown reduzido em ${Math.round((1 - perks.rollCooldownMultiplier) * 100)}%` });
+        } else {
+            embed.setFooter({ text: `${ui.BRAND} • Assinantes rolam com até 40% menos espera — veja /vip` });
+        }
         return interaction.reply({ embeds: [embed], ephemeral: true });
     }
 
@@ -84,7 +96,7 @@ module.exports = async (client, interaction, rollCollect, rollEnd) => {
     const marketValue = card.overall * 10;
     const valueToSell = marketValue / 2;
 
-    const cardBuilder = new CardBuilder(card);
+    const cardBuilder = new CardBuilder(card, { moldura: molduraEfetiva(user) });
     const cardImageBuffer = await cardBuilder.build();
 
     const rarityMeta = ui.getRarity(card.rarity);

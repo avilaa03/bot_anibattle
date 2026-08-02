@@ -4,6 +4,7 @@ const { ActionRowBuilder, ButtonBuilder, ButtonStyle, AttachmentBuilder } = requ
 const ui = require('../../utils/embeds.js');
 const CardBuilder = require('../../utils/cardBuilder.js');
 const { escapeRegex } = require('../../utils/regexUtils.js');
+const { molduraEfetiva } = require('../../utils/vip.js');
 
 async function undosellRun(client, interaction) {
     const cardName = (interaction.options.getString('cardname') || '').trim();
@@ -26,6 +27,8 @@ async function undosellRun(client, interaction) {
     await interaction.deferReply();
 
     const indexRef = { currentIndex: 0 };
+    const dono = await User.findOne({ id: interaction.user.id }).lean();
+    const moldura = molduraEfetiva(dono);
 
     async function buildEmbed(listing) {
         const price = listing.listingPrice ?? listing.marketValue ?? 0;
@@ -41,7 +44,7 @@ async function undosellRun(client, interaction) {
             LIF: listing.LIF ?? listing.lif ?? 0,
             POW: listing.POW ?? listing.pow ?? 0
         };
-        const cardBuilder = new CardBuilder(cardData);
+        const cardBuilder = new CardBuilder(cardData, { moldura });
         const cardImageBuffer = await cardBuilder.build();
         const attachment = new AttachmentBuilder(cardImageBuffer, { name: 'cardImage.png' });
 

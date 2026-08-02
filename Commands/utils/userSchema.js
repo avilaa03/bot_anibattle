@@ -53,7 +53,20 @@ const UserSchema = new Schema({
     discovered: [{
         cardId: { type: mongoose.Schema.Types.ObjectId, ref: 'Card' },
         firstObtainedAt: { type: Date, default: Date.now }
-    }]
+    }],
+    // Assinatura VIP. expiresAt nulo significa vitalício.
+    vip: {
+        tier: { type: String, default: null },
+        since: { type: Date, default: null },
+        expiresAt: { type: Date, default: null }
+    },
+    // Cosméticos equipados. Ficam salvos mesmo se o VIP expirar — só
+    // deixam de ser aplicados até a assinatura voltar.
+    cosmetics: {
+        moldura: { type: String, default: 'nenhuma' },
+        corPerfil: { type: Number, default: null },
+        banner: { type: String, default: null }
+    }
 });
 
 UserSchema.index({ balance: -1 });

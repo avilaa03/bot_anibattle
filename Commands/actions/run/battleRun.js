@@ -23,14 +23,14 @@ async function battleRun(interaction) {
         return recusar('Alvo inválido', 'Você não pode desafiar a si mesmo.');
     }
 
-    if (temBatalhaAtiva(userX.id)) {
+    if (await temBatalhaAtiva(userX.id)) {
         return recusar('Batalha em andamento', 'Você já está em uma batalha. Termine ela antes de começar outra.');
     }
-    if (temBatalhaAtiva(userY.id)) {
+    if (await temBatalhaAtiva(userY.id)) {
         return recusar('Oponente ocupado', `**${userY.username}** já está em uma batalha no momento.`);
     }
 
-    const restante = cooldownRestante(userX.id, userY.id);
+    const restante = await cooldownRestante(userX.id, userY.id);
     if (restante > 0) {
         return recusar('Muito rápido', `Vocês dois acabaram de duelar. Esperem ${ui.duration(restante)} antes de batalhar de novo.`);
     }

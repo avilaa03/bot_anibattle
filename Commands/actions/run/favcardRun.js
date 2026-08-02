@@ -2,6 +2,7 @@ const User = require('../../utils/userSchema');
 const CardBuilder = require('../../utils/cardBuilder.js');
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle, AttachmentBuilder } = require('discord.js');
 const ui = require('../../utils/embeds');
+const { molduraEfetiva } = require('../../utils/vip');
 
 // Coletores ativos por usuário (ver rollRun.js para o motivo de não usar
 // mais uma única variável de módulo compartilhada entre todos os usuários).
@@ -29,7 +30,7 @@ module.exports = async (client, interaction, favCardCollect, favCardEnd) => {
 
     const updateEmbed = async (index) => {
         const card = matchingCards[index];
-        const cardBuilder = new CardBuilder(card);
+        const cardBuilder = new CardBuilder(card, { moldura: molduraEfetiva(user) });
         const cardImageBuffer = await cardBuilder.build();
         const attachment = new AttachmentBuilder(cardImageBuffer, { name: 'cardImage.png' });
 

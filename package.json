@@ -5,12 +5,13 @@
   "main": "index.js",
   "scripts": {
     "dev": "node index.js",
-    "test": "node .",
+    "test": "node tests/run.js",
     "lint": "eslint src --fix",
     "seed:cards": "node scripts/seedCards.js",
     "import:anilist": "node scripts/importFromAnilist.js",
     "preview:cards": "node scripts/previewCards.js",
-    "migrate:pokedex": "node scripts/migratePokedex.js"
+    "migrate:pokedex": "node scripts/migratePokedex.js",
+    "vip:grant": "node scripts/grantVip.js"
   },
   "keywords": [
     "BOT"

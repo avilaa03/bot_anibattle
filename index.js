@@ -5,25 +5,27 @@ require('dotenv/config');
 const { REST, Routes, EmbedBuilder } = require('discord.js');
 const { registerCommands } = require('./commands/utils/registry');
 
-// Garante que o estado de batalha seja o mesmo Map em todo o processo (evita cache de módulo diferente)
-require('./Commands/utils/battleState');
+const { recoverPendingBattles, sweepStaleBattles } = require('./Commands/utils/battleState');
 
 mongoose.set('strictQuery', false);
 mongoose.connection.on('error', (err) => {
   console.error('Erro de conexão com o MongoDB:', err);
 });
 
-const client = new Client ({
+// Nenhum intent privilegiado aqui de propósito.
+//
+// O bot já usou MessageContent (para ler "confirmar" no /give e o número
+// da carta no /market). Os dois viraram botões e menu de seleção, então o
+// intent deixou de ser necessário — e com isso o bot não precisa passar
+// pela aprovação de intents privilegiados que o Discord exige acima de
+// 10.000 usuários.
+const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent,
-    GatewayIntentBits.GuildMessageReactions,
     GatewayIntentBits.DirectMessages,
   ],
   partials: [
-    Partials.Message,
-    Partials.Reaction,
+    Partials.Channel, // necessário para receber interações em DM
   ]
 });
 
@@ -85,12 +87,17 @@ process.on('unhandledRejection', (err) => {
 // Servidor HTTP mínimo, só para health-check (útil em plataformas de host
 // que exigem uma porta aberta para considerar o serviço "vivo").
 const express = require('express');
+const { criarRotaPagamento } = require('./Commands/utils/paymentWebhook');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.get('/', (req, res) => {
   res.send('AniBattle está online.');
 });
+
+// Webhook de pagamento (ativa VIP). Fica desligado se
+// PAYMENT_WEBHOOK_SECRET não estiver configurado no .env.
+app.use(criarRotaPagamento(client));
 
 async function start() {
   if (!process.env.MONGODB_URI) {
@@ -106,6 +113,25 @@ async function start() {
   // porque a query no Mongo ainda estava esperando a conexão terminar.
   await mongoose.connect(process.env.MONGODB_URI, { keepAlive: true });
   console.log('Conectado ao MongoDB.');
+
+  // Batalhas que ficaram penduradas de uma execução anterior: as apostas
+  // estavam retidas pelo bot, então precisam voltar para os jogadores.
+  const recuperadas = await recoverPendingBattles();
+  if (recuperadas.canceladas > 0) {
+    console.log(`Recuperação: ${recuperadas.canceladas} batalha(s) pendente(s) cancelada(s), ${recuperadas.devolvido} moeda(s) devolvida(s).`);
+  }
+
+  // Varredura periódica para duelos abandonados no meio da escolha.
+  setInterval(async () => {
+    try {
+      const resultado = await sweepStaleBattles();
+      if (resultado.canceladas > 0) {
+        console.log(`Varredura: ${resultado.canceladas} batalha(s) abandonada(s), ${resultado.devolvido} moeda(s) devolvida(s).`);
+      }
+    } catch (err) {
+      console.error('Erro na varredura de batalhas:', err);
+    }
+  }, 5 * 60 * 1000);
 
   client.slashCommands = new Collection();
   await registerCommands(client, '../commands');

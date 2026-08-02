@@ -48,6 +48,15 @@ const PAGES = [
     ]
   },
   {
+    titulo: '✨ VIP e cosméticos',
+    descricao: 'Apoie o bot e leve estilo — sem vantagem de combate.',
+    comandos: [
+      { nome: '/vip', desc: 'Vê os planos e o status da sua assinatura.' },
+      { nome: '/cosmeticos', desc: 'Equipa suas molduras de carta e cor de perfil.' },
+      { nome: '​', desc: '🛡️ **Nenhum plano dá vantagem de combate.** Atributos, chance de raridade e resultado de batalha são iguais para todos. O que muda é aparência (molduras, cores, emblemas) e conveniência (cooldown e daily).' }
+    ]
+  },
+  {
     titulo: '🎲 Outros',
     descricao: 'Comandos diversos.',
     comandos: [

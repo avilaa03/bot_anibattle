@@ -5,11 +5,20 @@ const {
     getBattleByUserId,
     addCardToDeck,
     bothDecksReady,
-    finishBattle
+    claimForResolution,
+    finishBattle,
+    cancelBattle,
+    releaseWager
 } = require('../utils/battleState');
 const { runBattle } = require('../utils/battleEngine');
 const { addBalance } = require('../utils/economy');
 const { buildDeckChoiceMessage } = require('../actions/collect/battleCollect');
+
+/** Busca o inventário atual do jogador direto do banco. */
+async function carregarInventario(userId) {
+    const doc = await User.findOne({ id: userId }).select('inventory').lean();
+    return doc?.inventory || [];
+}
 
 /**
  * customId: battle_pick_<battleId>_<X|Y>_<cardId>
@@ -21,58 +30,60 @@ async function handleBattlePick(client, interaction) {
     const side = parts[3];
     const cardId = parts.slice(4).join('_');
 
-    let state = getBattle(battleId);
-    if (!state) {
-        state = getBattleByUserId(interaction.user.id);
-        if (!state) {
+    let battle = await getBattle(battleId);
+    if (!battle) {
+        battle = await getBattleByUserId(interaction.user.id);
+        if (!battle) {
             await interaction.reply({ content: 'Esta batalha expirou ou já foi concluída.', ephemeral: true }).catch(() => {});
             return true;
         }
     }
-    const effectiveBattleId = state.battleId;
 
     const isX = side === 'X';
-    const userId = interaction.user.id;
-    if (isX && state.userX.id !== userId) {
-        await interaction.reply({ content: 'Você não é um dos jogadores desta batalha.', ephemeral: true }).catch(() => {});
-        return true;
-    }
-    if (!isX && state.userY.id !== userId) {
+    const donoDoLado = isX ? battle.userX.id : battle.userY.id;
+    if (donoDoLado !== interaction.user.id) {
         await interaction.reply({ content: 'Você não é um dos jogadores desta batalha.', ephemeral: true }).catch(() => {});
         return true;
     }
 
-    const selectedIds = isX ? state.selectedIdsX : state.selectedIdsY;
-    const inventory = isX ? state.userXData.inventory : state.userYData.inventory;
-    const deck = isX ? state.deckX : state.deckY;
-
-    if (selectedIds.has(cardId)) {
+    const jaEscolhidas = isX ? battle.selectedIdsX : battle.selectedIdsY;
+    if (jaEscolhidas.map(String).includes(cardId)) {
         await interaction.reply({ content: 'Você já escolheu esta carta.', ephemeral: true }).catch(() => {});
         return true;
     }
-    if (deck.length >= 3) {
-        await interaction.reply({ content: 'Você já escolheu 3 cartas! Aguarde o oponente.', ephemeral: true }).catch(() => {});
-        return true;
-    }
 
-    const card = inventory.find((c) => String(c._id) === cardId);
+    const inventario = await carregarInventario(interaction.user.id);
+    const card = inventario.find((c) => String(c._id) === cardId);
     if (!card) {
-        await interaction.reply({ content: 'Carta inválida.', ephemeral: true }).catch(() => {});
+        await interaction.reply({ content: 'Essa carta não está mais no seu inventário.', ephemeral: true }).catch(() => {});
         return true;
     }
 
     await interaction.deferUpdate();
 
-    addCardToDeck(effectiveBattleId, side, card);
-    selectedIds.add(cardId);
+    // A escrita é atômica: se o jogador clicar rápido em quatro cartas, o
+    // banco recusa a quarta em vez de aceitarmos um deck inválido.
+    const atualizada = await addCardToDeck(battle.battleId, side, card);
+    if (!atualizada) {
+        await interaction.followUp({ content: 'Você já escolheu 3 cartas! Aguarde o oponente.', ephemeral: true }).catch(() => {});
+        return true;
+    }
+    battle = atualizada;
 
-    const msgXContent = buildDeckChoiceMessage(effectiveBattleId, 'X', state.userXData.inventory, state.selectedIdsX, state.deckX, state.wager);
-    const msgYContent = buildDeckChoiceMessage(effectiveBattleId, 'Y', state.userYData.inventory, state.selectedIdsY, state.deckY, state.wager);
+    const deckAtual = isX ? battle.deckX : battle.deckY;
 
+    // Redesenha a tela de escolha de quem clicou.
     try {
-        const conteudo = isX ? msgXContent : msgYContent;
-        const canalId = isX ? state.channelXId : state.channelYId;
-        const mensagemId = isX ? state.messageXId : state.messageYId;
+        const conteudo = buildDeckChoiceMessage(
+            battle.battleId,
+            side,
+            inventario,
+            isX ? battle.selectedIdsX : battle.selectedIdsY,
+            deckAtual,
+            battle.wager
+        );
+        const canalId = isX ? battle.channelXId : battle.channelYId;
+        const mensagemId = isX ? battle.messageXId : battle.messageYId;
         const channel = await client.channels.fetch(canalId).catch(() => null);
         if (channel) {
             const msg = await channel.messages.fetch(mensagemId).catch(() => null);
@@ -83,24 +94,26 @@ async function handleBattlePick(client, interaction) {
     }
 
     await interaction.followUp({
-        content: `**${ui.cardName(card.name)}** entrou no seu time! (${deck.length}/3)`,
+        content: `**${ui.cardName(card.name)}** entrou no seu time! (${deckAtual.length}/3)`,
         ephemeral: true
     }).catch(() => {});
 
-    if (!bothDecksReady(state)) return true;
+    if (!bothDecksReady(battle)) return true;
 
-    state.phase = 'fighting';
-    await resolverBatalha(client, state);
+    // Trava a batalha para resolução. Se dois cliques chegarem juntos, só
+    // um consegue — o outro recebe null e não paga a aposta de novo.
+    const travada = await claimForResolution(battle.battleId);
+    if (!travada) return true;
+
+    await resolverBatalha(client, travada);
     return true;
 }
 
 /**
  * Confere no banco se o jogador ainda possui as três cartas escolhidas.
  *
- * Isto é o que impedia a trapaça mais óbvia do sistema antigo: escolher o
- * time, vender as cartas no mercado e mesmo assim batalhar com elas. O
- * inventário guardado no estado é um retrato de quando o duelo começou, e
- * pode estar desatualizado — a fonte da verdade é o banco.
+ * Isto impede a trapaça mais óbvia do sistema antigo: escolher o time,
+ * vender as cartas no mercado e mesmo assim batalhar com elas.
  */
 async function validarPosse(userId, deck) {
     const atual = await User.findOne({ id: userId }).select('inventory._id').lean();
@@ -112,35 +125,40 @@ async function validarPosse(userId, deck) {
     return { ok: faltando.length === 0, faltando };
 }
 
-async function resolverBatalha(client, state) {
-    const canal = await client.channels.fetch(state.challengeChannelId).catch(() => null);
-    const wager = state.wager || 0;
+async function enviarNoPrivado(client, userId, payload) {
+    const user = await client.users.fetch(userId).catch(() => null);
+    if (user) await user.send(payload).catch(() => {});
+}
+
+async function resolverBatalha(client, battle) {
+    const canal = await client.channels.fetch(battle.challengeChannelId).catch(() => null);
+    const wager = battle.wager || 0;
+    const nomeX = battle.userX.username || 'Jogador 1';
+    const nomeY = battle.userY.username || 'Jogador 2';
 
     const [posseX, posseY] = await Promise.all([
-        validarPosse(state.userX.id, state.deckX),
-        validarPosse(state.userY.id, state.deckY)
+        validarPosse(battle.userX.id, battle.deckX),
+        validarPosse(battle.userY.id, battle.deckY)
     ]);
 
     if (!posseX.ok || !posseY.ok) {
-        // Alguém não tem mais as cartas: cancela e devolve as apostas.
-        if (wager > 0) {
-            await addBalance(state.userX.id, wager);
-            await addBalance(state.userY.id, wager);
-        }
+        // Alguém não tem mais as cartas: cancela devolvendo as apostas.
+        await cancelBattle(battle.battleId);
 
         const culpados = [];
-        if (!posseX.ok) culpados.push(`**${state.userX.username}** (${posseX.faltando.join(', ')})`);
-        if (!posseY.ok) culpados.push(`**${state.userY.username}** (${posseY.faltando.join(', ')})`);
+        if (!posseX.ok) culpados.push(`**${nomeX}** (${posseX.faltando.join(', ')})`);
+        if (!posseY.ok) culpados.push(`**${nomeY}** (${posseY.faltando.join(', ')})`);
 
-        const embed = ui.error('Batalha cancelada', `Cartas escolhidas não estão mais no inventário de ${culpados.join(' e ')}.\n\n${wager > 0 ? 'As apostas foram devolvidas.' : ''}`);
+        const embed = ui.error('Batalha cancelada', `Cartas escolhidas não estão mais no inventário de ${culpados.join(' e ')}.${wager > 0 ? '\n\nAs apostas foram devolvidas.' : ''}`);
         if (canal) await canal.send({ embeds: [embed] }).catch(() => {});
-        finishBattle(state.battleId);
         return;
     }
 
-    const result = runBattle(state.deckX, state.deckY);
-    const winnerUser = result.winner === 'X' ? state.userX : result.winner === 'Y' ? state.userY : null;
-    const loserUser = result.winner === 'X' ? state.userY : result.winner === 'Y' ? state.userX : null;
+    const result = runBattle(battle.deckX, battle.deckY);
+    const vencedorId = result.winner === 'X' ? battle.userX.id : result.winner === 'Y' ? battle.userY.id : null;
+    const perdedorId = result.winner === 'X' ? battle.userY.id : result.winner === 'Y' ? battle.userX.id : null;
+    const nomeVencedor = result.winner === 'X' ? nomeX : nomeY;
+    const nomePerdedor = result.winner === 'X' ? nomeY : nomeX;
 
     const placar = `**${result.winsX}** — **${result.winsY}**`;
 
@@ -148,34 +166,33 @@ async function resolverBatalha(client, state) {
         .setTitle(result.winner ? '⚔️ Fim da batalha' : '⚔️ Empate')
         .setDescription(
             result.winner
-                ? `👑 **${winnerUser.username}** venceu — ${state.userX.username} ${placar} ${state.userY.username}`
-                : `Ninguém levou vantagem — ${state.userX.username} ${placar} ${state.userY.username}`
+                ? `👑 **${nomeVencedor}** venceu — ${nomeX} ${placar} ${nomeY}`
+                : `Ninguém levou vantagem — ${nomeX} ${placar} ${nomeY}`
         );
 
-    // Narração: mostra os lances mais marcantes de cada rodada.
     const roundLines = result.rounds.map((r) => {
         const venceuX = r.winner === 'A';
-        const nomeVencedor = venceuX ? state.userX.username : state.userY.username;
+        const quemVenceu = venceuX ? nomeX : nomeY;
         const destaques = r.log.filter((l) => l.includes('CRÍTICO') || l.includes('VIRADA') || l.includes('esquivou'));
         const extra = destaques.length > 0 ? `\n└ ${destaques[destaques.length - 1]}` : '';
-        return `\`R${r.round}\` ${venceuX ? '🟢' : '🔴'} **${ui.cardName(r.cardX)}** vs **${ui.cardName(r.cardY)}** → ${nomeVencedor}${extra}`;
+        return `\`R${r.round}\` ${venceuX ? '🟢' : '🔴'} **${ui.cardName(r.cardX)}** vs **${ui.cardName(r.cardY)}** → ${quemVenceu}${extra}`;
     }).join('\n');
 
     resultEmbed.addFields({ name: 'Rodadas', value: roundLines.slice(0, 1024), inline: false });
 
     if (wager > 0) {
-        if (winnerUser) {
-            // Vencedor leva o pote inteiro (a própria aposta + a do outro).
-            const atualizado = await addBalance(winnerUser.id, wager * 2);
+        if (vencedorId) {
+            const atualizado = await addBalance(vencedorId, wager * 2);
+            await releaseWager(battle.battleId);
             resultEmbed.addFields({
                 name: '💰 Aposta',
-                value: `👑 **${winnerUser.username}** levou ${ui.coins(wager * 2)}\n💸 **${loserUser.username}** perdeu ${ui.coins(wager)}\n\nSaldo do vencedor: ${ui.coins(atualizado?.balance ?? 0)}`,
+                value: `👑 **${nomeVencedor}** levou ${ui.coins(wager * 2)}\n💸 **${nomePerdedor}** perdeu ${ui.coins(wager)}\n\nSaldo do vencedor: ${ui.coins(atualizado?.balance ?? 0)}`,
                 inline: false
             });
         } else {
-            // Empate: cada um recebe a própria aposta de volta.
-            await addBalance(state.userX.id, wager);
-            await addBalance(state.userY.id, wager);
+            await addBalance(battle.userX.id, wager);
+            await addBalance(battle.userY.id, wager);
+            await releaseWager(battle.battleId);
             resultEmbed.addFields({
                 name: '💰 Aposta',
                 value: `Empate — cada jogador recebeu ${ui.coins(wager)} de volta.`,
@@ -184,23 +201,22 @@ async function resolverBatalha(client, state) {
         }
     }
 
-    if (winnerUser && loserUser) {
-        await User.updateOne({ id: winnerUser.id }, { $inc: { wins: 1 } });
-        await User.updateOne({ id: loserUser.id }, { $inc: { losses: 1 } });
+    if (vencedorId && perdedorId) {
+        await User.updateOne({ id: vencedorId }, { $inc: { wins: 1 } });
+        await User.updateOne({ id: perdedorId }, { $inc: { losses: 1 } });
     }
 
     if (canal) {
         await canal.send({
-            content: `${state.userX} vs ${state.userY}`,
+            content: `<@${battle.userX.id}> vs <@${battle.userY.id}>`,
             embeds: [resultEmbed]
         }).catch(() => {});
     }
 
-    // Manda o resultado no privado dos dois também.
-    await state.userX.send({ embeds: [resultEmbed] }).catch(() => {});
-    await state.userY.send({ embeds: [resultEmbed] }).catch(() => {});
+    await enviarNoPrivado(client, battle.userX.id, { embeds: [resultEmbed] });
+    await enviarNoPrivado(client, battle.userY.id, { embeds: [resultEmbed] });
 
-    finishBattle(state.battleId);
+    await finishBattle(battle.battleId);
 }
 
 module.exports = { handleBattlePick, validarPosse };

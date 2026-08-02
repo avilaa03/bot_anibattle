@@ -1,44 +1,43 @@
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder } = require('discord.js');
 const ui = require('../../utils/embeds');
 
 /**
  * Paginação + compra do /market.
  *
- * generateEmbed/generateButtons chegam por parâmetro: antes eles eram
- * usados aqui dentro sem existir neste escopo, o que quebrava os botões
- * de página com ReferenceError no primeiro clique.
+ * Antes a compra era feita digitando o número da carta no chat, o que
+ * obrigava o bot a usar o intent privilegiado MessageContent. Agora é um
+ * menu de seleção, então o intent deixou de ser necessário.
  */
 module.exports = async (interaction, embedMessage, currentPage, listings, cardsPerPage, marketEnd, generateEmbed, generateButtons) => {
     const totalPages = Math.ceil(listings.length / cardsPerPage);
 
-    const filter = (i) => ['previous_page', 'next_page'].includes(i.customId) && i.user.id === interaction.user.id;
-    const collector = embedMessage.createMessageComponentCollector({ filter, time: 120000 });
+    const filtro = (i) =>
+        i.user.id === interaction.user.id &&
+        ['previous_page', 'next_page', 'market_select'].includes(i.customId);
+
+    const collector = embedMessage.createMessageComponentCollector({ filter: filtro, time: 180000 });
 
     collector.on('collect', async (i) => {
-        if (i.customId === 'previous_page') {
-            currentPage = Math.max(0, currentPage - 1);
-        } else if (i.customId === 'next_page') {
-            currentPage = Math.min(totalPages - 1, currentPage + 1);
+        if (i.customId === 'previous_page' || i.customId === 'next_page') {
+            if (i.customId === 'previous_page') currentPage = Math.max(0, currentPage - 1);
+            else currentPage = Math.min(totalPages - 1, currentPage + 1);
+
+            return i.update({
+                embeds: [generateEmbed(currentPage)],
+                components: generateButtons(currentPage)
+            });
         }
 
-        await i.update({
-            embeds: [generateEmbed(currentPage)],
-            components: generateButtons(currentPage)
-        });
-    });
+        // Seleção de uma carta para comprar
+        const escolhidoId = i.values?.[0];
+        const selectedCard = listings.find((l) => String(l._id) === escolhidoId);
+        if (!selectedCard) {
+            return i.reply({ embeds: [ui.error('Carta indisponível', 'Esse anúncio não existe mais.')], ephemeral: true });
+        }
 
-    const numberFilter = (response) => {
-        if (response.author.id !== interaction.user.id) return false;
-        const choice = parseInt(response.content, 10);
-        const disponiveisNaPagina = Math.min(cardsPerPage, listings.length - currentPage * cardsPerPage);
-        return !isNaN(choice) && choice > 0 && choice <= disponiveisNaPagina;
-    };
-
-    const numberCollector = interaction.channel.createMessageCollector({ filter: numberFilter, time: 120000 });
-
-    numberCollector.on('collect', async (response) => {
-        const choice = parseInt(response.content, 10);
-        const selectedCard = listings[currentPage * cardsPerPage + choice - 1];
-        if (!selectedCard) return;
+        if (selectedCard.sellerId === interaction.user.id) {
+            return i.reply({ embeds: [ui.error('Anúncio seu', 'Você não pode comprar a própria carta. Use `/undosell` para retirá-la.')], ephemeral: true });
+        }
 
         const meta = ui.getRarity(selectedCard.rarity);
         const ovr = selectedCard.overall ?? (selectedCard.marketValue != null ? Math.round(selectedCard.marketValue / 10) : 0);
@@ -51,26 +50,56 @@ module.exports = async (interaction, embedMessage, currentPage, listings, cardsP
                 '',
                 ui.statLines(selectedCard),
                 '',
-                `Preço: ${ui.coins(selectedCard.listingPrice)}`
+                `Preço: ${ui.coins(selectedCard.listingPrice)}`,
+                `Vendedor: <@${selectedCard.sellerId}>`
             ].join('\n'));
 
         if (selectedCard.characterImage) confirmEmbed.setThumbnail(selectedCard.characterImage);
 
-        const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
         const confirmButtons = new ActionRowBuilder().addComponents(
             new ButtonBuilder().setCustomId('confirm_buy').setLabel('Comprar').setEmoji('🪙').setStyle(ButtonStyle.Success),
             new ButtonBuilder().setCustomId('cancel_buy').setLabel('Cancelar').setStyle(ButtonStyle.Secondary)
         );
 
-        const confirmMessage = await response.reply({ embeds: [confirmEmbed], components: [confirmButtons], fetchReply: true });
+        const confirmMessage = await i.reply({
+            embeds: [confirmEmbed],
+            components: [confirmButtons],
+            ephemeral: false,
+            fetchReply: true
+        });
 
         marketEnd(confirmMessage, selectedCard, interaction);
     });
 
     collector.on('end', () => {
-        numberCollector.stop();
         marketEnd(embedMessage);
     });
 
     return collector;
 };
+
+/** Monta o menu de seleção com as cartas da página atual. */
+function buildSelectMenu(listings, page, cardsPerPage) {
+    const inicio = page * cardsPerPage;
+    const pageCards = listings.slice(inicio, inicio + cardsPerPage);
+
+    const options = pageCards.map((listing) => {
+        const meta = ui.getRarity(listing.rarity);
+        const ovr = listing.overall ?? (listing.marketValue != null ? Math.round(listing.marketValue / 10) : 0);
+        return {
+            label: `${ui.cardName(listing.cardName)} · OVR ${ovr}`.slice(0, 100),
+            description: `${meta.label} • ${ui.number(listing.listingPrice)} moedas • ${listing.series || '—'}`.slice(0, 100),
+            value: String(listing._id),
+            emoji: meta.emoji
+        };
+    });
+
+    return new ActionRowBuilder().addComponents(
+        new StringSelectMenuBuilder()
+            .setCustomId('market_select')
+            .setPlaceholder('Escolha uma carta para comprar')
+            .addOptions(options)
+    );
+}
+
+module.exports.buildSelectMenu = buildSelectMenu;

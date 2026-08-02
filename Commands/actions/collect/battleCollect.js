@@ -1,5 +1,5 @@
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const { createBattle, generateBattleId, finishBattle } = require('../../utils/battleState');
+const { createBattle, generateBattleId, cancelBattle, setMessageRefs } = require('../../utils/battleState');
 const { trySpend, addBalance } = require('../../utils/economy');
 const ui = require('../../utils/embeds');
 
@@ -23,6 +23,7 @@ function ordenarParaBatalha(inventory) {
 }
 
 function buildDeckChoiceMessage(battleId, side, inventory, selectedIds, deck, wager = 0) {
+    const selecionadas = new Set((selectedIds || []).map(String));
     const completo = deck.length === 3;
 
     const embed = ui.base(completo ? ui.STATUS_COLORS.success : ui.STATUS_COLORS.warning)
@@ -31,7 +32,7 @@ function buildDeckChoiceMessage(battleId, side, inventory, selectedIds, deck, wa
             completo
                 ? '✅ **Time completo!** Aguardando seu oponente escolher...'
                 : [
-                    `Escolha **3 cartas** para batalhar.`,
+                    'Escolha **3 cartas** para batalhar.',
                     '',
                     `${'🔵'.repeat(deck.length)}${'⚪'.repeat(3 - deck.length)}  **${deck.length}/3**`,
                     '',
@@ -53,8 +54,7 @@ function buildDeckChoiceMessage(battleId, side, inventory, selectedIds, deck, wa
         });
     }
 
-    const ordenado = ordenarParaBatalha(inventory);
-    const cardsToShow = ordenado.slice(0, MAX_CARDS_SHOWN);
+    const cardsToShow = ordenarParaBatalha(inventory).slice(0, MAX_CARDS_SHOWN);
 
     if (inventory.length > MAX_CARDS_SHOWN) {
         embed.setFooter({ text: `${ui.BRAND} • Mostrando suas ${MAX_CARDS_SHOWN} melhores cartas de ${inventory.length}` });
@@ -68,7 +68,7 @@ function buildDeckChoiceMessage(battleId, side, inventory, selectedIds, deck, wa
             if (index >= cardsToShow.length) break;
             const card = cardsToShow[index];
             const cardId = String(card._id);
-            const isSelected = selectedIds.has(cardId);
+            const isSelected = selecionadas.has(cardId);
             const meta = ui.getRarity(card.rarity);
             const nomeCurto = card.name.length > 60 ? card.name.slice(0, 57) + '…' : card.name;
             const label = `${nomeCurto} · ${getOvr(card)}`;
@@ -126,17 +126,17 @@ async function battleCollect(interaction, userX, userY, userXData, userYData, ch
             return;
         }
 
+        const battleId = generateBattleId();
+        await createBattle(battleId, userX, userY, interaction.channelId, wager);
+
         await i.update({
             content: null,
             embeds: [ui.success('Duelo aceito!', `**${userY.username}** topou. ${ui.coins(wager * 2)} em jogo.\n\nOs dois receberam no privado a tela para montar o time.`)],
             components: []
         });
 
-        const battleId = generateBattleId();
-        const state = createBattle(battleId, userX, userY, userXData, userYData, interaction.channelId, wager);
-
-        const msgXContent = buildDeckChoiceMessage(battleId, 'X', userXData.inventory, state.selectedIdsX, state.deckX, wager);
-        const msgYContent = buildDeckChoiceMessage(battleId, 'Y', userYData.inventory, state.selectedIdsY, state.deckY, wager);
+        const msgXContent = buildDeckChoiceMessage(battleId, 'X', userXData.inventory, [], [], wager);
+        const msgYContent = buildDeckChoiceMessage(battleId, 'Y', userYData.inventory, [], [], wager);
 
         try {
             const msgX = await userX.send({
@@ -144,22 +144,18 @@ async function battleCollect(interaction, userX, userY, userXData, userYData, ch
                 embeds: [msgXContent.embed],
                 components: msgXContent.components
             });
-            state.messageXId = msgX.id;
-            state.channelXId = msgX.channel.id;
+            await setMessageRefs(battleId, 'X', msgX.id, msgX.channel.id);
 
             const msgY = await userY.send({
                 content: `Você está batalhando contra **${userX.username}**!`,
                 embeds: [msgYContent.embed],
                 components: msgYContent.components
             });
-            state.messageYId = msgY.id;
-            state.channelYId = msgY.channel.id;
+            await setMessageRefs(battleId, 'Y', msgY.id, msgY.channel.id);
         } catch (err) {
             console.error('Erro ao enviar DM da batalha:', err);
-            // Não conseguiu abrir o privado: devolve as apostas e cancela.
-            await addBalance(userX.id, wager);
-            await addBalance(userY.id, wager);
-            finishBattle(battleId);
+            // Não conseguiu abrir o privado: cancela devolvendo as apostas.
+            await cancelBattle(battleId);
             await interaction.followUp({
                 embeds: [ui.error('Não foi possível iniciar', 'Não consegui enviar mensagem no privado de um dos jogadores. Habilitem mensagens diretas do servidor.\n\nAs apostas foram devolvidas.')]
             }).catch(() => {});

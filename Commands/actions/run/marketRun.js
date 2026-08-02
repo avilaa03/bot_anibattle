@@ -2,6 +2,7 @@ const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const Market = require('../../utils/marketSchema.js');
 const { escapeRegex } = require('../../utils/regexUtils.js');
 const ui = require('../../utils/embeds.js');
+const { buildSelectMenu } = require('../collect/marketCollect.js');
 
 module.exports = async (client, interaction, marketCollect, marketEnd) => {
     const cardName = interaction.options.getString('cardname') || '';
@@ -23,7 +24,7 @@ module.exports = async (client, interaction, marketCollect, marketEnd) => {
         query.series = new RegExp(escapeRegex(series), 'i');
     }
 
-    const listings = await Market.find(query);
+    const listings = await Market.find(query).lean();
 
     if (listings.length === 0) {
         const embed = ui.neutral('🛒 Mercado', 'Nenhuma carta encontrada com esses filtros. Tente buscar sem filtro ou use `/sell` para anunciar a sua.');
@@ -49,12 +50,12 @@ module.exports = async (client, interaction, marketCollect, marketEnd) => {
 
         return ui.base(ui.STATUS_COLORS.info)
             .setTitle('🛒 Mercado de cartas')
-            .setDescription(`${lista}\n\n💡 *Digite o número da carta no chat para comprá-la.*`)
+            .setDescription(`${lista}\n\n💡 *Use o menu abaixo para escolher uma carta.*`)
             .setFooter({ text: `${ui.BRAND} • Página ${page + 1} de ${totalPages} • ${listings.length} anúncio(s)` });
     };
 
     const generateButtons = (page) => {
-        return [new ActionRowBuilder().addComponents(
+        const navegacao = new ActionRowBuilder().addComponents(
             new ButtonBuilder()
                 .setCustomId('previous_page')
                 .setEmoji('◀️')
@@ -70,7 +71,10 @@ module.exports = async (client, interaction, marketCollect, marketEnd) => {
                 .setEmoji('▶️')
                 .setStyle(ButtonStyle.Secondary)
                 .setDisabled(page >= totalPages - 1)
-        )];
+        );
+
+        // O menu de seleção substituiu o "digite o número no chat".
+        return [buildSelectMenu(listings, page, cardsPerPage), navegacao];
     };
 
     const embedMessage = await interaction.editReply({

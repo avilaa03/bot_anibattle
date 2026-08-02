@@ -4,6 +4,7 @@ const User = require('../../utils/userSchema.js');
 const { showEnd } = require('../end/showEnd.js');
 const CardBuilder = require('../../utils/cardBuilder.js');
 const ui = require('../../utils/embeds.js');
+const { molduraEfetiva } = require('../../utils/vip.js');
 
 async function showRun(client, interaction) {
     const name = interaction.options.getString('name').toLowerCase();
@@ -29,7 +30,7 @@ async function showRun(client, interaction) {
 
     const updateEmbed = async (index, cards, includeImage = false) => {
         const card = cards[index];
-        const cardBuilder = new CardBuilder(card);
+        const cardBuilder = new CardBuilder(card, { moldura: molduraEfetiva(user) });
         const meta = ui.getRarity(card.rarity);
 
         const embed = ui.base(meta.color)

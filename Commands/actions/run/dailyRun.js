@@ -1,5 +1,6 @@
 const User = require("../../utils/userSchema");
 const ui = require('../../utils/embeds');
+const { getPerks } = require('../../utils/vip');
 
 const DAILY_MIN = 10;
 const DAILY_MAX = 100;
@@ -26,7 +27,10 @@ async function dailyRun(client, interaction) {
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
 
-        const dailyAmount = Math.floor(Math.random() * (DAILY_MAX - DAILY_MIN + 1) + DAILY_MIN);
+        const perks = getPerks(user);
+        const base = Math.floor(Math.random() * (DAILY_MAX - DAILY_MIN + 1) + DAILY_MIN);
+        const dailyAmount = Math.floor(base * perks.dailyMultiplier);
+
         user.balance = (user.balance || 0) + dailyAmount;
         user.lastDaily = today;
         await user.save();
@@ -35,8 +39,15 @@ async function dailyRun(client, interaction) {
             .addFields(
                 { name: 'Recebido', value: ui.coins(dailyAmount), inline: true },
                 { name: 'Saldo atual', value: ui.coins(user.balance), inline: true }
-            )
-            .setFooter({ text: `${ui.BRAND} • Volte amanhã para coletar de novo` });
+            );
+
+        if (perks.vip) {
+            embed.addFields({ name: 'Bônus VIP', value: `${perks.tier.emoji} **${perks.tier.nome}** — ${perks.dailyMultiplier}x (base era ${ui.coins(base)})`, inline: false });
+            embed.setFooter({ text: `${ui.BRAND} • Volte amanhã para coletar de novo` });
+        } else {
+            embed.setFooter({ text: `${ui.BRAND} • Assinantes recebem até 3x — veja /vip` });
+        }
+
         return interaction.reply({ embeds: [embed] });
     } catch (err) {
         console.error('Erro ao processar a recompensa diária:', err);

@@ -124,11 +124,20 @@ function drawSpacedText(ctx, text, centerX, y, spacing) {
 }
 
 class CardBuilder {
-    constructor(cardData = {}) {
+    /**
+     * @param {object} cardData dados da carta
+     * @param {object} [opcoes]
+     * @param {string} [opcoes.moldura] moldura cosmética de VIP ('nenhuma' por padrão).
+     *   É puramente visual: desenhada por cima, nunca altera atributo.
+     */
+    constructor(cardData = {}, opcoes = {}) {
         this.cardData = cardData;
+        this.moldura = opcoes.moldura || 'nenhuma';
         this.canvas = createCanvas(CARD_W, CARD_H);
         this.context = this.canvas.getContext('2d');
     }
+
+    setMoldura(moldura) { this.moldura = moldura || 'nenhuma'; }
 
     setName(name) { this.cardData.name = name; }
     setSeries(series) { this.cardData.series = series; }
@@ -246,6 +255,122 @@ class CardBuilder {
         ctx.lineWidth = 1.5;
         drawRoundedRect(ctx, 11, 11, CARD_W - 22, CARD_H - 22, CARD_RADIUS - 8);
         ctx.stroke();
+    }
+
+    /**
+     * Moldura cosmética de VIP, desenhada por cima da moldura de raridade.
+     * Só aparência — nenhum atributo da carta é tocado aqui.
+     */
+    drawCosmeticFrame() {
+        const moldura = this.moldura;
+        if (!moldura || moldura === 'nenhuma') return;
+
+        const ctx = this.context;
+        const paleta = {
+            bronze: ['#CD7F32', '#8B5A2B'],
+            prata: ['#E8E8E8', '#9E9E9E'],
+            ouro: ['#FFD700', '#B8860B'],
+            sakura: ['#FFB7C5', '#FF69B4'],
+            holografica: ['#FF00CC', '#00E5FF'],
+            neon: ['#39FF14', '#00E5FF']
+        }[moldura];
+
+        if (!paleta) return;
+        const [c1, c2] = paleta;
+
+        ctx.save();
+
+        if (moldura === 'holografica') {
+            // Faixa iridescente atravessando a carta.
+            ctx.save();
+            drawRoundedRect(ctx, 0, 0, CARD_W, CARD_H, CARD_RADIUS);
+            ctx.clip();
+            const faixa = ctx.createLinearGradient(0, CARD_H, CARD_W, 0);
+            faixa.addColorStop(0.20, 'rgba(255,255,255,0)');
+            faixa.addColorStop(0.38, `${c1}55`);
+            faixa.addColorStop(0.50, 'rgba(255,255,255,0.25)');
+            faixa.addColorStop(0.62, `${c2}55`);
+            faixa.addColorStop(0.80, 'rgba(255,255,255,0)');
+            ctx.fillStyle = faixa;
+            ctx.fillRect(0, 0, CARD_W, CARD_H);
+            ctx.restore();
+        }
+
+        if (moldura === 'neon') {
+            // Contorno neon: várias passadas com brilho crescente.
+            for (const [cor, blur, largura] of [[c2, 26, 9], [c1, 16, 6], ['#FFFFFF', 6, 2.5]]) {
+                ctx.strokeStyle = cor;
+                ctx.shadowColor = cor;
+                ctx.shadowBlur = blur;
+                ctx.lineWidth = largura;
+                drawRoundedRect(ctx, 7, 7, CARD_W - 14, CARD_H - 14, CARD_RADIUS - 4);
+                ctx.stroke();
+            }
+            ctx.restore();
+            return;
+        }
+
+        // Borda dupla com gradiente, comum a bronze/prata/ouro/sakura.
+        const grad = ctx.createLinearGradient(0, 0, CARD_W, CARD_H);
+        grad.addColorStop(0, c1);
+        grad.addColorStop(0.5, c2);
+        grad.addColorStop(1, c1);
+
+        ctx.strokeStyle = grad;
+        ctx.shadowColor = c1;
+        ctx.shadowBlur = 12;
+        ctx.lineWidth = 7;
+        drawRoundedRect(ctx, 7, 7, CARD_W - 14, CARD_H - 14, CARD_RADIUS - 4);
+        ctx.stroke();
+
+        ctx.shadowBlur = 0;
+        ctx.strokeStyle = c2;
+        ctx.lineWidth = 2;
+        drawRoundedRect(ctx, 17, 17, CARD_W - 34, CARD_H - 34, CARD_RADIUS - 10);
+        ctx.stroke();
+
+        if (moldura === 'ouro' || moldura === 'sakura') {
+            this.drawCornerOrnaments(moldura === 'sakura' ? c2 : c1, moldura === 'sakura');
+        }
+
+        ctx.restore();
+    }
+
+    /** Ornamentos nos quatro cantos (losangos, ou pétalas no caso da sakura). */
+    drawCornerOrnaments(cor, petala = false) {
+        const ctx = this.context;
+        const cantos = [
+            [30, 30], [CARD_W - 30, 30],
+            [30, CARD_H - 30], [CARD_W - 30, CARD_H - 30]
+        ];
+
+        ctx.save();
+        ctx.fillStyle = cor;
+        ctx.shadowColor = cor;
+        ctx.shadowBlur = 8;
+
+        for (const [x, y] of cantos) {
+            ctx.beginPath();
+            if (petala) {
+                // Cinco pétalas em círculo.
+                for (let i = 0; i < 5; i++) {
+                    const ang = (i / 5) * Math.PI * 2 - Math.PI / 2;
+                    const px = x + Math.cos(ang) * 9;
+                    const py = y + Math.sin(ang) * 9;
+                    ctx.moveTo(x, y);
+                    ctx.arc(px, py, 5, 0, Math.PI * 2);
+                }
+            } else {
+                // Losango simples.
+                ctx.moveTo(x, y - 11);
+                ctx.lineTo(x + 11, y);
+                ctx.lineTo(x, y + 11);
+                ctx.lineTo(x - 11, y);
+                ctx.closePath();
+            }
+            ctx.fill();
+        }
+        ctx.restore();
     }
 
     /** Badge de overall (topo esquerdo) e pílula de raridade (topo direito). */
@@ -379,6 +504,7 @@ class CardBuilder {
         this.drawHeader();
         this.drawFooter();
         this.drawFrame();
+        this.drawCosmeticFrame();
         return this.canvas.toBuffer();
     }
 }
