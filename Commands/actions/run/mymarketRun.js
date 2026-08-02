@@ -61,7 +61,8 @@ async function mymarketRun(client, interaction) {
         ));
     }
 
-    const message = await interaction.reply({ embeds: [embed], components, fetchReply: true });
+    await interaction.reply({ embeds: [embed], components });
+    const message = await interaction.fetchReply();
 
     if (components.length === 0) return;
 

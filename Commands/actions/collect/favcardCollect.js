@@ -1,6 +1,9 @@
 const ui = require('../../utils/embeds');
 
-module.exports = async (interaction, message, indexRef, matchingCards, user, favCardEnd, updateEmbed, createRow) => {
+// NÃO marcar como async: quem chama usa o retorno como coletor
+// (`collector.on(...)`). Se a função for async ela devolve uma Promise
+// e a chamada quebra com "collector.on is not a function".
+module.exports = (interaction, message, indexRef, matchingCards, user, favCardEnd, updateEmbed, createRow) => {
     const filter = i => ['prev', 'next', 'fav', 'cancel'].includes(i.customId) && i.user.id === interaction.user.id;
     const collector = message.createMessageComponentCollector({ filter, time: 60000 });
 

@@ -97,11 +97,11 @@ module.exports = async (client, interaction, inventoryCollect, inventoryEnd) => 
         previousCollector.stop();
     }
 
-    const embedMessage = await interaction.reply({
+    await interaction.reply({
         embeds: [generateEmbed(0)],
-        components: [generateButtons(0)],
-        fetchReply: true
+        components: [generateButtons(0)]
     });
+    const embedMessage = await interaction.fetchReply();
 
     const collector = inventoryCollect(interaction, embedMessage, 0, user, generateEmbed, generateButtons, inventoryEnd);
     activeCollectors.set(interaction.user.id, collector);

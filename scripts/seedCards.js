@@ -23,7 +23,10 @@ require('dotenv/config');
 const fs = require('fs');
 const path = require('path');
 const mongoose = require('mongoose');
+
+mongoose.set('strictQuery', false);
 const Card = require('../Commands/utils/cardSchema');
+const { assignMissingDexNumbers, formatarNumero } = require('../Commands/utils/dexNumbers');
 
 // Faixas de estatística por raridade — ajuste esses números como quiser,
 // eles só definem os valores sorteados quando você NÃO informa overall/
@@ -155,6 +158,13 @@ async function main() {
 
     console.log(`\n✓ ${created} cartas criadas. ${skipped} já existiam (não foram alteradas). ${invalid} entradas inválidas/repetidas no arquivo.`);
     console.log(`Total de cartas no catálogo agora: ${total}`);
+
+    // Numera as cartas recém-criadas. Cartas antigas mantêm o número que
+    // já tinham — a numeração da Pokédex nunca é reembaralhada.
+    const numeracao = await assignMissingDexNumbers();
+    if (numeracao.atribuidos > 0) {
+        console.log(`\n📖 ${numeracao.atribuidos} carta(s) numerada(s): ${formatarNumero(numeracao.primeiro, total)} a ${formatarNumero(numeracao.ultimo, total)}`);
+    }
 
     const porRaridade = await Card.aggregate([
         { $group: { _id: '$rarity', total: { $sum: 1 } } },

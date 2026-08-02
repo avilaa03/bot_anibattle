@@ -16,6 +16,8 @@
 
 require('dotenv/config');
 const mongoose = require('mongoose');
+
+mongoose.set('strictQuery', false);
 const { concederVip, revogarVip } = require('../Commands/utils/vipService');
 const { TIERS } = require('../Commands/utils/vip');
 const User = require('../Commands/utils/userSchema');

@@ -1,4 +1,7 @@
-module.exports = async (interaction, embedMessage, currentPage, user, generateEmbed, generateButtons, inventoryEnd) => {
+// NÃO marcar como async: quem chama usa o retorno como coletor
+// (`collector.on(...)`). Se a função for async ela devolve uma Promise
+// e a chamada quebra com "collector.on is not a function".
+module.exports = (interaction, embedMessage, currentPage, user, generateEmbed, generateButtons, inventoryEnd) => {
     const filter = (i) => ['previous_page', 'next_page'].includes(i.customId) && i.user.id === interaction.user.id;
     const collector = embedMessage.createMessageComponentCollector({ filter, time: 60000 });
 

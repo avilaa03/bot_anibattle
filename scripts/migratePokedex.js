@@ -16,6 +16,8 @@
 
 require('dotenv/config');
 const mongoose = require('mongoose');
+
+mongoose.set('strictQuery', false);
 const User = require('../Commands/utils/userSchema');
 const Card = require('../Commands/utils/cardSchema');
 const Market = require('../Commands/utils/marketSchema');

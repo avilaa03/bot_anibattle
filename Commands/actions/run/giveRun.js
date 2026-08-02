@@ -39,7 +39,8 @@ async function giveRun(client, interaction) {
             new ButtonBuilder().setCustomId('give_cancel').setLabel('Cancelar').setStyle(ButtonStyle.Secondary)
         );
 
-        const mensagem = await interaction.reply({ embeds: [embed], components: [botoes], fetchReply: true });
+        await interaction.reply({ embeds: [embed], components: [botoes] });
+        const mensagem = await interaction.fetchReply();
 
         // Antes isto era um coletor de mensagens ("digite confirmar"), o que
         // obrigava o bot a usar o intent privilegiado MessageContent. Com

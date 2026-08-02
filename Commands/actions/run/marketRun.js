@@ -79,8 +79,7 @@ module.exports = async (client, interaction, marketCollect, marketEnd) => {
 
     const embedMessage = await interaction.editReply({
         embeds: [generateEmbed(currentPage)],
-        components: generateButtons(currentPage),
-        fetchReply: true
+        components: generateButtons(currentPage)
     });
 
     marketCollect(interaction, embedMessage, currentPage, listings, cardsPerPage, marketEnd, generateEmbed, generateButtons);

@@ -17,6 +17,8 @@ require('dotenv/config');
 const fs = require('fs');
 const path = require('path');
 const mongoose = require('mongoose');
+
+mongoose.set('strictQuery', false);
 const Card = require('../Commands/utils/cardSchema');
 const CardBuilder = require('../Commands/utils/cardBuilder');
 const { buildAnimatedCard, ehAnimada, FRAMES, GIF_W, GIF_H } = require('../Commands/utils/cardAnimator');

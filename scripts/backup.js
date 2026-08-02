@@ -23,6 +23,8 @@ const path = require('path');
 const zlib = require('zlib');
 const mongoose = require('mongoose');
 
+mongoose.set('strictQuery', false);
+
 const PADRAO_MANTER = 7;
 
 function parseArgs(argv) {

@@ -8,7 +8,10 @@ const ui = require('../../utils/embeds');
  * obrigava o bot a usar o intent privilegiado MessageContent. Agora é um
  * menu de seleção, então o intent deixou de ser necessário.
  */
-module.exports = async (interaction, embedMessage, currentPage, listings, cardsPerPage, marketEnd, generateEmbed, generateButtons) => {
+// NÃO marcar como async: quem chama usa o retorno como coletor
+// (`collector.on(...)`). Se a função for async ela devolve uma Promise
+// e a chamada quebra com "collector.on is not a function".
+module.exports = (interaction, embedMessage, currentPage, listings, cardsPerPage, marketEnd, generateEmbed, generateButtons) => {
     const totalPages = Math.ceil(listings.length / cardsPerPage);
 
     const filtro = (i) =>
@@ -61,12 +64,11 @@ module.exports = async (interaction, embedMessage, currentPage, listings, cardsP
             new ButtonBuilder().setCustomId('cancel_buy').setLabel('Cancelar').setStyle(ButtonStyle.Secondary)
         );
 
-        const confirmMessage = await i.reply({
+        await i.reply({
             embeds: [confirmEmbed],
-            components: [confirmButtons],
-            ephemeral: false,
-            fetchReply: true
+            components: [confirmButtons]
         });
+        const confirmMessage = await i.fetchReply();
 
         marketEnd(confirmMessage, selectedCard, interaction);
     });

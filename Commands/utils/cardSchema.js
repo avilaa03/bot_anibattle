@@ -2,6 +2,13 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const cardSchema = new Schema({
+    // Número na Pokédex. Fixo para sempre depois de atribuído — é o que
+    // permite dizer "carta #042" e a pessoa achar a mesma carta amanhã.
+    // Cartas novas recebem o próximo número livre, nunca reaproveitam.
+    numero: {
+        type: Number,
+        default: null
+    },
     name: {
         type: String,
         required: true
@@ -45,6 +52,8 @@ const cardSchema = new Schema({
 }, { collection: 'new-cards' });
 
 cardSchema.index({ rarity: 1 });
+// sparse: cartas ainda sem número não conflitam entre si no índice único.
+cardSchema.index({ numero: 1 }, { unique: true, sparse: true });
 
 const Card = mongoose.model('Card', cardSchema);
 

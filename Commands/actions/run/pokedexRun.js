@@ -3,6 +3,7 @@ const Card = require('../../utils/cardSchema');
 const ui = require('../../utils/embeds');
 const { escapeRegex } = require('../../utils/regexUtils');
 const { getDiscoveredSet } = require('../../utils/discovery');
+const { formatarNumero } = require('../../utils/dexNumbers');
 
 const POR_PAGINA = 10;
 
@@ -24,7 +25,7 @@ async function pokedexRun(client, interaction) {
 
     const [descobertoSet, cartas] = await Promise.all([
         getDiscoveredSet(interaction.user.id),
-        Card.find(query).select('name series rarity overall').lean()
+        Card.find(query).select('numero name series rarity overall').lean()
     ]);
 
     if (cartas.length === 0) {
@@ -33,12 +34,15 @@ async function pokedexRun(client, interaction) {
         });
     }
 
-    // Ordena por raridade (mais rara primeiro) e depois por nome, para a
-    // lista ficar previsível entre uma consulta e outra.
+    // Ordena pelo número da dex — é o que faz a lista bater com o número
+    // que o jogador vê na `/ficha`. Cartas ainda sem número vão para o fim.
     cartas.sort((a, b) => {
-        const porRaridade = ui.compareRarityDesc(a.rarity, b.rarity);
-        if (porRaridade !== 0) return porRaridade;
-        return String(a.name).localeCompare(String(b.name), 'pt-BR');
+        if (a.numero == null && b.numero == null) {
+            return String(a.name).localeCompare(String(b.name), 'pt-BR');
+        }
+        if (a.numero == null) return 1;
+        if (b.numero == null) return -1;
+        return a.numero - b.numero;
     });
 
     const totalNoFiltro = cartas.length;
@@ -60,16 +64,18 @@ async function pokedexRun(client, interaction) {
         const inicio = pagina * POR_PAGINA;
         const fatia = listadas.slice(inicio, inicio + POR_PAGINA);
 
-        const linhas = fatia.map((carta, i) => {
-            const numero = String(inicio + i + 1).padStart(3, '0');
+        const linhas = fatia.map((carta) => {
+            // Número fixo da carta, não a posição na lista — assim o que
+            // aparece aqui é o mesmo número que a `/ficha` mostra.
+            const numero = formatarNumero(carta.numero, totalNoFiltro);
             const achou = descobertoSet.has(String(carta._id));
             const meta = ui.getRarity(carta.rarity);
 
             if (!achou) {
                 // Carta não descoberta aparece censurada, como na Pokédex.
-                return `\`#${numero}\` ⬛ **???** — *${carta.series}*`;
+                return `\`${numero}\` ⬛ **???** — *${carta.series}*`;
             }
-            return `\`#${numero}\` ${meta.emoji} **${ui.cardName(carta.name)}** — OVR **${carta.overall}**\n└ *${carta.series}*`;
+            return `\`${numero}\` ${meta.emoji} **${ui.cardName(carta.name)}** — OVR **${carta.overall}**\n└ *${carta.series}*`;
         }).join('\n');
 
         const titulo = filtroSerie || filtroRaridade

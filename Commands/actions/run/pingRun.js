@@ -1,7 +1,8 @@
 const ui = require('../../utils/embeds');
 
 async function pingRun(client, interaction) {
-    const sent = await interaction.reply({ content: 'Calculando...', fetchReply: true });
+    await interaction.reply({ content: 'Calculando...' });
+    const sent = await interaction.fetchReply();
     const roundtrip = sent.createdTimestamp - interaction.createdTimestamp;
     const wsLatency = Math.round(client.ws.ping);
 

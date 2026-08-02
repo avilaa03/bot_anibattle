@@ -83,11 +83,11 @@ async function cosmeticosRun(client, interaction) {
         return interaction.reply({ embeds: [montarEmbed(user)], ephemeral: true });
     }
 
-    const mensagem = await interaction.reply({
+    await interaction.reply({
         embeds: [montarEmbed(user)],
-        components: montarComponentes(user),
-        fetchReply: true
+        components: montarComponentes(user)
     });
+    const mensagem = await interaction.fetchReply();
 
     const filtro = (i) => i.user.id === interaction.user.id && ['cosm_moldura', 'cosm_cor'].includes(i.customId);
     const coletor = mensagem.createMessageComponentCollector({ filter: filtro, time: 180000 });

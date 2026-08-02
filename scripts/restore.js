@@ -20,6 +20,8 @@ const zlib = require('zlib');
 const readline = require('readline');
 const mongoose = require('mongoose');
 
+mongoose.set('strictQuery', false);
+
 function parseArgs(argv) {
     const args = { de: null, confirmar: false, colecao: null };
     for (let i = 2; i < argv.length; i++) {

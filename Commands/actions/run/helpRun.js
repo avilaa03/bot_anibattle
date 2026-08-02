@@ -8,7 +8,7 @@ const PAGES = [
     comandos: [
       { nome: '/roll', desc: 'Sorteia uma carta aleatória. Você escolhe se guarda ou vende na hora.' },
       { nome: '/inventory', desc: 'Sua coleção completa, ordenada das cartas mais raras para as mais comuns.' },
-      { nome: '/show', desc: 'Mostra uma carta específica do seu inventário, com a arte completa.' },
+      { nome: '/show', desc: 'Mostra uma carta que você tem **agora** no inventário, com a arte completa.' },
       { nome: '/favcard', desc: 'Define sua carta favorita — ela aparece no seu perfil.' },
       { nome: '/profile', desc: 'Seu perfil: saldo, coleção, Pokédex e retrospecto de batalhas.' }
     ]
@@ -18,8 +18,10 @@ const PAGES = [
     descricao: 'Todo carta que passa pelo seu inventário fica registrada para sempre — mesmo que você venda depois.',
     comandos: [
       { nome: '/pokedex', desc: 'Mostra o que você já descobriu e o que ainda falta. Filtra por série, raridade, ou só o que falta.' },
+      { nome: '/ficha', desc: 'Consulta a ficha completa de uma carta registrada, por nome ou número. Funciona mesmo se você já vendeu a carta.' },
       { nome: '/colecionadores', desc: 'Ranking de quem já descobriu mais cartas.' },
-      { nome: '​', desc: '💡 *Cartas não descobertas aparecem como* ⬛ **???** *— vá atrás delas no `/market` ou no `/roll`.*' }
+      { nome: '​', desc: '💡 *Cartas não descobertas aparecem como* ⬛ **???** *— vá atrás delas no `/market` ou no `/roll`.*' },
+      { nome: '​', desc: '🔢 *Cada carta tem um número fixo. O* `#042` *de hoje é o mesmo amanhã, mesmo com o catálogo crescendo.*' }
     ]
   },
   {
@@ -110,11 +112,11 @@ function buildRows(pageIndex) {
 async function helpRun(client, interaction) {
   const indexRef = { currentIndex: 0 };
 
-  const message = await interaction.reply({
+  await interaction.reply({
     embeds: [buildEmbed(indexRef.currentIndex)],
-    components: [buildRows(indexRef.currentIndex)],
-    fetchReply: true
+    components: [buildRows(indexRef.currentIndex)]
   });
+  const message = await interaction.fetchReply();
 
   const filter = i => i.user.id === interaction.user.id && ['help_prev', 'help_next'].includes(i.customId);
   const collector = message.createMessageComponentCollector({ filter, time: 180000 });
