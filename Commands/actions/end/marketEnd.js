@@ -2,6 +2,7 @@ const User = require('../../utils/userSchema');
 const Market = require('../../utils/marketSchema');
 const { trySpend, addBalance, applyMarketTax, MARKET_TAX_RATE } = require('../../utils/economy');
 const { registerDiscovery } = require('../../utils/discovery');
+const { registrar } = require('../../utils/progresso');
 const ui = require('../../utils/embeds');
 
 module.exports = async (message, selectedCard, interaction) => {
@@ -74,6 +75,10 @@ module.exports = async (message, selectedCard, interaction) => {
                 if (inedita) {
                     embed.setDescription(`${embed.data.description}\n\n📖 **Nova entrada na Pokédex!**`);
                 }
+
+                registrar(interaction.user.id, { comprasMercado: 1 }, {
+                    eventosMissao: inedita ? ['mercado', 'descoberta'] : ['mercado']
+                }).catch(() => {});
 
                 return i.update({ embeds: [embed], components: [] });
             } else if (i.customId === 'cancel_buy') {

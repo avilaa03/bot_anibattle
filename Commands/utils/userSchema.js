@@ -66,11 +66,74 @@ const UserSchema = new Schema({
         moldura: { type: String, default: 'nenhuma' },
         corPerfil: { type: Number, default: null },
         banner: { type: String, default: null }
+    },
+
+    // Sequência de dias coletando o /daily. Zera se pular um dia.
+    streak: {
+        atual: { type: Number, default: 0 },
+        maior: { type: Number, default: 0 },
+        ultimoDia: { type: String, default: null }  // 'AAAA-MM-DD'
+    },
+
+    // Cartas do catálogo que o jogador quer. Quando alguém rola uma
+    // delas, ele é avisado.
+    wishlist: [{
+        cardId: { type: mongoose.Schema.Types.ObjectId, ref: 'Card' },
+        adicionadaEm: { type: Date, default: Date.now }
+    }],
+
+    // Pontuação de batalha. Separada de wins/losses porque esses contam
+    // qualquer duelo, e o rank só conta partida valendo pontos.
+    elo: { type: Number, default: 1000 },
+    picoElo: { type: Number, default: 1000 },
+
+    // Troféus conquistados (chave do catálogo em achievements.js).
+    conquistas: [{
+        chave: String,
+        desbloqueadaEm: { type: Date, default: Date.now }
+    }],
+
+    // Contadores acumulados. São a fonte de verdade das conquistas e das
+    // missões — em vez de cada feature recontar o inventário toda hora,
+    // os comandos incrementam aqui quando a ação acontece.
+    stats: {
+        rolls: { type: Number, default: 0 },
+        batalhasVencidas: { type: Number, default: 0 },
+        batalhasPerdidas: { type: Number, default: 0 },
+        trocasFeitas: { type: Number, default: 0 },
+        vendasMercado: { type: Number, default: 0 },
+        comprasMercado: { type: Number, default: 0 },
+        moedasGanhas: { type: Number, default: 0 },
+        moedasGastas: { type: Number, default: 0 },
+        criticos: { type: Number, default: 0 },
+        viradas: { type: Number, default: 0 },
+        torneiosVencidos: { type: Number, default: 0 },
+        diasAtivos: { type: Number, default: 0 }
+    },
+
+    // Missões ativas. Regeneradas quando o período vira.
+    missoes: {
+        diarias: [{
+            chave: String,
+            progresso: { type: Number, default: 0 },
+            alvo: Number,
+            resgatada: { type: Boolean, default: false }
+        }],
+        semanais: [{
+            chave: String,
+            progresso: { type: Number, default: 0 },
+            alvo: Number,
+            resgatada: { type: Boolean, default: false }
+        }],
+        diaGerado: { type: String, default: null },     // 'AAAA-MM-DD'
+        semanaGerada: { type: String, default: null }   // 'AAAA-Wnn'
     }
 });
 
 UserSchema.index({ balance: -1 });
 UserSchema.index({ 'discovered.cardId': 1 });
+UserSchema.index({ elo: -1 });
+UserSchema.index({ 'wishlist.cardId': 1 });
 
 const User = mongoose.models.User || mongoose.model('User', UserSchema);
 

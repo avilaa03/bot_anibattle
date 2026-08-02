@@ -2,6 +2,8 @@ const User = require('../../utils/userSchema');
 const ui = require('../../utils/embeds');
 const { getProgress } = require('../../utils/discovery');
 const { getTier, corPerfilEfetiva, isVipAtivo } = require('../../utils/vip');
+const achievements = require('../../utils/achievements');
+const elo = require('../../utils/elo');
 
 function getCardOvr(card) {
     return card.overall ?? (card.marketValue != null ? Math.round(card.marketValue / 10) : 0);
@@ -60,6 +62,42 @@ async function profileRun(client, interaction) {
             { name: '🎴 Cartas', value: `**${ui.number(totalCards)}**`, inline: true },
             { name: '💎 Patrimônio', value: ui.coins(totalValue + (user.balance || 0)), inline: true },
             { name: '⚔️ Batalhas', value: totalBattles > 0 ? `**${wins}**V — **${losses}**D  (${winRate}% de vitórias)\n${ui.progressBar(winRate, 100)}` : 'Nenhuma batalha ainda', inline: false },
+            {
+                name: '⚔️ Ranking',
+                value: (() => {
+                    const pontos = user.elo ?? elo.ELO_INICIAL;
+                    const div = elo.divisao(pontos);
+                    return totalBattles > 0
+                        ? `${div.emoji} **${div.nome}** — ${ui.number(pontos)} pts`
+                        : 'Sem partidas ainda';
+                })(),
+                inline: true
+            },
+            {
+                name: '🔥 Sequência',
+                value: user.streak?.atual > 0
+                    ? `**${user.streak.atual}** dia(s) (recorde: ${user.streak.maior})`
+                    : 'Nenhuma — use \`/daily\`',
+                inline: true
+            },
+            {
+                name: '🏆 Troféus',
+                value: (() => {
+                    const chaves = (user.conquistas || []).map((c) => c.chave);
+                    const totais = achievements.contagemPorTipo();
+                    const obtidos = { bronze: 0, prata: 0, ouro: 0, platina: 0 };
+                    for (const chave of chaves) {
+                        const c = achievements.porChave(chave);
+                        if (c) obtidos[c.tipo]++;
+                    }
+                    const totalTodos = Object.values(totais).reduce((a, b) => a + b, 0);
+                    const linha = Object.keys(totais)
+                        .map((t) => `${achievements.TIPOS[t].emoji}${obtidos[t]}`)
+                        .join(' ');
+                    return `${linha}\n**${chaves.length}**/${totalTodos} • Nível ${achievements.nivel(achievements.pontos(chaves))}`;
+                })(),
+                inline: true
+            },
             {
                 name: '📖 Pokédex',
                 value: `**${ui.number(pokedex.descobertas)}** / ${ui.number(pokedex.total)} cartas descobertas (${pokedex.percentual.toFixed(1)}%)\n${ui.progressBar(pokedex.percentual, 100, 12)}`,

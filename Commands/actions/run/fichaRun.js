@@ -6,6 +6,8 @@ const { escapeRegex } = require('../../utils/regexUtils');
 const { renderCard } = require('../../utils/cardRenderer');
 const { molduraEfetiva } = require('../../utils/vip');
 const { formatarNumero } = require('../../utils/dexNumbers');
+const { registrar } = require('../../utils/progresso');
+const wishlist = require('../../utils/wishlist');
 
 /**
  * /ficha — mostra a ficha de uma carta que o jogador JÁ REGISTROU na Pokédex.
@@ -120,6 +122,11 @@ async function fichaRun(client, interaction) {
                     name: '💰 Valor de mercado',
                     value: ui.coins((carta.overall ?? 0) * 10),
                     inline: true
+                },
+                {
+                    name: '💭 Procurada por',
+                    value: `${await wishlist.contarDesejos(carta._id)} jogador(es)`,
+                    inline: true
                 }
             )
             .setImage(render.url)
@@ -139,6 +146,8 @@ async function fichaRun(client, interaction) {
             new ButtonBuilder().setCustomId('ficha_next').setEmoji('▶️').setStyle(ButtonStyle.Secondary)
         )];
     };
+
+    registrar(interaction.user.id, {}, { eventosMissao: ['consulta'], checarConquistas: false }).catch(() => {});
 
     const primeira = await montarFicha(indice);
     const mensagem = await interaction.editReply({

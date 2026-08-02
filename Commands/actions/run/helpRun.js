@@ -38,7 +38,6 @@ const PAGES = [
     titulo: '🪙 Economia e mercado',
     descricao: 'Ganhe moedas e negocie cartas com outros jogadores.',
     comandos: [
-      { nome: '/daily', desc: 'Recompensa diária em moedas.' },
       { nome: '/balance', desc: 'Consulta o saldo e o patrimônio de alguém.' },
       { nome: '/magnata', desc: 'Ranking dos 10 jogadores mais ricos.' },
       { nome: '/give', desc: 'Transfere moedas para outro jogador.' },
@@ -47,6 +46,27 @@ const PAGES = [
       { nome: '/market', desc: 'Procura e compra cartas anunciadas por outros jogadores.' },
       { nome: '/mymarket', desc: 'Seus anúncios ativos e histórico de vendas.' },
       { nome: '/undosell', desc: 'Retira um anúncio do mercado e devolve a carta ao inventário.' }
+    ]
+  },
+  {
+    titulo: '🏆 Progressão',
+    descricao: 'Troféus, missões e ranking — o que dá objetivo de longo prazo.',
+    comandos: [
+      { nome: '/conquistas', desc: 'Seus troféus. 🥉 Bronze, 🥈 Prata, 🥇 Ouro e 💎 **Platina**, que só desbloqueia com todos os outros.' },
+      { nome: '/missoes', desc: 'Missões diárias e semanais. O progresso é automático — só volte para resgatar.' },
+      { nome: '/ranking', desc: 'Classificação por pontuação de batalha, de Bronze a Mestre.' },
+      { nome: '/daily', desc: 'Recompensa diária **com sequência**: quanto mais dias seguidos, mais vale. Marcos em 7, 14, 30, 60 e 100 dias.' },
+      { nome: '​', desc: '⚠️ *Faltou um dia? A sequência zera. É de propósito.*' }
+    ]
+  },
+  {
+    titulo: '🤝 Social',
+    descricao: 'Negocie e dispute com outros jogadores.',
+    comandos: [
+      { nome: '/trocar', desc: 'Troca carta por carta. Os dois montam a oferta e os dois confirmam — mexeu na oferta, as confirmações caem.' },
+      { nome: '/desejar', desc: 'Marca uma carta que você está caçando. Você é avisado quando alguém rolar ela.' },
+      { nome: '/desejos', desc: 'Sua lista de desejos, com quantos jogadores disputam cada carta.' },
+      { nome: '/torneio', desc: 'Cria um torneio eliminatório. Entra com um clique e o bot resolve tudo.' }
     ]
   },
   {

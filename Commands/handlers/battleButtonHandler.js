@@ -12,6 +12,9 @@ const {
 } = require('../utils/battleState');
 const { runBattle } = require('../utils/battleEngine');
 const { addBalance } = require('../utils/economy');
+const elo = require('../utils/elo');
+const { registrar } = require('../utils/progresso');
+const { anunciarConquistas } = require('../utils/notificacoes');
 const { buildDeckChoiceMessage } = require('../actions/collect/battleCollect');
 
 /** Busca o inventário atual do jogador direto do banco. */
@@ -201,9 +204,38 @@ async function resolverBatalha(client, battle) {
         }
     }
 
+    // ---- Pontuação de ranking ----
+    const [docX, docY] = await Promise.all([
+        User.findOne({ id: battle.userX.id }).select('elo picoElo').lean(),
+        User.findOne({ id: battle.userY.id }).select('elo picoElo').lean()
+    ]);
+    const eloX = docX?.elo ?? elo.ELO_INICIAL;
+    const eloY = docY?.elo ?? elo.ELO_INICIAL;
+
     if (vencedorId && perdedorId) {
-        await User.updateOne({ id: vencedorId }, { $inc: { wins: 1 } });
-        await User.updateOne({ id: perdedorId }, { $inc: { losses: 1 } });
+        const eloVencedor = vencedorId === battle.userX.id ? eloX : eloY;
+        const eloPerdedor = vencedorId === battle.userX.id ? eloY : eloX;
+        const r = elo.calcular(eloVencedor, eloPerdedor);
+
+        await User.updateOne(
+            { id: vencedorId },
+            { $inc: { wins: 1 }, $set: { elo: r.vencedor, picoElo: Math.max(r.vencedor, vencedorId === battle.userX.id ? (docX?.picoElo ?? eloX) : (docY?.picoElo ?? eloY)) } }
+        );
+        await User.updateOne({ id: perdedorId }, { $inc: { losses: 1 }, $set: { elo: r.perdedor } });
+
+        const divVencedor = elo.divisao(r.vencedor);
+        const divPerdedor = elo.divisao(r.perdedor);
+
+        resultEmbed.addFields({
+            name: '📊 Ranking',
+            value: `👑 **${nomeVencedor}** ${divVencedor.emoji} ${ui.number(r.vencedor)} pts (**+${r.ganho}**)\n`
+                + `💤 **${nomePerdedor}** ${divPerdedor.emoji} ${ui.number(r.perdedor)} pts (**-${r.perda}**)`,
+            inline: false
+        });
+    } else {
+        const r = elo.calcularEmpate(eloX, eloY);
+        await User.updateOne({ id: battle.userX.id }, { $set: { elo: r.a } });
+        await User.updateOne({ id: battle.userY.id }, { $set: { elo: r.b } });
     }
 
     if (canal) {
@@ -215,6 +247,38 @@ async function resolverBatalha(client, battle) {
 
     await enviarNoPrivado(client, battle.userX.id, { embeds: [resultEmbed] });
     await enviarNoPrivado(client, battle.userY.id, { embeds: [resultEmbed] });
+
+    // Conta críticos e viradas da luta toda, para missões e conquistas.
+    const logCompleto = result.rounds.flatMap((r) => r.log).join('\n');
+    const criticos = (logCompleto.match(/CRÍTICO/g) || []).length;
+    const viradas = (logCompleto.match(/VIRADA/g) || []).length;
+
+    const eventosVencedor = ['batalha', 'vitoria', ...Array(criticos).fill('critico')];
+    const eventosPerdedor = ['batalha'];
+
+    const progresso = [];
+    if (vencedorId && perdedorId) {
+        progresso.push(
+            registrar(vencedorId, { batalhasVencidas: 1, criticos, viradas }, { eventosMissao: eventosVencedor }),
+            registrar(perdedorId, { batalhasPerdidas: 1 }, { eventosMissao: eventosPerdedor })
+        );
+    } else {
+        progresso.push(
+            registrar(battle.userX.id, {}, { eventosMissao: ['batalha'] }),
+            registrar(battle.userY.id, {}, { eventosMissao: ['batalha'] })
+        );
+    }
+
+    // Troféus: comuns no privado, raros anunciados no canal do duelo.
+    const resultados = await Promise.all(progresso).catch(() => []);
+    for (let i = 0; i < resultados.length; i++) {
+        const conquistas = resultados[i]?.conquistas || [];
+        if (conquistas.length === 0) continue;
+        const destinatario = vencedorId && perdedorId
+            ? (i === 0 ? vencedorId : perdedorId)
+            : (i === 0 ? battle.userX.id : battle.userY.id);
+        await anunciarConquistas(client, destinatario, conquistas, canal);
+    }
 
     await finishBattle(battle.battleId);
 }

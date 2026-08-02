@@ -3,6 +3,8 @@ const User = require('../../utils/userSchema');
 const { addBalance } = require('../../utils/economy');
 const ui = require('../../utils/embeds');
 const { registerDiscovery } = require('../../utils/discovery');
+const { registrar } = require('../../utils/progresso');
+const { notificarProgresso } = require('../../utils/notificacoes');
 
 module.exports = (interaction, card, user, marketValue, valueToSell, rollEnd) => {
     const filter = (i) => (i.customId.startsWith(`enviarInventario_${card._id}`) || i.customId.startsWith(`vender_${card._id}`)) && i.user.id === interaction.user.id;
@@ -43,6 +45,11 @@ module.exports = (interaction, card, user, marketValue, valueToSell, rollEnd) =>
 
             // Pokédex: registra a descoberta e avisa se for inédita.
             const inedita = await registerDiscovery(interaction.user.id, card._id);
+            if (inedita) {
+                registrar(interaction.user.id, {}, { eventosMissao: ['descoberta'] })
+                    .then((r) => notificarProgresso(interaction, r))
+                    .catch(() => {});
+            }
 
             await i.update({
                 content: inedita

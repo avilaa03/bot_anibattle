@@ -5,6 +5,7 @@ const { showEnd } = require('../end/showEnd.js');
 const { renderCard } = require('../../utils/cardRenderer.js');
 const ui = require('../../utils/embeds.js');
 const { molduraEfetiva } = require('../../utils/vip.js');
+const { registrar } = require('../../utils/progresso.js');
 
 async function showRun(client, interaction) {
     const name = interaction.options.getString('name').toLowerCase();
@@ -79,6 +80,8 @@ async function showRun(client, interaction) {
                 .setStyle(ButtonStyle.Secondary)
                 .setDisabled(matchingCards.length === 1)
         );
+
+    registrar(interaction.user.id, {}, { eventosMissao: ['consulta'], checarConquistas: false }).catch(() => {});
 
     const { embed, attachment } = await updateEmbed(indexRef.currentIndex, matchingCards, true);
     const message = await interaction.editReply({ embeds: [embed], components: [row], files: [attachment] });

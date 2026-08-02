@@ -4,6 +4,29 @@ const User = require('../../utils/userSchema');
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const ui = require('../../utils/embeds');
 const { getPerks, molduraEfetiva } = require('../../utils/vip');
+const wishlist = require('../../utils/wishlist');
+const { registrar } = require('../../utils/progresso');
+const { notificarProgresso } = require('../../utils/notificacoes');
+
+/**
+ * Menciona no canal quem tem a carta na lista de desejos.
+ * Falhar aqui nunca pode atrapalhar o /roll — por isso a chamada é
+ * disparada sem await e com catch.
+ */
+async function avisarDesejantes(interaction, card, rarityMeta) {
+    const desejantes = await wishlist.quemDeseja(card._id, interaction.user.id);
+    if (desejantes.length === 0) return;
+
+    const mencoes = desejantes.map((id) => `<@${id}>`).join(' ');
+    const embed = ui.base(rarityMeta.color)
+        .setTitle('💭 Carta da sua lista de desejos apareceu!')
+        .setDescription(
+            `${rarityMeta.emoji} **${ui.cardName(card.name)}** — *${card.series}*\n\n`
+            + `Rolada por **${interaction.user.username}**. Que tal propor uma troca com \`/trocar\`?`
+        );
+
+    await interaction.followUp({ content: mencoes, embeds: [embed] }).catch(() => {});
+}
 
 // Coletores ativos por usuário — antes isto era uma única variável de módulo
 // compartilhada por TODOS os usuários, o que fazia o /roll de um jogador
@@ -140,6 +163,16 @@ module.exports = async (client, interaction, rollCollect, rollEnd) => {
 
     user.lastRoll = now;
     await user.save();
+
+    // Avisa quem tem essa carta na lista de desejos. É só um aviso: quem
+    // rolou continua com prioridade total sobre a carta. A ideia é gerar
+    // conversa e movimentar o mercado, não criar disputa por clique.
+    avisarDesejantes(interaction, card, rarityMeta).catch(() => {});
+
+    // Contadores, missões e conquistas.
+    registrar(interaction.user.id, { rolls: 1 }, { eventosMissao: ['roll'] })
+        .then((resultado) => notificarProgresso(interaction, resultado))
+        .catch((err) => console.error('Erro ao registrar progresso do roll:', err));
 
     const previousCollector = activeCollectors.get(interaction.user.id);
     if (previousCollector) {

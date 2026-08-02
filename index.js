@@ -54,11 +54,18 @@ client.on('interactionCreate', async (interaction) => {
           .setColor('#E53935');
         interaction.reply({ embeds: [embed], ephemeral: true });
       }
-    } else if (interaction.isButton()) {
-      if (interaction.customId.startsWith('battle_pick_')) {
+    } else if (interaction.isButton() || interaction.isStringSelectMenu()) {
+      const id = interaction.customId;
+
+      if (id.startsWith('battle_pick_')) {
         const { handleBattlePick } = require('./Commands/handlers/battleButtonHandler');
-        const handled = await handleBattlePick(client, interaction);
-        if (handled) return;
+        if (await handleBattlePick(client, interaction)) return;
+      } else if (id.startsWith('trade_')) {
+        const { handleTrade } = require('./Commands/handlers/tradeHandler');
+        if (await handleTrade(client, interaction)) return;
+      } else if (id.startsWith('tn_')) {
+        const { handleTournament } = require('./Commands/handlers/tournamentHandler');
+        if (await handleTournament(client, interaction)) return;
       }
     }
   } catch (err) {
@@ -149,15 +156,23 @@ async function start() {
     console.log(`Recuperação: ${recuperadas.canceladas} batalha(s) pendente(s) cancelada(s), ${recuperadas.devolvido} moeda(s) devolvida(s).`);
   }
 
-  // Varredura periódica para duelos abandonados no meio da escolha.
+  // Varredura periódica: duelos, trocas e torneios abandonados.
   setInterval(async () => {
     try {
       const resultado = await sweepStaleBattles();
       if (resultado.canceladas > 0) {
         console.log(`Varredura: ${resultado.canceladas} batalha(s) abandonada(s), ${resultado.devolvido} moeda(s) devolvida(s).`);
       }
+
+      const { limparAbandonadas } = require('./Commands/utils/trade');
+      const trocas = await limparAbandonadas();
+      if (trocas > 0) console.log(`Varredura: ${trocas} troca(s) abandonada(s) removida(s).`);
+
+      const { limparAbandonados } = require('./Commands/utils/tournament');
+      const torneios = await limparAbandonados();
+      if (torneios > 0) console.log(`Varredura: ${torneios} torneio(s) abandonado(s) cancelado(s).`);
     } catch (err) {
-      monitoring.capturarErro(err, { origem: 'sweepStaleBattles' });
+      monitoring.capturarErro(err, { origem: 'varreduraPeriodica' });
     }
   }, 5 * 60 * 1000);
 

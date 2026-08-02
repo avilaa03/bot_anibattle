@@ -2,6 +2,7 @@ const Market = require('../../utils/marketSchema');
 const User = require('../../utils/userSchema');
 const ui = require('../../utils/embeds');
 const { applyMarketTax, MARKET_TAX_RATE } = require('../../utils/economy');
+const { registrar } = require('../../utils/progresso');
 
 async function sellCollect(interaction, collector, matchingCards, indexRef, listingPrice, user, rowNavigation, rowConfirmation, buildSellEmbed) {
     collector.on('collect', async (i) => {
@@ -68,6 +69,7 @@ async function sellCollect(interaction, collector, matchingCards, indexRef, list
                 )
                 .setFooter({ text: `${ui.BRAND} • Use /undosell para retirar o anúncio` });
             await i.update({ embeds: [successEmbed], components: [], files: [] });
+            registrar(interaction.user.id, { vendasMercado: 1 }, { eventosMissao: ['venda', 'mercado'] }).catch(() => {});
             collector.stop('collected');
         } else if (i.customId === 'cancel_sell') {
             const cancelEmbed = ui.neutral('Anúncio cancelado', 'Sua carta continua no inventário.');
