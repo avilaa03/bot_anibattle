@@ -1,21 +1,7 @@
-const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-
 function showEnd(message) {
-    const disabledRow = new ActionRowBuilder()
-        .addComponents(
-            new ButtonBuilder()
-                .setCustomId('prev')
-                .setLabel('Anterior')
-                .setStyle(ButtonStyle.Primary)
-                .setDisabled(true),
-            new ButtonBuilder()
-                .setCustomId('next')
-                .setLabel('Próximo')
-                .setStyle(ButtonStyle.Primary)
-                .setDisabled(true)
-        );
-
-    message.edit({ components: [disabledRow] });
+    // Some os botões quando o tempo acaba, em vez de deixar botões
+    // desabilitados poluindo a mensagem.
+    message.edit({ components: [] }).catch(() => {});
 }
 
 module.exports = { showEnd };

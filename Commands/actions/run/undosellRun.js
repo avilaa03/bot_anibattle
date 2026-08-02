@@ -1,19 +1,14 @@
 const User = require('../../utils/userSchema.js');
 const Market = require('../../utils/marketSchema.js');
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, AttachmentBuilder } = require('discord.js');
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle, AttachmentBuilder } = require('discord.js');
+const ui = require('../../utils/embeds.js');
 const CardBuilder = require('../../utils/cardBuilder.js');
-
-function escapeRegex(str) {
-    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
+const { escapeRegex } = require('../../utils/regexUtils.js');
 
 async function undosellRun(client, interaction) {
     const cardName = (interaction.options.getString('cardname') || '').trim();
     if (!cardName) {
-        const embed = new EmbedBuilder()
-            .setTitle('❌ Nome inválido')
-            .setDescription('Informe o nome da carta.')
-            .setColor('#E53935');
+        const embed = ui.error('Nome inválido', 'Informe o nome da carta que você quer retirar do mercado.');
         return interaction.reply({ embeds: [embed], ephemeral: true });
     }
 
@@ -24,10 +19,7 @@ async function undosellRun(client, interaction) {
     }).lean();
 
     if (!listings || listings.length === 0) {
-        const embed = new EmbedBuilder()
-            .setTitle('❌ Anúncio não encontrado')
-            .setDescription('Nenhum anúncio encontrado com esse nome (ou já foi vendido).')
-            .setColor('#E53935');
+        const embed = ui.error('Anúncio não encontrado', 'Nenhum anúncio seu com esse nome (ou a carta já foi vendida).');
         return interaction.reply({ embeds: [embed], ephemeral: true });
     }
 
@@ -53,17 +45,16 @@ async function undosellRun(client, interaction) {
         const cardImageBuffer = await cardBuilder.build();
         const attachment = new AttachmentBuilder(cardImageBuffer, { name: 'cardImage.png' });
 
-        const embed = new EmbedBuilder()
-            .setTitle('📋 Retirar carta do mercado')
-            .setDescription('Confirme que é esta carta que deseja retirar do mercado. Ela voltará ao seu inventário.')
-            .setColor('#FF9800')
+        const embed = ui.base(ui.getRarity(listing.rarity).color)
+            .setTitle('📋 Retirar do mercado')
+            .setDescription('Confirme a retirada — a carta volta para o seu inventário.')
             .addFields(
                 { name: 'Carta', value: listing.cardName || '—', inline: true },
-                { name: 'Preço no anúncio', value: `${price} moedas`, inline: true },
-                { name: 'Raridade', value: listing.rarity || '—', inline: true }
+                { name: 'Preço no anúncio', value: ui.coins(price), inline: true },
+                { name: 'Raridade', value: ui.rarityTag(listing.rarity), inline: true }
             )
             .setImage('attachment://cardImage.png')
-            .setFooter({ text: listings.length > 1 ? `Mostrando ${indexRef.currentIndex + 1} de ${listings.length} • Use os botões para trocar` : 'AniBattle' });
+            .setFooter({ text: listings.length > 1 ? `${ui.BRAND} • Anúncio ${indexRef.currentIndex + 1} de ${listings.length}` : ui.BRAND });
         return { embed, attachment };
     }
 
@@ -72,8 +63,8 @@ async function undosellRun(client, interaction) {
         if (listings.length > 1) {
             rows.push(
                 new ActionRowBuilder().addComponents(
-                    new ButtonBuilder().setCustomId('undosell_prev').setLabel('Anterior').setStyle(ButtonStyle.Secondary),
-                    new ButtonBuilder().setCustomId('undosell_next').setLabel('Próximo').setStyle(ButtonStyle.Secondary)
+                    new ButtonBuilder().setCustomId('undosell_prev').setEmoji('◀️').setStyle(ButtonStyle.Secondary),
+                    new ButtonBuilder().setCustomId('undosell_next').setEmoji('▶️').setStyle(ButtonStyle.Secondary)
                 )
             );
         }
@@ -112,10 +103,7 @@ async function undosellRun(client, interaction) {
             return;
         }
         if (i.customId === 'undosell_cancel') {
-            await i.update({
-                embeds: [new EmbedBuilder().setTitle('Cancelado').setDescription('Nenhuma alteração feita.').setColor('#9E9E9E')],
-                components: []
-            });
+            await i.update({ embeds: [ui.neutral('Cancelado', 'Nenhuma alteração feita.')], components: [], files: [] });
             collector.stop();
             return;
         }
@@ -125,7 +113,7 @@ async function undosellRun(client, interaction) {
 
             const user = await User.findOne({ id: interaction.user.id });
             if (!user) {
-                await i.update({ content: 'Erro: usuário não encontrado.', embeds: [], components: [] });
+                await i.update({ embeds: [ui.error('Perfil não encontrado', 'Não foi possível localizar seu perfil.')], components: [], files: [] });
                 return;
             }
             const card = {
@@ -148,11 +136,8 @@ async function undosellRun(client, interaction) {
             user.inventory.push(card);
             await user.save();
 
-            const embed = new EmbedBuilder()
-                .setTitle('✅ Anúncio removido')
-                .setDescription(`**${listing.cardName}** foi retirada do mercado e devolvida ao seu inventário.`)
-                .setColor('#4CAF50');
-            await i.update({ embeds: [embed], components: [] });
+            const embed = ui.success('Anúncio removido', `**${ui.cardName(listing.cardName)}** voltou para o seu inventário.`);
+            await i.update({ embeds: [embed], components: [], files: [] });
             collector.stop();
         }
     });

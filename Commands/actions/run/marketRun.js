@@ -1,5 +1,7 @@
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const Market = require('../../utils/marketSchema.js');
+const { escapeRegex } = require('../../utils/regexUtils.js');
+const ui = require('../../utils/embeds.js');
 
 module.exports = async (client, interaction, marketCollect, marketEnd) => {
     const cardName = interaction.options.getString('cardname') || '';
@@ -8,26 +10,23 @@ module.exports = async (client, interaction, marketCollect, marketEnd) => {
     const rarity = interaction.options.getString('rarity') || '';
 
     const query = {
-        cardName: new RegExp(cardName, 'i'),
+        cardName: new RegExp(escapeRegex(cardName), 'i'),
         listingPrice: { $gte: minValue, $lte: maxValue },
         status: 'available'
     };
 
     if (rarity) {
-        query.rarity = new RegExp(`^${rarity}$`, 'i');
+        query.rarity = new RegExp(`^${escapeRegex(rarity)}$`, 'i');
     }
     const series = interaction.options.getString('series') || '';
     if (series) {
-        query.series = new RegExp(series, 'i');
+        query.series = new RegExp(escapeRegex(series), 'i');
     }
 
     const listings = await Market.find(query);
 
     if (listings.length === 0) {
-        const embed = new EmbedBuilder()
-            .setTitle('🛒 Mercado')
-            .setDescription('Nenhuma carta encontrada com os filtros informados.')
-            .setColor('#9E9E9E');
+        const embed = ui.neutral('🛒 Mercado', 'Nenhuma carta encontrada com esses filtros. Tente buscar sem filtro ou use `/sell` para anunciar a sua.');
         return interaction.reply({ embeds: [embed], ephemeral: true });
     }
 
@@ -35,46 +34,43 @@ module.exports = async (client, interaction, marketCollect, marketEnd) => {
 
     let currentPage = 0;
     const cardsPerPage = 9;
+    const totalPages = Math.ceil(listings.length / cardsPerPage);
 
     const generateEmbed = (page) => {
         const start = page * cardsPerPage;
-        const end = start + cardsPerPage;
-        const pageCards = listings.slice(start, end);
+        const pageCards = listings.slice(start, start + cardsPerPage);
 
-        const embed = new EmbedBuilder()
-            .setTitle('Cartas Disponíveis no Mercado')
-            .setDescription(`Página ${page + 1} de ${Math.ceil(listings.length / cardsPerPage)}`)
-            .setColor(0x0099FF);
+        const lista = pageCards.map((listing, index) => {
+            const meta = ui.getRarity(listing.rarity);
+            const ovr = listing.overall ?? (listing.marketValue != null ? Math.round(listing.marketValue / 10) : 0);
+            return `\`${index + 1}\` ${meta.emoji} **${ui.cardName(listing.cardName)}** — OVR **${ovr}**\n`
+                + `└ ${listing.series || '—'} • ${ui.coins(listing.listingPrice)} • vendedor <@${listing.sellerId}>`;
+        }).join('\n');
 
-        pageCards.forEach((listing, index) => {
-            embed.addFields({ name: `${index + 1}. ${listing.cardName}`, value: `Preço: ${listing.listingPrice}`, inline: false });
-        });
-
-        return embed;
+        return ui.base(ui.STATUS_COLORS.info)
+            .setTitle('🛒 Mercado de cartas')
+            .setDescription(`${lista}\n\n💡 *Digite o número da carta no chat para comprá-la.*`)
+            .setFooter({ text: `${ui.BRAND} • Página ${page + 1} de ${totalPages} • ${listings.length} anúncio(s)` });
     };
 
     const generateButtons = (page) => {
-        const buttons = new ActionRowBuilder();
-
-        if (page > 0) {
-            buttons.addComponents(
-                new ButtonBuilder()
-                    .setCustomId('previous_page')
-                    .setLabel('Anterior')
-                    .setStyle(ButtonStyle.Primary)
-            );
-        }
-
-        if (page < Math.ceil(listings.length / cardsPerPage) - 1) {
-            buttons.addComponents(
-                new ButtonBuilder()
-                    .setCustomId('next_page')
-                    .setLabel('Próximo')
-                    .setStyle(ButtonStyle.Primary)
-            );
-        }
-
-        return buttons.components.length > 0 ? [buttons] : [];
+        return [new ActionRowBuilder().addComponents(
+            new ButtonBuilder()
+                .setCustomId('previous_page')
+                .setEmoji('◀️')
+                .setStyle(ButtonStyle.Secondary)
+                .setDisabled(page <= 0),
+            new ButtonBuilder()
+                .setCustomId('page_indicator')
+                .setLabel(`${page + 1} / ${totalPages}`)
+                .setStyle(ButtonStyle.Secondary)
+                .setDisabled(true),
+            new ButtonBuilder()
+                .setCustomId('next_page')
+                .setEmoji('▶️')
+                .setStyle(ButtonStyle.Secondary)
+                .setDisabled(page >= totalPages - 1)
+        )];
     };
 
     const embedMessage = await interaction.editReply({
@@ -83,5 +79,5 @@ module.exports = async (client, interaction, marketCollect, marketEnd) => {
         fetchReply: true
     });
 
-    marketCollect(interaction, embedMessage, currentPage, listings, cardsPerPage, marketEnd);
+    marketCollect(interaction, embedMessage, currentPage, listings, cardsPerPage, marketEnd, generateEmbed, generateButtons);
 };

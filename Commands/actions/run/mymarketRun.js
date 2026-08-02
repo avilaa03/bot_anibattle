@@ -1,36 +1,82 @@
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const Market = require('../../utils/marketSchema.js')
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const Market = require('../../utils/marketSchema.js');
+const { mymarketCollect } = require('../collect/mymarketCollect.js');
+const ui = require('../../utils/embeds.js');
 
 async function mymarketRun(client, interaction) {
-    const listings = await Market.find({ sellerId: interaction.user.id });
+    const listings = await Market.find({ sellerId: interaction.user.id }).lean();
 
     if (listings.length === 0) {
-        const emptyEmbed = new EmbedBuilder()
-            .setTitle('📋 Seu mercado')
-            .setDescription('Você não tem cartas anunciadas no mercado.')
-            .setColor('#9E9E9E');
-        return interaction.reply({ embeds: [emptyEmbed], ephemeral: true });
+        const embed = ui.neutral('📋 Seus anúncios', 'Você não tem cartas anunciadas. Use `/sell` para colocar uma à venda.');
+        return interaction.reply({ embeds: [embed], ephemeral: true });
     }
 
-    const embed = new EmbedBuilder()
-        .setTitle('Suas Cartas Anunciadas no Mercado')
-        .setColor(0x0099FF);
+    const disponiveis = listings.filter((l) => l.status === 'available');
+    const vendidas = listings.filter((l) => l.status === 'sold');
 
-    listings.forEach(listing => {
-        embed.addFields({ name: listing.cardName, value: `Preço: ${listing.marketValue} | Status: ${listing.status}`, inline: false });
-    });
+    const formatar = (listing) => {
+        const meta = ui.getRarity(listing.rarity);
+        // Antes esta linha mostrava listing.marketValue (o valor base da
+        // carta), não o preço que o jogador realmente pediu no anúncio.
+        const preco = listing.listingPrice ?? listing.marketValue ?? 0;
+        return `${meta.emoji} **${ui.cardName(listing.cardName)}** — ${ui.coins(preco)}`;
+    };
 
-    const clearHistoryButton = new ActionRowBuilder().addComponents(
-        new ButtonBuilder()
-            .setCustomId('clear_history')
-            .setLabel('Limpar Histórico')
-            .setStyle(ButtonStyle.Danger)
+    const totalAVenda = disponiveis.reduce((sum, l) => sum + (l.listingPrice ?? l.marketValue ?? 0), 0);
+    const totalVendido = vendidas.reduce((sum, l) => sum + (l.listingPrice ?? l.marketValue ?? 0), 0);
+
+    const embed = ui.base(ui.STATUS_COLORS.info)
+        .setAuthor({ name: `Anúncios de ${interaction.user.username}`, iconURL: interaction.user.displayAvatarURL() })
+        .setTitle('🏪 Sua banca no mercado');
+
+    if (disponiveis.length > 0) {
+        embed.addFields({
+            name: `🟢 À venda (${disponiveis.length})`,
+            value: disponiveis.slice(0, 15).map(formatar).join('\n') + (disponiveis.length > 15 ? `\n*...e mais ${disponiveis.length - 15}*` : ''),
+            inline: false
+        });
+    }
+
+    if (vendidas.length > 0) {
+        embed.addFields({
+            name: `✅ Já vendidas (${vendidas.length})`,
+            value: vendidas.slice(0, 10).map(formatar).join('\n') + (vendidas.length > 10 ? `\n*...e mais ${vendidas.length - 10}*` : ''),
+            inline: false
+        });
+    }
+
+    embed.addFields(
+        { name: 'Anunciado agora', value: ui.coins(totalAVenda), inline: true },
+        { name: 'Total já vendido', value: ui.coins(totalVendido), inline: true }
     );
 
-    const message = await interaction.reply({ embeds: [embed], components: [clearHistoryButton], fetchReply: true });
+    const components = [];
+    if (vendidas.length > 0) {
+        components.push(new ActionRowBuilder().addComponents(
+            new ButtonBuilder()
+                .setCustomId('clear_history')
+                .setLabel('Limpar histórico de vendas')
+                .setEmoji('🧹')
+                .setStyle(ButtonStyle.Danger)
+        ));
+    }
+
+    const message = await interaction.reply({ embeds: [embed], components, fetchReply: true });
+
+    if (components.length === 0) return;
 
     const filter = (i) => i.customId === 'clear_history' && i.user.id === interaction.user.id;
-    const collector = message.createMessageComponentCollector({ filter, time: 60000 });
+    const collector = message.createMessageComponentCollector({ filter, time: 60000, max: 1 });
+
+    // Antes o coletor era criado mas nunca ligado ao handler, então o botão
+    // de limpar histórico simplesmente não fazia nada.
+    mymarketCollect(interaction, collector);
+
+    collector.on('end', (collected, reason) => {
+        if (reason === 'time') {
+            message.edit({ components: [] }).catch(() => {});
+        }
+    });
 }
 
-module.exports = mymarketRun
+module.exports = mymarketRun;

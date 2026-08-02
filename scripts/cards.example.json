@@ -1,0 +1,38 @@
+[
+  {
+    "name": "Gon",
+    "series": "Hunter X Hunter",
+    "rarity": "common",
+    "characterImage": "https://i.imgur.com/sQECRU7.png",
+    "seriesImage": "https://i.imgur.com/xkxyV1J.png",
+    "baseImage": "https://i.imgur.com/7kwp8OR.png"
+  },
+  {
+    "name": "Killua",
+    "series": "Hunter X Hunter",
+    "rarity": "rare",
+    "characterImage": "https://exemplo.com/imagens/killua.png"
+  },
+  {
+    "name": "Naruto Uzumaki",
+    "series": "Naruto",
+    "rarity": "ultra rare",
+    "characterImage": "https://exemplo.com/imagens/naruto.png"
+  },
+  {
+    "name": "Itachi Uchiha",
+    "series": "Naruto",
+    "rarity": "legendary",
+    "characterImage": "https://exemplo.com/imagens/itachi.png"
+  },
+  {
+    "name": "Saitama",
+    "series": "One Punch Man",
+    "rarity": "master",
+    "characterImage": "https://exemplo.com/imagens/saitama.png",
+    "overall": 99,
+    "ATA": 99,
+    "LIF": 250,
+    "POW": 250
+  }
+]

@@ -1,5 +1,8 @@
 const User = require("../../utils/userSchema");
-const { EmbedBuilder } = require('discord.js');
+const ui = require('../../utils/embeds');
+
+const DAILY_MIN = 10;
+const DAILY_MAX = 100;
 
 async function dailyRun(client, interaction) {
     const userId = interaction.user.id;
@@ -8,45 +11,36 @@ async function dailyRun(client, interaction) {
         let user = await User.findOne({ id: userId });
 
         if (!user) {
-            user = new User({
-                id: userId,
-                balance: 0,
-                lastDaily: null
-            });
+            user = new User({ id: userId, balance: 0, lastDaily: null });
         }
 
         const today = new Date();
         if (user.lastDaily && user.lastDaily.toDateString() === today.toDateString()) {
-            const embed = new EmbedBuilder()
-                .setTitle('📅 Recompensa diária')
-                .setDescription('Você já coletou sua recompensa diária hoje. Volte amanhã!')
-                .setColor('#9E9E9E')
-                .setFooter({ text: 'AniBattle' });
+            // Meia-noite do dia seguinte, no fuso do servidor.
+            const amanha = new Date(today);
+            amanha.setDate(amanha.getDate() + 1);
+            amanha.setHours(0, 0, 0, 0);
+
+            const embed = ui.warning('Recompensa já coletada', `Você já pegou sua recompensa de hoje.\nA próxima libera <t:${Math.floor(amanha.getTime() / 1000)}:R>.`)
+                .addFields({ name: 'Saldo atual', value: ui.coins(user.balance || 0), inline: true });
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
 
-        const dailyAmount = Math.floor(Math.random() * (100 - 10 + 1) + 10);
-        user.balance += dailyAmount;
+        const dailyAmount = Math.floor(Math.random() * (DAILY_MAX - DAILY_MIN + 1) + DAILY_MIN);
+        user.balance = (user.balance || 0) + dailyAmount;
         user.lastDaily = today;
         await user.save();
 
-        const embed = new EmbedBuilder()
-            .setTitle('💰 Recompensa diária coletada!')
-            .setColor('#FFD700')
-            .setDescription(`Você resgatou sua recompensa diária.`)
+        const embed = ui.success('Recompensa diária coletada', `Você recebeu ${ui.coins(dailyAmount)}.`)
             .addFields(
-                { name: 'Valor recebido', value: `**+${dailyAmount}** moedas`, inline: true },
-                { name: 'Saldo atual', value: `**${user.balance}** moedas`, inline: true }
+                { name: 'Recebido', value: ui.coins(dailyAmount), inline: true },
+                { name: 'Saldo atual', value: ui.coins(user.balance), inline: true }
             )
-            .setFooter({ text: 'Volte amanhã para coletar novamente • AniBattle' })
-            .setTimestamp();
+            .setFooter({ text: `${ui.BRAND} • Volte amanhã para coletar de novo` });
         return interaction.reply({ embeds: [embed] });
     } catch (err) {
         console.error('Erro ao processar a recompensa diária:', err);
-        const embed = new EmbedBuilder()
-            .setTitle('❌ Erro')
-            .setDescription('Houve um erro ao processar sua recompensa diária.')
-            .setColor('#E53935');
+        const embed = ui.error('Erro', 'Houve um erro ao processar sua recompensa diária.');
         return interaction.reply({ embeds: [embed], ephemeral: true });
     }
 }

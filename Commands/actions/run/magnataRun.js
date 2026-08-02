@@ -1,41 +1,53 @@
 const User = require('../../utils/userSchema');
-const { EmbedBuilder } = require('discord.js');
+const ui = require('../../utils/embeds');
 
 async function magnataRun(client, interaction) {
     try {
         await interaction.deferReply();
 
-        const users = await User.find({})
+        const users = await User.find({ balance: { $gt: 0 } })
             .sort({ balance: -1 })
             .limit(10)
             .lean();
 
-        const embed = new EmbedBuilder()
-            .setTitle('💰 Magnatas do AniBattle')
-            .setColor('#FFD700')
-            .setDescription('Top 10 jogadores mais ricos do bot (por saldo em moedas).');
-
         if (!users || users.length === 0) {
-            embed.addFields({ name: '\u200b', value: 'Nenhum jogador com saldo registrado ainda.' });
+            const embed = ui.neutral('💰 Magnatas', 'Nenhum jogador com saldo registrado ainda. Use `/daily` para começar!');
             return interaction.editReply({ embeds: [embed] });
         }
 
-        const list = users.map((u, i) => {
-            const pos = ['🥇', '🥈', '🥉'][i] || `**${i + 1}.**`;
-            const balance = u.balance ?? 0;
-            return `${pos} <@${u.id}> — **${balance}** moedas`;
+        const posicaoDoAutor = await User.countDocuments({ balance: { $gt: 0 } }).then(async () => {
+            const eu = await User.findOne({ id: interaction.user.id }).lean();
+            if (!eu) return null;
+            const acima = await User.countDocuments({ balance: { $gt: eu.balance || 0 } });
+            return { posicao: acima + 1, balance: eu.balance || 0 };
+        });
+
+        const lista = users.map((u, i) => {
+            const destaque = u.id === interaction.user.id;
+            const nome = destaque ? `__<@${u.id}>__` : `<@${u.id}>`;
+            return `${ui.medal(i)} ${nome}\n└ ${ui.coins(u.balance || 0)}`;
         }).join('\n');
 
-        embed.addFields({ name: '\u200b', value: list });
+        const embed = ui.base(ui.STATUS_COLORS.warning)
+            .setTitle('💰 Magnatas do AniBattle')
+            .setDescription(lista);
+
+        if (posicaoDoAutor && posicaoDoAutor.posicao > 10) {
+            embed.addFields({
+                name: 'Sua posição',
+                value: `\`#${posicaoDoAutor.posicao}\` — ${ui.coins(posicaoDoAutor.balance)}`,
+                inline: false
+            });
+        }
 
         return interaction.editReply({ embeds: [embed] });
     } catch (err) {
         console.error('Erro ao buscar magnatas:', err);
-        const embed = new EmbedBuilder().setTitle('❌ Erro').setDescription('Houve um erro ao buscar o ranking.').setColor('#E53935');
+        const embed = ui.error('Erro', 'Houve um erro ao buscar o ranking.');
         try {
             if (interaction.deferred) await interaction.editReply({ embeds: [embed] });
             else await interaction.reply({ embeds: [embed], ephemeral: true });
-        } catch (e) {}
+        } catch (e) { /* ignora */ }
     }
 }
 

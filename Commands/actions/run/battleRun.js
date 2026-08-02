@@ -1,8 +1,9 @@
-const { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } = require('discord.js');
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const User = require("../../utils/userSchema");
+const ui = require('../../utils/embeds');
 
 function battleErrorEmbed(title, description) {
-    return new EmbedBuilder().setTitle(title).setDescription(description).setColor('#E53935');
+    return ui.error(title.replace(/^❌\s*/, ''), description);
 }
 
 async function battleRun(interaction) {
@@ -30,14 +31,20 @@ async function battleRun(interaction) {
     if (!userYData || userYData.inventory.length < 3) {
         return interaction.reply({ embeds: [battleErrorEmbed('❌ Oponente sem cartas', `${userY.username} não tem 3 cartas ou mais para batalhar!`)], ephemeral: false });
     }
-    const challengeEmbed = new EmbedBuilder()
-        .setTitle('Desafio para um AniBattle!')
-        .setDescription(`${userX.username} desafiou ${userY.username} para uma batalha!`)
-        .setColor('#FFA500');
+    const challengeEmbed = ui.base(ui.STATUS_COLORS.warning)
+        .setTitle('⚔️ Desafio de batalha')
+        .setDescription(`**${userX.username}** desafiou **${userY.username}** para um duelo 3 vs 3!`)
+        .addFields(
+            { name: userX.username, value: `🎴 ${userXData.inventory.length} cartas\n⚔️ ${userXData.wins || 0}V — ${userXData.losses || 0}D`, inline: true },
+            { name: 'vs', value: '​', inline: true },
+            { name: userY.username, value: `🎴 ${userYData.inventory.length} cartas\n⚔️ ${userYData.wins || 0}V — ${userYData.losses || 0}D`, inline: true }
+        )
+        .setFooter({ text: `${ui.BRAND} • O desafio expira em 30 segundos` });
 
     const acceptButton = new ButtonBuilder()
         .setCustomId('accept_battle')
-        .setLabel('Aceitar Batalha')
+        .setLabel('Aceitar duelo')
+        .setEmoji('⚔️')
         .setStyle(ButtonStyle.Success);
 
     const actionRow = new ActionRowBuilder().addComponents(acceptButton);

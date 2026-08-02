@@ -1,5 +1,6 @@
 const Market = require('../../utils/marketSchema');
-const { EmbedBuilder } = require('discord.js');
+const User = require('../../utils/userSchema');
+const ui = require('../../utils/embeds');
 
 async function sellCollect(interaction, collector, matchingCards, indexRef, listingPrice, user, rowNavigation, rowConfirmation, buildSellEmbed) {
     collector.on('collect', async (i) => {
@@ -17,7 +18,22 @@ async function sellCollect(interaction, collector, matchingCards, indexRef, list
             await i.editReply({ embeds: [embed], components: [rowNavigation, rowConfirmation], files: [attachment] });
         } else if (i.customId === 'confirm_sell') {
             const card = matchingCards[indexRef.currentIndex];
-            user.inventory = user.inventory.filter(c => c._id.toString() !== card._id.toString());
+
+            // Remoção atômica pelo _id da subdocument, em vez de reatribuir
+            // o array inteiro a partir de uma cópia que pode estar
+            // desatualizada (o usuário pode ter feito outra ação entre abrir
+            // o /sell e confirmar). Se a carta já não estiver mais lá,
+            // aborta em vez de recriar o anúncio a partir de dado velho.
+            const updatedUser = await User.findOneAndUpdate(
+                { id: user.id, 'inventory._id': card._id },
+                { $pull: { inventory: { _id: card._id } } }
+            );
+            if (!updatedUser) {
+                const missingEmbed = ui.error('Carta indisponível', 'Essa carta não está mais no seu inventário.');
+                await i.update({ embeds: [missingEmbed], components: [] });
+                collector.stop('collected');
+                return;
+            }
 
             const listing = new Market({
                 cardId: card._id,
@@ -39,20 +55,14 @@ async function sellCollect(interaction, collector, matchingCards, indexRef, list
             });
 
             await listing.save();
-            await user.save();
 
-            const successEmbed = new EmbedBuilder()
-                .setTitle('✅ Carta listada')
-                .setDescription(`**${card.name}** foi listada no mercado por **${listingPrice}** moedas.`)
-                .setColor('#4CAF50');
-            await i.update({ embeds: [successEmbed], components: [] });
+            const successEmbed = ui.success('Carta anunciada', `${ui.getRarity(card.rarity).emoji} **${ui.cardName(card.name)}** está à venda por ${ui.coins(listingPrice)}.`)
+                .setFooter({ text: `${ui.BRAND} • Use /undosell para retirar o anúncio` });
+            await i.update({ embeds: [successEmbed], components: [], files: [] });
             collector.stop('collected');
         } else if (i.customId === 'cancel_sell') {
-            const cancelEmbed = new EmbedBuilder()
-                .setTitle('Cancelado')
-                .setDescription('Venda cancelada.')
-                .setColor('#9E9E9E');
-            await i.update({ embeds: [cancelEmbed], components: [] });
+            const cancelEmbed = ui.neutral('Anúncio cancelado', 'Sua carta continua no inventário.');
+            await i.update({ embeds: [cancelEmbed], components: [], files: [] });
             collector.stop('collected');
         }
     });

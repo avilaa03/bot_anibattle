@@ -1,4 +1,5 @@
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, AttachmentBuilder } = require('discord.js');
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle, AttachmentBuilder } = require('discord.js');
+const ui = require('../../utils/embeds');
 const User = require('../../utils/userSchema');
 const { sellCollect } = require('../collect/sellCollect.js');
 const { sellEnd } = require('../end/sellEnd.js');
@@ -22,13 +23,17 @@ async function buildSellEmbed(card, listingPrice) {
     const cardImageBuffer = await cardBuilder.build();
     const attachment = new AttachmentBuilder(cardImageBuffer, { name: 'cardImage.png' });
 
-    const embed = new EmbedBuilder()
-        .setTitle('AniBattle — Vender no mercado')
-        .addFields(
-            { name: 'Nome', value: card.name ? card.name.charAt(0).toUpperCase() + card.name.slice(1) : '—', inline: true },
-            { name: 'Raridade', value: card.rarity || '—', inline: true },
-            { name: 'Valor de Venda', value: `${listingPrice} moedas`, inline: true }
-        )
+    const meta = ui.getRarity(card.rarity);
+    const embed = ui.base(meta.color)
+        .setTitle(`🏪 Anunciar ${ui.cardName(card.name)}`)
+        .setDescription([
+            `${meta.emoji} ${ui.rarityTag(card.rarity)} • *${card.series || '—'}*`,
+            '',
+            ui.statLines(card),
+            '',
+            `Preço do anúncio: ${ui.coins(listingPrice)}`,
+            `Valor de mercado: ${ui.coins(card.marketValue || 0)}`
+        ].join('\n'))
         .setImage('attachment://cardImage.png');
 
     return { embed, attachment };
@@ -40,19 +45,13 @@ async function sellRun(client, interaction) {
 
     const user = await User.findOne({ id: interaction.user.id });
     if (!user) {
-        const embed = new EmbedBuilder()
-            .setTitle('❌ Erro')
-            .setDescription('Usuário não encontrado.')
-            .setColor('#E53935');
+        const embed = ui.error('Perfil não encontrado', 'Use `/roll` ou `/daily` para criar seu perfil primeiro.');
         return interaction.reply({ embeds: [embed], ephemeral: true });
     }
     const matchingCards = user.inventory.filter(card => card.name.toLowerCase().includes(cardName.toLowerCase()));
 
     if (matchingCards.length === 0) {
-        const embed = new EmbedBuilder()
-            .setTitle('❌ Carta não encontrada')
-            .setDescription('Nenhuma carta no seu inventário corresponde a esse nome.')
-            .setColor('#E53935');
+        const embed = ui.error('Carta não encontrada', `Nenhuma carta no seu inventário tem "${cardName}" no nome.`);
         return interaction.reply({ embeds: [embed], ephemeral: true });
     }
 
@@ -69,10 +68,7 @@ async function sellRun(client, interaction) {
         embed = result.embed;
         attachment = result.attachment;
     } catch (err) {
-        const errEmbed = new EmbedBuilder()
-            .setTitle('❌ Erro ao gerar a carta')
-            .setDescription(err.message === 'TIMEOUT' ? 'A imagem demorou demais. Tente novamente.' : 'Não foi possível exibir a carta. Tente novamente.')
-            .setColor('#E53935');
+        const errEmbed = ui.error('Erro ao gerar a carta', err.message === 'TIMEOUT' ? 'A imagem demorou demais para carregar. Tente novamente.' : 'Não foi possível exibir a carta. Tente novamente.');
         return interaction.editReply({ embeds: [errEmbed] });
     }
 
@@ -80,13 +76,13 @@ async function sellRun(client, interaction) {
         .addComponents(
             new ButtonBuilder()
                 .setCustomId('prev')
-                .setLabel('Anterior')
-                .setStyle(ButtonStyle.Primary)
+                .setEmoji('◀️')
+                .setStyle(ButtonStyle.Secondary)
                 .setDisabled(matchingCards.length === 1),
             new ButtonBuilder()
                 .setCustomId('next')
-                .setLabel('Próximo')
-                .setStyle(ButtonStyle.Primary)
+                .setEmoji('▶️')
+                .setStyle(ButtonStyle.Secondary)
                 .setDisabled(matchingCards.length === 1)
         );
 
@@ -94,8 +90,9 @@ async function sellRun(client, interaction) {
         .addComponents(
             new ButtonBuilder()
                 .setCustomId('confirm_sell')
-                .setLabel(`Vender por ${listingPrice} moedas`)
-                .setStyle(ButtonStyle.Primary),
+                .setLabel(`Anunciar por ${ui.number(listingPrice)}`)
+                .setEmoji('🏪')
+                .setStyle(ButtonStyle.Success),
             new ButtonBuilder()
                 .setCustomId('cancel_sell')
                 .setLabel('Cancelar')

@@ -1,18 +1,21 @@
-const { EmbedBuilder } = require('discord.js');
+const ui = require('../../utils/embeds');
 
 async function pingRun(client, interaction) {
     const sent = await interaction.reply({ content: 'Calculando...', fetchReply: true });
     const roundtrip = sent.createdTimestamp - interaction.createdTimestamp;
     const wsLatency = Math.round(client.ws.ping);
 
-    const embed = new EmbedBuilder()
-        .setTitle('🏓 Pong!')
-        .setColor('#4CAF50')
+    const pior = Math.max(roundtrip, wsLatency);
+    const cor = pior < 200 ? ui.STATUS_COLORS.success : pior < 500 ? ui.STATUS_COLORS.warning : ui.STATUS_COLORS.error;
+    const status = pior < 200 ? '🟢 Excelente' : pior < 500 ? '🟡 Aceitável' : '🔴 Lento';
+
+    const embed = ui.base(cor)
+        .setTitle('🏓 Pong')
         .addFields(
-            { name: 'Latência da API', value: `**${roundtrip}** ms`, inline: true },
-            { name: 'WebSocket', value: `**${wsLatency}** ms`, inline: true }
-        )
-        .setFooter({ text: 'AniBattle' });
+            { name: 'Resposta', value: `**${roundtrip}** ms`, inline: true },
+            { name: 'WebSocket', value: `**${wsLatency}** ms`, inline: true },
+            { name: 'Status', value: status, inline: true }
+        );
     return interaction.editReply({ content: null, embeds: [embed] });
 }
 

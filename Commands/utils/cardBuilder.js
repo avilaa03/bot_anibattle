@@ -1,81 +1,132 @@
 const { createCanvas, loadImage } = require('canvas');
 
-const MAX_NAME_LENGTH = 22;
-const CARD_RADIUS = 16;
+const CARD_W = 500;
+const CARD_H = 700;
+const CARD_RADIUS = 26;
+const PAD = 26;
 
-const RARITY_COLORS = {
+// Pilha de fontes: node-canvas cai na primeira que existir no sistema.
+const FONT = '"Helvetica Neue", "Arial", sans-serif';
+
+const RARITY_STYLES = {
     common: {
         border: '#9E9E9E',
-        text: '#BDBDBD',
-        accent: '#757575',
-        bg: '#37474F',
-        bgGradient: ['#455A64', '#263238'],
-        barAlpha: 0.35
+        accent: '#BDBDBD',
+        text: '#D6D6D6',
+        badgeText: '#1C1C1C',
+        backdrop: ['#4A5560', '#232A30'],
+        glow: 0,
+        sheen: false
     },
     rare: {
         border: '#2196F3',
-        text: '#90CAF9',
-        accent: '#1976D2',
-        bg: '#0D47A1',
-        bgGradient: ['#1565C0', '#0D47A1'],
-        barAlpha: 0.4
+        accent: '#64B5F6',
+        text: '#BBDEFB',
+        badgeText: '#06294D',
+        backdrop: ['#1565C0', '#0A2B54'],
+        glow: 6,
+        sheen: false
     },
     'ultra rare': {
-        border: '#9C27B0',
-        text: '#CE93D8',
-        accent: '#7B1FA2',
-        bg: '#4A148C',
-        bgGradient: ['#6A1B9A', '#4A148C'],
-        barAlpha: 0.45
+        border: '#AB47BC',
+        accent: '#CE93D8',
+        text: '#E1BEE7',
+        badgeText: '#2E0A38',
+        backdrop: ['#6A1B9A', '#331046'],
+        glow: 10,
+        sheen: false
     },
     legendary: {
         border: '#FF9800',
-        text: '#FFE0B2',
-        accent: '#E65100',
-        bg: '#E65100',
-        bgGradient: ['#FF9800', '#BF360C'],
-        barAlpha: 0.5
+        accent: '#FFB74D',
+        text: '#FFD9A3',
+        badgeText: '#3D2400',
+        backdrop: ['#8A4B10', '#331F08'],
+        glow: 16,
+        sheen: true
     },
     master: {
         border: '#FFD700',
-        text: '#FFF8E1',
-        accent: '#FFA000',
-        bg: '#FF6F00',
-        bgGradient: ['#FFD700', '#FF8F00'],
-        barAlpha: 0.55
+        accent: '#FFE082',
+        text: '#FFEDA1',
+        badgeText: '#4A3B00',
+        backdrop: ['#8A7410', '#332B06'],
+        glow: 22,
+        sheen: true
     }
 };
 
 function getRarityStyle(rarity) {
-    const key = (rarity || 'common').toLowerCase();
-    return RARITY_COLORS[key] || RARITY_COLORS.common;
+    const key = String(rarity || 'common').toLowerCase();
+    return RARITY_STYLES[key] || RARITY_STYLES.common;
 }
 
 function drawRoundedRect(ctx, x, y, w, h, r) {
+    const radius = Math.min(r, w / 2, h / 2);
     ctx.beginPath();
-    ctx.moveTo(x + r, y);
-    ctx.lineTo(x + w - r, y);
-    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-    ctx.lineTo(x + w, y + h - r);
-    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-    ctx.lineTo(x + r, y + h);
-    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-    ctx.lineTo(x, y + r);
-    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.moveTo(x + radius, y);
+    ctx.lineTo(x + w - radius, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + radius);
+    ctx.lineTo(x + w, y + h - radius);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - radius, y + h);
+    ctx.lineTo(x + radius, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - radius);
+    ctx.lineTo(x, y + radius);
+    ctx.quadraticCurveTo(x, y, x + radius, y);
     ctx.closePath();
 }
 
-function truncateName(name) {
-    if (!name || typeof name !== 'string') return 'Carta';
-    const trimmed = name.trim();
-    if (trimmed.length <= MAX_NAME_LENGTH) return trimmed.toUpperCase();
-    return trimmed.slice(0, MAX_NAME_LENGTH - 2).trim() + '…';
+/** Desenha a imagem preenchendo a área toda sem distorcer (estilo CSS object-fit: cover). */
+function drawImageCover(ctx, img, x, y, w, h) {
+    const scale = Math.max(w / img.width, h / img.height);
+    const drawW = img.width * scale;
+    const drawH = img.height * scale;
+    // Ancorado no topo horizontalmente centralizado: em arte de personagem
+    // o rosto quase sempre está na parte de cima, então cortar por baixo
+    // preserva melhor o enquadramento do que centralizar.
+    const dx = x + (w - drawW) / 2;
+    const dy = y;
+    ctx.drawImage(img, dx, dy, drawW, drawH);
+}
+
+/** Desenha a imagem inteira dentro da área, sem cortar (estilo object-fit: contain). */
+function drawImageContain(ctx, img, x, y, w, h) {
+    const scale = Math.min(w / img.width, h / img.height);
+    const drawW = img.width * scale;
+    const drawH = img.height * scale;
+    ctx.drawImage(img, x + (w - drawW) / 2, y + (h - drawH) / 2, drawW, drawH);
+}
+
+/** Reduz o tamanho da fonte até o texto caber na largura disponível. */
+function fitText(ctx, text, maxWidth, startSize, minSize, weight = 'bold') {
+    let size = startSize;
+    ctx.font = `${weight} ${size}px ${FONT}`;
+    while (ctx.measureText(text).width > maxWidth && size > minSize) {
+        size -= 2;
+        ctx.font = `${weight} ${size}px ${FONT}`;
+    }
+    return size;
+}
+
+/** Desenha texto com espaçamento entre letras (node-canvas não tem letterSpacing). */
+function drawSpacedText(ctx, text, centerX, y, spacing) {
+    const chars = [...text];
+    const widths = chars.map((c) => ctx.measureText(c).width);
+    const total = widths.reduce((a, b) => a + b, 0) + spacing * (chars.length - 1);
+    let cursor = centerX - total / 2;
+    const prevAlign = ctx.textAlign;
+    ctx.textAlign = 'left';
+    chars.forEach((c, i) => {
+        ctx.fillText(c, cursor, y);
+        cursor += widths[i] + spacing;
+    });
+    ctx.textAlign = prevAlign;
 }
 
 class CardBuilder {
     constructor(cardData = {}) {
         this.cardData = cardData;
-        this.canvas = createCanvas(500, 700);
+        this.canvas = createCanvas(CARD_W, CARD_H);
         this.context = this.canvas.getContext('2d');
     }
 
@@ -91,194 +142,243 @@ class CardBuilder {
     setRarity(rarity) { this.cardData.rarity = rarity; }
 
     async loadImages() {
-        const url = (u) => (typeof u === 'string' && u.trim().length > 0) ? u.trim() : null;
-        try {
-            const u = url(this.cardData.baseImage);
-            this.baseImage = u ? await loadImage(u) : null;
-        } catch (e) {
-            this.baseImage = null;
-        }
-        try {
-            const u = url(this.cardData.characterImage);
-            this.characterImage = u ? await loadImage(u) : null;
-        } catch (e) {
-            this.characterImage = null;
-        }
-        try {
-            const u = url(this.cardData.seriesImage);
-            this.seriesImage = u ? await loadImage(u) : null;
-        } catch (e) {
-            this.seriesImage = null;
-        }
+        const clean = (u) => (typeof u === 'string' && u.trim().length > 0 ? u.trim() : null);
+        const tryLoad = async (url) => {
+            if (!url) return null;
+            try {
+                return await loadImage(url);
+            } catch (e) {
+                return null;
+            }
+        };
+        const [baseImage, characterImage, seriesImage] = await Promise.all([
+            tryLoad(clean(this.cardData.baseImage)),
+            tryLoad(clean(this.cardData.characterImage)),
+            tryLoad(clean(this.cardData.seriesImage))
+        ]);
+        this.baseImage = baseImage;
+        this.characterImage = characterImage;
+        this.seriesImage = seriesImage;
     }
 
-    drawTemplate() {
+    /** Fundo + arte do personagem, tudo recortado no formato da carta. */
+    drawArtwork() {
         const ctx = this.context;
-        const w = this.canvas.width;
-        const h = this.canvas.height;
         const style = getRarityStyle(this.cardData.rarity);
-        const rarityKey = (this.cardData.rarity || 'common').toLowerCase();
-        const isHighRarity = rarityKey === 'legendary' || rarityKey === 'master';
 
         ctx.save();
-        drawRoundedRect(ctx, 6, 6, w - 12, h - 12, CARD_RADIUS - 2);
+        drawRoundedRect(ctx, 0, 0, CARD_W, CARD_H, CARD_RADIUS);
         ctx.clip();
 
-        const [g1, g2] = style.bgGradient || [style.bg, style.border];
-        const gradient = ctx.createLinearGradient(0, 0, w, h);
-        gradient.addColorStop(0, g1);
-        gradient.addColorStop(1, g2);
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, w, h);
+        // Fundo base gerado por código, com a cor da raridade. Só aparece
+        // onde a arte não cobre (ou se a arte for um PNG com transparência).
+        const bg = ctx.createLinearGradient(0, 0, CARD_W * 0.6, CARD_H);
+        bg.addColorStop(0, style.backdrop[0]);
+        bg.addColorStop(1, style.backdrop[1]);
+        ctx.fillStyle = bg;
+        ctx.fillRect(0, 0, CARD_W, CARD_H);
 
+        // baseImage é cenário opcional atrás do personagem.
         if (this.baseImage) {
-            ctx.globalAlpha = 0.85;
-            ctx.drawImage(this.baseImage, 0, 0, w, h);
-            ctx.globalAlpha = 1;
-            ctx.fillStyle = style.bg;
-            ctx.globalAlpha = 0.25;
-            ctx.fillRect(0, 0, w, h);
-            ctx.globalAlpha = 1;
+            drawImageCover(ctx, this.baseImage, 0, 0, CARD_W, CARD_H);
         }
 
-        const vignette = ctx.createRadialGradient(w / 2, h / 2, w * 0.3, w / 2, h / 2, w * 0.8);
-        vignette.addColorStop(0, 'rgba(0,0,0,0)');
-        vignette.addColorStop(0.7, 'rgba(0,0,0,0)');
-        vignette.addColorStop(1, 'rgba(0,0,0,0.5)');
-        ctx.fillStyle = vignette;
-        ctx.fillRect(0, 0, w, h);
+        if (this.characterImage) {
+            drawImageCover(ctx, this.characterImage, 0, 0, CARD_W, CARD_H);
+        } else {
+            ctx.fillStyle = 'rgba(255,255,255,0.35)';
+            ctx.font = `500 22px ${FONT}`;
+            ctx.textAlign = 'center';
+            ctx.fillText('Imagem indisponível', CARD_W / 2, CARD_H / 2);
+        }
+
+        // Brilho diagonal nas raridades altas, por cima da arte.
+        if (style.sheen) {
+            const sheen = ctx.createLinearGradient(0, CARD_H, CARD_W, 0);
+            sheen.addColorStop(0.30, 'rgba(255,255,255,0)');
+            sheen.addColorStop(0.46, 'rgba(255,255,255,0.14)');
+            sheen.addColorStop(0.60, 'rgba(255,255,255,0)');
+            ctx.fillStyle = sheen;
+            ctx.fillRect(0, 0, CARD_W, CARD_H);
+        }
+
+        // Escurecimento no topo (para o badge e a raridade lerem bem) e
+        // principalmente embaixo, onde ficam nome, série e atributos.
+        const topScrim = ctx.createLinearGradient(0, 0, 0, 170);
+        topScrim.addColorStop(0, 'rgba(0,0,0,0.55)');
+        topScrim.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = topScrim;
+        ctx.fillRect(0, 0, CARD_W, 170);
+
+        const bottomScrim = ctx.createLinearGradient(0, CARD_H * 0.42, 0, CARD_H);
+        bottomScrim.addColorStop(0, 'rgba(0,0,0,0)');
+        bottomScrim.addColorStop(0.55, 'rgba(0,0,0,0.86)');
+        bottomScrim.addColorStop(1, 'rgba(0,0,0,0.97)');
+        ctx.fillStyle = bottomScrim;
+        ctx.fillRect(0, CARD_H * 0.42, CARD_W, CARD_H * 0.58);
 
         ctx.restore();
+    }
 
-        if (isHighRarity) {
+    /** Moldura da raridade: brilho externo + borda dupla. */
+    drawFrame() {
+        const ctx = this.context;
+        const style = getRarityStyle(this.cardData.rarity);
+
+        if (style.glow > 0) {
             ctx.save();
-            ctx.globalAlpha = 0.35;
             ctx.strokeStyle = style.border;
-            for (let i = 1; i <= 5; i++) {
-                ctx.lineWidth = 4 + i * 2;
-                drawRoundedRect(ctx, 3 - i * 2, 3 - i * 2, w - 6 + i * 4, h - 6 + i * 4, CARD_RADIUS + i * 2);
-                ctx.stroke();
-            }
+            ctx.shadowColor = style.border;
+            ctx.shadowBlur = style.glow;
+            ctx.lineWidth = 5;
+            drawRoundedRect(ctx, 4, 4, CARD_W - 8, CARD_H - 8, CARD_RADIUS - 2);
+            ctx.stroke();
+            ctx.stroke();
             ctx.restore();
         }
 
         ctx.strokeStyle = style.border;
-        ctx.lineWidth = 6;
-        drawRoundedRect(ctx, 3, 3, w - 6, h - 6, CARD_RADIUS);
+        ctx.lineWidth = 5;
+        drawRoundedRect(ctx, 4, 4, CARD_W - 8, CARD_H - 8, CARD_RADIUS - 2);
         ctx.stroke();
 
-        ctx.strokeStyle = style.accent;
-        ctx.lineWidth = 2;
-        drawRoundedRect(ctx, 8, 8, w - 16, h - 16, CARD_RADIUS - 4);
+        ctx.strokeStyle = 'rgba(255,255,255,0.22)';
+        ctx.lineWidth = 1.5;
+        drawRoundedRect(ctx, 11, 11, CARD_W - 22, CARD_H - 22, CARD_RADIUS - 8);
         ctx.stroke();
     }
 
-    drawCharacter() {
+    /** Badge de overall (topo esquerdo) e pílula de raridade (topo direito). */
+    drawHeader() {
         const ctx = this.context;
-        const w = this.canvas.width;
         const style = getRarityStyle(this.cardData.rarity);
+        const overall = this.cardData.overall ?? 0;
 
-        const charX = 60;
-        const charY = 160;
-        const charW = 380;
-        const charH = 340;
+        const badgeSize = 86;
+        const bx = PAD;
+        const by = PAD;
 
         ctx.save();
-        drawRoundedRect(ctx, charX - 4, charY - 4, charW + 8, charH + 8, 12);
-        ctx.fillStyle = style.border;
-        ctx.globalAlpha = style.barAlpha ?? 0.35;
+        drawRoundedRect(ctx, bx, by, badgeSize, badgeSize, 16);
+        const badgeGrad = ctx.createLinearGradient(bx, by, bx + badgeSize, by + badgeSize);
+        badgeGrad.addColorStop(0, style.accent);
+        badgeGrad.addColorStop(1, style.border);
+        ctx.fillStyle = badgeGrad;
         ctx.fill();
+        ctx.strokeStyle = 'rgba(0,0,0,0.28)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.restore();
+
+        ctx.fillStyle = style.badgeText;
+        ctx.textAlign = 'center';
+        const ovrSize = fitText(ctx, String(overall), badgeSize - 20, 44, 26);
+        ctx.font = `bold ${ovrSize}px ${FONT}`;
+        ctx.fillText(String(overall), bx + badgeSize / 2, by + badgeSize / 2 + 10);
+
+        ctx.font = `bold 13px ${FONT}`;
+        ctx.globalAlpha = 0.75;
+        drawSpacedText(ctx, 'OVR', bx + badgeSize / 2, by + badgeSize - 13, 1.5);
         ctx.globalAlpha = 1;
-        ctx.strokeStyle = style.accent;
+
+        // Pílula de raridade
+        const rarityLabel = String(this.cardData.rarity || 'common').toUpperCase();
+        ctx.font = `bold 15px ${FONT}`;
+        const labelChars = [...rarityLabel];
+        const labelWidth = labelChars.reduce((sum, c) => sum + ctx.measureText(c).width, 0) + 2 * (labelChars.length - 1);
+        const pillW = labelWidth + 30;
+        const pillH = 34;
+        const px = CARD_W - PAD - pillW;
+        const py = PAD + 4;
+
+        ctx.save();
+        drawRoundedRect(ctx, px, py, pillW, pillH, pillH / 2);
+        ctx.fillStyle = 'rgba(0,0,0,0.5)';
+        ctx.fill();
+        ctx.strokeStyle = style.border;
         ctx.lineWidth = 2;
         ctx.stroke();
         ctx.restore();
 
-        if (this.characterImage) {
-            ctx.save();
-            drawRoundedRect(ctx, charX, charY, charW, charH, 8);
-            ctx.clip();
-            ctx.drawImage(this.characterImage, charX, charY, charW, charH);
-            ctx.restore();
-        } else {
-            ctx.fillStyle = '#455A64';
-            ctx.fillRect(charX, charY, charW, charH);
-            ctx.fillStyle = '#78909C';
-            ctx.font = '24px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText('Imagem indisponível', w / 2, 330);
-        }
+        ctx.fillStyle = style.text;
+        ctx.font = `bold 15px ${FONT}`;
+        drawSpacedText(ctx, rarityLabel, px + pillW / 2, py + pillH / 2 + 5, 2);
     }
 
-    drawText() {
+    /** Nome, série, divisória e a linha de atributos. */
+    drawFooter() {
         const ctx = this.context;
-        const w = this.canvas.width;
         const style = getRarityStyle(this.cardData.rarity);
-        const name = truncateName(this.cardData.name);
-        const barAlpha = style.barAlpha ?? 0.35;
+        const maxWidth = CARD_W - PAD * 2;
 
-        ctx.save();
-        ctx.fillStyle = style.accent;
-        ctx.globalAlpha = barAlpha;
-        drawRoundedRect(ctx, 40, 95, w - 80, 52, 10);
-        ctx.fill();
-        ctx.restore();
-
-        ctx.shadowColor = 'rgba(0,0,0,0.9)';
-        ctx.shadowBlur = 4;
-        ctx.shadowOffsetX = 2;
-        ctx.shadowOffsetY = 2;
-
-        ctx.fillStyle = style.text;
-        ctx.font = 'bold 36px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText(name, 250, 142);
-
-        ctx.shadowBlur = 0;
-        ctx.shadowOffsetX = 0;
-        ctx.shadowOffsetY = 0;
-
-        ctx.save();
-        ctx.fillStyle = style.border;
-        ctx.globalAlpha = 0.6;
-        drawRoundedRect(ctx, 50, 118, 58, 42, 8);
-        ctx.fill();
-        ctx.restore();
-
-        ctx.fillStyle = '#fff';
-        ctx.font = 'bold 52px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText(String(this.cardData.overall ?? 0), 79, 152);
-
-        ctx.font = 'bold 18px Arial';
-        ctx.fillStyle = style.text;
-        ctx.textAlign = 'center';
-        ctx.fillText((this.cardData.rarity || 'common').toUpperCase(), 250, 652);
-
+        // Logo da série (opcional) logo acima do nome, à direita.
         if (this.seriesImage) {
-            ctx.drawImage(this.seriesImage, 150, 478, 200, 80);
+            ctx.save();
+            ctx.globalAlpha = 0.9;
+            drawImageContain(ctx, this.seriesImage, CARD_W - PAD - 150, 470, 150, 54);
+            ctx.restore();
         }
 
+        const name = String(this.cardData.name || 'Carta').trim();
+        const displayName = name.charAt(0).toUpperCase() + name.slice(1);
+
+        ctx.textAlign = 'left';
         ctx.save();
-        ctx.fillStyle = style.accent;
-        ctx.globalAlpha = barAlpha;
-        drawRoundedRect(ctx, 30, 548, w - 60, 52, 10);
-        ctx.fill();
+        ctx.shadowColor = 'rgba(0,0,0,0.85)';
+        ctx.shadowBlur = 8;
+        ctx.fillStyle = '#FFFFFF';
+        const nameSize = fitText(ctx, displayName, maxWidth, 46, 24);
+        ctx.font = `bold ${nameSize}px ${FONT}`;
+        ctx.fillText(displayName, PAD, 566);
         ctx.restore();
 
-        ctx.font = 'bold 24px Arial';
-        ctx.fillStyle = '#fff';
+        if (this.cardData.series) {
+            ctx.fillStyle = style.text;
+            const seriesSize = fitText(ctx, this.cardData.series, maxWidth, 20, 13, '500');
+            ctx.font = `500 ${seriesSize}px ${FONT}`;
+            ctx.fillText(this.cardData.series, PAD, 594);
+        }
+
+        // Divisória
+        ctx.strokeStyle = style.border;
+        ctx.globalAlpha = 0.5;
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(PAD, 616);
+        ctx.lineTo(CARD_W - PAD, 616);
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+
+        // Atributos
+        const stats = [
+            { label: 'ATA', value: this.cardData.ATA ?? 0 },
+            { label: 'LIF', value: this.cardData.LIF ?? 0 },
+            { label: 'POW', value: this.cardData.POW ?? 0 }
+        ];
+        const colWidth = (CARD_W - PAD * 2) / 3;
+
         ctx.textAlign = 'center';
-        ctx.fillText(`ATA ${this.cardData.ATA ?? 0}`, 110, 582);
-        ctx.fillText(`LIF ${this.cardData.LIF ?? 0}`, 250, 582);
-        ctx.fillText(`POW ${this.cardData.POW ?? 0}`, 390, 582);
+        stats.forEach((stat, i) => {
+            const cx = PAD + colWidth * i + colWidth / 2;
+
+            ctx.fillStyle = style.text;
+            ctx.globalAlpha = 0.8;
+            ctx.font = `bold 14px ${FONT}`;
+            drawSpacedText(ctx, stat.label, cx, 645, 2);
+            ctx.globalAlpha = 1;
+
+            ctx.fillStyle = '#FFFFFF';
+            ctx.font = `bold 32px ${FONT}`;
+            ctx.fillText(String(stat.value), cx, 678);
+        });
     }
 
     async build() {
         await this.loadImages();
-        this.drawTemplate();
-        this.drawCharacter();
-        this.drawText();
+        this.drawArtwork();
+        this.drawHeader();
+        this.drawFooter();
+        this.drawFrame();
         return this.canvas.toBuffer();
     }
 }

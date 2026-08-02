@@ -1,6 +1,6 @@
 const User = require('../../utils/userSchema');
-const { EmbedBuilder } = require('discord.js');
 const { giveCollect } = require('../collect/giveCollect.js');
+const ui = require('../../utils/embeds');
 
 async function giveRun(client, interaction) {
     const amount = interaction.options.getNumber('amount');
@@ -8,12 +8,19 @@ async function giveRun(client, interaction) {
     const senderId = interaction.user.id;
 
     try {
+        if (recipient.id === senderId) {
+            return interaction.reply({ embeds: [ui.error('Destinatário inválido', 'Você não pode transferir moedas para si mesmo.')], ephemeral: true });
+        }
+        if (recipient.bot) {
+            return interaction.reply({ embeds: [ui.error('Destinatário inválido', 'Bots não recebem moedas.')], ephemeral: true });
+        }
+        if (!Number.isFinite(amount) || amount <= 0) {
+            return interaction.reply({ embeds: [ui.error('Valor inválido', 'Informe uma quantia maior que zero.')], ephemeral: true });
+        }
+
         const senderUser = await User.findOne({ id: senderId });
         if (!senderUser || senderUser.balance < amount) {
-            const embed = new EmbedBuilder()
-                .setTitle('❌ Saldo insuficiente')
-                .setDescription('Você não tem dinheiro suficiente para essa transferência.')
-                .setColor('#E53935');
+            const embed = ui.error('Saldo insuficiente', `Você tem ${ui.coins(senderUser?.balance || 0)} e precisa de ${ui.coins(amount)}.`);
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
 
@@ -22,29 +29,21 @@ async function giveRun(client, interaction) {
             recipientUser = new User({ id: recipient.id, balance: 0 });
         }
 
-        const embed = new EmbedBuilder()
-            .setTitle('💸 Confirmar transferência')
-            .setColor('#FF9800')
-            .setDescription(`Você está prestes a enviar **${amount}** moedas para **${recipient.username}**.`)
+        const embed = ui.warning('Confirmar transferência', `Você vai enviar ${ui.coins(amount)} para **${recipient.username}**.`)
             .addFields(
-                { name: 'Seu saldo atual', value: `${senderUser.balance} moedas`, inline: true },
-                { name: 'Ação', value: 'Digite **confirmar** para concluir ou **cancelar** para desistir.', inline: false }
+                { name: 'Seu saldo agora', value: ui.coins(senderUser.balance), inline: true },
+                { name: 'Depois da transferência', value: ui.coins(senderUser.balance - amount), inline: true },
+                { name: 'Como confirmar', value: 'Digite `confirmar` no chat para concluir, ou `cancelar` para desistir.', inline: false }
             )
-            .setFooter({ text: 'AniBattle' });
+            .setFooter({ text: `${ui.BRAND} • Você tem 30 segundos` });
 
-        const confirmationMessage = await interaction.reply({
-            embeds: [embed],
-            fetchReply: true
-        });
+        await interaction.reply({ embeds: [embed], fetchReply: true });
 
         giveCollect(interaction, senderId, amount, senderUser, recipientUser);
     } catch (err) {
         console.error('Erro ao executar o comando give:', err);
-        const embed = new EmbedBuilder()
-            .setTitle('❌ Erro')
-            .setDescription('Houve um erro ao executar o comando give.')
-            .setColor('#E53935');
-        interaction.reply({ embeds: [embed], ephemeral: true });
+        const embed = ui.error('Erro', 'Houve um erro ao executar a transferência.');
+        interaction.reply({ embeds: [embed], ephemeral: true }).catch(() => {});
     }
 }
 

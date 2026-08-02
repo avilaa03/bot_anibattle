@@ -9,6 +9,9 @@ const { registerCommands } = require('./commands/utils/registry');
 require('./Commands/utils/battleState');
 
 mongoose.set('strictQuery', false);
+mongoose.connection.on('error', (err) => {
+  console.error('Erro de conexão com o MongoDB:', err);
+});
 
 const client = new Client ({
   intents: [
@@ -33,7 +36,11 @@ client.on('interactionCreate', async (interaction) => {
       const { commandName } = interaction;
       const cmd = client.slashCommands.get(commandName);
       if (cmd) {
-        cmd.run(client, interaction);
+        // Precisa de "await": sem isso, um erro dentro do comando vira uma
+        // Promise rejeitada sem tratamento e derruba o processo inteiro do
+        // bot (foi exatamente o que aconteceu no crash do /roll), em vez de
+        // cair no catch logo abaixo.
+        await cmd.run(client, interaction);
       } else {
         const embed = new EmbedBuilder()
           .setTitle('❌ Comando indisponível')
@@ -55,100 +62,66 @@ client.on('interactionCreate', async (interaction) => {
         .setTitle('❌ Erro')
         .setDescription('Ocorreu um erro ao processar sua ação. Tente novamente.')
         .setColor('#E53935');
-      interaction.reply({ embeds: [embed], ephemeral: true }).catch(() => {});
+      // Se já tiver dado deferReply, precisa editar a resposta pendente em
+      // vez de tentar responder de novo (o que geraria um outro erro).
+      const respond = interaction.deferred
+        ? interaction.editReply({ embeds: [embed] })
+        : interaction.reply({ embeds: [embed], ephemeral: true });
+      respond.catch(() => {});
     }
   }
 });
 
-
-
-
-(async () => {
-  try {
-    client.slashCommands = new Collection();
-    await registerCommands(client, '../commands');
-    // console.log(client.slashCommands);
-    const slashCommandsJson = client.slashCommands.map(
-      (cmd) => cmd.getSlashCommandJSON()
-      );
-      // console.log(slashCommandsJson);
-    console.log('Started refreshing application (/) commands.');
-    await rest.put(Routes.applicationCommands(CLIENT_ID), {
-      body: slashCommandsJson
-    });
-    const registeredSlashCommands = await client.rest.get(
-      Routes.applicationCommands(CLIENT_ID)
-    );
-    // console.log(registeredSlashCommands);
-    console.log('Successfully reloaded application (/) commands.');
-  } catch (error) {
-    console.error(error);
-  }
-})();
-
 client.on('ready', () => {
-  console.log("The bot is ready")
-
-  mongoose.connect(process.env.MONGODB_URI, {
-    keepAlive: true,
-  });
-})
-
-// client.on("message", async (message) => {
-//   giveMoneyCommand.handle(message);
-//   dailyCommand.handle(message);
-//   balanceCommand.handle(message);
-// });
-
-// client.on('messageCreate', async (message) => {
-//   await messageCountSchema.findOneAndUpdate({
-//     _id: message.author.id
-//   }, {
-//     _id: message.author.id,
-//     $inc: {
-//       messageCount: 1
-//     }
-//   }, {
-//     upsert: true
-//   })
-// });
-
-var express = require('express');
-var app = express();
-
-app.get('/', function(req, res){
-   res.send("Hello world!");
+  console.log('O bot está pronto (conectado ao Discord).');
 });
 
-app.listen(3000);
-
-app.post('/inserir', function(req, res){
-  console.log(req);
-  res.send({
-    "nome": req.body
-  });
+// Rede de segurança: nunca deixar uma rejeição de Promise sem tratamento
+// derrubar o processo inteiro (o bug do /roll acima era exatamente isso).
+process.on('unhandledRejection', (err) => {
+  console.error('Unhandled promise rejection:', err);
 });
 
-const bodyParser = require('body-parser');
+// Servidor HTTP mínimo, só para health-check (útil em plataformas de host
+// que exigem uma porta aberta para considerar o serviço "vivo").
+const express = require('express');
+const app = express();
+const PORT = process.env.PORT || 3000;
 
-app.use(express.json());
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
+app.get('/', (req, res) => {
+  res.send('AniBattle está online.');
+});
 
+async function start() {
+  if (!process.env.MONGODB_URI) {
+    console.error('MONGODB_URI não definido no .env — encerrando.');
+    process.exit(1);
+  }
 
-// client.on('messageCreate', async (message) => {
-//   if (message.content === "ping") {
-//     const reply = await message.reply('pong')
-//     reply.react('🇧🇴')
-//   }
-// })
+  // Conecta no MongoDB ANTES de logar no Discord e antes de aceitar
+  // interações. Antes, a conexão só era iniciada dentro do evento "ready"
+  // do client — como o bot já passa a receber /comandos assim que fica
+  // pronto, um /roll disparado rápido demais podia estourar os 3 segundos
+  // que o Discord dá para responder (erro "Unknown interaction", 10062),
+  // porque a query no Mongo ainda estava esperando a conexão terminar.
+  await mongoose.connect(process.env.MONGODB_URI, { keepAlive: true });
+  console.log('Conectado ao MongoDB.');
 
-// client.on('messageReactionAdd', async (reaction) => {
-//   if (reaction.partial) {
-//     await reaction.fetch()
-//   }
-//   console.log(reaction)
-// })
+  client.slashCommands = new Collection();
+  await registerCommands(client, '../commands');
+  const slashCommandsJson = client.slashCommands.map((cmd) => cmd.getSlashCommandJSON());
+  console.log('Started refreshing application (/) commands.');
+  await rest.put(Routes.applicationCommands(CLIENT_ID), { body: slashCommandsJson });
+  console.log('Successfully reloaded application (/) commands.');
 
+  app.listen(PORT, () => {
+    console.log(`Health-check HTTP ouvindo na porta ${PORT}`);
+  });
 
-client.login(process.env.TOKEN)
+  await client.login(process.env.TOKEN);
+}
+
+start().catch((err) => {
+  console.error('Erro ao iniciar o bot:', err);
+  process.exit(1);
+});

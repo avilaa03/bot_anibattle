@@ -1,23 +1,28 @@
-const { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } = require('discord.js');
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { createBattle, generateBattleId } = require('../../utils/battleState');
+const ui = require('../../utils/embeds');
 
 const MAX_CARDS_SHOWN = 25;
 const CARDS_PER_ROW = 5;
 
 function buildDeckChoiceMessage(battleId, side, inventory, selectedIndices, deck) {
-    const embed = new EmbedBuilder()
-        .setTitle('⚔️ Escolha 3 cartas para a batalha')
+    const completo = deck.length === 3;
+
+    const embed = ui.base(completo ? ui.STATUS_COLORS.success : ui.STATUS_COLORS.warning)
+        .setTitle('⚔️ Monte seu time')
         .setDescription(
-            deck.length < 3
-                ? `Clique em **3 cartas** abaixo (${deck.length}/3 escolhidas).`
-                : '✅ **Deck completo!** Aguardando seu oponente...'
-        )
-        .setColor(deck.length === 3 ? '#00FF00' : '#FFA500');
+            completo
+                ? '✅ **Time completo!** Aguardando seu oponente escolher...'
+                : `Escolha **3 cartas** para batalhar.\n\n${'🔵'.repeat(deck.length)}${'⚪'.repeat(3 - deck.length)}  **${deck.length}/3**\n\n💡 *A ordem importa: sua 1ª carta enfrenta a 1ª do oponente, e assim por diante.*`
+        );
 
     if (deck.length > 0) {
         embed.addFields({
-            name: 'Suas cartas escolhidas',
-            value: deck.map((c, i) => `${i + 1}. ${c.name}`).join('\n')
+            name: 'Seu time',
+            value: deck.map((c, i) => {
+                const meta = ui.getRarity(c.rarity);
+                return `\`${i + 1}\` ${meta.emoji} **${ui.cardName(c.name)}** — OVR ${c.overall ?? 0}\n└ ⚔️ ${c.ATA ?? 0} · ❤️ ${c.LIF ?? 0} · 💥 ${c.POW ?? 0}`;
+            }).join('\n')
         });
     }
 
@@ -31,12 +36,17 @@ function buildDeckChoiceMessage(battleId, side, inventory, selectedIndices, deck
             if (index >= cardsToShow.length) break;
             const card = cardsToShow[index];
             const isSelected = selectedIndices.has(index);
-            const label = card.name.length > 80 ? card.name.slice(0, 77) + '...' : card.name;
+            const meta = ui.getRarity(card.rarity);
+            // O OVR no rótulo deixa a escolha estratégica sem precisar
+            // abrir o inventário em outra janela.
+            const nomeCurto = card.name.length > 60 ? card.name.slice(0, 57) + '…' : card.name;
+            const label = `${nomeCurto} · ${card.overall ?? 0}`;
             actionRow.addComponents(
                 new ButtonBuilder()
                     .setCustomId(`battle_pick_${battleId}_${side}_${index}`)
-                    .setLabel(isSelected ? `✓ ${label.slice(0, 76)}` : label)
-                    .setStyle(isSelected ? ButtonStyle.Success : ButtonStyle.Primary)
+                    .setLabel(label.slice(0, 80))
+                    .setEmoji(meta.emoji)
+                    .setStyle(isSelected ? ButtonStyle.Success : ButtonStyle.Secondary)
                     .setDisabled(isSelected)
             );
         }

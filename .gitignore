@@ -5,6 +5,11 @@ node_modules
 .env
 config.json
 
+# PNGs de preview de carta gerados localmente
+scripts/preview/
+# Manifestos grandes gerados pelo importador do AniList
+scripts/cards.anilist.json
+
 tmp/uploads/*
 #!tpm/
 # Compiled source #

@@ -1,86 +1,113 @@
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const User = require('../../utils/userSchema');
-let currentCollector = null;
+const ui = require('../../utils/embeds');
+
+// Coletores ativos por usuário (ver rollRun.js para o motivo de não usar
+// mais uma única variável de módulo compartilhada entre todos os usuários).
+const activeCollectors = new Map();
+
+const CARDS_PER_PAGE = 8;
+
+function getOvr(card) {
+    return card.overall ?? (card.marketValue != null ? Math.round(card.marketValue / 10) : 0);
+}
 
 module.exports = async (client, interaction, inventoryCollect, inventoryEnd) => {
     const user = await User.findOne({ id: interaction.user.id });
 
-        if (!user || user.inventory.length === 0) {
-            const embed = new EmbedBuilder()
-                .setTitle('📋 Inventário vazio')
-                .setDescription('Seu inventário está vazio. Use /roll para ganhar cartas!')
-                .setColor('#9E9E9E');
-            return interaction.reply({ embeds: [embed], ephemeral: true });
-        }
+    if (!user || user.inventory.length === 0) {
+        const embed = ui.neutral('📋 Inventário vazio', 'Você ainda não tem cartas. Use `/roll` para ganhar a primeira!');
+        return interaction.reply({ embeds: [embed], ephemeral: true });
+    }
 
-    const favCard = user.inventory.find(card => card.cardId.equals(user.favCard));
-    const cardsPerPage = 6;
-    let currentPage = 0;
+    // Ordena por raridade (mais rara primeiro) e depois por overall, que é
+    // como o jogador espera ver a coleção — as melhores cartas no topo.
+    const cards = [...user.inventory].sort((a, b) => {
+        const byRarity = ui.compareRarityDesc(a.rarity, b.rarity);
+        return byRarity !== 0 ? byRarity : getOvr(b) - getOvr(a);
+    });
+
+    const favCard = user.favCard
+        ? cards.find((c) => c.cardId && c.cardId.equals(user.favCard))
+        : null;
+
+    const totalValue = cards.reduce((sum, c) => sum + (c.marketValue || 0), 0);
+    const totalPages = Math.ceil(cards.length / CARDS_PER_PAGE);
+
+    // Contagem por raridade, para o resumo do topo.
+    const byRarity = cards.reduce((acc, c) => {
+        const key = String(c.rarity || 'common').toLowerCase();
+        acc[key] = (acc[key] || 0) + 1;
+        return acc;
+    }, {});
+    const rarityResumo = Object.keys(ui.RARITIES)
+        .filter((key) => byRarity[key])
+        .map((key) => `${ui.RARITIES[key].emoji} ${byRarity[key]}`)
+        .join('  ');
 
     const generateEmbed = (page) => {
-        const start = page * cardsPerPage;
-        const end = start + cardsPerPage;
-        const currentCards = user.inventory.slice(start, end);
+        const start = page * CARDS_PER_PAGE;
+        const pageCards = cards.slice(start, start + CARDS_PER_PAGE);
 
-        const embed = new EmbedBuilder()
-            .setTitle('Seu Inventário de Cartas')
-            .setDescription('Aqui estão as cartas do seu inventário.')
-            .setFooter({ text: `Página ${page + 1} de ${Math.ceil(user.inventory.length / cardsPerPage)}` });
+        const lista = pageCards.map((card, i) => {
+            const meta = ui.getRarity(card.rarity);
+            const isFav = favCard && card.cardId && card.cardId.equals(user.favCard);
+            return `\`${String(start + i + 1).padStart(2, '0')}\` ${meta.emoji} **${ui.cardName(card.name)}**${isFav ? ' ⭐' : ''}\n`
+                + `└ ${card.series || '—'} • OVR **${getOvr(card)}** • ${ui.coins(card.marketValue || 0)}`;
+        }).join('\n');
 
-        if (favCard) {
-            embed.setThumbnail(favCard.image);
+        const embed = ui.base(ui.STATUS_COLORS.info)
+            .setAuthor({ name: `Coleção de ${interaction.user.username}`, iconURL: interaction.user.displayAvatarURL() })
+            .setDescription(`${rarityResumo}\n\n${lista}`)
+            .addFields(
+                { name: 'Total de cartas', value: `**${ui.number(cards.length)}**`, inline: true },
+                { name: 'Valor da coleção', value: ui.coins(totalValue), inline: true }
+            )
+            .setFooter({ text: `${ui.BRAND} • Página ${page + 1} de ${totalPages}` });
+
+        if (favCard && (favCard.characterImage || favCard.baseImage)) {
+            embed.setThumbnail(favCard.characterImage || favCard.baseImage);
         }
-
-        currentCards.forEach(card => {
-            embed.addFields({ name: card.name, value: `OVR: ${card.overall ?? (card.marketValue != null ? Math.round(card.marketValue / 10) : 0)}`, inline: false });
-        });
 
         return embed;
     };
 
     const generateButtons = (page) => {
-        const buttons = new ActionRowBuilder();
-
-        if (page > 0) {
-            buttons.addComponents(
-                new ButtonBuilder()
-                    .setCustomId('previous_page')
-                    .setLabel('Página Anterior')
-                    .setStyle(ButtonStyle.Primary)
-            );
-        }
-
-        if ((page + 1) * cardsPerPage < user.inventory.length) {
-            buttons.addComponents(
-                new ButtonBuilder()
-                    .setCustomId('next_page')
-                    .setLabel('Próxima Página')
-                    .setStyle(ButtonStyle.Primary)
-            );
-        }
-
-        if (buttons.components.length === 0) {
-            buttons.addComponents(
-                new ButtonBuilder()
-                    .setCustomId('no_action')
-                    .setLabel('Sem Ações')
-                    .setStyle(ButtonStyle.Secondary)
-                    .setDisabled(true)
-            );
-        }
-
-        return buttons;
+        return new ActionRowBuilder().addComponents(
+            new ButtonBuilder()
+                .setCustomId('previous_page')
+                .setEmoji('◀️')
+                .setStyle(ButtonStyle.Secondary)
+                .setDisabled(page <= 0),
+            new ButtonBuilder()
+                .setCustomId('page_indicator')
+                .setLabel(`${page + 1} / ${totalPages}`)
+                .setStyle(ButtonStyle.Secondary)
+                .setDisabled(true),
+            new ButtonBuilder()
+                .setCustomId('next_page')
+                .setEmoji('▶️')
+                .setStyle(ButtonStyle.Secondary)
+                .setDisabled(page >= totalPages - 1)
+        );
     };
 
-    // if (currentCollector) {
-    //     currentCollector.stop();
-    // }
+    const previousCollector = activeCollectors.get(interaction.user.id);
+    if (previousCollector) {
+        previousCollector.stop();
+    }
 
     const embedMessage = await interaction.reply({
-        embeds: [generateEmbed(currentPage)],
-        components: [generateButtons(currentPage)],
+        embeds: [generateEmbed(0)],
+        components: [generateButtons(0)],
         fetchReply: true
     });
 
-    currentCollector = inventoryCollect(interaction, embedMessage, currentPage, user, generateEmbed, generateButtons, inventoryEnd);
+    const collector = inventoryCollect(interaction, embedMessage, 0, user, generateEmbed, generateButtons, inventoryEnd);
+    activeCollectors.set(interaction.user.id, collector);
+    collector.on('end', () => {
+        if (activeCollectors.get(interaction.user.id) === collector) {
+            activeCollectors.delete(interaction.user.id);
+        }
+    });
 };

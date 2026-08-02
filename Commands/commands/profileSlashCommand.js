@@ -14,6 +14,11 @@ module.exports = class ProfileSlashCommand extends BaseSlashCommand {
     getSlashCommandJSON() {
         return new SlashCommandBuilder()
             .setName(this.name)
-            .setDescription('Mostra o perfil do usuário com informações do inventário');
+            .setDescription('Mostra o perfil de um jogador (o seu, se não mencionar ninguém)')
+            .addUserOption(option =>
+                option.setName('user')
+                    .setDescription('Jogador que você quer ver o perfil')
+                    .setRequired(false)
+            );
     }
 };

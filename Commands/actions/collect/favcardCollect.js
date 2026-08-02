@@ -1,3 +1,5 @@
+const ui = require('../../utils/embeds');
+
 module.exports = async (interaction, message, indexRef, matchingCards, user, favCardEnd, updateEmbed, createRow) => {
     const filter = i => ['prev', 'next', 'fav', 'cancel'].includes(i.customId) && i.user.id === interaction.user.id;
     const collector = message.createMessageComponentCollector({ filter, time: 60000 });
@@ -12,12 +14,15 @@ module.exports = async (interaction, message, indexRef, matchingCards, user, fav
             const { embed, attachment } = await updateEmbed(indexRef.currentIndex);
             await i.update({ embeds: [embed], components: [createRow()], files: [attachment] });
         } else if (i.customId === 'fav') {
-            user.favCard = matchingCards[indexRef.currentIndex].cardId;
+            const escolhida = matchingCards[indexRef.currentIndex];
+            user.favCard = escolhida.cardId;
             await user.save();
-            await i.update({ content: `A carta **${matchingCards[indexRef.currentIndex].name}** foi adicionada como favorita!`, embeds: [], components: [] });
+            const embed = ui.success('Carta favorita definida', `⭐ ${ui.getRarity(escolhida.rarity).emoji} **${ui.cardName(escolhida.name)}** agora aparece no seu \`/profile\`.`);
+            if (escolhida.characterImage) embed.setThumbnail(escolhida.characterImage);
+            await i.update({ embeds: [embed], components: [] });
             collector.stop('collected');
         } else if (i.customId === 'cancel') {
-            await i.update({ content: 'Operação cancelada.', embeds: [], components: [] });
+            await i.update({ embeds: [ui.neutral('Cancelado', 'Sua carta favorita continua a mesma.')], components: [] });
             collector.stop('collected');
         }
     });

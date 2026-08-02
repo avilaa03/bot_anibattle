@@ -1,8 +1,9 @@
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, AttachmentBuilder } = require('discord.js');
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle, AttachmentBuilder } = require('discord.js');
 const { showCollect } = require('../collect/showCollect.js');
 const User = require('../../utils/userSchema.js');
 const { showEnd } = require('../end/showEnd.js');
 const CardBuilder = require('../../utils/cardBuilder.js');
+const ui = require('../../utils/embeds.js');
 
 async function showRun(client, interaction) {
     const name = interaction.options.getString('name').toLowerCase();
@@ -10,20 +11,14 @@ async function showRun(client, interaction) {
     const user = await User.findOne({ id: interaction.user.id });
 
     if (!user || user.inventory.length === 0) {
-        const embed = new EmbedBuilder()
-            .setTitle('📋 Inventário vazio')
-            .setDescription('Seu inventário está vazio ou você ainda não foi encontrado no sistema.')
-            .setColor('#9E9E9E');
+        const embed = ui.neutral('📋 Inventário vazio', 'Você ainda não tem cartas. Use `/roll` para ganhar a primeira!');
         return interaction.reply({ embeds: [embed], ephemeral: true });
     }
 
     const matchingCards = user.inventory.filter(c => c.name.toLowerCase().includes(name));
 
     if (matchingCards.length === 0) {
-        const embed = new EmbedBuilder()
-            .setTitle('❌ Carta não encontrada')
-            .setDescription('Nenhuma carta no seu inventário corresponde a esse nome.')
-            .setColor('#E53935');
+        const embed = ui.error('Carta não encontrada', `Nenhuma carta no seu inventário tem "${name}" no nome.`);
         return interaction.reply({ embeds: [embed], ephemeral: true });
     }
 
@@ -35,14 +30,23 @@ async function showRun(client, interaction) {
     const updateEmbed = async (index, cards, includeImage = false) => {
         const card = cards[index];
         const cardBuilder = new CardBuilder(card);
+        const meta = ui.getRarity(card.rarity);
 
-        const embed = new EmbedBuilder()
-            .setTitle('AniBattle')
+        const embed = ui.base(meta.color)
+            .setAuthor({ name: `Coleção de ${interaction.user.username}`, iconURL: interaction.user.displayAvatarURL() })
+            .setTitle(`${meta.emoji} ${ui.cardName(card.name)}`)
+            .setDescription([
+                `*${card.series || '—'}*`,
+                '',
+                ui.statLines(card),
+                '',
+                `Raridade ${ui.rarityTag(card.rarity)} • Overall **${card.overall ?? 0}**`
+            ].join('\n'))
             .addFields(
-                { name: "Nome", value: card.name.charAt(0).toUpperCase() + card.name.slice(1) },
-                { name: "Série", value: card.series },
-                { name: "Raridade", value: card.rarity }
-            );
+                { name: 'Valor de mercado', value: ui.coins(card.marketValue || 0), inline: true },
+                { name: 'Venda rápida', value: ui.coins(card.valueToSell || Math.floor((card.marketValue || 0) / 2)), inline: true }
+            )
+            .setFooter({ text: `${ui.BRAND} • Carta ${index + 1} de ${cards.length}` });
 
         if (includeImage) {
             const cardImageBuffer = await cardBuilder.build();
@@ -59,13 +63,13 @@ async function showRun(client, interaction) {
         .addComponents(
             new ButtonBuilder()
                 .setCustomId('prev')
-                .setLabel('Anterior')
-                .setStyle(ButtonStyle.Primary)
+                .setEmoji('◀️')
+                .setStyle(ButtonStyle.Secondary)
                 .setDisabled(matchingCards.length === 1),
             new ButtonBuilder()
                 .setCustomId('next')
-                .setLabel('Próximo')
-                .setStyle(ButtonStyle.Primary)
+                .setEmoji('▶️')
+                .setStyle(ButtonStyle.Secondary)
                 .setDisabled(matchingCards.length === 1)
         );
 

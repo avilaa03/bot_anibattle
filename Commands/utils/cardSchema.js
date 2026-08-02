@@ -12,11 +12,11 @@ const cardSchema = new Schema({
     },
     seriesImage: {
         type: String,
-        required: true
+        default: ''
     },
     baseImage: {
         type: String,
-        required: true
+        default: ''
     },
     characterImage: {
         type: String,

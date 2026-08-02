@@ -1,15 +1,23 @@
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const User = require('../../utils/userSchema');
+const ui = require('../../utils/embeds');
 
-module.exports = async (interaction, embedMessage, currentPage, listings, cardsPerPage, marketEnd) => {
+/**
+ * Paginação + compra do /market.
+ *
+ * generateEmbed/generateButtons chegam por parâmetro: antes eles eram
+ * usados aqui dentro sem existir neste escopo, o que quebrava os botões
+ * de página com ReferenceError no primeiro clique.
+ */
+module.exports = async (interaction, embedMessage, currentPage, listings, cardsPerPage, marketEnd, generateEmbed, generateButtons) => {
+    const totalPages = Math.ceil(listings.length / cardsPerPage);
+
     const filter = (i) => ['previous_page', 'next_page'].includes(i.customId) && i.user.id === interaction.user.id;
-    const collector = embedMessage.createMessageComponentCollector({ filter, time: 60000 });
+    const collector = embedMessage.createMessageComponentCollector({ filter, time: 120000 });
 
     collector.on('collect', async (i) => {
         if (i.customId === 'previous_page') {
-            currentPage--;
+            currentPage = Math.max(0, currentPage - 1);
         } else if (i.customId === 'next_page') {
-            currentPage++;
+            currentPage = Math.min(totalPages - 1, currentPage + 1);
         }
 
         await i.update({
@@ -18,45 +26,51 @@ module.exports = async (interaction, embedMessage, currentPage, listings, cardsP
         });
     });
 
-    collector.on('end', () => {
-        marketEnd(embedMessage);
-    });
-
     const numberFilter = (response) => {
-        const choice = parseInt(response.content);
-        return !isNaN(choice) && choice > 0 && choice <= Math.min(cardsPerPage, listings.length - currentPage * cardsPerPage) && response.author.id === interaction.user.id;
+        if (response.author.id !== interaction.user.id) return false;
+        const choice = parseInt(response.content, 10);
+        const disponiveisNaPagina = Math.min(cardsPerPage, listings.length - currentPage * cardsPerPage);
+        return !isNaN(choice) && choice > 0 && choice <= disponiveisNaPagina;
     };
 
-    const numberCollector = interaction.channel.createMessageCollector({ filter: numberFilter, time: 60000 });
+    const numberCollector = interaction.channel.createMessageCollector({ filter: numberFilter, time: 120000 });
 
     numberCollector.on('collect', async (response) => {
-        const choice = parseInt(response.content);
+        const choice = parseInt(response.content, 10);
         const selectedCard = listings[currentPage * cardsPerPage + choice - 1];
+        if (!selectedCard) return;
 
-        const confirmEmbed = new EmbedBuilder()
-            .setTitle('Confirmar Compra')
-            .setDescription(`Você quer comprar a carta **${selectedCard.cardName}** por **${selectedCard.listingPrice}** moedas?`)
-            .setColor(0x00FF00);
+        const meta = ui.getRarity(selectedCard.rarity);
+        const ovr = selectedCard.overall ?? (selectedCard.marketValue != null ? Math.round(selectedCard.marketValue / 10) : 0);
 
-        const confirmButtons = new ActionRowBuilder()
-            .addComponents(
-                new ButtonBuilder()
-                    .setCustomId('confirm_buy')
-                    .setLabel('Confirmar')
-                    .setStyle(ButtonStyle.Success),
-                new ButtonBuilder()
-                    .setCustomId('cancel_buy')
-                    .setLabel('Cancelar')
-                    .setStyle(ButtonStyle.Danger)
-            );
+        const confirmEmbed = ui.base(meta.color)
+            .setTitle('🛒 Confirmar compra')
+            .setDescription([
+                `${meta.emoji} **${ui.cardName(selectedCard.cardName)}** — OVR **${ovr}**`,
+                `*${selectedCard.series || '—'}*`,
+                '',
+                ui.statLines(selectedCard),
+                '',
+                `Preço: ${ui.coins(selectedCard.listingPrice)}`
+            ].join('\n'));
+
+        if (selectedCard.characterImage) confirmEmbed.setThumbnail(selectedCard.characterImage);
+
+        const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+        const confirmButtons = new ActionRowBuilder().addComponents(
+            new ButtonBuilder().setCustomId('confirm_buy').setLabel('Comprar').setEmoji('🪙').setStyle(ButtonStyle.Success),
+            new ButtonBuilder().setCustomId('cancel_buy').setLabel('Cancelar').setStyle(ButtonStyle.Secondary)
+        );
 
         const confirmMessage = await response.reply({ embeds: [confirmEmbed], components: [confirmButtons], fetchReply: true });
 
-        // Chamar o método para lidar com a confirmação da compra
         marketEnd(confirmMessage, selectedCard, interaction);
     });
 
-    numberCollector.on('end', () => {
+    collector.on('end', () => {
+        numberCollector.stop();
         marketEnd(embedMessage);
     });
+
+    return collector;
 };

@@ -1,5 +1,5 @@
-const { EmbedBuilder } = require('discord.js');
 const User = require('../utils/userSchema');
+const ui = require('../utils/embeds');
 const { getBattle, getBattleByUserId, addCardToDeck, bothDecksReady, finishBattle, COIN_WINNER, COIN_LOSER } = require('../utils/battleState');
 const { runBattle } = require('../utils/battleEngine');
 const { buildDeckChoiceMessage } = require('../actions/collect/battleCollect');
@@ -95,20 +95,23 @@ async function handleBattlePick(client, interaction) {
     const winnerUser = result.winner === 'X' ? state.userX : result.winner === 'Y' ? state.userY : null;
     const loserUser = result.winner === 'X' ? state.userY : result.winner === 'Y' ? state.userX : null;
 
-    const resultEmbed = new EmbedBuilder()
-        .setTitle(result.winner ? '⚔️ Batalha encerrada!' : '⚔️ Empate!')
-        .setColor(result.winner ? '#FFD700' : '#808080')
+    const placar = `**${result.winsX}** — **${result.winsY}**`;
+
+    const resultEmbed = ui.base(result.winner ? 0xFFD700 : ui.STATUS_COLORS.neutral)
+        .setTitle(result.winner ? '⚔️ Fim da batalha' : '⚔️ Empate')
         .setDescription(
             result.winner
-                ? `**${winnerUser.username}** venceu por **${result.winner === 'X' ? result.winsX : result.winsY}** a **${result.winner === 'X' ? result.winsY : result.winsX}**!`
-                : `Ninguém levou vantagem. **${result.winsX}** x **${result.winsY}**.`
+                ? `👑 **${winnerUser.username}** venceu ${state.userX.username} ${placar} ${state.userY.username}`
+                : `Ninguém levou vantagem — ${state.userX.username} ${placar} ${state.userY.username}`
         );
 
-    const roundFields = result.rounds.map((r, i) => ({
-        name: `Rodada ${r.round}`,
-        value: `${r.cardX} vs ${r.cardY} → **${r.winner === 'A' ? state.userX.username : state.userY.username}** venceu.`
-    }));
-    resultEmbed.addFields(roundFields);
+    const roundLines = result.rounds.map((r) => {
+        const venceuX = r.winner === 'A';
+        const nomeVencedor = venceuX ? state.userX.username : state.userY.username;
+        return `\`R${r.round}\` ${venceuX ? '🟢' : '🔴'} **${ui.cardName(r.cardX)}**  vs  **${ui.cardName(r.cardY)}**\n└ ${nomeVencedor} levou a rodada`;
+    }).join('\n');
+
+    resultEmbed.addFields({ name: 'Rodadas', value: roundLines, inline: false });
 
     if (winnerUser && loserUser) {
         const winnerData = await User.findOne({ id: winnerUser.id });
@@ -123,9 +126,11 @@ async function handleBattlePick(client, interaction) {
             loserData.losses = (loserData.losses || 0) + 1;
             await loserData.save();
         }
-        resultEmbed.addFields(
-            { name: '💰 Recompensas', value: `${winnerUser.username}: +${COIN_WINNER} moedas\n${loserUser.username}: +${COIN_LOSER} moedas`, inline: false }
-        );
+        resultEmbed.addFields({
+            name: '💰 Recompensas',
+            value: `👑 ${winnerUser.username} — ${ui.coins(COIN_WINNER)}\n🥈 ${loserUser.username} — ${ui.coins(COIN_LOSER)}`,
+            inline: false
+        });
     }
 
     const challengeChannel = await client.channels.fetch(state.challengeChannelId).catch(() => null);
