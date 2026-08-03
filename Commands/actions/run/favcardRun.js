@@ -1,6 +1,6 @@
 const User = require('../../utils/userSchema');
 const { renderCard } = require('../../utils/cardRenderer.js');
-const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags } = require('discord.js');
 const ui = require('../../utils/embeds');
 const { molduraEfetiva } = require('../../utils/vip');
 
@@ -14,14 +14,14 @@ module.exports = async (client, interaction, favCardCollect, favCardEnd) => {
 
     if (!user || user.inventory.length === 0) {
         const embed = ui.neutral('📋 Inventário vazio', 'Você ainda não tem cartas. Use `/roll` para ganhar a primeira!');
-        return interaction.reply({ embeds: [embed], ephemeral: true });
+        return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
     }
 
     const matchingCards = user.inventory.filter(c => c.name.toLowerCase().includes(name));
 
     if (matchingCards.length === 0) {
         const embed = ui.error('Carta não encontrada', `Nenhuma carta no seu inventário tem "${name}" no nome.`);
-        return interaction.reply({ embeds: [embed], ephemeral: true });
+        return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
     }
 
     await interaction.deferReply();

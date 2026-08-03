@@ -111,6 +111,20 @@ const UserSchema = new Schema({
         diasAtivos: { type: Number, default: 0 }
     },
 
+    // Suspensão administrativa, aplicada pelo painel do site.
+    //
+    // Ficar no próprio documento do usuário (em vez de numa coleção
+    // separada) faz o bot descobrir o banimento na mesma consulta que já
+    // faria de qualquer jeito, sem custo extra por comando.
+    banimento: {
+        ativo: { type: Boolean, default: false },
+        motivo: { type: String, default: null },
+        aplicadoEm: { type: Date, default: null },
+        aplicadoPor: { type: String, default: null },
+        // Nulo com ativo=true significa banimento permanente.
+        expiraEm: { type: Date, default: null }
+    },
+
     // Missões ativas. Regeneradas quando o período vira.
     missoes: {
         diarias: [{
@@ -134,6 +148,14 @@ UserSchema.index({ balance: -1 });
 UserSchema.index({ 'discovered.cardId': 1 });
 UserSchema.index({ elo: -1 });
 UserSchema.index({ 'wishlist.cardId': 1 });
+// Índice PARCIAL, não sparse: `banimento.ativo` tem default false, então
+// o campo existe em todo documento e um índice sparse indexaria a base
+// inteira. Com partialFilterExpression só os banidos entram, e o índice
+// fica com algumas dezenas de entradas em vez de milhares.
+UserSchema.index(
+    { 'banimento.ativo': 1 },
+    { partialFilterExpression: { 'banimento.ativo': true } }
+);
 
 const User = mongoose.models.User || mongoose.model('User', UserSchema);
 

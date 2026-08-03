@@ -1,4 +1,4 @@
-const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags } = require('discord.js');
 const Market = require('../../utils/marketSchema.js');
 const { mymarketCollect } = require('../collect/mymarketCollect.js');
 const ui = require('../../utils/embeds.js');
@@ -8,7 +8,7 @@ async function mymarketRun(client, interaction) {
 
     if (listings.length === 0) {
         const embed = ui.neutral('📋 Seus anúncios', 'Você não tem cartas anunciadas. Use `/sell` para colocar uma à venda.');
-        return interaction.reply({ embeds: [embed], ephemeral: true });
+        return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
     }
 
     const disponiveis = listings.filter((l) => l.status === 'available');

@@ -1,4 +1,4 @@
-const { AttachmentBuilder } = require('discord.js');
+const { AttachmentBuilder, MessageFlags } = require('discord.js');
 const ui = require('./embeds');
 const achievements = require('./achievements');
 
@@ -110,7 +110,7 @@ async function notificarProgresso(interaction, resultado) {
 
     if (embedsPrivados.length > 0) {
         try {
-            const payload = { embeds: embedsPrivados, ephemeral: true };
+            const payload = { embeds: embedsPrivados, flags: MessageFlags.Ephemeral };
             if (interaction.replied || interaction.deferred) await interaction.followUp(payload);
             else await interaction.reply(payload);
         } catch (err) { /* aviso nunca quebra o comando */ }

@@ -1,4 +1,4 @@
-const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags } = require('discord.js');
 const User = require("../../utils/userSchema");
 const ui = require('../../utils/embeds');
 const { MIN_WAGER } = require('../../utils/economy');
@@ -11,7 +11,7 @@ async function battleRun(interaction) {
     const wager = apostaPedida && apostaPedida > MIN_WAGER ? apostaPedida : MIN_WAGER;
 
     const recusar = (titulo, descricao) =>
-        interaction.reply({ embeds: [ui.error(titulo, descricao)], ephemeral: true });
+        interaction.reply({ embeds: [ui.error(titulo, descricao)], flags: MessageFlags.Ephemeral });
 
     if (!userY) {
         return recusar('Usuário necessário', 'Você precisa mencionar alguém para desafiar.');

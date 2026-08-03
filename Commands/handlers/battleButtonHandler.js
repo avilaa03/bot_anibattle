@@ -16,6 +16,7 @@ const elo = require('../utils/elo');
 const { registrar } = require('../utils/progresso');
 const { anunciarConquistas } = require('../utils/notificacoes');
 const { buildDeckChoiceMessage } = require('../actions/collect/battleCollect');
+const { MessageFlags } = require('discord.js');
 
 /** Busca o inventário atual do jogador direto do banco. */
 async function carregarInventario(userId) {
@@ -37,7 +38,7 @@ async function handleBattlePick(client, interaction) {
     if (!battle) {
         battle = await getBattleByUserId(interaction.user.id);
         if (!battle) {
-            await interaction.reply({ content: 'Esta batalha expirou ou já foi concluída.', ephemeral: true }).catch(() => {});
+            await interaction.reply({ content: 'Esta batalha expirou ou já foi concluída.', flags: MessageFlags.Ephemeral }).catch(() => {});
             return true;
         }
     }
@@ -45,20 +46,20 @@ async function handleBattlePick(client, interaction) {
     const isX = side === 'X';
     const donoDoLado = isX ? battle.userX.id : battle.userY.id;
     if (donoDoLado !== interaction.user.id) {
-        await interaction.reply({ content: 'Você não é um dos jogadores desta batalha.', ephemeral: true }).catch(() => {});
+        await interaction.reply({ content: 'Você não é um dos jogadores desta batalha.', flags: MessageFlags.Ephemeral }).catch(() => {});
         return true;
     }
 
     const jaEscolhidas = isX ? battle.selectedIdsX : battle.selectedIdsY;
     if (jaEscolhidas.map(String).includes(cardId)) {
-        await interaction.reply({ content: 'Você já escolheu esta carta.', ephemeral: true }).catch(() => {});
+        await interaction.reply({ content: 'Você já escolheu esta carta.', flags: MessageFlags.Ephemeral }).catch(() => {});
         return true;
     }
 
     const inventario = await carregarInventario(interaction.user.id);
     const card = inventario.find((c) => String(c._id) === cardId);
     if (!card) {
-        await interaction.reply({ content: 'Essa carta não está mais no seu inventário.', ephemeral: true }).catch(() => {});
+        await interaction.reply({ content: 'Essa carta não está mais no seu inventário.', flags: MessageFlags.Ephemeral }).catch(() => {});
         return true;
     }
 
@@ -68,7 +69,7 @@ async function handleBattlePick(client, interaction) {
     // banco recusa a quarta em vez de aceitarmos um deck inválido.
     const atualizada = await addCardToDeck(battle.battleId, side, card);
     if (!atualizada) {
-        await interaction.followUp({ content: 'Você já escolheu 3 cartas! Aguarde o oponente.', ephemeral: true }).catch(() => {});
+        await interaction.followUp({ content: 'Você já escolheu 3 cartas! Aguarde o oponente.', flags: MessageFlags.Ephemeral }).catch(() => {});
         return true;
     }
     battle = atualizada;
@@ -98,7 +99,7 @@ async function handleBattlePick(client, interaction) {
 
     await interaction.followUp({
         content: `**${ui.cardName(card.name)}** entrou no seu time! (${deckAtual.length}/3)`,
-        ephemeral: true
+        flags: MessageFlags.Ephemeral
     }).catch(() => {});
 
     if (!bothDecksReady(battle)) return true;

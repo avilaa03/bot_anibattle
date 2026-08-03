@@ -19,6 +19,12 @@ const { trySpend, addBalance } = require('./economy');
 const VAGAS_VALIDAS = [4, 8, 16];
 const TTL_MS = 60 * 60 * 1000;   // torneio sem começar em 1h é cancelado
 
+// Um torneio inteiro resolve em segundos: as batalhas rodam em memória,
+// sem esperar ninguém. Se ficar 5 minutos em "emandamento", o bot caiu no
+// meio da execução — e aí o servidor fica travado para sempre, porque
+// `ativoNoServidor` considera essa fase ocupada e nada nunca a tira dela.
+const TTL_EXECUCAO_MS = 5 * 60 * 1000;
+
 function gerarId() {
     return 'tn' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 }
@@ -220,14 +226,32 @@ async function cancelar(tournamentId) {
     return torneio;
 }
 
-/** Cancela torneios esquecidos em inscrição, devolvendo as taxas. */
+/**
+ * Cancela torneios travados, devolvendo as taxas.
+ *
+ * Dois casos, com prazos diferentes:
+ *
+ * - `inscricoes` parada há mais de uma hora: ninguém vai começar mais.
+ * - `emandamento` há mais de cinco minutos: impossível, a execução leva
+ *   segundos. Significa que o bot caiu no meio. Antes essa fase não era
+ *   varrida, e um crash durante a execução travava o servidor para
+ *   sempre — nenhum torneio novo podia ser criado, e não havia botão
+ *   para cancelar porque a mensagem antiga já tinha sido substituída
+ *   pelo "deferUpdate" da execução.
+ */
 async function limparAbandonados() {
-    const limite = new Date(Date.now() - TTL_MS);
-    const velhos = await Tournament.find({ fase: 'inscricoes', criadoEm: { $lt: limite } });
-    for (const t of velhos) {
+    const agora = Date.now();
+    const travados = await Tournament.find({
+        $or: [
+            { fase: 'inscricoes', criadoEm: { $lt: new Date(agora - TTL_MS) } },
+            { fase: 'emandamento', criadoEm: { $lt: new Date(agora - TTL_EXECUCAO_MS) } }
+        ]
+    });
+
+    for (const t of travados) {
         await cancelar(t.tournamentId);
     }
-    return velhos.length;
+    return travados.length;
 }
 
 /** Nome da rodada conforme quantos participantes restam. */
@@ -241,6 +265,8 @@ function nomeRodada(quantosNaRodada) {
 
 module.exports = {
     VAGAS_VALIDAS,
+    TTL_MS,
+    TTL_EXECUCAO_MS,
     gerarId,
     ativoNoServidor,
     buscar,

@@ -1,4 +1,4 @@
-const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags } = require('discord.js');
 const User = require('../../utils/userSchema');
 const ui = require('../../utils/embeds');
 const { trySpend, addBalance } = require('../../utils/economy');
@@ -9,7 +9,7 @@ async function giveRun(client, interaction) {
     const senderId = interaction.user.id;
 
     const recusar = (titulo, descricao) =>
-        interaction.reply({ embeds: [ui.error(titulo, descricao)], ephemeral: true });
+        interaction.reply({ embeds: [ui.error(titulo, descricao)], flags: MessageFlags.Ephemeral });
 
     try {
         if (recipient.id === senderId) {
@@ -85,9 +85,9 @@ async function giveRun(client, interaction) {
         console.error('Erro ao executar o comando give:', err);
         const embed = ui.error('Erro', 'Houve um erro ao executar a transferência.');
         if (interaction.replied || interaction.deferred) {
-            interaction.followUp({ embeds: [embed], ephemeral: true }).catch(() => {});
+            interaction.followUp({ embeds: [embed], flags: MessageFlags.Ephemeral }).catch(() => {});
         } else {
-            interaction.reply({ embeds: [embed], ephemeral: true }).catch(() => {});
+            interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral }).catch(() => {});
         }
     }
 }

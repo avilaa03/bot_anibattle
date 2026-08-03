@@ -4,6 +4,7 @@ const { getProgress } = require('../../utils/discovery');
 const { getTier, corPerfilEfetiva, isVipAtivo } = require('../../utils/vip');
 const achievements = require('../../utils/achievements');
 const elo = require('../../utils/elo');
+const { MessageFlags } = require('discord.js');
 
 function getCardOvr(card) {
     return card.overall ?? (card.marketValue != null ? Math.round(card.marketValue / 10) : 0);
@@ -15,7 +16,7 @@ async function profileRun(client, interaction) {
 
     if (!user) {
         const embed = ui.error('Perfil não encontrado', `${alvo.id === interaction.user.id ? 'Você ainda não tem' : `**${alvo.username}** ainda não tem`} um perfil. Ele é criado ao usar \`/roll\` ou \`/daily\`.`);
-        return interaction.reply({ embeds: [embed], ephemeral: true });
+        return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
     }
 
     const inventory = user.inventory || [];

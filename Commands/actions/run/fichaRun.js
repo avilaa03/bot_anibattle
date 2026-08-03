@@ -1,4 +1,4 @@
-const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags } = require('discord.js');
 const Card = require('../../utils/cardSchema');
 const User = require('../../utils/userSchema');
 const ui = require('../../utils/embeds');
@@ -28,7 +28,7 @@ async function fichaRun(client, interaction) {
     if (!nomeBuscado && numeroBuscado == null) {
         return interaction.reply({
             embeds: [ui.error('Informe o que procurar', 'Use `/ficha nome:Kirito` ou `/ficha numero:42`.')],
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 
@@ -124,7 +124,10 @@ async function fichaRun(client, interaction) {
                     inline: true
                 },
                 {
-                    name: '💭 Procurada por',
+                    // "Procuram" e não "disputam": a carta rolada é única
+                    // e fica com quem rolou. O número mede demanda no
+                    // mercado, não briga pela cópia.
+                    name: '💭 Procuram',
                     value: `${await wishlist.contarDesejos(carta._id)} jogador(es)`,
                     inline: true
                 }
@@ -163,7 +166,7 @@ async function fichaRun(client, interaction) {
                 'Alguns resultados ficaram de fora',
                 `${encontradas.length - disponiveis.length} carta(s) com esse nome ainda não estão na sua Pokédex.`
             )],
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         }).catch(() => {});
     }
 

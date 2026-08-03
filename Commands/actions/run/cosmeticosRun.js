@@ -1,4 +1,4 @@
-const { ActionRowBuilder, StringSelectMenuBuilder } = require('discord.js');
+const { ActionRowBuilder, StringSelectMenuBuilder, MessageFlags } = require('discord.js');
 const User = require('../../utils/userSchema');
 const ui = require('../../utils/embeds');
 const { MOLDURAS, getPerks, isVipAtivo } = require('../../utils/vip');
@@ -80,7 +80,7 @@ async function cosmeticosRun(client, interaction) {
     const user = await User.findOne({ id: interaction.user.id }).lean();
 
     if (!isVipAtivo(user)) {
-        return interaction.reply({ embeds: [montarEmbed(user)], ephemeral: true });
+        return interaction.reply({ embeds: [montarEmbed(user)], flags: MessageFlags.Ephemeral });
     }
 
     await interaction.reply({
@@ -102,7 +102,7 @@ async function cosmeticosRun(client, interaction) {
             const atual = await User.findOne({ id: interaction.user.id }).lean();
             const perks = getPerks(atual);
             if (!perks.moldurasDisponiveis.includes(escolha)) {
-                return i.reply({ embeds: [ui.error('Indisponível', 'Essa moldura não está liberada no seu plano.')], ephemeral: true });
+                return i.reply({ embeds: [ui.error('Indisponível', 'Essa moldura não está liberada no seu plano.')], flags: MessageFlags.Ephemeral });
             }
             atualizacao['cosmetics.moldura'] = escolha;
         } else {

@@ -1,5 +1,6 @@
 const User = require('../../utils/userSchema');
 const ui = require('../../utils/embeds');
+const { MessageFlags } = require('discord.js');
 
 async function balanceRun(client, interaction) {
     const alvo = interaction.options.getUser('user') || interaction.user;
@@ -9,7 +10,7 @@ async function balanceRun(client, interaction) {
 
         if (!user) {
             const embed = ui.neutral('🪙 Saldo', `${alvo.id === interaction.user.id ? 'Você ainda não tem' : `**${alvo.username}** ainda não tem`} um perfil. Use \`/daily\` ou \`/roll\` para começar.`);
-            return interaction.reply({ embeds: [embed], ephemeral: true });
+            return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
         }
 
         const inventoryValue = (user.inventory || []).reduce((sum, c) => sum + (c.marketValue || 0), 0);
@@ -27,7 +28,7 @@ async function balanceRun(client, interaction) {
     } catch (err) {
         console.error('Erro ao buscar o saldo do usuário:', err);
         const embed = ui.error('Erro', 'Houve um erro ao buscar o saldo.');
-        return interaction.reply({ embeds: [embed], ephemeral: true });
+        return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
     }
 }
 

@@ -9,9 +9,21 @@ const { getPerks } = require('./vip');
  * e o que faz o `/roll` dos outros virar um evento social em vez de uma
  * mensagem que ninguém lê.
  *
- * Aqui o aviso é só isso: um aviso. Quem rolou continua com prioridade
- * total sobre a carta. A ideia é criar conversa e movimentar o mercado
- * ("te dou 5 mil nessa"), não criar disputa por clique.
+ * REGRA QUE NÃO PODE SER QUEBRADA: desejar não disputa nada.
+ *
+ * No AniBattle, a carta rolada vira uma cópia ÚNICA no inventário de quem
+ * rolou — não existe carta "solta" que dois jogadores possam reivindicar.
+ * A lista de desejos é só um aviso: "apareceu, e está com fulano". O que
+ * ela cria é conversa e movimento no mercado ("te dou 5 mil nessa"), não
+ * corrida por clique.
+ *
+ * Isso é o oposto do modelo de bot em que a carta aparece no canal e o
+ * primeiro a clicar leva. Ali a wishlist é aviso de leilão; aqui é aviso
+ * de oportunidade de negócio. Qualquer texto de comando que sugira
+ * "disputa" está errado e precisa ser corrigido.
+ *
+ * A contagem de quantos desejam a mesma carta não mede concorrência pela
+ * cópia: mede procura, ou seja, quanto ela deve valer numa troca.
  */
 
 // Limite por jogador. VIP leva mais — é conveniência, não poder.

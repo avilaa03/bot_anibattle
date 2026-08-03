@@ -1,7 +1,7 @@
 const { renderCard } = require('../../utils/cardRenderer');
 const Card = require('../../utils/cardSchema');
 const User = require('../../utils/userSchema');
-const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags } = require('discord.js');
 const ui = require('../../utils/embeds');
 const { getPerks, molduraEfetiva } = require('../../utils/vip');
 const wishlist = require('../../utils/wishlist');
@@ -59,7 +59,7 @@ module.exports = async (client, interaction, rollCollect, rollEnd) => {
         user = await User.findOne({ id: interaction.user.id });
     } catch (err) {
         console.error('Erro ao buscar as informações do usuário:', err);
-        return interaction.reply({ embeds: [errorEmbed('Houve um erro ao buscar suas informações. Tente novamente.')], ephemeral: true });
+        return interaction.reply({ embeds: [errorEmbed('Houve um erro ao buscar suas informações. Tente novamente.')], flags: MessageFlags.Ephemeral });
     }
 
     const now = Date.now();
@@ -83,7 +83,7 @@ module.exports = async (client, interaction, rollCollect, rollEnd) => {
         } else {
             embed.setFooter({ text: `${ui.BRAND} • Assinantes rolam com até 40% menos espera — veja /vip` });
         }
-        return interaction.reply({ embeds: [embed], ephemeral: true });
+        return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
     }
 
     await interaction.deferReply();

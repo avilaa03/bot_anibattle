@@ -27,4 +27,6 @@ const marketSchema = new Schema({
 marketSchema.index({ status: 1, listingPrice: 1 });
 marketSchema.index({ sellerId: 1, status: 1 });
 
-module.exports = mongoose.model('Market', marketSchema);
+// Mesma rede de segurança dos outros schemas: carregar o arquivo duas
+// vezes não pode derrubar o bot.
+module.exports = mongoose.models.Market || mongoose.model('Market', marketSchema);

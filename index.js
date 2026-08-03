@@ -1,9 +1,21 @@
-const { Client, GatewayIntentBits, Partials, Collection } = require("discord.js");
+const { Client, GatewayIntentBits, Partials, Collection, Events, MessageFlags } = require("discord.js");
 const mongoose = require('mongoose');
 require('dotenv/config');
 
 const { REST, Routes, EmbedBuilder } = require('discord.js');
-const { registerCommands } = require('./commands/utils/registry');
+// ATENÇÃO AO "C" MAIÚSCULO. A pasta no disco chama-se "Commands".
+//
+// O macOS tem sistema de arquivos que não diferencia maiúsculas, então
+// `./commands/...` e `./Commands/...` abrem o mesmo arquivo. Mas o Node
+// guarda os módulos em cache pela STRING do caminho — então os dois
+// grafias viram dois módulos independentes, cada um com seu próprio
+// estado. O sintoma disso foi o "Cannot overwrite `Card` model once
+// compiled": o schema era carregado duas vezes e registrava o model duas
+// vezes no mongoose.
+//
+// Em Linux (VPS) seria pior: `./commands` simplesmente não existiria e o
+// bot nem subiria.
+const { registerCommands } = require('./Commands/utils/registry');
 
 const { recoverPendingBattles, sweepStaleBattles } = require('./Commands/utils/battleState');
 const monitoring = require('./Commands/utils/monitoring');
@@ -36,8 +48,18 @@ const client = new Client({
 const CLIENT_ID = process.env.CLIENT_ID;
 const rest = new REST({ version: '10' }).setToken(process.env.TOKEN);
 
+const { bloquearSeBanido } = require('./Commands/utils/moderacao');
+const presenca = require('./Commands/utils/presenca');
+
 client.on('interactionCreate', async (interaction) => {
   try {
+    // Porteiro: conta suspensa não passa daqui. Fica antes de tudo de
+    // propósito — se a checagem estivesse dentro de cada comando, bastaria
+    // esquecer de um para o banido continuar jogando por ele.
+    if (interaction.isChatInputCommand() || interaction.isButton() || interaction.isStringSelectMenu()) {
+      if (await bloquearSeBanido(interaction)) return;
+    }
+
     if (interaction.isChatInputCommand()) {
       const { commandName } = interaction;
       const cmd = client.slashCommands.get(commandName);
@@ -52,7 +74,7 @@ client.on('interactionCreate', async (interaction) => {
           .setTitle('❌ Comando indisponível')
           .setDescription('Este comando não está disponível no momento.')
           .setColor('#E53935');
-        interaction.reply({ embeds: [embed], ephemeral: true });
+        interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
       }
     } else if (interaction.isButton() || interaction.isStringSelectMenu()) {
       const id = interaction.customId;
@@ -84,14 +106,19 @@ client.on('interactionCreate', async (interaction) => {
       // vez de tentar responder de novo (o que geraria um outro erro).
       const respond = interaction.deferred
         ? interaction.editReply({ embeds: [embed] })
-        : interaction.reply({ embeds: [embed], ephemeral: true });
+        : interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
       respond.catch(() => {});
     }
   }
 });
 
-client.on('ready', () => {
+// Usamos a constante em vez da string literal: o discord.js renomeou
+// 'ready' para 'clientReady' na v14.22 (em v15 só o nome novo existe), e
+// `Events.ClientReady` sempre aponta para o nome certo da versão instalada.
+client.on(Events.ClientReady, () => {
   console.log('O bot está pronto (conectado ao Discord).');
+  // Publica servidores e sinal de vida para o painel do site.
+  presenca.iniciar(client);
 });
 
 // Rede de segurança: nunca deixar uma rejeição de Promise sem tratamento
@@ -113,6 +140,8 @@ process.on('uncaughtException', async (err) => {
 for (const sinal of ['SIGINT', 'SIGTERM']) {
   process.on(sinal, async () => {
     console.log(`\nRecebido ${sinal}, encerrando...`);
+    presenca.parar();
+    await presenca.marcarOffline();
     await monitoring.encerrar(2000);
     await mongoose.connection.close().catch(() => {});
     process.exit(0);
@@ -177,6 +206,8 @@ async function start() {
   }, 5 * 60 * 1000);
 
   client.slashCommands = new Collection();
+  // "../commands" é relativo a Commands/utils/, ou seja: Commands/commands/.
+  // A grafia minúscula aqui é a correta — essa pasta existe assim no disco.
   await registerCommands(client, '../commands');
   const slashCommandsJson = client.slashCommands.map((cmd) => cmd.getSlashCommandJSON());
   console.log('Started refreshing application (/) commands.');

@@ -1,6 +1,6 @@
 const User = require('../../utils/userSchema.js');
 const Market = require('../../utils/marketSchema.js');
-const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags } = require('discord.js');
 const ui = require('../../utils/embeds.js');
 const { renderCard } = require('../../utils/cardRenderer.js');
 const { escapeRegex } = require('../../utils/regexUtils.js');
@@ -10,7 +10,7 @@ async function undosellRun(client, interaction) {
     const cardName = (interaction.options.getString('cardname') || '').trim();
     if (!cardName) {
         const embed = ui.error('Nome inválido', 'Informe o nome da carta que você quer retirar do mercado.');
-        return interaction.reply({ embeds: [embed], ephemeral: true });
+        return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
     }
 
     const listings = await Market.find({
@@ -21,7 +21,7 @@ async function undosellRun(client, interaction) {
 
     if (!listings || listings.length === 0) {
         const embed = ui.error('Anúncio não encontrado', 'Nenhum anúncio seu com esse nome (ou a carta já foi vendida).');
-        return interaction.reply({ embeds: [embed], ephemeral: true });
+        return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
     }
 
     await interaction.deferReply();

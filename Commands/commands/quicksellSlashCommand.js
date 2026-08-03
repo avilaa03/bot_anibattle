@@ -1,5 +1,5 @@
 const BaseSlashCommand = require('../utils/BaseSlashCommand.js');
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, MessageFlags } = require('discord.js');
 const ui = require('../utils/embeds.js');
 const User = require('../utils/userSchema.js');
 const { quicksellRun } = require('../actions/run/quicksellRun.js');
@@ -17,14 +17,14 @@ module.exports = class QuickSellSlashCommand extends BaseSlashCommand {
 
         if (!user || user.inventory.length === 0) {
             const embed = ui.neutral('📋 Inventário vazio', 'Você ainda não tem cartas. Use `/roll` para ganhar a primeira!');
-            return interaction.reply({ embeds: [embed], ephemeral: true });
+            return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
         }
 
         const matchingCards = user.inventory.filter(c => c.name.toLowerCase().includes(name));
 
         if (matchingCards.length === 0) {
             const embed = ui.error('Carta não encontrada', `Nenhuma carta no seu inventário tem "${name}" no nome.`);
-            return interaction.reply({ embeds: [embed], ephemeral: true });
+            return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
         }
 
         const { message, indexRef, rowNavigation } = await quicksellRun(client, interaction, user, matchingCards);

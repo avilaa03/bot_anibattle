@@ -103,7 +103,33 @@ npm run restore -- --de backups/<pasta>    # simula; use --confirmar para execut
 
 ## Ferramentas de administração
 
+> **Tudo que está aqui também existe no painel web**, em `/admin/jogadores` do
+> [projeto do site](../anibattle-site). O painel tem confirmação, mostra o
+> estado antes e depois, e grava tudo num log de auditoria — prefira ele para
+> o dia a dia. Os scripts abaixo continuam sendo o caminho certo para
+> **operação em massa** e para quando o site estiver fora do ar.
+
 Todas recebem `--user <id do Discord>`. Para copiar um ID: Discord → Configurações → Avançado → Modo desenvolvedor, depois botão direito no usuário → Copiar ID.
+
+### Banir e desbanir
+
+Isso **só existe no painel web** (`/admin/jogadores/<id>` → Moderação), porque
+banimento pede motivo registrado e rastro de quem aplicou.
+
+Do lado do bot, o que existe é a leitura, em `Commands/utils/moderacao.js`:
+
+- Um jogador banido é bloqueado em **todos** os comandos e botões, com um aviso
+  dizendo o motivo e o prazo. A checagem fica no `interactionCreate`, antes de
+  qualquer despacho — se estivesse dentro de cada comando, bastaria esquecer de
+  um para o banido continuar jogando por ele.
+- O veredito fica **30 segundos em cache**. Sem isso seria uma consulta ao Mongo
+  por clique, para um campo que quase nunca muda. Consequência aceita: banir e
+  desbanir demoram até meio minuto para valer.
+- **Banco fora do ar não bane ninguém.** Se a consulta falhar, o jogador passa.
+  Errar liberando é incômodo; errar bloqueando derruba o jogo inteiro numa
+  queda do Atlas.
+- Banimento com prazo vencido se apaga sozinho na primeira consulta depois do
+  vencimento. Não precisa de rotina agendada.
 
 ### Dar (ou tirar) cartas
 
@@ -118,6 +144,32 @@ npm run cards:grant -- --user <id> --carta "Kirito" --remover
 A carta entregue é idêntica à que o `/roll` geraria — mesmos campos, mesmo cálculo de valor — e entra na Pokédex normalmente. Use `--sem-pokedex` se quiser dar a carta sem marcar a descoberta. Acima de 25 cartas de uma vez, o script exige `--confirmar`.
 
 Remover cartas **não** apaga a descoberta na Pokédex, porque descoberta é permanente por design (igual a Pokémon: soltar o bicho não apaga o registro).
+
+### Destravar torneios
+
+Cada servidor só pode ter um torneio aberto por vez. Normalmente você cancela pelo botão dentro do Discord — se rodar `/torneio` com um já aberto, a resposta traz o link para a mensagem dele e o botão de cancelar (para quem criou ou quem tem **Gerenciar servidor**).
+
+Quando isso não resolve (mensagem apagada, bot fora do ar):
+
+```bash
+npm run torneios:limpar                    # só lista o que está aberto
+npm run torneios:limpar -- --id tn1a2b3c   # cancela um
+npm run torneios:limpar -- --tudo          # cancela todos
+```
+
+Cancelar devolve a taxa de inscrição de quem pagou.
+
+O bot também varre sozinho a cada 5 minutos: inscrição parada há mais de 1 hora, e execução travada há mais de 5 minutos (a execução leva segundos — se passou disso, o bot caiu no meio dela).
+
+### Testando torneio sozinho
+
+Não dá: o torneio precisa de **pelo menos 2 participantes**, cada um com **3 cartas ou mais**. Com um inscrito só, começar devolve as inscrições e cancela.
+
+Para testar, chame alguém ou use uma segunda conta do Discord, e adiante o inventário dela:
+
+```bash
+npm run cards:grant -- --user <id da segunda conta> --raridade rare --quantidade 3
+```
 
 ### Completar a Pokédex sem dar as cartas
 
@@ -168,6 +220,22 @@ tests/         testes que rodam sem banco
 | `utils/economy.js` | Débito/crédito atômico e taxa do mercado |
 | `utils/vip.js` | Planos e cosméticos. **Nada aqui pode dar vantagem de combate** |
 | `utils/discovery.js` | Pokédex |
+| `utils/moderacao.js` | Leitura do banimento. **O porteiro fica no `interactionCreate`**, não dentro dos comandos |
+| `utils/presenca.js` | Publica servidores e sinal de vida na coleção `bot_status`, para o painel do site ler |
+
+### Convenções verificadas por teste
+
+`tests/convencoes.test.js` varre o código-fonte e falha se alguma destas regras for quebrada. Todas existem porque o bug já aconteceu:
+
+| Regra | O que quebrou quando foi violada |
+|---|---|
+| `require` tem que usar a caixa exata do nome no disco | `require('./commands/...')` com c minúsculo. O macOS abre o mesmo arquivo, mas o Node cacheia módulo pela string do caminho — a árvore inteira carregava **duas vezes**, com estado duplicado, e o `/torneio` morria com "Cannot overwrite `Card` model once compiled". Em Linux o bot nem sobe |
+| Schema usa `mongoose.models.X \|\| mongoose.model(...)` | Rede de segurança do mesmo problema |
+| Nada usa `ephemeral:` | Depreciado no discord.js, some na v15. O certo é `flags: MessageFlags.Ephemeral` |
+| Quem usa `MessageFlags` importa `MessageFlags` | Erro que só aparece quando aquele caminho do código roda — pode levar meses |
+| Embed só nasce em `utils/embeds.js` | Comando fugindo do padrão de cor, emoji e rodapé |
+
+Cada verificação foi validada reintroduzindo o bug de propósito e conferindo que o teste falha. Teste que nunca viu o erro que promete pegar não prova nada.
 
 ## Decisões que valem conhecer antes de mexer
 

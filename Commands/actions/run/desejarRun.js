@@ -1,4 +1,4 @@
-const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags } = require('discord.js');
 const Card = require('../../utils/cardSchema');
 const User = require('../../utils/userSchema');
 const ui = require('../../utils/embeds');
@@ -20,11 +20,11 @@ async function desejarRun(client, interaction) {
     if (!nome && numero == null) {
         return interaction.reply({
             embeds: [ui.error('Informe o que procurar', 'Use `/desejar nome:Gojo` ou `/desejar numero:42`.')],
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
     const totalCatalogo = await Card.countDocuments();
     const filtro = numero != null
@@ -93,9 +93,15 @@ async function desejarRun(client, interaction) {
         .addFields(
             { name: 'Número', value: formatarNumero(carta.numero, totalCatalogo), inline: true },
             { name: 'Sua lista', value: `${resultado.total} / ${resultado.limite}`, inline: true },
-            { name: 'Procurada por', value: `${quantosDesejam} jogador(es)`, inline: true }
+            { name: 'Também procuram', value: `${quantosDesejam} jogador(es)`, inline: true }
         )
-        .setFooter({ text: `${ui.BRAND} • Você será avisado quando alguém rolar esta carta` });
+        .addFields({
+            name: 'O que isso faz',
+            value: 'Quando alguém rolar esta carta, você é avisado e pode propor uma troca ou uma compra.\n'
+                + '⚠️ Desejar **não** disputa a carta: ela fica com quem rolou.',
+            inline: false
+        })
+        .setFooter({ text: `${ui.BRAND} • O aviso é só para você saber com quem negociar` });
 
     if (jaTem) {
         embed.setDescription(`${embed.data.description}\n\n💡 *Você já registrou essa carta na Pokédex — talvez queira caçar outra.*`);

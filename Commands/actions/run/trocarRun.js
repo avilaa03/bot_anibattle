@@ -1,4 +1,4 @@
-const { ActionRowBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder } = require('discord.js');
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder, MessageFlags } = require('discord.js');
 const User = require('../../utils/userSchema');
 const ui = require('../../utils/embeds');
 const trade = require('../../utils/trade');
@@ -136,7 +136,7 @@ async function trocarRun(client, interaction) {
     const alvo = interaction.options.getUser('user');
 
     const recusar = (titulo, descricao) =>
-        interaction.reply({ embeds: [ui.error(titulo, descricao)], ephemeral: true });
+        interaction.reply({ embeds: [ui.error(titulo, descricao)], flags: MessageFlags.Ephemeral });
 
     if (!alvo) return recusar('Usuário necessário', 'Mencione com quem você quer trocar.');
     if (alvo.bot) return recusar('Alvo inválido', 'Bots não trocam cartas.');

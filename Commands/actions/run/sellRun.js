@@ -1,4 +1,4 @@
-const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags } = require('discord.js');
 const ui = require('../../utils/embeds');
 const { applyMarketTax, MARKET_TAX_RATE } = require('../../utils/economy');
 const User = require('../../utils/userSchema');
@@ -47,13 +47,13 @@ async function sellRun(client, interaction) {
     const user = await User.findOne({ id: interaction.user.id });
     if (!user) {
         const embed = ui.error('Perfil não encontrado', 'Use `/roll` ou `/daily` para criar seu perfil primeiro.');
-        return interaction.reply({ embeds: [embed], ephemeral: true });
+        return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
     }
     const matchingCards = user.inventory.filter(card => card.name.toLowerCase().includes(cardName.toLowerCase()));
 
     if (matchingCards.length === 0) {
         const embed = ui.error('Carta não encontrada', `Nenhuma carta no seu inventário tem "${cardName}" no nome.`);
-        return interaction.reply({ embeds: [embed], ephemeral: true });
+        return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
     }
 
     await interaction.deferReply();

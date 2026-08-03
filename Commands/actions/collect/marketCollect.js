@@ -1,4 +1,4 @@
-const { ActionRowBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder } = require('discord.js');
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder, MessageFlags } = require('discord.js');
 const ui = require('../../utils/embeds');
 
 /**
@@ -35,11 +35,11 @@ module.exports = (interaction, embedMessage, currentPage, listings, cardsPerPage
         const escolhidoId = i.values?.[0];
         const selectedCard = listings.find((l) => String(l._id) === escolhidoId);
         if (!selectedCard) {
-            return i.reply({ embeds: [ui.error('Carta indisponível', 'Esse anúncio não existe mais.')], ephemeral: true });
+            return i.reply({ embeds: [ui.error('Carta indisponível', 'Esse anúncio não existe mais.')], flags: MessageFlags.Ephemeral });
         }
 
         if (selectedCard.sellerId === interaction.user.id) {
-            return i.reply({ embeds: [ui.error('Anúncio seu', 'Você não pode comprar a própria carta. Use `/undosell` para retirá-la.')], ephemeral: true });
+            return i.reply({ embeds: [ui.error('Anúncio seu', 'Você não pode comprar a própria carta. Use `/undosell` para retirá-la.')], flags: MessageFlags.Ephemeral });
         }
 
         const meta = ui.getRarity(selectedCard.rarity);

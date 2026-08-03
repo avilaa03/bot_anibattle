@@ -4,6 +4,7 @@ const trade = require('../utils/trade');
 const { registrar } = require('../utils/progresso');
 const { anunciarConquistas } = require('../utils/notificacoes');
 const { montarEmbed, montarComponentes } = require('../actions/run/trocarRun');
+const { MessageFlags } = require('discord.js');
 
 /**
  * Botões e menus da mesa de troca.
@@ -44,7 +45,7 @@ async function handleTrade(client, interaction) {
     if (!t) {
         await interaction.reply({
             embeds: [ui.error('Troca expirada', 'Essa negociação não existe mais.')],
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         }).catch(() => {});
         return true;
     }
@@ -53,7 +54,7 @@ async function handleTrade(client, interaction) {
     if (!lado) {
         await interaction.reply({
             embeds: [ui.error('Negociação alheia', 'Você não faz parte desta troca.')],
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         }).catch(() => {});
         return true;
     }
@@ -75,7 +76,7 @@ async function handleTrade(client, interaction) {
         if (ladoDoMenu !== lado) {
             await interaction.reply({
                 embeds: [ui.error('Menu do oponente', 'Use o menu com o seu nome.')],
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             }).catch(() => {});
             return true;
         }
@@ -118,7 +119,7 @@ async function handleTrade(client, interaction) {
         if (t.proponente.cartas.length === 0 && t.alvo.cartas.length === 0) {
             await interaction.reply({
                 embeds: [ui.warning('Oferta vazia', 'Pelo menos um dos lados precisa oferecer alguma carta.')],
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             }).catch(() => {});
             return true;
         }

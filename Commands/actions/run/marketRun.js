@@ -1,4 +1,4 @@
-const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags } = require('discord.js');
 const Market = require('../../utils/marketSchema.js');
 const { escapeRegex } = require('../../utils/regexUtils.js');
 const ui = require('../../utils/embeds.js');
@@ -28,7 +28,7 @@ module.exports = async (client, interaction, marketCollect, marketEnd) => {
 
     if (listings.length === 0) {
         const embed = ui.neutral('🛒 Mercado', 'Nenhuma carta encontrada com esses filtros. Tente buscar sem filtro ou use `/sell` para anunciar a sua.');
-        return interaction.reply({ embeds: [embed], ephemeral: true });
+        return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
     }
 
     await interaction.deferReply();

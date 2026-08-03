@@ -3,7 +3,8 @@ const ui = require('../utils/embeds');
 const torneio = require('../utils/tournament');
 const { verificarConquistas } = require('../utils/progresso');
 const { anunciarConquistas } = require('../utils/notificacoes');
-const { montarEmbedInscricoes, montarBotoes } = require('../actions/run/torneioRun');
+const { montarEmbedInscricoes, montarBotoes, podeAdministrar } = require('../actions/run/torneioRun');
+const { MessageFlags } = require('discord.js');
 
 /**
  * Botões do torneio: entrar, sair, começar, cancelar.
@@ -54,7 +55,7 @@ async function handleTournament(client, interaction) {
     if (!t) {
         await interaction.reply({
             embeds: [ui.error('Torneio não encontrado', 'Esse torneio não existe mais.')],
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         }).catch(() => {});
         return true;
     }
@@ -74,7 +75,7 @@ async function handleTournament(client, interaction) {
             };
             await interaction.reply({
                 embeds: [ui.error('Não deu para entrar', mensagens[resultado.motivo] || 'Erro desconhecido.')],
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             }).catch(() => {});
             return true;
         }
@@ -91,7 +92,7 @@ async function handleTournament(client, interaction) {
         await interaction.followUp({
             embeds: [ui.success('Inscrito!', `Seu time no torneio:\n\n${deckTexto}`)
                 .setFooter({ text: `${ui.BRAND} • Suas 3 melhores cartas foram escolhidas automaticamente` })],
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         }).catch(() => {});
         return true;
     }
@@ -104,7 +105,7 @@ async function handleTournament(client, interaction) {
                 embeds: [ui.error('Não deu para sair', resultado.motivo === 'NAO_INSCRITO'
                     ? 'Você não está inscrito neste torneio.'
                     : 'As inscrições já foram encerradas.')],
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             }).catch(() => {});
             return true;
         }
@@ -117,27 +118,56 @@ async function handleTournament(client, interaction) {
 
     // ---- Cancelar ----
     if (acao === 'cancel') {
-        if (interaction.user.id !== t.criadorId) {
+        if (!podeAdministrar(interaction, t)) {
             await interaction.reply({
-                embeds: [ui.error('Sem permissão', 'Só quem criou o torneio pode cancelar.')],
-                ephemeral: true
+                embeds: [ui.error(
+                    'Sem permissão',
+                    'Só quem criou o torneio pode cancelar. Se você entrou e quer desistir, use o botão **Sair**.'
+                )],
+                flags: MessageFlags.Ephemeral
             }).catch(() => {});
             return true;
         }
+
         await torneio.cancelar(tournamentId);
+
+        const avisoCancelado = ui.neutral(
+            'Torneio cancelado',
+            t.taxaInscricao > 0
+                ? `**${t.nome}** foi cancelado e as inscrições foram devolvidas.`
+                : `**${t.nome}** foi cancelado.`
+        );
+
+        // O botão pode ter sido clicado em dois lugares: na mensagem
+        // original do torneio, ou no aviso efêmero do /torneio. No segundo
+        // caso, atualizar só a interação deixaria a mensagem original com
+        // botões vivos de um torneio que não existe mais.
+        const naMensagemOriginal = interaction.message?.id === t.mensagemId;
+
         await interaction.update({
-            embeds: [ui.neutral('Torneio cancelado', 'As inscrições foram devolvidas.')],
+            embeds: [avisoCancelado],
             components: []
         }).catch(() => {});
+
+        if (!naMensagemOriginal && t.canalId && t.mensagemId) {
+            try {
+                const canal = await client.channels.fetch(t.canalId);
+                const mensagem = await canal.messages.fetch(t.mensagemId);
+                await mensagem.edit({ embeds: [avisoCancelado], components: [] });
+            } catch {
+                // Mensagem apagada ou canal sem acesso: o torneio já foi
+                // cancelado no banco, que é o que importa.
+            }
+        }
         return true;
     }
 
     // ---- Começar ----
     if (acao === 'start') {
-        if (interaction.user.id !== t.criadorId) {
+        if (!podeAdministrar(interaction, t)) {
             await interaction.reply({
                 embeds: [ui.error('Sem permissão', 'Só quem criou o torneio pode começar.')],
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             }).catch(() => {});
             return true;
         }

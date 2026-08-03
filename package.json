@@ -16,6 +16,7 @@
     "cards:grant": "node scripts/grantCards.js",
     "pokedex:grant": "node scripts/grantPokedex.js",
     "check:db": "node scripts/checkDb.js",
+    "torneios:limpar": "node scripts/limparTorneios.js",
     "backup": "node scripts/backup.js",
     "restore": "node scripts/restore.js"
   },

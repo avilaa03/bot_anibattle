@@ -61,11 +61,12 @@ const PAGES = [
   },
   {
     titulo: '🤝 Social',
-    descricao: 'Negocie e dispute com outros jogadores.',
+    descricao: 'Troque e negocie com outros jogadores.',
     comandos: [
       { nome: '/trocar', desc: 'Troca carta por carta. Os dois montam a oferta e os dois confirmam — mexeu na oferta, as confirmações caem.' },
-      { nome: '/desejar', desc: 'Marca uma carta que você está caçando. Você é avisado quando alguém rolar ela.' },
-      { nome: '/desejos', desc: 'Sua lista de desejos, com quantos jogadores disputam cada carta.' },
+      { nome: '/desejar', desc: 'Marca uma carta que você quer. Quando alguém rolar ela, você fica sabendo e pode propor uma troca ou uma compra.' },
+      { nome: '/desejos', desc: 'Sua lista de desejos, com quantos jogadores também procuram cada carta.' },
+      { nome: '​', desc: '💡 *Desejar **não** disputa a carta com ninguém. Quem rolou fica com ela; o aviso serve só para você saber com quem negociar.*' },
       { nome: '/torneio', desc: 'Cria um torneio eliminatório. Entra com um clique e o bot resolve tudo.' }
     ]
   },

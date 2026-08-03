@@ -39,7 +39,10 @@ async function desejosRun(client, interaction) {
     const descobertas = new Set((user?.discovered || []).map((d) => String(d.cardId)));
     const inventario = new Set((user?.inventory || []).map((c) => String(c.originalCardId)));
 
-    // Quantos jogadores desejam cada uma — dá noção de concorrência.
+    // Quantos jogadores também procuram cada uma. Não é concorrência: a
+    // carta rolada fica com quem rolou. O número serve para o jogador
+    // saber se a carta é disputada NO MERCADO — ou seja, quanto ela
+    // provavelmente vale numa troca.
     const contagens = await Promise.all(cartas.map((c) => wishlist.contarDesejos(c._id)));
 
     const linhas = cartas.map((carta, i) => {
@@ -48,10 +51,10 @@ async function desejosRun(client, interaction) {
         const jaTeve = descobertas.has(String(carta._id));
 
         const marca = temAgora ? ' 🎴' : jaTeve ? ' 📖' : '';
-        const concorrencia = contagens[i] > 1 ? ` • ${contagens[i]} querem` : '';
+        const procura = contagens[i] > 1 ? ` • ${contagens[i]} também procuram` : '';
 
         return `${formatarNumero(carta.numero, totalCatalogo)} ${meta.emoji} **${ui.cardName(carta.name)}**${marca}\n`
-            + `└ *${carta.series}* • OVR ${carta.overall}${concorrencia}`;
+            + `└ *${carta.series}* • OVR ${carta.overall}${procura}`;
     }).join('\n');
 
     const limite = wishlist.limiteDe(user);

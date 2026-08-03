@@ -1,4 +1,4 @@
-const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags } = require('discord.js');
 const User = require('../../utils/userSchema');
 const ui = require('../../utils/embeds');
 
@@ -17,7 +17,7 @@ module.exports = async (client, interaction, inventoryCollect, inventoryEnd) => 
 
     if (!user || user.inventory.length === 0) {
         const embed = ui.neutral('📋 Inventário vazio', 'Você ainda não tem cartas. Use `/roll` para ganhar a primeira!');
-        return interaction.reply({ embeds: [embed], ephemeral: true });
+        return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
     }
 
     // Ordena por raridade (mais rara primeiro) e depois por overall, que é

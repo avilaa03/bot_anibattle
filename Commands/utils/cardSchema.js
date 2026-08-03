@@ -55,6 +55,10 @@ cardSchema.index({ rarity: 1 });
 // sparse: cartas ainda sem número não conflitam entre si no índice único.
 cardSchema.index({ numero: 1 }, { unique: true, sparse: true });
 
-const Card = mongoose.model('Card', cardSchema);
+// `mongoose.models.Card ||` é rede de segurança: se este arquivo for
+// carregado duas vezes (require com grafia diferente do caminho, ou hot
+// reload), reaproveita o model já compilado em vez de estourar
+// "Cannot overwrite `Card` model once compiled".
+const Card = mongoose.models.Card || mongoose.model('Card', cardSchema);
 
 module.exports = Card;

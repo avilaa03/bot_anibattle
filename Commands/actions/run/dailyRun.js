@@ -3,6 +3,7 @@ const ui = require('../../utils/embeds');
 const { getPerks } = require('../../utils/vip');
 const { registrar } = require('../../utils/progresso');
 const { chaveDoDia } = require('../../utils/missoes');
+const { MessageFlags } = require('discord.js');
 
 /**
  * Recompensa diária com sequência (streak).
@@ -86,7 +87,7 @@ async function dailyRun(client, interaction) {
                     inline: false
                 });
             }
-            return interaction.reply({ embeds: [embed], ephemeral: true });
+            return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
         }
 
         // Sequência continua se o último resgate foi ontem; senão recomeça.
@@ -155,8 +156,8 @@ async function dailyRun(client, interaction) {
         console.error('Erro ao processar a recompensa diária:', err);
         const embed = ui.error('Erro', 'Houve um erro ao processar sua recompensa diária.');
         const responder = interaction.replied || interaction.deferred
-            ? interaction.followUp({ embeds: [embed], ephemeral: true })
-            : interaction.reply({ embeds: [embed], ephemeral: true });
+            ? interaction.followUp({ embeds: [embed], flags: MessageFlags.Ephemeral })
+            : interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
         responder.catch(() => {});
     }
 }

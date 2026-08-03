@@ -1,5 +1,6 @@
 const User = require('../../utils/userSchema');
 const ui = require('../../utils/embeds');
+const { MessageFlags } = require('discord.js');
 
 async function magnataRun(client, interaction) {
     try {
@@ -46,7 +47,7 @@ async function magnataRun(client, interaction) {
         const embed = ui.error('Erro', 'Houve um erro ao buscar o ranking.');
         try {
             if (interaction.deferred) await interaction.editReply({ embeds: [embed] });
-            else await interaction.reply({ embeds: [embed], ephemeral: true });
+            else await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
         } catch (e) { /* ignora */ }
     }
 }
