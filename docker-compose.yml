@@ -1,0 +1,7 @@
+services:
+  bot:
+    container_name: anibattle-bot
+    build: .
+    restart: unless-stopped
+    env_file:
+      - .env
