@@ -111,6 +111,66 @@ const UserSchema = new Schema({
         diasAtivos: { type: Number, default: 0 }
     },
 
+    // Participação na beta.
+    //
+    // Marcado de uma vez por `scripts/marcarBeta.js`, não pelo bot em
+    // tempo real: a régua de quem "jogou a beta" é uma decisão de produto
+    // (quantos rolls contam?), e essa decisão precisa ser tomada uma vez,
+    // registrada, e não reavaliada a cada comando.
+    beta: {
+        participou: { type: Boolean, default: false },
+        // Quando o jogador entrou (primeira atividade conhecida).
+        desde: { type: Date, default: null },
+        // Fotografia do que ele tinha no momento da marcação. Fica aqui
+        // para a decisão ser auditável depois — sem isso, daqui a um ano
+        // ninguém sabe dizer por que fulano recebeu a carta e beltrano não.
+        rollsNaEpoca: { type: Number, default: 0 },
+        marcadoEm: { type: Date, default: null }
+    },
+
+    // Marca de equipe. Só muda pelo painel administrativo.
+    staff: { type: Boolean, default: false },
+
+    // Telemetria de comportamento do /roll.
+    //
+    // Só MEDE — nada aqui pune, bloqueia ou aumenta cooldown. Ver
+    // `utils/telemetria.js` para o desenho e o motivo de ser agregado em
+    // vez de guardar cada roll (seriam ~35 mil registros por jogador/ano).
+    telemetria: {
+        totalRolls: { type: Number, default: 0 },
+
+        // Histograma de atividade por hora UTC. Map, e não array, porque
+        // `$inc` numa posição de array que ainda não existe cria um
+        // OBJETO no lugar do array e quebra a tipagem na leitura seguinte.
+        porHora: { type: Map, of: Number, default: () => new Map() },
+
+        // Quanto tempo depois do cooldown vencer o jogador rolou. Guardado
+        // como somas para render média e desvio-padrão sem manter o bruto.
+        pontualidade: {
+            amostras: { type: Number, default: 0 },
+            pontuais: { type: Number, default: 0 },
+            somaAtraso: { type: Number, default: 0 },
+            // Em segundos², não ms²: em ms o valor estoura a precisão do
+            // double depois de alguns milhares de amostras.
+            somaQuadrados: { type: Number, default: 0 }
+        },
+
+        // Tempo entre a carta aparecer e o botão ser clicado.
+        cliques: {
+            amostras: { type: Number, default: 0 },
+            soma: { type: Number, default: 0 },
+            rapidos: { type: Number, default: 0 }
+        },
+
+        // Janela curta para inspeção caso a caso no painel. Limitada pelo
+        // próprio Mongo com $slice na escrita.
+        ultimosRolls: [{
+            em: Date,
+            atrasoMs: Number,
+            _id: false
+        }]
+    },
+
     // Suspensão administrativa, aplicada pelo painel do site.
     //
     // Ficar no próprio documento do usuário (em vez de numa coleção
@@ -145,6 +205,13 @@ const UserSchema = new Schema({
 });
 
 UserSchema.index({ balance: -1 });
+// Fila de revisão do painel: quem tem mais rolls medidos primeiro.
+UserSchema.index({ 'telemetria.pontualidade.amostras': -1 });
+// Lista de quem recebe a carta da beta.
+UserSchema.index(
+    { 'beta.participou': 1 },
+    { partialFilterExpression: { 'beta.participou': true } }
+);
 UserSchema.index({ 'discovered.cardId': 1 });
 UserSchema.index({ elo: -1 });
 UserSchema.index({ 'wishlist.cardId': 1 });

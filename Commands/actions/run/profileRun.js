@@ -55,9 +55,20 @@ async function profileRun(client, interaction) {
 
     const emblema = tierVip ? `${tierVip.emoji} ` : '';
 
+    // Selos de identidade.
+    //
+    // Só aparecem para quem tem — perfil de jogador novo não fica com uma
+    // fileira de espaços vazios. O de beta é permanente e não pode ser
+    // conquistado depois: é isso que dá valor a ele.
+    const selos = [];
+    if (user.staff) selos.push('🛡️ Staff');
+    if (user.beta?.participou) selos.push('🧪 Beta');
+    if (tierVip) selos.push(`${tierVip.emoji} ${tierVip.nome}`);
+
     const embed = ui.base(cor)
         .setAuthor({ name: `${emblema}Perfil de ${alvo.username}`, iconURL: alvo.displayAvatarURL() })
         .addFields(
+            ...(selos.length > 0 ? [{ name: '​', value: selos.join('  •  '), inline: false }] : []),
             { name: '🪙 Saldo', value: ui.coins(user.balance || 0), inline: true },
             { name: '🎴 Cartas', value: `**${ui.number(totalCards)}**`, inline: true },
             { name: '💎 Patrimônio', value: ui.coins(totalValue + (user.balance || 0)), inline: true },
