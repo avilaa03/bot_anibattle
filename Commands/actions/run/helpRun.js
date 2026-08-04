@@ -29,6 +29,7 @@ const PAGES = [
     descricao: 'Desafie outros jogadores em duelos 3 vs 3 apostando moedas.',
     comandos: [
       { nome: '/battle', desc: 'Desafia outro jogador. A aposta mínima é de 10 moedas, e o vencedor leva o dobro.' },
+      { nome: '/treino', desc: 'Batalha amistosa simulada contra o BOT Caviar, para testar suas cartas. Você monta o time normalmente e o BOT usa 3 cartas sorteadas — **não vale moeda, ELO, missão nem conquista**.' },
       { nome: '​', desc: '**Como funciona:** cada rodada é um 1 vs 1. Sua 1ª carta enfrenta a 1ª do oponente, a 2ª contra a 2ª, e assim por diante. Quem vencer 2 das 3 rodadas leva o duelo e o pote.' },
       { nome: '​', desc: '**Atributos:** ⚔️ `ATA` pesa na ordem dos turnos, no crítico e na esquiva · ❤️ `LIF` é a vida · 💥 `POW` é o dano.' },
       { nome: '​', desc: '**Sorte:** existe dano variável, crítico e esquiva — mas tudo pende para a carta melhor. E quem cai abaixo de 40% de vida entra em **modo desespero**, com muito mais chance de crítico. Viradas acontecem.' }

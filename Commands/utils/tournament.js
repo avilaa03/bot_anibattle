@@ -170,17 +170,10 @@ async function executar(tournamentId, rng = Math.random) {
                 continue;
             }
 
+            // Empate no 3v3 não existe: são três confrontos, cada um com
+            // um vencedor, então o placar é sempre 2x1 ou 3x0.
             const resultado = runBattle(a.deck, b.deck, rng);
-            // Empate no 3v3 não existe (sempre 2x1 ou 3x0), mas se
-            // acontecer decidimos pelo overall total do deck.
-            let vencedor;
-            if (resultado.winner === 'X') vencedor = a;
-            else if (resultado.winner === 'Y') vencedor = b;
-            else {
-                const somaA = a.deck.reduce((s, c) => s + (c.overall || 0), 0);
-                const somaB = b.deck.reduce((s, c) => s + (c.overall || 0), 0);
-                vencedor = somaA >= somaB ? a : b;
-            }
+            const vencedor = resultado.winner === 'X' ? a : b;
 
             proximaRodada.push(vencedor);
             confrontos.push({

@@ -10,10 +10,17 @@
  *   achar carta nenhuma e o comando falhar justamente para quem mais
  *   precisa dele.
  * - Catálogo pequeno não impede o treino.
+ * - O JOGADOR escolhe o time dele, carta por carta e na ordem que quiser.
+ *   O treino existe para prever a batalha real; se ele escalasse sozinho
+ *   as 3 melhores, a parte que mais decide duelo — a ordem — nunca seria
+ *   exercitada.
+ * - A tela final é a mesma do `/battle`. Se as duas divergirem, o treino
+ *   deixa de prever a batalha de verdade.
  */
 
 const path = require('path');
 const ROOT = path.join(__dirname, '..', 'Commands', 'utils') + path.sep;
+const CMD = path.join(__dirname, '..', 'Commands') + path.sep;
 
 // --- duplo do catálogo ---
 let catalogo = [];
@@ -40,7 +47,9 @@ const check = (nome, cond, extra = '') => {
     if (!cond) falhas++;
 };
 
+let proximoId = 0;
 const carta = (nome, ovr) => ({
+    _id: `id${++proximoId}`,
     name: nome, series: 'S', rarity: 'common',
     overall: ovr, ATA: ovr, LIF: ovr * 2, POW: ovr
 });
@@ -49,6 +58,10 @@ const encherCatalogo = (de, ate) => {
     catalogo = [];
     for (let o = de; o <= ate; o++) catalogo.push(carta(`Carta${o}`, o));
 };
+
+/** Todos os botões de um resultado do montarEscolhaDeTime. */
+const todosBotoes = (componentes) =>
+    componentes.flatMap((linha) => linha.components.map((b) => b.data));
 
 (async () => {
 console.log('=== Nome do rival ===');
@@ -59,7 +72,7 @@ check('média de 3 cartas', treino.mediaOverall([carta('a', 60), carta('b', 70),
 check('time vazio devolve zero', treino.mediaOverall([]) === 0);
 check('nulo não quebra', treino.mediaOverall(null) === 0);
 
-console.log('\n=== As 3 melhores ===');
+console.log('\n=== As 3 melhores (só para calibrar o rival) ===');
 const inventario = [carta('fraca', 30), carta('forte', 90), carta('media', 60), carta('ok', 70)];
 const melhores = treino.melhoresTres(inventario);
 check('pega 3', melhores.length === 3);
@@ -146,16 +159,157 @@ catalogo = [];
 const rVazio = await treino.montarTimeRival(meu, 'parelho');
 check('catálogo vazio devolve erro tratado', rVazio.ok === false && rVazio.motivo === 'CATALOGO_VAZIO');
 
-console.log('\n=== A luta de treino funciona de ponta a ponta ===');
+// -------------------------------------------------------------------
+console.log('\n=== A sessão de escolha de time ===');
+//
+// A sessão vive em memória, nunca no Mongo: o treino não tem aposta a
+// devolver, então uma queda do bot não deixa nada preso — e não guardar
+// nada é o que torna impossível o treino sujar o banco.
 encherCatalogo(20, 95);
-const { runBattle } = require(ROOT + 'battleEngine.js');
 const montagem = await treino.montarTimeRival(meu, 'parelho');
-const luta = runBattle(montagem.meuTime, montagem.timeRival);
 
-check('sai um resultado', ['X', 'Y', null].includes(luta.winner));
+const inv = [carta('alfa', 80), carta('beta', 75), carta('gama', 70), carta('delta', 65)];
+const abrir = () => treino.criarSessao({
+    userId: 'u1',
+    username: 'Jogador',
+    inventario: inv,
+    timeRival: montagem.timeRival,
+    dificuldade: montagem.dificuldade,
+    canalId: 'c1'
+});
+
+let sessao = abrir();
+check('a sessão nasce com o time vazio', sessao.deck.length === 0 && sessao.selectedIds.length === 0);
+check('o id não tem "_"', !sessao.id.includes('_'), `(${sessao.id})`);
+check('dá para achar pelo id', treino.getSessao(sessao.id)?.id === sessao.id);
+check('dá para achar pelo dono', treino.getSessaoDoUsuario('u1')?.id === sessao.id);
+check('outro jogador não acha', treino.getSessaoDoUsuario('u2') === null);
+
+console.log('\n=== O jogador escolhe as cartas, na ordem dele ===');
+// A ordem é o que decide os confrontos: 1ª contra 1ª, 2ª contra 2ª. Se o
+// treino reordenasse por overall, ele deixaria de testar exatamente a
+// decisão que mais pesa numa batalha real.
+const e1 = treino.escolherCarta(sessao.id, inv[3]); // delta, a PIOR
+const e2 = treino.escolherCarta(sessao.id, inv[0]); // alfa
+const e3 = treino.escolherCarta(sessao.id, inv[2]); // gama
+
+check('as três entram', e1.ok && e2.ok && e3.ok);
+check('a ordem escolhida é preservada',
+    sessao.deck.map((c) => c.name).join(',') === 'delta,alfa,gama',
+    `(${sessao.deck.map((c) => c.name).join(',')})`);
+check('a terceira fecha o time', e3.completo === true);
+check('as duas primeiras não fecham', e1.completo === false && e2.completo === false);
+
+console.log('\n=== O que a sessão recusa ===');
+check('quarta carta', treino.escolherCarta(sessao.id, inv[1]).motivo === 'TIME_CHEIO');
+check('sessão inexistente', treino.escolherCarta('naoexiste', inv[1]).motivo === 'SESSAO_EXPIRADA');
+
+// A repetida precisa ser testada com o time AINDA aberto: com 3 cartas
+// dentro, a recusa viria por "time cheio" e a checagem de duplicata
+// passaria batida mesmo se alguém a removesse.
+const comEspaco = abrir();
+treino.escolherCarta(comEspaco.id, inv[0]);
+check('carta repetida', treino.escolherCarta(comEspaco.id, inv[0]).motivo === 'JA_ESCOLHIDA');
+check('e o time não cresce com a recusa', comEspaco.deck.length === 1, `(${comEspaco.deck.length})`);
+treino.encerrarSessao(comEspaco.id);
+
+console.log('\n=== Só um clique resolve a luta ===');
+// Sem esta trava, dois cliques na terceira carta chegando juntos
+// resolveriam a batalha duas vezes e o canal receberia duas transmissões.
+const primeira = treino.reservarParaResolver(sessao.id);
+const segunda = treino.reservarParaResolver(sessao.id);
+check('o primeiro reserva', primeira !== null);
+check('o segundo não pega nada', segunda === null, '<- transmissão dupla');
+
+treino.encerrarSessao(sessao.id);
+check('encerrar some com a sessão', treino.getSessao(sessao.id) === null);
+check('e o jogador fica livre para abrir outra', treino.getSessaoDoUsuario('u1') === null);
+
+console.log('\n=== Time incompleto não resolve ===');
+sessao = abrir();
+treino.escolherCarta(sessao.id, inv[0]);
+check('com 1 carta não dá para reservar', treino.reservarParaResolver(sessao.id) === null);
+treino.encerrarSessao(sessao.id);
+
+console.log('\n=== Sessão vencida some sozinha ===');
+sessao = abrir();
+sessao.criadaEm = Date.now() - treino.DURACAO_SESSAO_MS - 1;
+check('getSessao devolve null', treino.getSessao(sessao.id) === null);
+check('e não fica presa na memória', treino.getSessaoDoUsuario('u1') === null);
+
+// -------------------------------------------------------------------
+console.log('\n=== A tela de escolha do treino ===');
+const treinoRun = require(CMD + 'actions/run/treinoRun.js');
+
+sessao = abrir();
+treino.escolherCarta(sessao.id, inv[1]);
+const tela = treinoRun.telaDeEscolha(sessao);
+const botoes = todosBotoes(tela.components);
+
+const picks = botoes.filter((b) => String(b.custom_id).startsWith('treino_pick_'));
+const cancelar = botoes.filter((b) => String(b.custom_id).startsWith('treino_cancel_'));
+
+check('um botão por carta do inventário', picks.length === inv.length, `(${picks.length})`);
+check('exatamente um botão de cancelar', cancelar.length === 1, `(${cancelar.length})`);
+check('o cancelar carrega o id da sessão', cancelar[0].custom_id === `treino_cancel_${sessao.id}`);
+
+// O roteador do index.js manda tudo que começa com "treino_" para o
+// handler, e lá cada ação é lida pelo prefixo. Se um customId de carta
+// não trouxer "pick_", ele cai como "recomeçar treino" e a dificuldade
+// vira lixo, em silêncio.
+check('todo customId de carta começa com treino_pick_',
+    picks.every((b) => String(b.custom_id).startsWith('treino_pick_')));
+
+const maiorId = Math.max(...botoes.map((b) => String(b.custom_id).length));
+check('nenhum customId passa de 100 caracteres', maiorId <= 100, `(maior: ${maiorId})`);
+
+const marcados = picks.filter((b) => b.disabled);
+check('a carta já escolhida fica desativada', marcados.length === 1, `(${marcados.length})`);
+
+const campos = tela.embed.data.fields || [];
+check('o time do BOT aparece na tela',
+    campos.some((f) => f.name.includes(treino.NOME_RIVAL)),
+    '<- é contra ele que o jogador escala');
+check('o time do jogador aparece conforme monta',
+    campos.some((f) => f.name === 'Seu time' && /beta/i.test(f.value)));
+
+treino.encerrarSessao(sessao.id);
+
+// -------------------------------------------------------------------
+console.log('\n=== A luta de treino funciona de ponta a ponta ===');
+const { runBattle } = require(ROOT + 'battleEngine.js');
+
+// O time é o que o JOGADOR escolheu, não as 3 melhores dele.
+const meuTimeEscolhido = [inv[3], inv[0], inv[2]];
+const luta = runBattle(meuTimeEscolhido, montagem.timeRival);
+
+check('sai um resultado', ['X', 'Y'].includes(luta.winner), `(${luta.winner})`);
+check('nunca dá empate', luta.winner !== null, '<- 3 confrontos sempre fecham 2-1 ou 3-0');
 check('3 rounds', luta.rounds.length === 3);
 check('a soma dos rounds bate', luta.winsX + luta.winsY === 3);
 check('gera eventos para a transmissão', luta.rounds.every((r) => r.eventos.length > 0));
+check('cada round usa a carta na posição que o jogador escolheu',
+    luta.rounds.map((r) => r.cardX).join(',') === 'delta,alfa,gama',
+    `(${luta.rounds.map((r) => r.cardX).join(',')})`);
+
+console.log('\n=== A tela final é a mesma do /battle ===');
+// Se o treino montasse a própria tela, as duas divergiriam na primeira
+// mudança e o treino deixaria de mostrar o que a batalha real mostra.
+const { montarEmbedResultado, contarDestaques } = require(ROOT + 'resultadoBatalha.js');
+
+const embedTreino = montarEmbedResultado({ nomeX: 'Jogador', nomeY: treino.NOME_RIVAL, resultado: luta });
+const dadosTreino = embedTreino.data;
+
+check('tem título de fim de batalha', dadosTreino.title === '⚔️ Fim da batalha', `(${dadosTreino.title})`);
+check('mostra o placar', /\d+\*\* — \*\*\d+/.test(dadosTreino.description), `(${dadosTreino.description})`);
+check('tem o resumo das rodadas', (dadosTreino.fields || []).some((f) => f.name === 'Rodadas'));
+check('cabe no limite do Discord',
+    (dadosTreino.fields || []).every((f) => f.value.length <= 1024));
+
+const destaques = contarDestaques(luta);
+check('conta críticos e viradas',
+    Number.isInteger(destaques.criticos) && Number.isInteger(destaques.viradas),
+    `(${destaques.criticos} crit, ${destaques.viradas} viradas)`);
 
 console.log(falhas === 0 ? '\n*** TODOS OS TESTES DE TREINO PASSARAM ***' : `\n*** ${falhas} FALHA(S) ***`);
 process.exit(falhas ? 1 : 0);

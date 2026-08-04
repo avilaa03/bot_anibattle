@@ -130,13 +130,19 @@ Round 1  ⚔️  Gojo  vs  Sukuna
 
 ## 5. `/treino` contra o BOT Caviar
 
-Já desenhado, falta escrever:
+Feito:
 
 - `utils/treino.js` — monta o time do BOT Caviar sorteando 3 cartas numa
-  faixa de overall relativa à média do seu time (fácil / parelho / difícil).
-- `/treino` usa suas 3 melhores por padrão, com botões "Lutar de novo" e
-  "Trocar meu time".
-- Reaproveita a batalha ao vivo do item 4 — por isso vem depois dele.
+  faixa de overall relativa à média da sua coleção (fácil / parelho /
+  difícil), e guarda a sessão de escolha em memória.
+- `/treino` é a MESMA batalha do `/battle`: você monta seu time no
+  privado, carta por carta e na ordem que quiser, e a luta é transmitida
+  ao vivo no canal. O que muda é só o adversário. O time do BOT aparece
+  na tela de escolha, porque aqui o objetivo é treinar contra ele.
+- Tela de escolha (`utils/escolhaDeTime.js`) e tela final
+  (`utils/resultadoBatalha.js`) são compartilhadas com o `/battle` — se
+  divergirem, o treino deixa de prever a batalha real.
+- Botão "Treinar de novo" na tela final.
 
 **A regra que não pode falhar:** treino não vale nada. `treinoRun.js` não
 pode importar `progresso`, `elo`, `economy` nem `battleState`. Isso vira

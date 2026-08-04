@@ -196,6 +196,11 @@ function runRound(cardA, cardB, roundIndex, rng = Math.random) {
 /**
  * Batalha 3v3: três confrontos 1v1, na ordem em que cada jogador escolheu
  * suas cartas. Quem vencer mais confrontos leva a batalha.
+ *
+ * Não existe empate: `runRound` sempre devolve um vencedor (até o estouro
+ * do limite de turnos é desempatado por vida restante e, se preciso, por
+ * POW), e três confrontos só podem terminar 2-1 ou 3-0. Portanto `winner`
+ * é sempre 'X' ou 'Y' — quem chama não precisa tratar nulo.
  */
 function runBattle(deckX, deckY, rng = Math.random) {
     const rounds = [];
@@ -222,8 +227,7 @@ function runBattle(deckX, deckY, rng = Math.random) {
         else winsY++;
     }
 
-    const winner = winsX > winsY ? 'X' : winsX < winsY ? 'Y' : null;
-    return { winner, winsX, winsY, rounds };
+    return { winner: winsX > winsY ? 'X' : 'Y', winsX, winsY, rounds };
 }
 
 module.exports = {

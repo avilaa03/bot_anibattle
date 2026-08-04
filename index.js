@@ -82,10 +82,8 @@ client.on('interactionCreate', async (interaction) => {
       // A ordem importa: 'battle_cancel_' precisa vir antes de qualquer
       // prefixo mais curto que também case com ele.
       if (id.startsWith('treino_')) {
-        const { executarTreino } = require('./Commands/actions/run/treinoRun');
-        const dificuldade = id.slice('treino_'.length);
-        await executarTreino(interaction, dificuldade, true);
-        return;
+        const { handleTreinoButton } = require('./Commands/handlers/treinoButtonHandler');
+        if (await handleTreinoButton(client, interaction)) return;
       } else if (id.startsWith('battle_cancel_')) {
         const { handleBattleCancel } = require('./Commands/handlers/battleButtonHandler');
         if (await handleBattleCancel(client, interaction)) return;
