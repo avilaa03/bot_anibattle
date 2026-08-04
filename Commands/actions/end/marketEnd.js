@@ -4,6 +4,7 @@ const { trySpend, addBalance, applyMarketTax, MARKET_TAX_RATE } = require('../..
 const { registerDiscovery } = require('../../utils/discovery');
 const { registrar } = require('../../utils/progresso');
 const ui = require('../../utils/embeds');
+const valores = require('../../utils/valores');
 
 module.exports = async (message, selectedCard, interaction) => {
     if (selectedCard) {
@@ -39,6 +40,13 @@ module.exports = async (message, selectedCard, interaction) => {
 
                 const catalogoId = reserved.originalCardId || reserved.cardId;
 
+                // Os dois valores saem do MESMO cálculo. Guardar o
+                // marketValue antigo e recalcular só a venda rápida
+                // deixaria uma carta anterior à migração com os dois campos
+                // discordando entre si — e como toda carta comprada passa
+                // por aqui, este ponto conserta o acervo aos poucos.
+                const preco = valores.valoresDaCarta(reserved);
+
                 const cardToAdd = {
                     cardId: reserved.cardId,
                     originalCardId: catalogoId,
@@ -48,13 +56,13 @@ module.exports = async (message, selectedCard, interaction) => {
                     baseImage: reserved.baseImage,
                     characterImage: reserved.characterImage,
                     rarity: reserved.rarity,
-                    overall: reserved.overall ?? (reserved.marketValue != null ? Math.round(reserved.marketValue / 10) : 0),
+                    overall: preco.overall,
                     ATA: reserved.ATA ?? 0,
                     LIF: reserved.LIF ?? 0,
                     POW: reserved.POW ?? 0,
                     obtainedAt: reserved.obtainedAt,
-                    marketValue: reserved.marketValue,
-                    valueToSell: reserved.marketValue ? Math.floor(reserved.marketValue / 2) : 0
+                    marketValue: preco.marketValue,
+                    valueToSell: preco.valueToSell
                 };
 
                 await User.findOneAndUpdate(

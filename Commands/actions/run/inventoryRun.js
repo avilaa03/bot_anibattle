@@ -1,6 +1,7 @@
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags } = require('discord.js');
 const User = require('../../utils/userSchema');
 const ui = require('../../utils/embeds');
+const valores = require('../../utils/valores');
 
 // Coletores ativos por usuário (ver rollRun.js para o motivo de não usar
 // mais uma única variável de módulo compartilhada entre todos os usuários).
@@ -8,9 +9,7 @@ const activeCollectors = new Map();
 
 const CARDS_PER_PAGE = 8;
 
-function getOvr(card) {
-    return card.overall ?? (card.marketValue != null ? Math.round(card.marketValue / 10) : 0);
-}
+const getOvr = valores.overallDaCarta;
 
 module.exports = async (client, interaction, inventoryCollect, inventoryEnd) => {
     const user = await User.findOne({ id: interaction.user.id });

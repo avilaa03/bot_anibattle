@@ -2,6 +2,7 @@ const { ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags } = require('
 const Market = require('../../utils/marketSchema.js');
 const { escapeRegex } = require('../../utils/regexUtils.js');
 const ui = require('../../utils/embeds.js');
+const valores = require('../../utils/valores.js');
 const { buildSelectMenu } = require('../collect/marketCollect.js');
 
 module.exports = async (client, interaction, marketCollect, marketEnd) => {
@@ -43,7 +44,7 @@ module.exports = async (client, interaction, marketCollect, marketEnd) => {
 
         const lista = pageCards.map((listing, index) => {
             const meta = ui.getRarity(listing.rarity);
-            const ovr = listing.overall ?? (listing.marketValue != null ? Math.round(listing.marketValue / 10) : 0);
+            const ovr = valores.overallDaCarta(listing);
             return `\`${index + 1}\` ${meta.emoji} **${ui.cardName(listing.cardName)}** — OVR **${ovr}**\n`
                 + `└ ${listing.series || '—'} • ${ui.coins(listing.listingPrice)} • vendedor <@${listing.sellerId}>`;
         }).join('\n');

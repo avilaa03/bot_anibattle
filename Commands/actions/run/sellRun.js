@@ -1,5 +1,6 @@
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags } = require('discord.js');
 const ui = require('../../utils/embeds');
+const valores = require('../../utils/valores');
 const { applyMarketTax, MARKET_TAX_RATE } = require('../../utils/economy');
 const User = require('../../utils/userSchema');
 const { sellCollect } = require('../collect/sellCollect.js');
@@ -16,7 +17,7 @@ async function buildSellEmbed(card, listingPrice, moldura = 'nenhuma') {
         baseImage: card.baseImage,
         characterImage: card.characterImage,
         rarity: card.rarity,
-        overall: card.overall ?? (card.marketValue != null ? Math.round(card.marketValue / 10) : 0),
+        overall: valores.overallDaCarta(card),
         ATA: card.ATA ?? 0,
         LIF: card.LIF ?? 0,
         POW: card.POW ?? 0

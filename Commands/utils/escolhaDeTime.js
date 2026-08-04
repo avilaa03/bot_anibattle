@@ -1,5 +1,6 @@
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const ui = require('./embeds');
+const valores = require('./valores');
 
 /**
  * Tela de "monte seu time": o embed e a grade de botões das cartas.
@@ -35,9 +36,7 @@ const CARDS_PER_ROW = 5;
 const MAX_LINHAS = 5;
 const MAX_BOTOES_POR_LINHA = 5;
 
-function getOvr(card) {
-    return card.overall ?? (card.marketValue != null ? Math.round(card.marketValue / 10) : 0);
-}
+const getOvr = valores.overallDaCarta;
 
 /**
  * Ordena o inventário das melhores cartas para as piores. Como só cabem 25

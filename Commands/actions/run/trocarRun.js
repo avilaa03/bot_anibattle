@@ -2,6 +2,7 @@ const { ActionRowBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder, M
 const User = require('../../utils/userSchema');
 const ui = require('../../utils/embeds');
 const trade = require('../../utils/trade');
+const valores = require('../../utils/valores');
 
 /**
  * /trocar — negociação de carta por carta.
@@ -15,9 +16,7 @@ const trade = require('../../utils/trade');
 
 const MAX_OPCOES = 25;
 
-function getOvr(card) {
-    return card.overall ?? (card.marketValue != null ? Math.round(card.marketValue / 10) : 0);
-}
+const getOvr = valores.overallDaCarta;
 
 /** Melhores cartas primeiro — só cabem 25 no menu. */
 function ordenar(inventario) {

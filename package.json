@@ -12,6 +12,7 @@
     "preview:cards": "node scripts/previewCards.js",
     "migrate:pokedex": "node scripts/migratePokedex.js",
     "migrate:dex": "node scripts/assignDexNumbers.js",
+    "migrar:valores": "node scripts/migrarValores.js",
     "vip:grant": "node scripts/grantVip.js",
     "cards:grant": "node scripts/grantCards.js",
     "pokedex:grant": "node scripts/grantPokedex.js",

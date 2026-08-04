@@ -1,5 +1,6 @@
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder, MessageFlags } = require('discord.js');
 const ui = require('../../utils/embeds');
+const valores = require('../../utils/valores');
 
 /**
  * Paginação + compra do /market.
@@ -43,7 +44,7 @@ module.exports = (interaction, embedMessage, currentPage, listings, cardsPerPage
         }
 
         const meta = ui.getRarity(selectedCard.rarity);
-        const ovr = selectedCard.overall ?? (selectedCard.marketValue != null ? Math.round(selectedCard.marketValue / 10) : 0);
+        const ovr = valores.overallDaCarta(selectedCard);
 
         const confirmEmbed = ui.base(meta.color)
             .setTitle('🛒 Confirmar compra')
@@ -87,7 +88,7 @@ function buildSelectMenu(listings, page, cardsPerPage) {
 
     const options = pageCards.map((listing) => {
         const meta = ui.getRarity(listing.rarity);
-        const ovr = listing.overall ?? (listing.marketValue != null ? Math.round(listing.marketValue / 10) : 0);
+        const ovr = valores.overallDaCarta(listing);
         return {
             label: `${ui.cardName(listing.cardName)} · OVR ${ovr}`.slice(0, 100),
             description: `${meta.label} • ${ui.number(listing.listingPrice)} moedas • ${listing.series || '—'}`.slice(0, 100),
