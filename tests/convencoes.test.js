@@ -185,5 +185,65 @@ check(
     embedDireto.length ? `\n     ${embedDireto.map(relativo).join('\n     ')}` : ''
 );
 
+// ---------------------------------------------------------------------
+console.log('\n=== A animação da batalha não toca no jogo ===');
+//
+// `narracao.js` e `transmissao.js` só reencenam uma batalha já resolvida.
+// Se algum dia importarem economia, ELO ou estado de batalha, a animação
+// deixa de ser enfeite e vira parte do resultado — e aí uma queda do bot
+// no meio da luta passa a poder deixar aposta presa ou partida sem
+// vencedor. É exatamente o que o desenho evita.
+const APENAS_APRESENTACAO = ['Commands/utils/narracao.js', 'Commands/utils/transmissao.js'];
+const PROIBIDOS = ['economy', 'battleState', 'progresso', 'elo', 'userSchema', 'discovery', 'vipService'];
+
+// O treino lê o inventário do jogador (por isso `userSchema` é liberado
+// para ele), mas não pode gravar progresso nem mexer em economia.
+const TREINO = ['Commands/utils/treino.js', 'Commands/actions/run/treinoRun.js'];
+const PROIBIDOS_TREINO = ['economy', 'battleState', 'progresso', 'elo', 'discovery', 'vipService'];
+
+const vazamentos = [];
+for (const arquivo of APENAS_APRESENTACAO) {
+    const completo = path.join(RAIZ, arquivo);
+    if (!fs.existsSync(completo)) continue;
+
+    // Só os `require` de verdade — procurar a palavra solta no arquivo dá
+    // falso positivo bobo ("elo" casa dentro de "pelo", "modelo").
+    const requires = [...ler(completo).matchAll(/require\(\s*'([^']+)'\s*\)/g)].map((m) => m[1]);
+    for (const dep of requires) {
+        const nome = path.basename(dep, '.js');
+        if (PROIBIDOS.includes(nome)) vazamentos.push(`${arquivo} -> ${dep}`);
+    }
+}
+
+check(
+    'a camada de apresentação não importa estado de jogo',
+    vazamentos.length === 0,
+    vazamentos.length ? `\n     ${vazamentos.join('\n     ')}` : ''
+);
+
+// ---------------------------------------------------------------------
+console.log('\n=== O treino não vale nada ===');
+//
+// `/treino` existe para o jogador testar o time sem consequência. No dia
+// em que alguém achar natural "só contar o treino nas estatísticas", isso
+// vira farm de missão e conquista sem risco nenhum. Este teste é a trava.
+const vazamentosTreino = [];
+for (const arquivo of TREINO) {
+    const completo = path.join(RAIZ, arquivo);
+    if (!fs.existsSync(completo)) continue;
+
+    const requires = [...ler(completo).matchAll(/require\(\s*'([^']+)'\s*\)/g)].map((m) => m[1]);
+    for (const dep of requires) {
+        const nome = path.basename(dep, '.js');
+        if (PROIBIDOS_TREINO.includes(nome)) vazamentosTreino.push(`${arquivo} -> ${dep}`);
+    }
+}
+
+check(
+    'o treino não importa economia, ELO nem progressão',
+    vazamentosTreino.length === 0,
+    vazamentosTreino.length ? `\n     ${vazamentosTreino.join('\n     ')}` : ''
+);
+
 console.log(falhas === 0 ? '\n*** TODAS AS CONVENÇÕES OK ***' : `\n*** ${falhas} FALHA(S) ***`);
 process.exit(falhas ? 1 : 0);

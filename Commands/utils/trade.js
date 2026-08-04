@@ -1,6 +1,7 @@
 const Trade = require('./tradeSchema');
 const User = require('./userSchema');
 const { registerDiscovery } = require('./discovery');
+const { PRAZOS_TROCA, filtroExpirados, podeCancelarTroca } = require('./cicloDeVida');
 
 /**
  * Trocas de carta por carta.
@@ -225,17 +226,30 @@ async function apagar(tradeId) {
 /** Limpa negociações abandonadas. Não há nada a devolver: as cartas
  * nunca saem do inventário antes da execução. */
 async function limparAbandonadas() {
-    const limite = new Date(Date.now() - TTL_MS);
-    const resultado = await Trade.deleteMany({
-        criadaEm: { $lt: limite },
-        fase: { $nin: ['concluida'] }
-    });
+    // Prazo por fase, não um só para tudo.
+    //
+    // A versão anterior apagava qualquer troca com mais de 10 minutos que
+    // não estivesse concluída. Duas consequências ruins:
+    //
+    // - Um convite não aceito segurava o jogador por 10 minutos, sem ele
+    //   ter como sair disso. Era o bug de "troca travada": `temTrocaAtiva`
+    //   considera 'aguardando' ocupado, e nada tirava dali antes do prazo.
+    // - Trocas em 'executando' entravam no filtro e podiam ser apagadas no
+    //   meio da transferência.
+    //
+    // Agora convite morre em 2 minutos, negociação em 5, e execução
+    // travada em 1 — ver `cicloDeVida.js`.
+    const resultado = await Trade.deleteMany(
+        filtroExpirados(PRAZOS_TROCA, 'fase', 'criadaEm')
+    );
     return resultado.deletedCount || 0;
 }
 
 module.exports = {
     MAX_CARTAS,
     TTL_MS,
+    PRAZOS_TROCA,
+    podeCancelarTroca,
     gerarTradeId,
     temTrocaAtiva,
     criar,

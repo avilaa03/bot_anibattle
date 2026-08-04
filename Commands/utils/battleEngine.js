@@ -115,8 +115,30 @@ function runRound(cardA, cardB, roundIndex, rng = Math.random) {
     let lifeB = cardB.LIF ?? 0;
     const log = [];
 
+    // Eventos estruturados, para a transmissão ao vivo.
+    //
+    // O `log` continua sendo texto puro (vários lugares dependem dele),
+    // mas texto não dá para desenhar barra de vida nem cronometrar. Cada
+    // evento carrega a vida dos dois LADOS no instante em que aconteceu —
+    // é isso que permite reproduzir a luta golpe a golpe depois, sem
+    // recalcular nada e sem risco de a animação divergir do resultado.
+    const eventos = [];
+    const registrar = (tipo, extra = {}) => {
+        eventos.push({
+            tipo,
+            round: roundIndex + 1,
+            vidaA: Math.max(0, lifeA),
+            vidaB: Math.max(0, lifeB),
+            maxA,
+            maxB,
+            ...extra
+        });
+    };
+
     let vezDeA = rng() < firstStrikeChance(cardA.ATA ?? 0, cardB.ATA ?? 0);
-    log.push(`⚡ **${vezDeA ? cardA.name : cardB.name}** foi mais rápido e atacou primeiro.`);
+    const abertura = `⚡ **${vezDeA ? cardA.name : cardB.name}** foi mais rápido e atacou primeiro.`;
+    log.push(abertura);
+    registrar('inicio', { texto: abertura, primeiro: vezDeA ? 'A' : 'B' });
 
     for (let turno = 0; turno < MAX_TURNS; turno++) {
         const atacante = vezDeA ? cardA : cardB;
@@ -128,15 +150,29 @@ function runRound(cardA, cardB, roundIndex, rng = Math.random) {
         if (vezDeA) lifeB -= resultado.damage;
         else lifeA -= resultado.damage;
 
-        log.push(descreverGolpe(atacante, defensor, resultado, vezDeA ? lifeB : lifeA));
+        const texto = descreverGolpe(atacante, defensor, resultado, vezDeA ? lifeB : lifeA);
+        log.push(texto);
+        registrar(resultado.dodged ? 'esquiva' : 'golpe', {
+            texto,
+            lado: vezDeA ? 'A' : 'B',
+            dano: resultado.damage,
+            crit: resultado.crit,
+            desperate: resultado.desperate
+        });
 
         if (lifeB <= 0) {
-            log.push(`🏆 **${cardA.name}** venceu o confronto!`);
-            return { winner: 'A', loser: 'B', log, lifeA, lifeB: 0 };
+            const fim = `🏆 **${cardA.name}** venceu o confronto!`;
+            log.push(fim);
+            lifeB = 0;
+            registrar('fim', { texto: fim, vencedor: 'A' });
+            return { winner: 'A', loser: 'B', log, eventos, lifeA, lifeB: 0 };
         }
         if (lifeA <= 0) {
-            log.push(`🏆 **${cardB.name}** venceu o confronto!`);
-            return { winner: 'B', loser: 'A', log, lifeA: 0, lifeB };
+            const fim = `🏆 **${cardB.name}** venceu o confronto!`;
+            log.push(fim);
+            lifeA = 0;
+            registrar('fim', { texto: fim, vencedor: 'B' });
+            return { winner: 'B', loser: 'A', log, eventos, lifeA: 0, lifeB };
         }
 
         vezDeA = !vezDeA;
@@ -145,15 +181,16 @@ function runRound(cardA, cardB, roundIndex, rng = Math.random) {
     // Estourou o limite de turnos: decide por percentual de vida restante.
     const percentA = lifeA / maxA;
     const percentB = lifeB / maxB;
-    log.push('⏱️ O confronto se estendeu — vence quem está em melhor estado.');
+    const porTempo = '⏱️ O confronto se estendeu — vence quem está em melhor estado.';
+    log.push(porTempo);
 
-    if (percentA === percentB) {
-        const vencedor = (cardA.POW ?? 0) >= (cardB.POW ?? 0) ? 'A' : 'B';
-        return { winner: vencedor, loser: vencedor === 'A' ? 'B' : 'A', log, lifeA, lifeB };
-    }
+    const vencedor = percentA === percentB
+        ? ((cardA.POW ?? 0) >= (cardB.POW ?? 0) ? 'A' : 'B')
+        : (percentA > percentB ? 'A' : 'B');
 
-    const vencedor = percentA > percentB ? 'A' : 'B';
-    return { winner: vencedor, loser: vencedor === 'A' ? 'B' : 'A', log, lifeA, lifeB };
+    registrar('tempo', { texto: porTempo, vencedor });
+
+    return { winner: vencedor, loser: vencedor === 'A' ? 'B' : 'A', log, eventos, lifeA, lifeB };
 }
 
 /**
@@ -172,7 +209,14 @@ function runBattle(deckX, deckY, rng = Math.random) {
             cardX: deckX[i].name,
             cardY: deckY[i].name,
             winner: result.winner,
-            log: result.log
+            log: result.log,
+            // A transmissão ao vivo lê daqui. Os nomes vão junto porque o
+            // evento sozinho só sabe dizer 'A' ou 'B'.
+            eventos: result.eventos,
+            nomeA: deckX[i].name,
+            nomeB: deckY[i].name,
+            raridadeA: deckX[i].rarity,
+            raridadeB: deckY[i].rarity
         });
         if (result.winner === 'A') winsX++;
         else winsY++;

@@ -79,7 +79,17 @@ client.on('interactionCreate', async (interaction) => {
     } else if (interaction.isButton() || interaction.isStringSelectMenu()) {
       const id = interaction.customId;
 
-      if (id.startsWith('battle_pick_')) {
+      // A ordem importa: 'battle_cancel_' precisa vir antes de qualquer
+      // prefixo mais curto que também case com ele.
+      if (id.startsWith('treino_')) {
+        const { executarTreino } = require('./Commands/actions/run/treinoRun');
+        const dificuldade = id.slice('treino_'.length);
+        await executarTreino(interaction, dificuldade, true);
+        return;
+      } else if (id.startsWith('battle_cancel_')) {
+        const { handleBattleCancel } = require('./Commands/handlers/battleButtonHandler');
+        if (await handleBattleCancel(client, interaction)) return;
+      } else if (id.startsWith('battle_pick_')) {
         const { handleBattlePick } = require('./Commands/handlers/battleButtonHandler');
         if (await handleBattlePick(client, interaction)) return;
       } else if (id.startsWith('trade_')) {
@@ -203,7 +213,13 @@ async function start() {
     } catch (err) {
       monitoring.capturarErro(err, { origem: 'varreduraPeriodica' });
     }
-  }, 5 * 60 * 1000);
+    // A cada minuto, não a cada cinco.
+    //
+    // Os prazos mais curtos (execução travada de troca e batalha) são de
+    // 1 minuto. Com varredura de 5 em 5, uma aposta retida podia ficar
+    // presa por até 6 minutos mesmo o prazo sendo 1. A varredura é barata:
+    // são consultas indexadas que quase sempre não retornam nada.
+  }, 60 * 1000);
 
   client.slashCommands = new Collection();
   // "../commands" é relativo a Commands/utils/, ou seja: Commands/commands/.

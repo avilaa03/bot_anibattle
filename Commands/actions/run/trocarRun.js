@@ -175,7 +175,17 @@ async function trocarRun(client, interaction) {
 
     const botoes = new ActionRowBuilder().addComponents(
         new ButtonBuilder().setCustomId(`trade_accept_${t.tradeId}`).setLabel('Aceitar').setEmoji('🔄').setStyle(ButtonStyle.Success),
-        new ButtonBuilder().setCustomId(`trade_decline_${t.tradeId}`).setLabel('Recusar').setStyle(ButtonStyle.Secondary)
+        new ButtonBuilder().setCustomId(`trade_decline_${t.tradeId}`).setLabel('Recusar').setStyle(ButtonStyle.Secondary),
+        // Quem convidou também precisa de saída.
+        //
+        // Antes só o convidado tinha botão: o coletor abaixo filtra por
+        // `i.user.id === alvo.id`. Se o convidado sumia, o proponente
+        // ficava preso — `temTrocaAtiva` conta 'aguardando' como ocupado e
+        // ele não conseguia abrir outra troca até o convite expirar.
+        //
+        // Este botão vai pelo handler global (`trade_cancel_`), não pelo
+        // coletor, então continua funcionando depois de um restart do bot.
+        new ButtonBuilder().setCustomId(`trade_cancel_${t.tradeId}`).setLabel('Cancelar convite').setEmoji('🚫').setStyle(ButtonStyle.Danger)
     );
 
     await interaction.reply({

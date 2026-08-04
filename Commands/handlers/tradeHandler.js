@@ -5,6 +5,7 @@ const { registrar } = require('../utils/progresso');
 const { anunciarConquistas } = require('../utils/notificacoes');
 const { montarEmbed, montarComponentes } = require('../actions/run/trocarRun');
 const { MessageFlags } = require('discord.js');
+const { podeCancelarTroca, MENSAGENS } = require('../utils/cicloDeVida');
 
 /**
  * Botões e menus da mesa de troca.
@@ -61,6 +62,19 @@ async function handleTrade(client, interaction) {
 
     // ---- Cancelar ----
     if (acao === 'cancel') {
+        // A regra fica em cicloDeVida.js, compartilhada com a batalha.
+        // O ponto sensível é a fase 'executando': ali as cartas já estão
+        // mudando de dono, e cancelar no meio deixaria o inventário dos
+        // dois inconsistente.
+        const permissao = podeCancelarTroca(t, interaction.user.id);
+        if (!permissao.ok) {
+            await interaction.reply({
+                embeds: [ui.error('Não dá para cancelar agora', MENSAGENS[permissao.motivo])],
+                flags: MessageFlags.Ephemeral
+            }).catch(() => {});
+            return true;
+        }
+
         await trade.apagar(tradeId);
         await interaction.update({
             content: null,

@@ -17,6 +17,8 @@ const { registrar } = require('../utils/progresso');
 const { anunciarConquistas } = require('../utils/notificacoes');
 const { buildDeckChoiceMessage } = require('../actions/collect/battleCollect');
 const { MessageFlags } = require('discord.js');
+const { podeCancelarBatalha, MENSAGENS } = require('../utils/cicloDeVida');
+const transmissao = require('../utils/transmissao');
 
 /** Busca o inventário atual do jogador direto do banco. */
 async function carregarInventario(userId) {
@@ -25,6 +27,82 @@ async function carregarInventario(userId) {
 }
 
 /**
+ * Desistência durante a escolha do time.
+ *
+ * customId: battle_cancel_<battleId>
+ *
+ * Só vale enquanto a fase é 'choosing'. Depois que a luta começou o
+ * resultado já foi calculado e a aposta resolvida — cancelar ali seria
+ * desfazer uma derrota. A regra mora em `cicloDeVida.js`.
+ */
+async function handleBattleCancel(client, interaction) {
+    const battleId = interaction.customId.slice('battle_cancel_'.length);
+
+    let battle = await getBattle(battleId);
+    if (!battle) battle = await getBattleByUserId(interaction.user.id);
+
+    if (!battle) {
+        await interaction.reply({
+            embeds: [ui.neutral('Nada para cancelar', 'Esta batalha já terminou ou expirou.')],
+            flags: MessageFlags.Ephemeral
+        }).catch(() => {});
+        return true;
+    }
+
+    const permissao = podeCancelarBatalha(battle, interaction.user.id);
+    if (!permissao.ok) {
+        await interaction.reply({
+            embeds: [ui.error('Não dá para desistir agora', MENSAGENS[permissao.motivo])],
+            flags: MessageFlags.Ephemeral
+        }).catch(() => {});
+        return true;
+    }
+
+    // cancelBattle devolve a aposta dos dois lados se ela estiver retida.
+    const cancelada = await cancelBattle(battle.battleId);
+    if (!cancelada) {
+        await interaction.reply({
+            embeds: [ui.neutral('Nada para cancelar', 'Esta batalha já foi encerrada.')],
+            flags: MessageFlags.Ephemeral
+        }).catch(() => {});
+        return true;
+    }
+
+    const aposta = cancelada.wager > 0 && cancelada.wagerHeld
+        ? `\n\nA aposta de ${ui.coins(cancelada.wager)} voltou para os dois.`
+        : '';
+
+    const aviso = ui.neutral(
+        'Duelo cancelado',
+        `**${interaction.user.username}** desistiu antes da luta começar.${aposta}`
+    );
+
+    await interaction.update({ embeds: [aviso], components: [] }).catch(() => {});
+
+    // O outro jogador está numa mensagem diferente (cada um escolhe o time
+    // no próprio privado). Sem avisar, ele ficaria escolhendo cartas para
+    // um duelo que não existe mais.
+    const souX = cancelada.userX.id === interaction.user.id;
+    const canalOutro = souX ? cancelada.channelYId : cancelada.channelXId;
+    const mensagemOutro = souX ? cancelada.messageYId : cancelada.messageXId;
+
+    if (canalOutro && mensagemOutro) {
+        try {
+            const canal = await client.channels.fetch(canalOutro);
+            const msg = await canal.messages.fetch(mensagemOutro);
+            await msg.edit({ embeds: [aviso], components: [] });
+        } catch {
+            // Mensagem apagada ou privado fechado: a batalha já foi
+            // cancelada no banco e a aposta devolvida, que é o que importa.
+        }
+    }
+
+    return true;
+}
+
+/**
+ * Escolha de uma carta para o time.
+ *
  * customId: battle_pick_<battleId>_<X|Y>_<cardId>
  */
 async function handleBattlePick(client, interaction) {
@@ -239,13 +317,31 @@ async function resolverBatalha(client, battle) {
         await User.updateOne({ id: battle.userY.id }, { $set: { elo: r.b } });
     }
 
+    // ---- Transmissão ao vivo ----
+    //
+    // Tudo que importa já aconteceu: o resultado está calculado, a aposta
+    // resolvida e o ELO gravado. A animação abaixo só reencena, e por isso
+    // pode falhar sem consequência — o resultado sai logo depois de
+    // qualquer jeito.
+    //
+    // A luta é transmitida no canal do servidor, não no privado, para os
+    // dois acompanharem juntos e o resto do servidor torcer.
+    const mencao = `<@${battle.userX.id}> vs <@${battle.userY.id}>`;
+
     if (canal) {
-        await canal.send({
-            content: `<@${battle.userX.id}> vs <@${battle.userY.id}>`,
-            embeds: [resultEmbed]
-        }).catch(() => {});
+        try {
+            await transmissao.transmitir({
+                canal, nomeX, nomeY, mencao, resultado: result, wager
+            });
+        } catch (err) {
+            // Nunca deixar a animação derrubar a entrega do resultado.
+            console.error('Erro na transmissão da batalha (resultado não afetado):', err.message);
+        }
+
+        await canal.send({ content: mencao, embeds: [resultEmbed] }).catch(() => {});
     }
 
+    // No privado vai só o resultado: quem quis assistir estava no canal.
     await enviarNoPrivado(client, battle.userX.id, { embeds: [resultEmbed] });
     await enviarNoPrivado(client, battle.userY.id, { embeds: [resultEmbed] });
 
@@ -284,4 +380,4 @@ async function resolverBatalha(client, battle) {
     await finishBattle(battle.battleId);
 }
 
-module.exports = { handleBattlePick, validarPosse };
+module.exports = { handleBattlePick, handleBattleCancel, validarPosse };

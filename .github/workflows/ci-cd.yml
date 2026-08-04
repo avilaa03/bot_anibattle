@@ -1,0 +1,87 @@
+name: Testes e deploy
+
+# Um arquivo só, com dois trabalhos, porque o segundo depende do primeiro:
+# o deploy só existe se os testes passarem. Em arquivos separados isso
+# exigiria `workflow_run`, que é mais difícil de ler e de depurar.
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  # Permite disparar o deploy pela aba Actions, sem precisar de um commit.
+  workflow_dispatch:
+
+jobs:
+  testes:
+    name: Testes
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # O canvas é dependência nativa: sem estas bibliotecas o `npm ci`
+      # tenta compilar do zero e falha. São as mesmas do Dockerfile.
+      - name: Dependências do canvas
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libcairo2-dev libjpeg-dev libpango1.0-dev libgif-dev build-essential
+
+      - name: Node 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.12.1'
+          cache: npm
+
+      - run: npm ci
+
+      # Os testes rodam sem banco e sem Discord, de propósito — por isso
+      # cabem aqui sem nenhum serviço extra.
+      - run: npm test
+
+  implantar:
+    name: Publicar na VPS
+    needs: testes
+    # Só a main vai para produção. Push na develop roda os testes e para
+    # por aí, que é justamente o ponto de ter a develop.
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    # Ambiente do GitHub: dá para exigir aprovação manual depois, se você
+    # quiser, sem mexer neste arquivo.
+    environment: producao
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Preparar chave SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+
+          # Fixa a identidade do servidor para o SSH não perguntar nada.
+          #
+          # O ideal seria guardar a chave pública da VPS num secret e usá-la
+          # aqui. O keyscan confia no que o servidor responder na hora, o
+          # que teoricamente abre espaço para um ataque no meio do caminho.
+          # Para endurecer: rode `ssh-keyscan -H SEU_IP` na sua máquina,
+          # salve a saída no secret VPS_KNOWN_HOSTS e troque este bloco por
+          # `echo "${{ secrets.VPS_KNOWN_HOSTS }}" > ~/.ssh/known_hosts`.
+          ssh-keyscan -H -p "${{ secrets.VPS_PORT || 22 }}" "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Rodar o deploy na VPS
+        env:
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_PORT: ${{ secrets.VPS_PORT || 22 }}
+          DEPLOY_DIR: ${{ secrets.DEPLOY_DIR }}
+        run: |
+          # O script vive no repositório (versionado, revisável) e é
+          # enviado pela entrada padrão do bash remoto. Assim a lógica de
+          # deploy não fica escondida dentro do YAML.
+          ssh -p "$VPS_PORT" "$VPS_USER@$VPS_HOST" \
+            "DEPLOY_DIR='$DEPLOY_DIR' bash -s" < deploy/implantar.sh
+
+      - name: Resumo
+        if: always()
+        run: |
+          echo "Commit publicado: ${{ github.sha }}"

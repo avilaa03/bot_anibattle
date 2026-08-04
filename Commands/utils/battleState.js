@@ -1,5 +1,6 @@
 const { Battle, BattleCooldown } = require('./battleSchema');
 const { addBalance } = require('./economy');
+const { PRAZOS_BATALHA, filtroExpirados, podeCancelarBatalha } = require('./cicloDeVida');
 
 /**
  * Estado das batalhas, persistido no MongoDB.
@@ -65,8 +66,18 @@ async function recoverPendingBattles() {
 
 /** Cancela batalhas abandonadas (jogador nunca terminou de escolher). */
 async function sweepStaleBattles() {
-    const limite = new Date(Date.now() - BATTLE_TTL_MS);
-    const velhas = await Battle.find({ createdAt: { $lt: limite } }).lean();
+    // Prazo por fase: escolher time tem 5 minutos, resolver a luta tem 1.
+    //
+    // A resolução roda em memória e leva milissegundos — se uma batalha
+    // está há mais de um minuto em 'fighting', o bot caiu no meio dela e
+    // as apostas estão retidas sem ninguém para devolver.
+    //
+    // Antes era um prazo único a partir da criação, o que obrigava
+    // escolher entre matar batalha viva ou deixar aposta presa por muito
+    // tempo. Ver `cicloDeVida.js`.
+    const velhas = await Battle.find(
+        filtroExpirados(PRAZOS_BATALHA, 'phase', 'createdAt')
+    ).lean();
     if (velhas.length === 0) return { canceladas: 0, devolvido: 0 };
 
     let devolvido = 0;
@@ -236,5 +247,7 @@ module.exports = {
     cooldownRestante,
     registrarDuelo,
     BATTLE_COOLDOWN_MS,
-    BATTLE_TTL_MS
+    BATTLE_TTL_MS,
+    PRAZOS_BATALHA,
+    podeCancelarBatalha
 };

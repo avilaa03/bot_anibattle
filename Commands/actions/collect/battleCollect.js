@@ -3,8 +3,20 @@ const { createBattle, generateBattleId, cancelBattle, setMessageRefs } = require
 const { trySpend, addBalance } = require('../../utils/economy');
 const ui = require('../../utils/embeds');
 
-const MAX_CARDS_SHOWN = 25;
+// 20, não 25.
+//
+// O Discord permite 5 linhas de 5 botões numa mensagem. Com 25 cartas as
+// cinco linhas ficavam lotadas e não sobrava espaço para o botão de
+// desistir — ele simplesmente não aparecia, sem erro nenhum.
+//
+// 20 cartas deixam a quinta linha livre. Para escolher 3 do time, ver as
+// 20 melhores é mais que suficiente.
+const MAX_CARDS_SHOWN = 20;
 const CARDS_PER_ROW = 5;
+
+// Limites do Discord, usados na montagem dos botões.
+const MAX_LINHAS = 5;
+const MAX_BOTOES_POR_LINHA = 5;
 
 function getOvr(card) {
     return card.overall ?? (card.marketValue != null ? Math.round(card.marketValue / 10) : 0);
@@ -84,6 +96,36 @@ function buildDeckChoiceMessage(battleId, side, inventory, selectedIds, deck, wa
             );
         }
         rows.push(actionRow);
+    }
+
+    // Saída durante a escolha do time.
+    //
+    // Sem isso, quem desafiava e via o oponente sumir ficava com a aposta
+    // retida até a varredura passar. Cancelar aqui devolve a aposta aos
+    // dois na hora — o `wagerHeld` do battleState existe justamente para
+    // isso saber quando devolver.
+    //
+    // Entra na última linha se couber; senão abre uma linha nova. Com
+    // MAX_CARDS_SHOWN em 20 sempre sobra espaço, mas a conta fica aqui
+    // para o botão não sumir em silêncio se alguém mexer nas constantes.
+    const botaoDesistir = new ButtonBuilder()
+        .setCustomId(`battle_cancel_${battleId}`)
+        .setLabel('Desistir')
+        .setEmoji('🚫')
+        .setStyle(ButtonStyle.Danger);
+
+    const ultima = rows[rows.length - 1];
+    if (ultima && ultima.components.length < MAX_BOTOES_POR_LINHA) {
+        ultima.addComponents(botaoDesistir);
+    } else if (rows.length < MAX_LINHAS) {
+        rows.push(new ActionRowBuilder().addComponents(botaoDesistir));
+    } else {
+        // Não deveria acontecer. Se acontecer, é erro de configuração e
+        // precisa gritar — botão de desistir sumido deixa aposta presa.
+        console.error(
+            '[battleCollect] Sem espaço para o botão de desistir. '
+            + `MAX_CARDS_SHOWN (${MAX_CARDS_SHOWN}) ocupa todas as ${MAX_LINHAS} linhas do Discord.`
+        );
     }
 
     return { embed, components: rows };
