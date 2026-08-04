@@ -4,6 +4,7 @@ const User = require('../../utils/userSchema.js');
 const { showEnd } = require('../end/showEnd.js');
 const { renderCard } = require('../../utils/cardRenderer.js');
 const ui = require('../../utils/embeds.js');
+const valores = require('../../utils/valores.js');
 const { molduraEfetiva } = require('../../utils/vip.js');
 const { registrar } = require('../../utils/progresso.js');
 
@@ -50,7 +51,7 @@ async function showRun(client, interaction) {
             ].join('\n'))
             .addFields(
                 { name: 'Valor de mercado', value: ui.coins(card.marketValue || 0), inline: true },
-                { name: 'Venda rápida', value: ui.coins(card.valueToSell || Math.floor((card.marketValue || 0) / 2)), inline: true }
+                { name: 'Venda rápida', value: ui.coins(card.valueToSell ?? valores.valoresDaCarta(card).valueToSell), inline: true }
             )
             .setFooter({ text: `${ui.BRAND} • Carta ${index + 1} de ${cards.length}` });
 

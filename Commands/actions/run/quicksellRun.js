@@ -1,8 +1,16 @@
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const ui = require('../../utils/embeds');
+const valores = require('../../utils/valores');
 
+/**
+ * O quanto a venda rápida paga.
+ *
+ * Cartas anteriores à migração de valores podem não ter `valueToSell`
+ * gravado; nesse caso recalculamos pela raridade em vez de dividir o
+ * valor de mercado, que só valia sob a fórmula antiga.
+ */
 function getValueToSell(card) {
-    return card.valueToSell ?? (card.marketValue != null ? Math.floor(card.marketValue / 2) : 0);
+    return card.valueToSell ?? valores.valoresDaCarta(card).valueToSell;
 }
 
 function updateEmbed(card) {

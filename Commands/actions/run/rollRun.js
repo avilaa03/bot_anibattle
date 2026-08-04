@@ -7,6 +7,7 @@ const { getPerks, molduraEfetiva } = require('../../utils/vip');
 const wishlist = require('../../utils/wishlist');
 const { registrar } = require('../../utils/progresso');
 const { notificarProgresso } = require('../../utils/notificacoes');
+const valores = require('../../utils/valores');
 
 /**
  * Menciona no canal quem tem a carta na lista de desejos.
@@ -116,8 +117,9 @@ module.exports = async (client, interaction, rollCollect, rollEnd) => {
         return interaction.editReply({ embeds: [errorEmbed('Nenhuma carta encontrada no banco de dados.')] });
     }
 
-    const marketValue = card.overall * 10;
-    const valueToSell = marketValue / 2;
+    // A raridade define a ordem de grandeza do preço; o overall só move
+    // dentro da faixa. Ver `utils/valores.js` para o porquê.
+    const { marketValue, valueToSell } = valores.valoresDaCarta(card);
 
     const render = await renderCard(card, { moldura: molduraEfetiva(user) });
 

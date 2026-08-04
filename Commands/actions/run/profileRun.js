@@ -4,11 +4,10 @@ const { getProgress } = require('../../utils/discovery');
 const { getTier, corPerfilEfetiva, isVipAtivo } = require('../../utils/vip');
 const achievements = require('../../utils/achievements');
 const elo = require('../../utils/elo');
+const valores = require('../../utils/valores');
 const { MessageFlags } = require('discord.js');
 
-function getCardOvr(card) {
-    return card.overall ?? (card.marketValue != null ? Math.round(card.marketValue / 10) : 0);
-}
+const getCardOvr = valores.overallDaCarta;
 
 async function profileRun(client, interaction) {
     const alvo = interaction.options.getUser('user') || interaction.user;

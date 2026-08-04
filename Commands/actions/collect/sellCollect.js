@@ -1,6 +1,7 @@
 const Market = require('../../utils/marketSchema');
 const User = require('../../utils/userSchema');
 const ui = require('../../utils/embeds');
+const valores = require('../../utils/valores');
 const { applyMarketTax, MARKET_TAX_RATE } = require('../../utils/economy');
 const { registrar } = require('../../utils/progresso');
 
@@ -49,7 +50,7 @@ async function sellCollect(interaction, collector, matchingCards, indexRef, list
                 baseImage: card.baseImage,
                 characterImage: card.characterImage,
                 rarity: card.rarity,
-                overall: card.overall ?? (card.marketValue != null ? Math.round(card.marketValue / 10) : 0),
+                overall: valores.overallDaCarta(card),
                 ATA: card.ATA ?? 0,
                 LIF: card.LIF ?? 0,
                 POW: card.POW ?? 0,

@@ -2,6 +2,7 @@ const User = require('../../utils/userSchema.js');
 const Market = require('../../utils/marketSchema.js');
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags } = require('discord.js');
 const ui = require('../../utils/embeds.js');
+const valores = require('../../utils/valores.js');
 const { renderCard } = require('../../utils/cardRenderer.js');
 const { escapeRegex } = require('../../utils/regexUtils.js');
 const { molduraEfetiva } = require('../../utils/vip.js');
@@ -39,7 +40,7 @@ async function undosellRun(client, interaction) {
             baseImage: listing.baseImage,
             characterImage: listing.characterImage,
             rarity: listing.rarity,
-            overall: listing.overall ?? listing.ovr ?? (listing.marketValue != null ? Math.round(listing.marketValue / 10) : 0),
+            overall: valores.overallDaCarta(listing),
             ATA: listing.ATA ?? listing.ata ?? 0,
             LIF: listing.LIF ?? listing.lif ?? 0,
             POW: listing.POW ?? listing.pow ?? 0
@@ -118,6 +119,9 @@ async function undosellRun(client, interaction) {
                 await i.update({ embeds: [ui.error('Perfil não encontrado', 'Não foi possível localizar seu perfil.')], components: [], files: [] });
                 return;
             }
+            // Os dois valores saem do MESMO cálculo — ver marketEnd.js.
+            const preco = valores.valoresDaCarta(listing);
+
             const card = {
                 cardId: listing.cardId,
                 originalCardId: listing.cardId,
@@ -127,13 +131,13 @@ async function undosellRun(client, interaction) {
                 baseImage: listing.baseImage,
                 characterImage: listing.characterImage,
                 rarity: listing.rarity,
-                overall: listing.overall ?? listing.ovr ?? (listing.marketValue != null ? Math.round(listing.marketValue / 10) : 0),
+                overall: preco.overall,
                 ATA: listing.ATA ?? listing.ata ?? 0,
                 LIF: listing.LIF ?? listing.lif ?? 0,
                 POW: listing.POW ?? listing.pow ?? 0,
                 obtainedAt: listing.obtainedAt,
-                marketValue: listing.marketValue,
-                valueToSell: listing.marketValue ? Math.floor(listing.marketValue / 2) : 0
+                marketValue: preco.marketValue,
+                valueToSell: preco.valueToSell
             };
             user.inventory.push(card);
             await user.save();
