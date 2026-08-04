@@ -8,6 +8,7 @@ const wishlist = require('../../utils/wishlist');
 const { registrar } = require('../../utils/progresso');
 const { notificarProgresso } = require('../../utils/notificacoes');
 const valores = require('../../utils/valores');
+const telemetria = require('../../utils/telemetria');
 
 /**
  * Menciona no canal quem tem a carta na lista de desejos.
@@ -87,6 +88,19 @@ module.exports = async (client, interaction, rollCollect, rollEnd) => {
         return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
     }
 
+    // Telemetria: quanto tempo depois do cooldown vencer este roll chegou.
+    //
+    // Precisa ser calculado AQUI, antes de `lastRoll` ser sobrescrito lá
+    // embaixo — depois disso o instante anterior não existe mais em lugar
+    // nenhum. Este era exatamente o dado que o bot vinha jogando fora a
+    // cada roll desde sempre.
+    //
+    // Sem await e com catch: telemetria nunca pode atrasar nem derrubar o
+    // /roll de ninguém.
+    const prontoEm = user?.lastRoll ? user.lastRoll + cooldownEfetivo : null;
+    telemetria.registrarRoll(interaction.user.id, { agora: now, prontoEm })
+        .catch((err) => console.error('Erro ao registrar telemetria do roll:', err.message));
+
     await interaction.deferReply();
 
     const rarities = [
@@ -159,6 +173,12 @@ module.exports = async (client, interaction, rollCollect, rollEnd) => {
 
     await interaction.editReply({ embeds: [embed], components: [row], files: [render.attachment] });
 
+    // Marco para medir a latência do clique no botão. Fica DEPOIS do
+    // editReply de propósito: medir a partir do início do comando somaria
+    // o tempo de renderizar a carta no canvas, que varia de centenas de
+    // milissegundos a segundos e afogaria o sinal.
+    const mostradoEm = Date.now();
+
     if (!user) {
         user = new User({ id: interaction.user.id });
     }
@@ -181,7 +201,7 @@ module.exports = async (client, interaction, rollCollect, rollEnd) => {
         previousCollector.stop();
     }
 
-    const collector = rollCollect(interaction, card, user, marketValue, valueToSell, rollEnd);
+    const collector = rollCollect(interaction, card, user, marketValue, valueToSell, rollEnd, mostradoEm);
     activeCollectors.set(interaction.user.id, collector);
     collector.on('end', () => {
         if (activeCollectors.get(interaction.user.id) === collector) {

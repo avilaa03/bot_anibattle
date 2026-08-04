@@ -13,6 +13,8 @@
     "migrate:pokedex": "node scripts/migratePokedex.js",
     "migrate:dex": "node scripts/assignDexNumbers.js",
     "migrar:valores": "node scripts/migrarValores.js",
+    "beta:marcar": "node scripts/marcarBeta.js",
+    "telemetria:suspeitos": "node scripts/suspeitos.js",
     "vip:grant": "node scripts/grantVip.js",
     "cards:grant": "node scripts/grantCards.js",
     "pokedex:grant": "node scripts/grantPokedex.js",

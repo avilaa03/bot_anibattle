@@ -5,14 +5,23 @@ const ui = require('../../utils/embeds');
 const { registerDiscovery } = require('../../utils/discovery');
 const { registrar } = require('../../utils/progresso');
 const { notificarProgresso } = require('../../utils/notificacoes');
+const telemetria = require('../../utils/telemetria');
 
-module.exports = (interaction, card, user, marketValue, valueToSell, rollEnd) => {
+module.exports = (interaction, card, user, marketValue, valueToSell, rollEnd, mostradoEm = null) => {
     const filter = (i) => (i.customId.startsWith(`enviarInventario_${card._id}`) || i.customId.startsWith(`vender_${card._id}`)) && i.user.id === interaction.user.id;
     // max: 1 garante que "enviar ao inventário"/"vender" só podem ser
     // processados uma vez, mesmo com clique duplo quase simultâneo.
     const collector = interaction.channel.createMessageComponentCollector({ filter, time: 30000, max: 1 });
 
     collector.on('collect', async (i) => {
+        // Quanto o jogador levou entre a carta aparecer e decidir. Humano
+        // leva de 1 a 5 s; macro responde em uns 200 ms. Sem await e com
+        // catch: telemetria nunca atrapalha a ação de quem clicou.
+        if (mostradoEm) {
+            telemetria.registrarClique(interaction.user.id, i.createdTimestamp - mostradoEm)
+                .catch(() => {});
+        }
+
         if (i.customId.startsWith('enviarInventario_')) {
             const clonedCard = {
                 cardId: new mongoose.Types.ObjectId(),
