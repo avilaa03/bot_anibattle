@@ -198,7 +198,16 @@ const PROIBIDOS = ['economy', 'battleState', 'progresso', 'elo', 'userSchema', '
 
 // O treino lê o inventário do jogador (por isso `userSchema` é liberado
 // para ele), mas não pode gravar progresso nem mexer em economia.
-const TREINO = ['Commands/utils/treino.js', 'Commands/actions/run/treinoRun.js'];
+//
+// `battleState` entra na lista proibida também por outro motivo: a sessão
+// de escolha de time do treino vive em memória, de propósito. Se ela
+// passar pelo Mongo, o treino ganha um jeito de sujar o banco e de deixar
+// registro de algo que não deveria existir depois que a luta acaba.
+const TREINO = [
+    'Commands/utils/treino.js',
+    'Commands/actions/run/treinoRun.js',
+    'Commands/handlers/treinoButtonHandler.js'
+];
 const PROIBIDOS_TREINO = ['economy', 'battleState', 'progresso', 'elo', 'discovery', 'vipService'];
 
 const vazamentos = [];
@@ -227,22 +236,56 @@ console.log('\n=== O treino não vale nada ===');
 // `/treino` existe para o jogador testar o time sem consequência. No dia
 // em que alguém achar natural "só contar o treino nas estatísticas", isso
 // vira farm de missão e conquista sem risco nenhum. Este teste é a trava.
+//
+// A verificação segue a CADEIA de requires, não só os imports diretos.
+// Quando o treino passou a compartilhar a tela de escolha e a tela final
+// com o `/battle`, olhar só o primeiro nível deixou de bastar: bastaria
+// um desses módulos comuns importar `economy` para o treino voltar a
+// mexer em moeda, com o teste passando feliz.
+
+/**
+ * Todos os módulos locais alcançáveis a partir de um arquivo.
+ * @returns {Array<{de: string, para: string, caminho: string[]}>}
+ */
+function cadeiaDeRequires(entrada) {
+    const vistos = new Set();
+    const arestas = [];
+    const fila = [{ arquivo: entrada, caminho: [entrada] }];
+
+    while (fila.length > 0) {
+        const { arquivo, caminho } = fila.pop();
+        if (vistos.has(arquivo) || !fs.existsSync(arquivo)) continue;
+        vistos.add(arquivo);
+
+        // Só require com caminho relativo: pacote do npm não interessa aqui.
+        for (const m of ler(arquivo).matchAll(/require\(\s*'(\.[^']+)'\s*\)/g)) {
+            const alvo = path.resolve(path.dirname(arquivo), m[1]);
+            const destino = fs.existsSync(alvo) && fs.statSync(alvo).isFile() ? alvo : `${alvo}.js`;
+            arestas.push({ de: arquivo, para: destino, caminho: [...caminho, destino] });
+            fila.push({ arquivo: destino, caminho: [...caminho, destino] });
+        }
+    }
+    return arestas;
+}
+
 const vazamentosTreino = [];
 for (const arquivo of TREINO) {
     const completo = path.join(RAIZ, arquivo);
     if (!fs.existsSync(completo)) continue;
 
-    const requires = [...ler(completo).matchAll(/require\(\s*'([^']+)'\s*\)/g)].map((m) => m[1]);
-    for (const dep of requires) {
-        const nome = path.basename(dep, '.js');
-        if (PROIBIDOS_TREINO.includes(nome)) vazamentosTreino.push(`${arquivo} -> ${dep}`);
+    for (const aresta of cadeiaDeRequires(completo)) {
+        const nome = path.basename(aresta.para, '.js');
+        if (!PROIBIDOS_TREINO.includes(nome)) continue;
+        // Mostra o caminho inteiro: num import indireto, saber só o ponto
+        // de chegada não diz onde cortar.
+        vazamentosTreino.push(aresta.caminho.map(relativo).join(' -> '));
     }
 }
 
 check(
-    'o treino não importa economia, ELO nem progressão',
+    'o treino não importa economia, ELO nem progressão (nem por tabela)',
     vazamentosTreino.length === 0,
-    vazamentosTreino.length ? `\n     ${vazamentosTreino.join('\n     ')}` : ''
+    vazamentosTreino.length ? `\n     ${[...new Set(vazamentosTreino)].join('\n     ')}` : ''
 );
 
 console.log(falhas === 0 ? '\n*** TODAS AS CONVENÇÕES OK ***' : `\n*** ${falhas} FALHA(S) ***`);

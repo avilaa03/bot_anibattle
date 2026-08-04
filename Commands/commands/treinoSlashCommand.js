@@ -15,7 +15,7 @@ module.exports = class TreinoSlashCommand extends BaseSlashCommand {
     getSlashCommandJSON() {
         return new SlashCommandBuilder()
             .setName(this.name)
-            .setDescription('Testa seu time contra o BOT Caviar — não vale moeda, ELO nem conquista')
+            .setDescription('Batalha simulada contra o BOT Caviar — não vale moeda, ELO nem conquista')
             .addStringOption(option =>
                 option.setName('dificuldade')
                     .setDescription('Quão forte é o adversário (padrão: parelho)')

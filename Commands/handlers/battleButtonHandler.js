@@ -19,6 +19,7 @@ const { buildDeckChoiceMessage } = require('../actions/collect/battleCollect');
 const { MessageFlags } = require('discord.js');
 const { podeCancelarBatalha, MENSAGENS } = require('../utils/cicloDeVida');
 const transmissao = require('../utils/transmissao');
+const { montarEmbedResultado, contarDestaques } = require('../utils/resultadoBatalha');
 
 /** Busca o inventário atual do jogador direto do banco. */
 async function carregarInventario(userId) {
@@ -236,51 +237,28 @@ async function resolverBatalha(client, battle) {
         return;
     }
 
+    // Empate não existe no 3v3: são três confrontos, cada um com um
+    // vencedor, então o placar é sempre 2-1 ou 3-0. `winner` é 'X' ou 'Y'.
     const result = runBattle(battle.deckX, battle.deckY);
-    const vencedorId = result.winner === 'X' ? battle.userX.id : result.winner === 'Y' ? battle.userY.id : null;
-    const perdedorId = result.winner === 'X' ? battle.userY.id : result.winner === 'Y' ? battle.userX.id : null;
-    const nomeVencedor = result.winner === 'X' ? nomeX : nomeY;
-    const nomePerdedor = result.winner === 'X' ? nomeY : nomeX;
+    const venceuX = result.winner === 'X';
+    const vencedorId = venceuX ? battle.userX.id : battle.userY.id;
+    const perdedorId = venceuX ? battle.userY.id : battle.userX.id;
+    const nomeVencedor = venceuX ? nomeX : nomeY;
+    const nomePerdedor = venceuX ? nomeY : nomeX;
 
-    const placar = `**${result.winsX}** — **${result.winsY}**`;
-
-    const resultEmbed = ui.base(result.winner ? 0xFFD700 : ui.STATUS_COLORS.neutral)
-        .setTitle(result.winner ? '⚔️ Fim da batalha' : '⚔️ Empate')
-        .setDescription(
-            result.winner
-                ? `👑 **${nomeVencedor}** venceu — ${nomeX} ${placar} ${nomeY}`
-                : `Ninguém levou vantagem — ${nomeX} ${placar} ${nomeY}`
-        );
-
-    const roundLines = result.rounds.map((r) => {
-        const venceuX = r.winner === 'A';
-        const quemVenceu = venceuX ? nomeX : nomeY;
-        const destaques = r.log.filter((l) => l.includes('CRÍTICO') || l.includes('VIRADA') || l.includes('esquivou'));
-        const extra = destaques.length > 0 ? `\n└ ${destaques[destaques.length - 1]}` : '';
-        return `\`R${r.round}\` ${venceuX ? '🟢' : '🔴'} **${ui.cardName(r.cardX)}** vs **${ui.cardName(r.cardY)}** → ${quemVenceu}${extra}`;
-    }).join('\n');
-
-    resultEmbed.addFields({ name: 'Rodadas', value: roundLines.slice(0, 1024), inline: false });
+    // A tela final é a mesma do `/treino` — placar, vencedor e rodadas
+    // saem de `utils/resultadoBatalha.js`. Aposta e ranking, que só
+    // existem aqui, entram como campos extras logo abaixo.
+    const resultEmbed = montarEmbedResultado({ nomeX, nomeY, resultado: result });
 
     if (wager > 0) {
-        if (vencedorId) {
-            const atualizado = await addBalance(vencedorId, wager * 2);
-            await releaseWager(battle.battleId);
-            resultEmbed.addFields({
-                name: '💰 Aposta',
-                value: `👑 **${nomeVencedor}** levou ${ui.coins(wager * 2)}\n💸 **${nomePerdedor}** perdeu ${ui.coins(wager)}\n\nSaldo do vencedor: ${ui.coins(atualizado?.balance ?? 0)}`,
-                inline: false
-            });
-        } else {
-            await addBalance(battle.userX.id, wager);
-            await addBalance(battle.userY.id, wager);
-            await releaseWager(battle.battleId);
-            resultEmbed.addFields({
-                name: '💰 Aposta',
-                value: `Empate — cada jogador recebeu ${ui.coins(wager)} de volta.`,
-                inline: false
-            });
-        }
+        const atualizado = await addBalance(vencedorId, wager * 2);
+        await releaseWager(battle.battleId);
+        resultEmbed.addFields({
+            name: '💰 Aposta',
+            value: `👑 **${nomeVencedor}** levou ${ui.coins(wager * 2)}\n💸 **${nomePerdedor}** perdeu ${ui.coins(wager)}\n\nSaldo do vencedor: ${ui.coins(atualizado?.balance ?? 0)}`,
+            inline: false
+        });
     }
 
     // ---- Pontuação de ranking ----
@@ -291,31 +269,26 @@ async function resolverBatalha(client, battle) {
     const eloX = docX?.elo ?? elo.ELO_INICIAL;
     const eloY = docY?.elo ?? elo.ELO_INICIAL;
 
-    if (vencedorId && perdedorId) {
-        const eloVencedor = vencedorId === battle.userX.id ? eloX : eloY;
-        const eloPerdedor = vencedorId === battle.userX.id ? eloY : eloX;
-        const r = elo.calcular(eloVencedor, eloPerdedor);
+    const eloVencedor = venceuX ? eloX : eloY;
+    const eloPerdedor = venceuX ? eloY : eloX;
+    const picoVencedor = venceuX ? (docX?.picoElo ?? eloX) : (docY?.picoElo ?? eloY);
+    const r = elo.calcular(eloVencedor, eloPerdedor);
 
-        await User.updateOne(
-            { id: vencedorId },
-            { $inc: { wins: 1 }, $set: { elo: r.vencedor, picoElo: Math.max(r.vencedor, vencedorId === battle.userX.id ? (docX?.picoElo ?? eloX) : (docY?.picoElo ?? eloY)) } }
-        );
-        await User.updateOne({ id: perdedorId }, { $inc: { losses: 1 }, $set: { elo: r.perdedor } });
+    await User.updateOne(
+        { id: vencedorId },
+        { $inc: { wins: 1 }, $set: { elo: r.vencedor, picoElo: Math.max(r.vencedor, picoVencedor) } }
+    );
+    await User.updateOne({ id: perdedorId }, { $inc: { losses: 1 }, $set: { elo: r.perdedor } });
 
-        const divVencedor = elo.divisao(r.vencedor);
-        const divPerdedor = elo.divisao(r.perdedor);
+    const divVencedor = elo.divisao(r.vencedor);
+    const divPerdedor = elo.divisao(r.perdedor);
 
-        resultEmbed.addFields({
-            name: '📊 Ranking',
-            value: `👑 **${nomeVencedor}** ${divVencedor.emoji} ${ui.number(r.vencedor)} pts (**+${r.ganho}**)\n`
-                + `💤 **${nomePerdedor}** ${divPerdedor.emoji} ${ui.number(r.perdedor)} pts (**-${r.perda}**)`,
-            inline: false
-        });
-    } else {
-        const r = elo.calcularEmpate(eloX, eloY);
-        await User.updateOne({ id: battle.userX.id }, { $set: { elo: r.a } });
-        await User.updateOne({ id: battle.userY.id }, { $set: { elo: r.b } });
-    }
+    resultEmbed.addFields({
+        name: '📊 Ranking',
+        value: `👑 **${nomeVencedor}** ${divVencedor.emoji} ${ui.number(r.vencedor)} pts (**+${r.ganho}**)\n`
+            + `💤 **${nomePerdedor}** ${divPerdedor.emoji} ${ui.number(r.perdedor)} pts (**-${r.perda}**)`,
+        inline: false
+    });
 
     // ---- Transmissão ao vivo ----
     //
@@ -346,35 +319,22 @@ async function resolverBatalha(client, battle) {
     await enviarNoPrivado(client, battle.userY.id, { embeds: [resultEmbed] });
 
     // Conta críticos e viradas da luta toda, para missões e conquistas.
-    const logCompleto = result.rounds.flatMap((r) => r.log).join('\n');
-    const criticos = (logCompleto.match(/CRÍTICO/g) || []).length;
-    const viradas = (logCompleto.match(/VIRADA/g) || []).length;
+    const { criticos, viradas } = contarDestaques(result);
 
     const eventosVencedor = ['batalha', 'vitoria', ...Array(criticos).fill('critico')];
     const eventosPerdedor = ['batalha'];
 
-    const progresso = [];
-    if (vencedorId && perdedorId) {
-        progresso.push(
-            registrar(vencedorId, { batalhasVencidas: 1, criticos, viradas }, { eventosMissao: eventosVencedor }),
-            registrar(perdedorId, { batalhasPerdidas: 1 }, { eventosMissao: eventosPerdedor })
-        );
-    } else {
-        progresso.push(
-            registrar(battle.userX.id, {}, { eventosMissao: ['batalha'] }),
-            registrar(battle.userY.id, {}, { eventosMissao: ['batalha'] })
-        );
-    }
+    const progresso = [
+        registrar(vencedorId, { batalhasVencidas: 1, criticos, viradas }, { eventosMissao: eventosVencedor }),
+        registrar(perdedorId, { batalhasPerdidas: 1 }, { eventosMissao: eventosPerdedor })
+    ];
 
     // Troféus: comuns no privado, raros anunciados no canal do duelo.
     const resultados = await Promise.all(progresso).catch(() => []);
     for (let i = 0; i < resultados.length; i++) {
         const conquistas = resultados[i]?.conquistas || [];
         if (conquistas.length === 0) continue;
-        const destinatario = vencedorId && perdedorId
-            ? (i === 0 ? vencedorId : perdedorId)
-            : (i === 0 ? battle.userX.id : battle.userY.id);
-        await anunciarConquistas(client, destinatario, conquistas, canal);
+        await anunciarConquistas(client, i === 0 ? vencedorId : perdedorId, conquistas, canal);
     }
 
     await finishBattle(battle.battleId);
