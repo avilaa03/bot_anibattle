@@ -49,24 +49,76 @@ jobs:
     # quiser, sem mexer neste arquivo.
     environment: producao
 
+    # Um deploy por vez, e nunca cancelar um pela metade.
+    #
+    # Dois pushes seguidos disparavam dois deploys simultâneos no MESMO
+    # diretório da VPS, os dois fazendo `git reset --hard` e
+    # `docker compose up --build` ao mesmo tempo. O resultado é imprevisível:
+    # o build de um pega arquivos que o outro acabou de trocar.
+    #
+    # `cancel-in-progress: false` enfileira em vez de cancelar — matar um
+    # deploy no meio do build deixa o contêiner num estado pior do que
+    # simplesmente esperar.
+    concurrency:
+      group: deploy-vps-bot
+      cancel-in-progress: false
+
     steps:
       - uses: actions/checkout@v4
 
+      # Sem isto, secret faltando vira um erro de SSH incompreensível lá na
+      # frente ("Permission denied" ou "Could not resolve hostname ''").
+      # Falhar aqui, dizendo exatamente qual falta, economiza a investigação.
+      - name: Conferir os secrets
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+          DEPLOY_DIR: ${{ secrets.DEPLOY_DIR }}
+        run: |
+          faltando=""
+          if [ -z "$VPS_HOST" ];    then faltando="$faltando VPS_HOST"; fi
+          if [ -z "$VPS_USER" ];    then faltando="$faltando VPS_USER"; fi
+          if [ -z "$VPS_SSH_KEY" ]; then faltando="$faltando VPS_SSH_KEY"; fi
+          if [ -z "$DEPLOY_DIR" ];  then faltando="$faltando DEPLOY_DIR"; fi
+
+          if [ -n "$faltando" ]; then
+            echo "❌ Faltam secrets:$faltando"
+            echo "   Cadastre em: Settings > Secrets and variables > Actions."
+            echo "   O passo a passo está no DEPLOY.md."
+            exit 1
+          fi
+          echo "✅ Secrets presentes."
+
       - name: Preparar chave SSH
+        env:
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+          VPS_KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_PORT: ${{ secrets.VPS_PORT || 22 }}
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
+          # Pela variável de ambiente, não interpolado direto no script: uma
+          # chave com aspas ou barra invertida quebraria o shell se fosse
+          # colada dentro do comando.
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
 
           # Fixa a identidade do servidor para o SSH não perguntar nada.
           #
-          # O ideal seria guardar a chave pública da VPS num secret e usá-la
-          # aqui. O keyscan confia no que o servidor responder na hora, o
-          # que teoricamente abre espaço para um ataque no meio do caminho.
-          # Para endurecer: rode `ssh-keyscan -H SEU_IP` na sua máquina,
-          # salve a saída no secret VPS_KNOWN_HOSTS e troque este bloco por
-          # `echo "${{ secrets.VPS_KNOWN_HOSTS }}" > ~/.ssh/known_hosts`.
-          ssh-keyscan -H -p "${{ secrets.VPS_PORT || 22 }}" "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
+          # Com o secret VPS_KNOWN_HOSTS cadastrado, confiamos só naquela
+          # chave. Sem ele, o keyscan confia no que o servidor responder na
+          # hora — o que teoricamente abre espaço para um ataque no meio do
+          # caminho. Para fechar isso: rode `ssh-keyscan -H SEU_IP` na sua
+          # máquina e salve a saída no secret VPS_KNOWN_HOSTS.
+          if [ -n "$VPS_KNOWN_HOSTS" ]; then
+            printf '%s\n' "$VPS_KNOWN_HOSTS" > ~/.ssh/known_hosts
+            echo "▶ Identidade da VPS vinda do secret VPS_KNOWN_HOSTS."
+          else
+            ssh-keyscan -H -p "$VPS_PORT" "$VPS_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+            echo "⚠️  VPS_KNOWN_HOSTS não cadastrado: confiando no keyscan."
+          fi
+          chmod 644 ~/.ssh/known_hosts
 
       - name: Rodar o deploy na VPS
         env:
