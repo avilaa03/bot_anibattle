@@ -45,7 +45,7 @@ module.exports = async (client, interaction, marketCollect, marketEnd) => {
         const lista = pageCards.map((listing, index) => {
             const meta = ui.getRarity(listing.rarity);
             const ovr = valores.overallDaCarta(listing);
-            return `\`${index + 1}\` ${meta.emoji} **${ui.cardName(listing.cardName)}** — OVR **${ovr}**\n`
+            return `\`${index + 1}\` ${meta.emoji} **${ui.cardName(listing.cardName)}**${ui.nivelTag(listing.nivel)} — OVR **${ovr}**\n`
                 + `└ ${listing.series || '—'} • ${ui.coins(listing.listingPrice)} • vendedor <@${listing.sellerId}>`;
         }).join('\n');
 

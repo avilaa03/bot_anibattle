@@ -27,7 +27,7 @@ async function buildSellEmbed(card, listingPrice, moldura = 'nenhuma') {
 
     const meta = ui.getRarity(card.rarity);
     const embed = ui.base(meta.color)
-        .setTitle(`🏪 Anunciar ${ui.cardName(card.name)}`)
+        .setTitle(`🏪 Anunciar ${ui.cardName(card.name)}${ui.nivelTag(card.nivel)}`)
         .setDescription([
             `${meta.emoji} ${ui.rarityTag(card.rarity)} • *${card.series || '—'}*`,
             '',

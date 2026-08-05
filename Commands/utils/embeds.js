@@ -41,6 +41,22 @@ function rarityTag(rarity) {
     return `${meta.emoji} **${meta.label}**`;
 }
 
+/**
+ * O selo de aprimoramento, para colar depois do nome da carta.
+ *
+ * Vazio no nível 0, para a esmagadora maioria das cartas não ganhar
+ * poluição visual.
+ *
+ * Precisa aparecer em toda tela onde a carta é vista por OUTRA pessoa —
+ * mercado, anúncio, batalha. Uma carta +16 tem atributos muito acima da
+ * mesma carta natural, e sem o selo o comprador não teria como saber pelo
+ * que está pagando.
+ */
+function nivelTag(nivel) {
+    const n = Math.max(0, Math.floor(Number(nivel) || 0));
+    return n > 0 ? ` \`+${n}\`` : '';
+}
+
 function rarityColor(rarity) {
     return getRarity(rarity).color;
 }
@@ -153,6 +169,7 @@ module.exports = {
     STATUS_COLORS,
     getRarity,
     rarityTag,
+    nivelTag,
     rarityColor,
     compareRarityDesc,
     coins,

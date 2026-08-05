@@ -2,6 +2,7 @@ const Market = require('../../utils/marketSchema');
 const User = require('../../utils/userSchema');
 const ui = require('../../utils/embeds');
 const valores = require('../../utils/valores');
+const aprimoramento = require('../../utils/aprimoramento');
 const { applyMarketTax, MARKET_TAX_RATE } = require('../../utils/economy');
 const { registrar } = require('../../utils/progresso');
 
@@ -55,6 +56,10 @@ async function sellCollect(interaction, collector, matchingCards, indexRef, list
                 LIF: card.LIF ?? 0,
                 POW: card.POW ?? 0,
                 obtainedAt: card.obtainedAt,
+                // O aprimoramento viaja junto: sem isto a carta volta ao
+                // comprador como natural. Ver `utils/marketSchema.js`.
+                nivel: card.nivel ?? 0,
+                base: aprimoramento.baseDaCarta(card),
                 marketValue: card.marketValue,
                 listingPrice: listingPrice,
                 status: 'available'

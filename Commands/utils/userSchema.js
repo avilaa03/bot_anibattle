@@ -45,7 +45,24 @@ const UserSchema = new Schema({
         POW: Number,
         obtainedAt: { type: Date, default: Date.now },
         marketValue: Number,
-        valueToSell: Number
+        valueToSell: Number,
+        // Nível de aprimoramento. Nunca negativo: o overall natural é o
+        // chão absoluto, e carta que nunca subiu não tem o que perder.
+        // Sem teto — ver `utils/aprimoramento.js`.
+        nivel: { type: Number, default: 0 },
+        // Os valores com que a carta nasceu.
+        //
+        // Precisa ficar gravado aqui, e não ser lido do catálogo: o painel
+        // admin edita cartas do catálogo, e uma carta já aprimorada teria
+        // seus atributos recalculados sobre uma base diferente da que ela
+        // realmente teve. Ausente = a carta nunca subiu, e os valores
+        // atuais são os naturais.
+        base: {
+            overall: Number,
+            ATA: Number,
+            LIF: Number,
+            POW: Number
+        }
     }],
     balance: {
         type: Number,
