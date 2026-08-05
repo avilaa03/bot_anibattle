@@ -125,8 +125,40 @@ const CAIXAS = {
     }
 };
 
+/**
+ * Prefixo da caixa quando ela está guardada na bolsa.
+ *
+ * A caixa é comprada e GUARDADA, não aberta na hora. O jogador abre quando
+ * quiser — e isso não é conveniência, é o que torna a Caixa do Apoiador
+ * possível: ela não é comprada, é dada por votar. Se comprar e abrir
+ * fossem o mesmo ato, não existiria caminho para uma caixa que ninguém
+ * comprou.
+ *
+ * O prefixo evita colisão com item: nada impede alguém de criar um item
+ * chamado `lendaria` amanhã, e as duas coisas dividem o mesmo Map no
+ * banco. `caixa_lendaria` nunca colide com um item.
+ */
+const PREFIXO_BOLSA = 'caixa_';
+
 function normalizar(chave) {
     return String(chave || '').toLowerCase().trim();
+}
+
+/** A chave desta caixa dentro da bolsa. */
+function chaveNaBolsa(chave) {
+    return `${PREFIXO_BOLSA}${normalizar(chave)}`;
+}
+
+/** A caixa correspondente a uma chave de bolsa, ou null se não for caixa. */
+function daChaveDeBolsa(chaveDeBolsa) {
+    const bruta = normalizar(chaveDeBolsa);
+    if (!bruta.startsWith(PREFIXO_BOLSA)) return null;
+    return getCaixa(bruta.slice(PREFIXO_BOLSA.length));
+}
+
+/** A chave de bolsa aponta para uma caixa conhecida? */
+function existeNaBolsa(chaveDeBolsa) {
+    return daChaveDeBolsa(chaveDeBolsa) !== null;
 }
 
 /**
@@ -209,11 +241,15 @@ module.exports = {
     OVR_REFERENCIA,
     MARGEM,
     ARREDONDAMENTO,
+    PREFIXO_BOLSA,
     valorEsperado,
     precoDaCaixa,
     getCaixa,
     existe,
     todas,
     aVenda,
-    sortearRaridade
+    sortearRaridade,
+    chaveNaBolsa,
+    daChaveDeBolsa,
+    existeNaBolsa
 };

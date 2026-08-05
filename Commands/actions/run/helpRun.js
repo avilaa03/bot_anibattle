@@ -54,7 +54,10 @@ const PAGES = [
       // sozinho não avisa que existe caminho melhor.
       { nome: '​', desc: '⚠️ *Tirou algo raro? **Não use a venda rápida.** Anuncie no `/market`: lá você recebe o preço cheio que outro jogador pagar, menos 5% de taxa. A venda rápida existe para repetida, não para tesouro.*' },
       { nome: '/loja', desc: 'Troca moedas por itens — gemas de aprimoramento e pergaminhos de proteção. A moeda gasta aqui sai de circulação.' },
-      { nome: '/bolsa', desc: 'Mostra os itens que você tem.' },
+      { nome: '/bolsa', desc: 'Mostra os itens e as caixas que você tem guardados.' },
+      { nome: '/caixa', desc: 'Caixas de cartas com chances próprias. Compre, **guarde na bolsa** e abra quando quiser — da Comum à Lendária, que tem 10% de chance de Mestra.' },
+      { nome: '​', desc: '🎯 *A **Caixa Temática** deixa você escolher a série — é a única que mira, e serve para fechar uma série na Pokédex.*' },
+      { nome: '​', desc: '⚖️ *Toda caixa é prejuízo na média, de propósito: você paga pela chance, não pelo retorno. As porcentagens ficam à vista no `/caixa`, e há limite diário de compra.*' },
       { nome: '/desmanchar', desc: 'Transforma uma carta em gemas. Rende mais que a venda rápida em tudo — **menos na Mestra**, onde vender ainda paga melhor.' },
       { nome: '/aprimorar', desc: 'Gasta gemas para tentar subir o nível de uma carta. Pode subir, não acontecer nada, ou cair um nível — e **não existe teto**.' },
       { nome: '​', desc: '✨ *A carta **nunca** fica pior do que nasceu: o overall natural é o chão, e em nível 0 a chance de queda é 0%. Os atributos acompanham o overall.*' },

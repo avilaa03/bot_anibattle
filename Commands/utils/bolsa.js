@@ -26,12 +26,27 @@
 
 const User = require('./userSchema');
 const itens = require('./itens');
+const caixas = require('./caixas');
 
 /** Erro de regra de negócio, para o comando distinguir de falha técnica. */
 class ErroDeBolsa extends Error {}
 
+/**
+ * A bolsa guarda DUAS coisas: itens (`gema`) e caixas (`caixa_lendaria`).
+ *
+ * O merge acontece aqui, e não no `itens.js`, porque é a bolsa que
+ * carrega os dois — o catálogo de itens continua sendo só o que a `/loja`
+ * vende, e o de caixas continua sendo só o que o `/caixa` abre.
+ *
+ * Isto é a LISTA DE PERMISSÃO das chaves. Ver o cabeçalho: a chave vira
+ * caminho de campo no Mongo, então chave fora daqui nunca pode ser escrita.
+ */
+function chaveConhecida(chave) {
+    return itens.existe(chave) || caixas.existeNaBolsa(chave);
+}
+
 function campo(chave) {
-    if (!itens.existe(chave)) {
+    if (!chaveConhecida(chave)) {
         throw new ErroDeBolsa(`Item desconhecido: "${chave}".`);
     }
     return `bolsa.${chave}`;
@@ -94,10 +109,24 @@ function quantidadeDe(user, chave) {
  * @returns {Array<{ item: object, quantidade: number }>}
  */
 function listar(user) {
-    return Object.values(itens.ITENS)
-        .map((item) => ({ item, quantidade: quantidadeDe(user, item.chave) }))
+    const linhas = Object.values(itens.ITENS)
+        .map((item) => ({ item, quantidade: quantidadeDe(user, item.chave), tipo: 'item' }));
+
+    // As caixas aparecem na mesma lista, depois dos itens: para o jogador
+    // é tudo "o que eu tenho guardado", e separar em duas telas só faria
+    // ele procurar a caixa comprada em dois lugares.
+    const dasCaixas = caixas.todas().map((caixa) => ({
+        item: caixa,
+        quantidade: quantidadeDe(user, caixas.chaveNaBolsa(caixa.chave)),
+        tipo: 'caixa'
+    }));
+
+    return [...linhas, ...dasCaixas]
         .filter((linha) => linha.quantidade > 0)
-        .sort((a, b) => a.item.ordem - b.item.ordem);
+        .sort((a, b) => {
+            if (a.tipo !== b.tipo) return a.tipo === 'item' ? -1 : 1;
+            return a.item.ordem - b.item.ordem;
+        });
 }
 
 /** A bolsa está vazia? */

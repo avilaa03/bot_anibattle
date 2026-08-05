@@ -176,6 +176,24 @@ const UserSchema = new Schema({
     // Marca de equipe. Só muda pelo painel administrativo.
     staff: { type: Boolean, default: false },
 
+    // Contadores que zeram quando o dia vira (compra de caixa, roll extra).
+    //
+    // Map de Map: `limites.caixa.usos.lendaria`. Map pelo mesmo motivo da
+    // bolsa — `$inc` num caminho que ainda não existe cria o campo e soma
+    // numa escrita só, e não há corrida capaz de gerar duplicata.
+    //
+    // Ver `utils/limiteDiario.js` para o porquê de não derivar isto do
+    // livro-razão (resumo: o razão é best-effort, e limite que a falha
+    // afrouxa não é limite).
+    limites: {
+        type: Map,
+        of: new Schema({
+            dia: String,
+            usos: { type: Map, of: Number, default: () => new Map() }
+        }, { _id: false }),
+        default: () => new Map()
+    },
+
     // Telemetria de comportamento do /roll.
     //
     // Só MEDE — nada aqui pune, bloqueia ou aumenta cooldown. Ver
