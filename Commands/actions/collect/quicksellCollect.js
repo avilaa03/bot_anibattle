@@ -2,6 +2,7 @@ const { updateEmbed, buildConfirmationRow, getValueToSell } = require('../run/qu
 const User = require('../../utils/userSchema');
 const { addBalance } = require('../../utils/economy');
 const ui = require('../../utils/embeds');
+const transacoes = require('../../utils/transacoes');
 
 async function quicksellCollect(i, indexRef, matchingCards, user, rowNavigation) {
     if (i.customId === 'prev') {
@@ -40,6 +41,22 @@ async function quicksellCollect(i, indexRef, matchingCards, user, rowNavigation)
         }
 
         const atualizado = await addBalance(user.id, value);
+
+        // Venda rápida CRIA moeda do nada — é a torneira de inflação do
+        // jogo. Registrar aqui é o que permite medir o tamanho dela, que
+        // hoje só dá para estimar.
+        transacoes.registrar({
+            userId: user.id,
+            tipo: 'venda_rapida',
+            moedaDelta: value,
+            saldoDepois: atualizado?.balance ?? null,
+            contexto: {
+                carta: card.name,
+                raridade: card.rarity,
+                overall: card.overall ?? null,
+                nivel: card.nivel ?? 0
+            }
+        });
 
         const embed = ui.success('Carta vendida', `**${ui.cardName(card)}** foi vendida por ${ui.coins(value)}.`)
             .addFields({ name: 'Saldo atual', value: ui.coins(atualizado?.balance ?? 0), inline: true });

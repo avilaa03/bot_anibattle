@@ -2,6 +2,7 @@ const User = require('../../utils/userSchema');
 const ui = require('../../utils/embeds');
 const bolsa = require('../../utils/bolsa');
 const aprimoramento = require('../../utils/aprimoramento');
+const transacoes = require('../../utils/transacoes');
 const { montarEmbed, montarBotoes } = require('../run/aprimorarRun');
 
 /**
@@ -136,6 +137,34 @@ async function aprimorarCollect(i, indexRef, matchingCards, user, rowNavigation)
         });
         return 'collected';
     }
+
+    // Livro-razão.
+    //
+    // É a linha mais rica do extrato: guarda o desfecho, o nível antes e
+    // depois e se o pergaminho foi queimado. Sem isso, "gastei 200 gemas e
+    // não subi nada" é palavra do jogador contra a sua — com isso, dá para
+    // conferir a sequência exata de tentativas.
+    //
+    // A gema aparece negativa porque saiu da bolsa; `moedaDelta` fica em
+    // zero porque aprimorar não mexe em saldo.
+    transacoes.registrar({
+        userId: i.user.id,
+        tipo: 'aprimoramento',
+        itens: [
+            { chave: 'gema', quantidade: -custo },
+            ...(protegido ? [{ chave: 'pergaminho', quantidade: -1 }] : [])
+        ],
+        contexto: {
+            carta: card.name,
+            raridade: card.rarity,
+            desfecho,
+            protegido,
+            nivelAntes: nivel,
+            nivelDepois: resultado.nivel,
+            overallAntes: antes.overall,
+            overallDepois: resultado.overall
+        }
+    });
 
     // Mantém o objeto em memória alinhado, para o caso de o jogador
     // navegar de volta para esta carta sem reabrir o comando.

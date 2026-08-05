@@ -4,6 +4,7 @@ const ui = require('../../utils/embeds');
 const itens = require('../../utils/itens');
 const bolsa = require('../../utils/bolsa');
 const { trySpend, addBalance } = require('../../utils/economy');
+const transacoes = require('../../utils/transacoes');
 
 /**
  * /loja — troca moeda por item.
@@ -100,6 +101,20 @@ async function comprar(interaction) {
         await addBalance(interaction.user.id, total).catch(() => {});
         throw err;
     }
+
+    // Livro-razão. Fica DEPOIS da entrega: registrar antes criaria linha
+    // para compra que não aconteceu, e extrato que mente é pior que
+    // extrato nenhum — ele é usado para investigar fraude.
+    //
+    // Sem await: o razão é observação, e uma falha nele não pode impedir
+    // ninguém de comprar o que já foi pago.
+    transacoes.compra({
+        userId: interaction.user.id,
+        item: item.chave,
+        quantidade,
+        total,
+        saldoDepois: debitado.balance
+    });
 
     const embed = ui.success('Compra concluída', [
         `${item.emoji} **${item.nome}** x${ui.number(quantidade)}`,
