@@ -208,7 +208,17 @@ async function comprarRollExtra(interaction) {
         });
     }
 
-    await User.updateOne({ id: interaction.user.id }, { $set: { lastRoll: 0 } });
+    // UM cooldown atrás, não zero.
+    //
+    // `lastRoll = 0` significa "nunca rolou", e quem nunca rolou recebe o
+    // teto CHEIO de cargas. Enquanto o teto era 1 isso não fazia diferença;
+    // com as cargas por nível, um roll extra comprado no nível 30 daria
+    // quatro rolls de uma vez. Recuar exatamente um cooldown entrega
+    // exatamente um roll, que é o que foi vendido.
+    await User.updateOne(
+        { id: interaction.user.id },
+        { $set: { lastRoll: Date.now() - cooldown } }
+    );
 
     transacoes.registrar({
         userId: interaction.user.id,
