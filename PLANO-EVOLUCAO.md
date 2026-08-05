@@ -133,6 +133,30 @@ Contador de "rolls sem Ultra Rara ou melhor". Ao chegar em 120, o próximo
 roll é Ultra Rara garantida e o contador zera. Quase não muda a
 distribuição e elimina o pior cenário de experiência.
 
+> **✅ Implementado, com os números recalibrados.** Os 120 acima estavam
+> errados por uma ordem de grandeza. Ultra Rara+ é 11% por roll (uma a
+> cada 9), então uma sequência de 120 secos tem chance de **1 em 1,18
+> milhão** — com 10 jogadores rolando 30 vezes por dia, apareceria a cada
+> ~10 anos de servidor. Seria código morto.
+>
+> Pior: o azar descrito no parágrafo acima é o de **Lendária**, não o de
+> Ultra Rara. Lendária+ é 1,2% por roll, e **1 em cada 4 jogadores** passa
+> 120 rolls sem ver uma. A rede em Ultra Rara não encostava nesse caso.
+>
+> Ficaram duas redes, em `Commands/utils/sorteio.js`:
+>
+> | Rede | Limite | Pega |
+> |---|---|---|
+> | Ultra Rara+ | **40** | o 1% mais azarado |
+> | Lendária+ | **300** | o pior ~3% |
+>
+> Medido em simulação, 0,2% dos rolls saem garantidos — rede de segurança,
+> não mecânica de jogo.
+>
+> **A Mestra não tem rede**, de propósito: Mestra entregue por tempo de
+> espera deixa de ser sorte e vira mensalidade. Mas quando sai, zera as
+> duas — está acima das duas.
+
 ---
 
 ## O valor das cartas — o conserto mais urgente
@@ -228,6 +252,11 @@ em 120, o próximo roll é Ultra Rara garantida, e o contador zera.
 Isso não muda quase nada a distribuição (poucos chegam lá) e elimina o
 pior cenário possível de experiência. É o "soft pity" de qualquer gacha
 moderno.
+
+> **✅ Implementado como duas redes: Ultra Rara+ em 40 e Lendária+ em
+> 300.** "Poucos chegam lá" era o problema, não a virtude: em 120,
+> ninguém chegava (1 em 1,18 milhão). Ver a nota na seção da Fase 2 para
+> as contas.
 
 ### Desmanche: o que salva a Comum
 
@@ -429,7 +458,7 @@ XP por ação: roll, batalha, troca, descoberta na dex, missão, daily.
 | 5 | 5.000 moedas + 10 fragmentos |
 | **10** | **+1 carga de roll** (acumula 2) |
 | 15 | Moldura exclusiva de nível |
-| **20** | **+1 carga** (total 3) + proteção contra azar de 120 → 100 |
+| **20** | **+1 carga** (total 3) + proteção contra azar de 40 → 30 (as redes viraram 40/300; `sortearRaridade` já aceita `limites` por jogador) |
 | 25 | Título no `/profile` |
 | **30** | **+1 carga** (total 4) |
 

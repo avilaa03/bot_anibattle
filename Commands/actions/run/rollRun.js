@@ -107,8 +107,11 @@ module.exports = async (client, interaction, rollCollect, rollEnd) => {
     // A tabela de chances e a proteção contra azar vivem em
     // `utils/sorteio.js`, onde dá para testar a distribuição sem subir um
     // cliente de Discord.
-    const seco = user?.rollsSemUltra ?? 0;
-    const { raridade, garantida } = sorteio.sortearRaridade({ rollsSemUltra: seco });
+    const contadores = {
+        rollsSemUltra: user?.rollsSemUltra ?? 0,
+        rollsSemLendaria: user?.rollsSemLendaria ?? 0
+    };
+    const { raridade, garantida } = sorteio.sortearRaridade({ contadores });
 
     let card = await sampleCardByRarity(raridade);
     if (!card) {
@@ -162,8 +165,10 @@ module.exports = async (client, interaction, rollCollect, rollEnd) => {
     // a cada roll transformaria a espera em contagem regressiva, e quem
     // está a 3 rolls da garantia pararia de rolar até chegar lá.
     if (garantida) {
+        const rede = sorteio.PROTECOES.find((p) => p.raridade === garantida);
+        const label = ui.getRarity(garantida).label;
         embed.setFooter({
-            text: `${ui.BRAND} • Proteção contra azar: ${seco} rolls sem Ultra Rara — esta veio garantida`
+            text: `${ui.BRAND} • Proteção contra azar: ${contadores[rede.campo]} rolls sem ${label} — esta veio garantida`
         });
     }
 
@@ -184,7 +189,7 @@ module.exports = async (client, interaction, rollCollect, rollEnd) => {
     // catálogo não tem carta da raridade sorteada, o jogador recebe uma
     // Comum — e zerar aí faria ele perder a espera acumulada sem ter
     // recebido nada em troca.
-    user.rollsSemUltra = sorteio.proximoContador(card.rarity, seco);
+    Object.assign(user, sorteio.proximosContadores(card.rarity, contadores));
     await user.save();
 
     // Avisa quem tem essa carta na lista de desejos. É só um aviso: quem

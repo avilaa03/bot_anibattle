@@ -13,7 +13,7 @@ const PAGES = [
       { nome: '/profile', desc: 'Seu perfil: saldo, coleção, Pokédex e retrospecto de batalhas.' },
       // A proteção só ajuda quem sabe que ela existe: sem isto, quem está
       // numa sequência ruim acha que o bot está contra ele e para de rolar.
-      { nome: '​', desc: '🍀 *Sequência ruim tem limite: depois de muitos rolls sem uma Ultra Rara, o jogo garante uma. Continue rolando.*' }
+      { nome: '​', desc: '🍀 *Sequência ruim tem limite: passando de muitos rolls sem uma Ultra Rara — ou de muito mais sem uma Lendária — o jogo garante uma. A Mestra é a única que nunca vem garantida.*' }
     ]
   },
   {

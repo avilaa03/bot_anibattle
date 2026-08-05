@@ -1,5 +1,5 @@
 /**
- * Testes da tabela de raridade e da proteção contra azar.
+ * Testes da tabela de raridade e das proteções contra azar.
  *
  * A tabela morava solta dentro do `rollRun.js` e era a regra mais
  * delicada do jogo sem um único teste. O que precisa valer sempre:
@@ -7,9 +7,10 @@
  * - A soma fecha em 100. Uma tabela somando 99,9 não quebra nada: só faz
  *   a Mestra nunca sair, e ninguém percebe por semanas.
  * - A escassez é monótona: cada raridade é mais rara que a anterior.
- * - A proteção contra azar NUNCA piora um roll. Se o sorteio deu Mestra,
- *   é Mestra que sai — mesmo no roll garantido.
- * - O contador zera pela carta ENTREGUE, não pela sorteada.
+ * - A proteção NUNCA piora um roll. Se o sorteio deu Mestra, é Mestra que
+ *   sai — mesmo no roll garantido.
+ * - A MESTRA NUNCA É GARANTIDA. É a regra que o resto do jogo assume.
+ * - Os contadores zeram pela carta ENTREGUE, não pela sorteada.
  */
 
 const path = require('path');
@@ -82,12 +83,13 @@ check('valor absurdo no .env não deixa a Comum negativa',
 
 console.log('\n=== O sorteio respeita as faixas ===');
 // Percentis logo dentro de cada faixa acumulada.
-check('percentil 0 cai em Comum', sorteio.sortearRaridade({ aleatorio: fixo(0) }).raridade === 'common');
-check('percentil 63,9 ainda é Comum', sorteio.sortearRaridade({ aleatorio: fixo(63.9) }).raridade === 'common');
-check('percentil 64,1 é Rara', sorteio.sortearRaridade({ aleatorio: fixo(64.1) }).raridade === 'rare');
-check('percentil 89,1 é Ultra Rara', sorteio.sortearRaridade({ aleatorio: fixo(89.1) }).raridade === 'ultra rare');
-check('percentil 98,9 é Lendária', sorteio.sortearRaridade({ aleatorio: fixo(98.9) }).raridade === 'legendary');
-check('percentil 99,95 é Mestra', sorteio.sortearRaridade({ aleatorio: fixo(99.95) }).raridade === 'master');
+const puro = (p) => sorteio.sortearRaridade({ aleatorio: fixo(p) }).raridade;
+check('percentil 0 cai em Comum', puro(0) === 'common');
+check('percentil 63,9 ainda é Comum', puro(63.9) === 'common');
+check('percentil 64,1 é Rara', puro(64.1) === 'rare');
+check('percentil 89,1 é Ultra Rara', puro(89.1) === 'ultra rare');
+check('percentil 98,9 é Lendária', puro(98.9) === 'legendary');
+check('percentil 99,95 é Mestra', puro(99.95) === 'master');
 
 console.log('\n=== A distribuição observada bate com a tabela ===');
 // Gerador determinístico: o teste não pode falhar por azar.
@@ -104,7 +106,7 @@ const aleatorio = geradorPrevisivel();
 const contagem = Object.fromEntries(sorteio.ORDEM.map((r) => [r, 0]));
 for (let i = 0; i < N; i++) {
     // Sem proteção: aqui se mede a tabela pura.
-    contagem[sorteio.sortearRaridade({ aleatorio, limite: Infinity }).raridade]++;
+    contagem[sorteio.sortearRaridade({ aleatorio }).raridade]++;
 }
 
 for (const raridade of sorteio.ORDEM) {
@@ -119,69 +121,151 @@ for (const raridade of sorteio.ORDEM) {
 }
 
 // ---------------------------------------------------------------------
-console.log('\n=== PROTEÇÃO CONTRA AZAR ===');
+console.log('\n=== AS DUAS REDES DE PROTEÇÃO ===');
 
-const LIMITE = sorteio.LIMITE_PROTECAO;
-check('o limite padrão é 120', LIMITE === 120);
+const ULTRA = sorteio.LIMITES.rollsSemUltra;
+const LEND = sorteio.LIMITES.rollsSemLendaria;
 
-// Percentil 0 = Comum garantida no sorteio puro. É o pior caso.
-const azarado = (seco) => sorteio.sortearRaridade({ rollsSemUltra: seco, aleatorio: fixo(0) });
+check('a rede de Ultra Rara é 40', ULTRA === 40);
+check('a rede de Lendária é 300', LEND === 300);
+check('só existem duas redes', sorteio.PROTECOES.length === 2);
 
-check('abaixo do limite continua Comum',
-    azarado(LIMITE - 1).raridade === 'common' && azarado(LIMITE - 1).garantida === false);
-check('no limite vem Ultra Rara garantida',
-    azarado(LIMITE).raridade === 'ultra rare' && azarado(LIMITE).garantida === true);
-check('acima do limite continua garantindo', azarado(LIMITE + 50).garantida === true);
+console.log('\n--- A MESTRA NUNCA É GARANTIDA ---');
+// A regra mais importante do arquivo: uma Mestra entregue por tempo de
+// espera deixa de ser sorte e vira mensalidade.
+check('nenhuma rede garante Mestra',
+    sorteio.PROTECOES.every((p) => p.raridade !== 'master'));
+check('não existe contador de Mestra',
+    sorteio.PROTECOES.every((p) => !/mestra/i.test(p.campo)));
+
+// Mesmo com os dois contadores absurdamente altos, o pior sorteio
+// possível nunca vira Mestra.
+const desesperado = sorteio.sortearRaridade({
+    contadores: { rollsSemUltra: 99999, rollsSemLendaria: 99999 },
+    aleatorio: fixo(0)
+});
+check('contadores enormes não produzem Mestra', desesperado.raridade !== 'master');
+check('produzem a garantia mais forte, que é Lendária', desesperado.raridade === 'legendary');
+
+console.log('\n--- rede de Ultra Rara (40) ---');
+const azarado = (u, l = 0) => sorteio.sortearRaridade({
+    contadores: { rollsSemUltra: u, rollsSemLendaria: l },
+    aleatorio: fixo(0)   // percentil 0 = Comum no sorteio puro
+});
+
+check('em 39 continua Comum', azarado(ULTRA - 1).raridade === 'common');
+check('em 40 vem Ultra Rara garantida',
+    azarado(ULTRA).raridade === 'ultra rare' && azarado(ULTRA).garantida === 'ultra rare');
+check('acima de 40 continua garantindo', azarado(ULTRA + 50).garantida === 'ultra rare');
 check('contador negativo não quebra', azarado(-5).raridade === 'common');
 
+console.log('\n--- rede de Lendária (300) ---');
+check('em 299 a rede de Lendária ainda não age',
+    azarado(0, LEND - 1).raridade === 'common');
+check('em 300 vem Lendária garantida',
+    azarado(0, LEND).raridade === 'legendary' && azarado(0, LEND).garantida === 'legendary');
+
+console.log('\n--- quando as duas vencem, vale a melhor ---');
+// Sem isto, a rede de Ultra rebaixaria o prêmio da rede de Lendária.
+const duas = azarado(ULTRA + 10, LEND + 10);
+check('as duas estouradas entregam Lendária, não Ultra Rara', duas.raridade === 'legendary');
+check('e a garantia reportada é a de Lendária', duas.garantida === 'legendary');
+
 console.log('\n--- a proteção nunca piora o roll ---');
-// Se o sorteio deu Mestra, é Mestra que sai — mesmo no roll garantido.
-// Trocar por "Ultra Rara" faria do jogador mais azarado do servidor o
-// único impedido de tirar uma Mestra, justo no roll prometido.
-const sortudoNoLimite = sorteio.sortearRaridade({ rollsSemUltra: LIMITE, aleatorio: fixo(99.95) });
-check('Mestra no roll garantido continua Mestra', sortudoNoLimite.raridade === 'master');
-check('e não é marcada como garantida', sortudoNoLimite.garantida === false);
-check('Lendária no roll garantido continua Lendária',
-    sorteio.sortearRaridade({ rollsSemUltra: LIMITE, aleatorio: fixo(98.9) }).raridade === 'legendary');
+// Se o sorteio deu Mestra, é Mestra que sai. Trocar por uma raridade
+// menor faria do jogador mais azarado do servidor o único impedido de
+// tirar uma Mestra, justo no roll prometido.
+const sortudo = (p) => sorteio.sortearRaridade({
+    contadores: { rollsSemUltra: 99999, rollsSemLendaria: 99999 },
+    aleatorio: fixo(p)
+});
+check('Mestra no roll garantido continua Mestra', sortudo(99.95).raridade === 'master');
+check('e não é marcada como garantida', sortudo(99.95).garantida === null);
+check('Lendária sorteada não vira "garantida"', sortudo(98.9).garantida === null);
 
-console.log('\n--- o limite é parametrizável (a Fase 6 baixa para 100) ---');
-check('limite 100 garante em 100',
-    sorteio.sortearRaridade({ rollsSemUltra: 100, limite: 100, aleatorio: fixo(0) }).garantida === true);
-check('e ainda não garante em 99',
-    sorteio.sortearRaridade({ rollsSemUltra: 99, limite: 100, aleatorio: fixo(0) }).garantida === false);
+console.log('\n--- os limites são parametrizáveis (a Fase 6 baixa o de Ultra) ---');
+const comLimite = (u, limite) => sorteio.sortearRaridade({
+    contadores: { rollsSemUltra: u },
+    limites: { rollsSemUltra: limite },
+    aleatorio: fixo(0)
+});
+check('limite 25 garante em 25', comLimite(25, 25).garantida === 'ultra rare');
+check('e ainda não garante em 24', comLimite(24, 25).garantida === null);
 
-console.log('\n--- o contador ---');
-check('Comum incrementa', sorteio.proximoContador('common', 7) === 8);
-check('Rara incrementa', sorteio.proximoContador('rare', 7) === 8);
-check('Ultra Rara zera', sorteio.proximoContador('ultra rare', 119) === 0);
-check('Lendária zera', sorteio.proximoContador('legendary', 119) === 0);
-check('Mestra zera', sorteio.proximoContador('master', 119) === 0);
-check('MAIÚSCULA é aceita', sorteio.proximoContador('ULTRA RARE', 50) === 0);
-check('sem contador anterior começa em 1', sorteio.proximoContador('common') === 1);
-check('raridade desconhecida não zera', sorteio.proximoContador('lixo', 30) === 31);
+// ---------------------------------------------------------------------
+console.log('\n=== OS CONTADORES ===');
+
+const depois = (raridade, u = 0, l = 0) =>
+    sorteio.proximosContadores(raridade, { rollsSemUltra: u, rollsSemLendaria: l });
+
+console.log('\n--- o que zera o quê ---');
+check('Comum sobe os dois',
+    depois('common', 5, 90).rollsSemUltra === 6 && depois('common', 5, 90).rollsSemLendaria === 91);
+check('Rara sobe os dois',
+    depois('rare', 5, 90).rollsSemUltra === 6 && depois('rare', 5, 90).rollsSemLendaria === 91);
+check('Ultra Rara zera o dela e SOBE o de Lendária',
+    depois('ultra rare', 39, 90).rollsSemUltra === 0
+    && depois('ultra rare', 39, 90).rollsSemLendaria === 91,
+    '<- ainda não viu Lendária');
+check('Lendária zera os dois',
+    depois('legendary', 39, 290).rollsSemUltra === 0
+    && depois('legendary', 39, 290).rollsSemLendaria === 0);
+
+// Foi o pedido explícito: a Mestra não tem rede própria, mas está acima
+// das duas — quem tirou uma Mestra não está sem sorte.
+check('MESTRA zera os dois',
+    depois('master', 39, 290).rollsSemUltra === 0
+    && depois('master', 39, 290).rollsSemLendaria === 0);
+
+console.log('\n--- detalhes ---');
+check('MAIÚSCULA é aceita', depois('ULTRA RARE', 50).rollsSemUltra === 0);
+check('sem contador anterior começa em 1', sorteio.proximosContadores('common').rollsSemUltra === 1);
+check('raridade desconhecida não zera nada',
+    depois('lixo', 30, 30).rollsSemUltra === 31 && depois('lixo', 30, 30).rollsSemLendaria === 31);
 
 // O /roll cai para Comum quando o catálogo não tem carta da raridade
 // sorteada. Se o contador zerasse pela raridade SORTEADA, o jogador
-// levaria uma Comum e perderia os 120 rolls de espera junto.
+// levaria uma Comum e perderia a espera acumulada junto.
 check('carta entregue Comum não zera, mesmo com Ultra sorteada',
-    sorteio.proximoContador('common', LIMITE) === LIMITE + 1,
+    depois('common', ULTRA).rollsSemUltra === ULTRA + 1,
     '<- o fallback do catálogo');
 
-console.log('\n--- ninguém passa do limite sem garantia ---');
-// Simula a pior sorte possível durante 500 rolls e confere que a
-// proteção segura o teto.
-let contador = 0;
-let maiorSequencia = 0;
-for (let i = 0; i < 500; i++) {
-    const { raridade } = sorteio.sortearRaridade({ rollsSemUltra: contador, aleatorio: fixo(0) });
-    contador = sorteio.proximoContador(raridade, contador);
-    maiorSequencia = Math.max(maiorSequencia, contador);
+// ---------------------------------------------------------------------
+console.log('\n=== SIMULAÇÃO: ninguém passa dos limites ===');
+// Pior sorte possível durante 2.000 rolls: as redes têm que segurar o teto.
+let contadores = { rollsSemUltra: 0, rollsSemLendaria: 0 };
+let picoUltra = 0;
+let picoLend = 0;
+for (let i = 0; i < 2000; i++) {
+    const { raridade } = sorteio.sortearRaridade({ contadores, aleatorio: fixo(0) });
+    contadores = sorteio.proximosContadores(raridade, contadores);
+    picoUltra = Math.max(picoUltra, contadores.rollsSemUltra);
+    picoLend = Math.max(picoLend, contadores.rollsSemLendaria);
 }
-check('com azar absoluto, a sequência sem Ultra nunca passa do limite',
-    maiorSequencia <= LIMITE, `(maior sequência: ${maiorSequencia})`);
+check('sequência sem Ultra Rara nunca passa de 40', picoUltra <= ULTRA, `(pico ${picoUltra})`);
+check('sequência sem Lendária nunca passa de 300', picoLend <= LEND, `(pico ${picoLend})`);
 
-check('rollsAteAGarantia conta para trás', sorteio.rollsAteAGarantia(118) === 2);
-check('e nunca fica negativo', sorteio.rollsAteAGarantia(999) === 0);
+console.log('\n--- com sorte real, as redes quase não aparecem ---');
+// A proteção é rede de segurança, não mecânica de jogo: se ela disparasse
+// com frequência, a raridade viraria cronômetro.
+const aleatorio2 = geradorPrevisivel(7);
+let cont2 = { rollsSemUltra: 0, rollsSemLendaria: 0 };
+let garantidos = 0;
+const ROLLS = 50000;
+for (let i = 0; i < ROLLS; i++) {
+    const r = sorteio.sortearRaridade({ contadores: cont2, aleatorio: aleatorio2 });
+    if (r.garantida) garantidos++;
+    cont2 = sorteio.proximosContadores(r.raridade, cont2);
+}
+check('menos de 1% dos rolls são garantidos', garantidos / ROLLS < 0.01,
+    `(${garantidos} em ${ROLLS.toLocaleString('pt-BR')} = ${pct((garantidos / ROLLS) * 100)})`);
+
+console.log('\n--- rollsAteAGarantia ---');
+const faltam = sorteio.rollsAteAGarantia({ rollsSemUltra: 38, rollsSemLendaria: 295 });
+check('conta para trás nas duas redes',
+    faltam.rollsSemUltra === 2 && faltam.rollsSemLendaria === 5);
+check('e nunca fica negativo',
+    sorteio.rollsAteAGarantia({ rollsSemUltra: 9999 }).rollsSemUltra === 0);
 
 console.log(falhas === 0 ? '\n*** TODOS OS TESTES DE SORTEIO PASSARAM ***' : `\n*** ${falhas} FALHA(S) ***`);
 process.exit(falhas ? 1 : 0);
