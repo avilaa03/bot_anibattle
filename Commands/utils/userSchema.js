@@ -11,6 +11,25 @@ const UserSchema = new Schema({
         type: Number,
         default: 0
     },
+    // Proteção contra azar: rolls seguidos sem tirar a raridade em
+    // questão ou melhor. Zeram sozinhos quando a sorte vem, e ao chegar no
+    // limite o próximo roll vem garantido. Ver `utils/sorteio.js` para as
+    // réguas (40 e 300) e o porquê de serem duas.
+    //
+    // Não existe contador de Mestra: ela é a única raridade sem rede, de
+    // propósito. Mas quando sai, zera os dois — está acima dos dois.
+    //
+    // Quem já jogava começa em 0, e isso é de propósito: dar crédito
+    // retroativo exigiria um histórico que o bot nunca guardou, e chutar
+    // pelo inventário premiaria justamente quem teve sorte.
+    rollsSemUltra: {
+        type: Number,
+        default: 0
+    },
+    rollsSemLendaria: {
+        type: Number,
+        default: 0
+    },
     inventory: [{
         cardId: mongoose.Schema.Types.ObjectId,
         originalCardId: mongoose.Schema.Types.ObjectId,

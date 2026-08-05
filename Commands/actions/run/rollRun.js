@@ -9,6 +9,7 @@ const { registrar } = require('../../utils/progresso');
 const { notificarProgresso } = require('../../utils/notificacoes');
 const valores = require('../../utils/valores');
 const telemetria = require('../../utils/telemetria');
+const sorteio = require('../../utils/sorteio');
 
 /**
  * Menciona no canal quem tem a carta na lista de desejos.
@@ -103,27 +104,16 @@ module.exports = async (client, interaction, rollCollect, rollEnd) => {
 
     await interaction.deferReply();
 
-    const rarities = [
-        { rarity: 'common', percentage: 55 },
-        { rarity: 'rare', percentage: 28 },
-        { rarity: 'ultra rare', percentage: 12 },
-        { rarity: 'legendary', percentage: 4 },
-        { rarity: 'master', percentage: 1 }
-    ];
+    // A tabela de chances e a proteção contra azar vivem em
+    // `utils/sorteio.js`, onde dá para testar a distribuição sem subir um
+    // cliente de Discord.
+    const contadores = {
+        rollsSemUltra: user?.rollsSemUltra ?? 0,
+        rollsSemLendaria: user?.rollsSemLendaria ?? 0
+    };
+    const { raridade, garantida } = sorteio.sortearRaridade({ contadores });
 
-    const random = Math.random() * 100;
-    let accumulated = 0;
-    let rarity;
-    for (const r of rarities) {
-        accumulated += r.percentage;
-        if (random <= accumulated) {
-            rarity = r.rarity;
-            break;
-        }
-    }
-    if (!rarity) rarity = 'common';
-
-    let card = await sampleCardByRarity(rarity);
+    let card = await sampleCardByRarity(raridade);
     if (!card) {
         card = await sampleCardByRarity('common');
     }
@@ -171,6 +161,17 @@ module.exports = async (client, interaction, rollCollect, rollEnd) => {
         )
         .setImage(render.url);
 
+    // Só avisa quando a proteção realmente disparou. Anunciar o contador
+    // a cada roll transformaria a espera em contagem regressiva, e quem
+    // está a 3 rolls da garantia pararia de rolar até chegar lá.
+    if (garantida) {
+        const rede = sorteio.PROTECOES.find((p) => p.raridade === garantida);
+        const label = ui.getRarity(garantida).label;
+        embed.setFooter({
+            text: `${ui.BRAND} • Proteção contra azar: ${contadores[rede.campo]} rolls sem ${label} — esta veio garantida`
+        });
+    }
+
     await interaction.editReply({ embeds: [embed], components: [row], files: [render.attachment] });
 
     // Marco para medir a latência do clique no botão. Fica DEPOIS do
@@ -184,6 +185,11 @@ module.exports = async (client, interaction, rollCollect, rollEnd) => {
     }
 
     user.lastRoll = now;
+    // Pela raridade da carta ENTREGUE, não pela sorteada: quando o
+    // catálogo não tem carta da raridade sorteada, o jogador recebe uma
+    // Comum — e zerar aí faria ele perder a espera acumulada sem ter
+    // recebido nada em troca.
+    Object.assign(user, sorteio.proximosContadores(card.rarity, contadores));
     await user.save();
 
     // Avisa quem tem essa carta na lista de desejos. É só um aviso: quem
