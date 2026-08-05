@@ -3,6 +3,7 @@ const ui = require('../../utils/embeds');
 const bolsa = require('../../utils/bolsa');
 const itens = require('../../utils/itens');
 const { updateEmbed, buildConfirmationRow, gemasDe, contarCopias } = require('../run/desmancharRun');
+const transacoes = require('../../utils/transacoes');
 
 async function desmancharCollect(i, indexRef, matchingCards, user, rowNavigation) {
     if (i.customId === 'prev' || i.customId === 'next') {
@@ -50,6 +51,21 @@ async function desmancharCollect(i, indexRef, matchingCards, user, rowNavigation
             await i.update({ embeds: [embed], components: [] });
             throw err;
         }
+
+        // A carta virou item, e nenhuma moeda foi criada — por isso
+        // `moedaDelta` fica em zero. Cada desmanche é uma venda rápida que
+        // deixou de imprimir dinheiro, e é isso que o razão registra.
+        transacoes.registrar({
+            userId: user.id,
+            tipo: 'desmanche',
+            itens: [{ chave: 'gema', quantidade: gemas }],
+            contexto: {
+                carta: card.name,
+                raridade: card.rarity,
+                overall: card.overall ?? null,
+                nivel: card.nivel ?? 0
+            }
+        });
 
         const item = itens.getItem('gema');
         const embed = ui.success('Carta desmanchada', [
