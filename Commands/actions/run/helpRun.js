@@ -10,7 +10,10 @@ const PAGES = [
       { nome: '/inventory', desc: 'Sua coleção completa, ordenada das cartas mais raras para as mais comuns.' },
       { nome: '/show', desc: 'Mostra uma carta que você tem **agora** no inventário, com a arte completa.' },
       { nome: '/favcard', desc: 'Define sua carta favorita — ela aparece no seu perfil.' },
-      { nome: '/profile', desc: 'Seu perfil: saldo, coleção, Pokédex e retrospecto de batalhas.' }
+      { nome: '/profile', desc: 'Seu perfil: saldo, coleção, Pokédex e retrospecto de batalhas.' },
+      // A proteção só ajuda quem sabe que ela existe: sem isto, quem está
+      // numa sequência ruim acha que o bot está contra ele e para de rolar.
+      { nome: '​', desc: '🍀 *Sequência ruim tem limite: depois de muitos rolls sem uma Ultra Rara, o jogo garante uma. Continue rolando.*' }
     ]
   },
   {

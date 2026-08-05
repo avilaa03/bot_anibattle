@@ -11,6 +11,18 @@ const UserSchema = new Schema({
         type: Number,
         default: 0
     },
+    // Proteção contra azar: rolls seguidos sem Ultra Rara ou melhor.
+    //
+    // Zera sozinho quando a sorte vem. Ao chegar no limite (120, ver
+    // `utils/sorteio.js`), o próximo roll tem Ultra Rara garantida.
+    //
+    // Quem já jogava começa em 0, e isso é de propósito: dar crédito
+    // retroativo exigiria um histórico que o bot nunca guardou, e chutar
+    // pelo inventário premiaria justamente quem teve sorte.
+    rollsSemUltra: {
+        type: Number,
+        default: 0
+    },
     inventory: [{
         cardId: mongoose.Schema.Types.ObjectId,
         originalCardId: mongoose.Schema.Types.ObjectId,

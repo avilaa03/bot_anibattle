@@ -5,10 +5,10 @@ e por risco, não por vontade.
 
 | # | Item | Impacto | Risco | Fase |
 |---|---|---|---|---|
-| 0 | Telemetria de roll + snapshot da beta | alto | baixo | **agora** |
-| 1 | **Valor por raridade** + migração | **altíssimo** | médio | 1 |
-| 2 | Raridade nova + proteção contra azar | **altíssimo** | baixo | 2 |
-| 3 | `/bolsa` + `/desmanchar` | alto | baixo | 3 |
+| 0 | Telemetria de roll + snapshot da beta | alto | baixo | ✅ no ar — falta rodar `beta:marcar` |
+| 1 | **Valor por raridade** + migração | **altíssimo** | médio | **✅ feito** |
+| 2 | Raridade nova + proteção contra azar | **altíssimo** | baixo | **✅ feito** |
+| 3 | `/bolsa` + `/desmanchar` | alto | baixo | **agora** |
 | 4 | Aprimoramento de cartas | **altíssimo** | **alto** | 4 |
 | 5 | Loja do jogo | alto | médio | 5 |
 | 6 | Nível, cargas de roll, VIP e badges | alto | médio | 6 |
