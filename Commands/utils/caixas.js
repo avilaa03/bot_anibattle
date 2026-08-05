@@ -1,0 +1,219 @@
+const valores = require('./valores');
+
+/**
+ * Caixas: sorteio pago, com distribuição própria.
+ *
+ * ## A diferença para o /roll
+ *
+ * O `/roll` é grátis, tem cooldown e a mesma chance para todo mundo. A
+ * caixa é comprada com moeda do jogo e tem distribuição melhor — é
+ * economia de RPG, não venda de sorte. O princípio que continua de pé é o
+ * outro: **dinheiro real nunca compra odds**.
+ *
+ * Vale reconhecer a corrente indireta: VIP dá mais rolls, mais rolls dão
+ * mais moeda, e mais moeda compra mais caixa. É bem mais fraco que vender
+ * odds, mas existe — e é por isso que o limite diário vale igual para
+ * assinante e não assinante.
+ *
+ * ## O preço NASCE do valor esperado, e isso é o ponto todo
+ *
+ * A pergunta que decide se a caixa quebra a economia é uma só: **sai mais
+ * valor do que entra?** Se sim, ela é uma impressora de dinheiro, e não
+ * importa quão bonita seja a tela.
+ *
+ * A tentação é escrever o preço na mão. Só que existe um caminho que
+ * quebra isso em silêncio: `VALOR_MULTIPLICADOR` escala o valor das
+ * cartas e NÃO escalaria um preço fixo. Subir o multiplicador para
+ * calibrar a economia transformaria uma caixa segura em impressora, sem
+ * ninguém tocar no arquivo das caixas.
+ *
+ * Por isso o preço é **derivado** do valor esperado, com margem fixa. O
+ * glitch fica impossível por construção, não por disciplina.
+ *
+ * ## Por que a referência é o valor de MERCADO
+ *
+ * A conta usa o valor de mercado, não o da venda rápida. O jogador pode
+ * revender a carta a outro jogador pelo preço cheio, então é esse o teto
+ * do que ele consegue extrair da caixa.
+ *
+ * Usar a venda rápida daria a impressão de uma folga enorme (ela paga de
+ * 15% a 50%) e a caixa viraria lucro garantido para quem vende no
+ * mercado — que é justamente quem abre caixa.
+ */
+
+/** Overall de referência para estimar o valor esperado. */
+const OVR_REFERENCIA = 70;
+
+/**
+ * Quanto o preço fica acima do valor esperado.
+ *
+ * 1,6x não é chute: abaixo disso a variância deixa um jogador sortudo
+ * lucrar de forma consistente o bastante para virar estratégia, e a caixa
+ * deixa de ser sink para virar aposta com retorno.
+ */
+const MARGEM = 1.6;
+
+/** Preços sobem para múltiplos disto, para não sair "6.437 moedas". */
+const ARREDONDAMENTO = 500;
+
+/**
+ * As distribuições.
+ *
+ * Cada uma soma 100. A Comum é o piso e a Lendária o topo; a Temática
+ * troca raridade por MIRA — ela vale pela série, não pelo prêmio.
+ *
+ * `serie: true` faz a caixa pedir uma série na hora de abrir.
+ */
+const CAIXAS = {
+    comum: {
+        chave: 'comum',
+        nome: 'Caixa Comum',
+        emoji: '📦',
+        descricao: 'A mais barata. Serve para tentar a sorte sem doer.',
+        distribuicao: { common: 40, rare: 45, 'ultra rare': 14, legendary: 1 },
+        limiteDia: 5,
+        ordem: 1
+    },
+    tematica: {
+        chave: 'tematica',
+        nome: 'Caixa Temática',
+        emoji: '🎯',
+        descricao: 'Você escolhe a série. Rara ou melhor garantida.',
+        detalhe: 'A única que mira: serve para fechar uma série na Pokédex.',
+        distribuicao: { rare: 70, 'ultra rare': 25, legendary: 4.5, master: 0.5 },
+        serie: true,
+        limiteDia: 3,
+        ordem: 2
+    },
+    elite: {
+        chave: 'elite',
+        nome: 'Caixa de Elite',
+        emoji: '💠',
+        descricao: 'Ultra Rara garantida, com boa chance de Lendária.',
+        distribuicao: { 'ultra rare': 70, legendary: 27, master: 3 },
+        limiteDia: 2,
+        ordem: 3
+    },
+    lendaria: {
+        chave: 'lendaria',
+        nome: 'Caixa Lendária',
+        emoji: '🌟',
+        descricao: 'A mais cara do jogo. 10% de chance de sair uma Mestra.',
+        detalhe: 'Ainda é prejuízo na média — você paga pela chance, não pelo retorno.',
+        distribuicao: { 'ultra rare': 50, legendary: 40, master: 10 },
+        limiteDia: 1,
+        ordem: 4
+    },
+
+    /**
+     * Caixa de quem vota no bot.
+     *
+     * `preco: null` = não está à venda. Ela entra na bolsa por fora, e é
+     * por isso que o sistema de caixas precisa aceitar caixa sem preço
+     * desde já: sem isso, plugar o webhook de voto depois exigiria mexer
+     * em toda a estrutura.
+     */
+    apoiador: {
+        chave: 'apoiador',
+        nome: 'Caixa do Apoiador',
+        emoji: '💝',
+        descricao: 'Não está à venda: é a recompensa de quem vota no bot.',
+        distribuicao: { rare: 60, 'ultra rare': 34, legendary: 5.5, master: 0.5 },
+        preco: null,
+        limiteDia: null,
+        ordem: 5
+    }
+};
+
+function normalizar(chave) {
+    return String(chave || '').toLowerCase().trim();
+}
+
+/**
+ * Quanto vale, em média, o que sai desta caixa.
+ *
+ * Recalculado a cada chamada de propósito: `valores.js` lê o
+ * `VALOR_MULTIPLICADOR` do ambiente, e o valor esperado precisa acompanhar
+ * — é exatamente esse acoplamento que impede o preço de ficar para trás.
+ */
+function valorEsperado(caixa, ovr = OVR_REFERENCIA) {
+    const dist = caixa?.distribuicao || {};
+    let total = 0;
+    for (const [raridade, chance] of Object.entries(dist)) {
+        total += (Number(chance) / 100) * valores.valorDeMercado(raridade, ovr);
+    }
+    return total;
+}
+
+/** O preço, derivado do valor esperado. Nunca escrito na mão. */
+function precoDaCaixa(caixa) {
+    // Caixa sem preço não está à venda (a do apoiador, por exemplo).
+    if (Object.prototype.hasOwnProperty.call(caixa, 'preco') && caixa.preco === null) return null;
+
+    const minimo = valorEsperado(caixa) * MARGEM;
+    return Math.ceil(minimo / ARREDONDAMENTO) * ARREDONDAMENTO;
+}
+
+/** A caixa com preço e valor esperado já calculados. */
+function getCaixa(chave) {
+    const bruta = CAIXAS[normalizar(chave)];
+    if (!bruta) return null;
+
+    return {
+        ...bruta,
+        preco: precoDaCaixa(bruta),
+        valorEsperado: Math.round(valorEsperado(bruta))
+    };
+}
+
+function existe(chave) {
+    return CAIXAS[normalizar(chave)] !== undefined;
+}
+
+/** Todas, na ordem de exibição. */
+function todas() {
+    return Object.keys(CAIXAS)
+        .map(getCaixa)
+        .sort((a, b) => a.ordem - b.ordem);
+}
+
+/** Só as compráveis com moeda. */
+function aVenda() {
+    return todas().filter((c) => c.preco != null);
+}
+
+/**
+ * Sorteia a raridade que sai desta caixa.
+ *
+ * Não usa `sorteio.js` de propósito: aquele arquivo é o sorteio do
+ * `/roll`, com a Comum como resto e as redes de proteção contra azar. A
+ * caixa tem distribuição própria e explícita, e **não conta para as redes**
+ * — quem abre caixa não está sem sorte, está pagando por ela.
+ */
+function sortearRaridade(caixa, aleatorio = Math.random) {
+    const faixas = Object.entries(caixa?.distribuicao || {});
+    const alvo = aleatorio() * 100;
+
+    let acumulado = 0;
+    for (const [raridade, chance] of faixas) {
+        acumulado += Number(chance);
+        if (alvo < acumulado) return raridade;
+    }
+
+    // Só chega aqui por arredondamento de ponto flutuante no limite.
+    return faixas.length > 0 ? faixas[faixas.length - 1][0] : 'common';
+}
+
+module.exports = {
+    CAIXAS,
+    OVR_REFERENCIA,
+    MARGEM,
+    ARREDONDAMENTO,
+    valorEsperado,
+    precoDaCaixa,
+    getCaixa,
+    existe,
+    todas,
+    aVenda,
+    sortearRaridade
+};
