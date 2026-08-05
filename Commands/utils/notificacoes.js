@@ -1,6 +1,7 @@
 const { AttachmentBuilder, MessageFlags } = require('discord.js');
 const ui = require('./embeds');
 const achievements = require('./achievements');
+const progressaoDeNivel = require('./progressaoDeNivel');
 
 /**
  * Avisos de progresso.
@@ -94,16 +95,50 @@ function embedMissoes(missoesCompletas) {
  *
  * Raros vão para o canal (todo mundo vê); comuns e missões vão privado.
  */
+/**
+ * Aviso de subida de nível.
+ *
+ * Vai no PRIVADO junto das missões, não no canal. Subir de nível acontece
+ * com frequência — anunciar cada um publicamente viraria ruído, e o que
+ * merece o canal são os troféus de ouro e platina, que são raros.
+ */
+function embedNivel(progressaoNivel) {
+    const { nivelDepois, entregues } = progressaoNivel;
+
+    const embed = ui.base(0xFFD700)
+        .setTitle(`⭐ Nível ${nivelDepois}!`)
+        .setDescription(
+            entregues.length > 1
+                ? `Você subiu **${entregues.length} níveis** de uma vez.`
+                : 'Você subiu de nível.'
+        );
+
+    for (const { nivel: n, recompensa } of entregues.slice(0, 5)) {
+        const linhas = progressaoDeNivel.descrever(recompensa);
+        if (linhas.length > 0) {
+            embed.addFields({ name: `Nível ${n}`, value: linhas.join('\n'), inline: false });
+        }
+    }
+
+    embed.setFooter({ text: `${ui.BRAND} • Veja seu progresso em /profile` });
+    return embed;
+}
+
 async function notificarProgresso(interaction, resultado) {
     if (!resultado) return;
-    const { conquistas = [], missoesCompletas = [] } = resultado;
-    if (conquistas.length === 0 && missoesCompletas.length === 0) return;
+    const { conquistas = [], missoesCompletas = [], nivel: progressaoNivel = null } = resultado;
+
+    const subiuDeNivel = Boolean(progressaoNivel?.subiu);
+    if (conquistas.length === 0 && missoesCompletas.length === 0 && !subiuDeNivel) return;
 
     const publicas = conquistas.filter(ehPublica);
     const privadas = conquistas.filter((c) => !ehPublica(c));
 
     // ---- Privado: bronze, prata e missões ----
     const embedsPrivados = [
+        // O nível vem primeiro: é a recompensa maior, e o Discord mostra os
+        // embeds na ordem em que chegam.
+        ...(subiuDeNivel ? [embedNivel(progressaoNivel)] : []),
         ...privadas.slice(0, 3).map((c) => embedConquista(c)),
         ...(missoesCompletas.length > 0 ? [embedMissoes(missoesCompletas)] : [])
     ];
@@ -168,6 +203,7 @@ async function anunciarConquistas(client, userId, conquistas, canal = null) {
 
 module.exports = {
     notificarProgresso,
+    embedNivel,
     anunciarConquistas,
     embedConquista,
     embedAnuncio,

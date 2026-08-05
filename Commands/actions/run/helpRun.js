@@ -78,6 +78,8 @@ const PAGES = [
       { nome: '/conquistas', desc: 'Seus troféus. 🥉 Bronze, 🥈 Prata, 🥇 Ouro e 💎 **Platina**, que só desbloqueia com todos os outros.' },
       { nome: '/missoes', desc: 'Missões diárias e semanais. O progresso é automático — só volte para resgatar.' },
       { nome: '/ranking', desc: 'Classificação por pontuação de batalha, de Bronze a Mestre.' },
+      { nome: '​', desc: '⭐ **Nível:** tudo que você faz rende XP — rolar, batalhar, trocar, descobrir carta nova, completar missão e coletar o diário. Veja em `/profile`.' },
+      { nome: '​', desc: '🎴 *A cada 10 níveis você **acumula um roll a mais**: os que passarem enquanto você estiver fora deixam de ser perdidos. Isso **não** encurta o cooldown nem muda sua chance de raridade — só evita desperdício.*' },
       { nome: '/daily', desc: 'Recompensa diária **com sequência**: quanto mais dias seguidos, mais vale. Marcos em 7, 14, 30, 60 e 100 dias.' },
       { nome: '​', desc: '⚠️ *Faltou um dia? A sequência zera. É de propósito.*' }
     ]

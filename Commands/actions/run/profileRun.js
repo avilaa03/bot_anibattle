@@ -1,10 +1,11 @@
 const User = require('../../utils/userSchema');
 const ui = require('../../utils/embeds');
 const { getProgress } = require('../../utils/discovery');
-const { getTier, corPerfilEfetiva, isVipAtivo } = require('../../utils/vip');
+const { getTier, corPerfilEfetiva, isVipAtivo, getPerks } = require('../../utils/vip');
 const achievements = require('../../utils/achievements');
 const elo = require('../../utils/elo');
 const valores = require('../../utils/valores');
+const nivel = require('../../utils/nivel');
 const { MessageFlags } = require('discord.js');
 
 const getCardOvr = valores.overallDaCarta;
@@ -69,6 +70,17 @@ async function profileRun(client, interaction) {
         .setAuthor({ name: `${emblema}Perfil de ${alvo.username}`, iconURL: alvo.displayAvatarURL() })
         .addFields(
             ...(selos.length > 0 ? [{ name: '​', value: selos.join('  •  '), inline: false }] : []),
+            {
+                name: '⭐ Nível',
+                value: (() => {
+                    const p = nivel.progresso(user.xp);
+                    const cargas = nivel.maxCargas(p.nivel) + (getPerks(user).cargasExtras || 0);
+                    return `**${p.nivel}** — ${ui.number(p.noNivel)}/${ui.number(p.paraOProximo)} XP\n`
+                        + `${ui.progressBar(p.percentual, 100, 12)}\n`
+                        + `🎴 Acumula até **${cargas}** roll(s)`;
+                })(),
+                inline: false
+            },
             { name: '🪙 Saldo', value: ui.coins(user.balance || 0), inline: true },
             { name: '🎴 Cartas', value: `**${ui.number(totalCards)}**`, inline: true },
             { name: '💎 Patrimônio', value: ui.coins(totalValue + (user.balance || 0)), inline: true },

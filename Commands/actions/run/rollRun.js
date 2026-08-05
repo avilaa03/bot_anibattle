@@ -12,6 +12,7 @@ const telemetria = require('../../utils/telemetria');
 const sorteio = require('../../utils/sorteio');
 const bolsa = require('../../utils/bolsa');
 const rollExtra = require('../../utils/rollExtra');
+const nivel = require('../../utils/nivel');
 
 /**
  * Menciona no canal quem tem a carta na lista de desejos.
@@ -75,7 +76,15 @@ module.exports = async (client, interaction, rollCollect, rollEnd) => {
     const perks = getPerks(user);
     const cooldownEfetivo = Math.round(ROLL_COOLDOWN_MS * perks.rollCooldownMultiplier);
 
-    const noCooldown = Boolean(user && user.lastRoll && now - user.lastRoll < cooldownEfetivo);
+    // Cargas: quantos rolls não usados o jogador acumulou, até o teto do
+    // nível dele. Abaixo do nível 10 o teto é 1, e a conta devolve
+    // exatamente o comportamento de sempre — por isso ninguém que já joga
+    // percebe diferença e não há migração.
+    const nivelAtual = nivel.nivelDoXp(user?.xp);
+    const teto = nivel.maxCargas(nivelAtual) + (perks.cargasExtras || 0);
+    const cargas = nivel.cargasDisponiveis(user?.lastRoll, cooldownEfetivo, teto, now);
+
+    const noCooldown = Boolean(user && user.lastRoll && cargas === 0);
 
     // O roll extra é um recurso PARALELO ao cooldown.
     //
@@ -239,7 +248,13 @@ module.exports = async (client, interaction, rollCollect, rollEnd) => {
     // Roll extra NÃO mexe no relógio: ele é recurso paralelo, e o roll
     // grátis continua chegando na hora de sempre. Atualizar `lastRoll`
     // aqui faria o extra custar o roll seguinte.
-    if (!usouExtra) user.lastRoll = now;
+    //
+    // Gastando uma carga, `lastRoll` avança UM cooldown em vez de ir para
+    // agora: o tempo que sobra continua contando para a próxima. Sem isso,
+    // quem tinha 3 cargas e usasse 1 perderia as outras 2.
+    if (!usouExtra) {
+        user.lastRoll = nivel.proximoLastRoll(Math.max(1, cargas), cooldownEfetivo, now);
+    }
 
     // Pela raridade da carta ENTREGUE, não pela sorteada: quando o
     // catálogo não tem carta da raridade sorteada, o jogador recebe uma
