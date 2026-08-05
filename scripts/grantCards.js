@@ -28,6 +28,7 @@ mongoose.set('strictQuery', false);
 const User = require('../Commands/utils/userSchema');
 const Card = require('../Commands/utils/cardSchema');
 const { registerDiscovery } = require('../Commands/utils/discovery');
+const valores = require('../Commands/utils/valores');
 
 const RARIDADES = ['common', 'rare', 'ultra rare', 'legendary', 'master'];
 const LIMITE_SEM_CONFIRMAR = 25;
@@ -59,11 +60,15 @@ function escapeRegex(str) {
 
 /**
  * Monta a cópia da carta para o inventário.
- * Mantido igual ao que rollCollect.js faz — se um mudar, o outro precisa
- * mudar junto, senão cartas dadas por script ficam diferentes das roladas.
+ *
+ * O preço sai de `utils/valores.js`, a mesma fonte que o /roll usa. Antes
+ * daqui saía `overall * 10`, a fórmula anterior à raridade entrar na
+ * conta: uma Mestra dada por evento entrava no inventário valendo 950 em
+ * vez de 190.500, e o valor fica GRAVADO na cópia — cada uso do script
+ * sujava o acervo que a migração acabara de arrumar.
  */
 function montarCopia(card) {
-    const marketValue = (card.overall ?? 0) * 10;
+    const { marketValue, valueToSell } = valores.valoresDaCarta(card);
     return {
         cardId: new mongoose.Types.ObjectId(),
         originalCardId: card._id,
@@ -79,7 +84,7 @@ function montarCopia(card) {
         POW: card.POW,
         obtainedAt: new Date(),
         marketValue,
-        valueToSell: Math.floor(marketValue / 2)
+        valueToSell
     };
 }
 

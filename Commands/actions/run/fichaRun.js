@@ -8,6 +8,7 @@ const { molduraEfetiva } = require('../../utils/vip');
 const { formatarNumero } = require('../../utils/dexNumbers');
 const { registrar } = require('../../utils/progresso');
 const wishlist = require('../../utils/wishlist');
+const valores = require('../../utils/valores');
 
 /**
  * /ficha — mostra a ficha de uma carta que o jogador JÁ REGISTROU na Pokédex.
@@ -120,7 +121,7 @@ async function fichaRun(client, interaction) {
                 },
                 {
                     name: '💰 Valor de mercado',
-                    value: ui.coins((carta.overall ?? 0) * 10),
+                    value: ui.coins(valores.valoresDaCarta(carta).marketValue),
                     inline: true
                 },
                 {
