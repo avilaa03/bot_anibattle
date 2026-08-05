@@ -98,6 +98,28 @@ const ITENS = {
         consumivel: true,
         ordem: 1
     },
+    /**
+     * Roll extra guardado.
+     *
+     * `preco: null` porque ele NÃO é comprado no `/loja comprar`: o preço
+     * dele escalona dentro do dia (ver `utils/rollExtra.js`), e um item de
+     * preço fixo não conseguiria representar isso. A compra tem porta
+     * própria, `/loja roll-extra`.
+     *
+     * Mesmo padrão da Caixa do Apoiador: item conhecido pela bolsa, fora
+     * da vitrine.
+     */
+    roll_extra: {
+        chave: 'roll_extra',
+        nome: 'Roll extra',
+        emoji: '🎟️',
+        descricao: 'Um `/roll` que ignora o cooldown. Guardado até você querer usar.',
+        detalhe: 'Compre em `/loja roll-extra` e use com `/roll extra:True`.',
+        preco: null,
+        limiteDia: null,
+        consumivel: true,
+        ordem: 3
+    },
     pergaminho: {
         chave: 'pergaminho',
         nome: 'Pergaminho de proteção',

@@ -2,6 +2,8 @@ const User = require('./userSchema');
 const Card = require('./cardSchema');
 const achievements = require('./achievements');
 const missoes = require('./missoes');
+const nivel = require('./nivel');
+const progressaoDeNivel = require('./progressaoDeNivel');
 
 /**
  * Ponto central de progressão.
@@ -105,6 +107,26 @@ async function verificarConquistas(userId, userDoc = null) {
  * @param {boolean} [opcoes.checarConquistas] padrão true
  * @returns {Promise<{conquistas: Array, missoesCompletas: Array}>}
  */
+/**
+ * Quanto XP cada evento de missão rende.
+ *
+ * O XP pega carona nos eventos que já existem em vez de ter uma chamada
+ * própria em cada comando: assim nenhuma ação nova precisa lembrar de dar
+ * XP, e nenhuma existente foi tocada para ganhar a barra.
+ *
+ * Eventos sem entrada aqui simplesmente não rendem XP — é a forma de
+ * incluir um evento novo na progressão sem alterar comando nenhum.
+ */
+const XP_POR_EVENTO = {
+    roll: nivel.XP.roll,
+    batalha: nivel.XP.batalha,
+    vitoria: nivel.XP.vitoria,
+    descoberta: nivel.XP.descoberta,
+    troca: nivel.XP.troca,
+    diario: nivel.XP.diario,
+    caixa: nivel.XP.caixa
+};
+
 async function registrar(userId, contadores = {}, opcoes = {}) {
     const { eventosMissao = [], checarConquistas = true } = opcoes;
 
@@ -122,9 +144,15 @@ async function registrar(userId, contadores = {}, opcoes = {}) {
         missoesCompletas = await missoes.progredir(userId, eventosMissao);
     }
 
+    // XP dos eventos, mais um bônus por missão concluída.
+    const xpDosEventos = eventosMissao.reduce((total, evento) => total + (XP_POR_EVENTO[evento] || 0), 0);
+    const xpDasMissoes = missoesCompletas.length * nivel.XP.missao;
+
+    const progressaoNivel = await progressaoDeNivel.ganhar(userId, xpDosEventos + xpDasMissoes);
+
     const conquistas = checarConquistas ? await verificarConquistas(userId) : [];
 
-    return { conquistas, missoesCompletas };
+    return { conquistas, missoesCompletas, nivel: progressaoNivel };
 }
 
 module.exports = { registrar, verificarConquistas, montarContexto };

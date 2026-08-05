@@ -51,6 +51,25 @@ const GRUPO = 'rollExtra';
 const CHAVE = 'padrao';
 
 /**
+ * Onde o roll extra fica guardado na bolsa.
+ *
+ * ## Comprar e usar são atos separados
+ *
+ * A primeira versão adiantava o roll na hora da compra, e por isso só
+ * deixava comprar durante o cooldown — fora dele a compra não teria
+ * efeito. Isso tornava impossível estocar para a noite, que é justamente
+ * quando quem trabalha usa o bot.
+ *
+ * Agora o roll extra é um item: compra quando tem dinheiro, usa quando tem
+ * tempo. Mesmo desenho das caixas.
+ *
+ * A trava econômica continua no mesmo lugar — o LIMITE DIÁRIO é de
+ * COMPRA. Estocar 3 por dia durante dez dias e gastar 30 numa tarde não
+ * cria nenhuma carta a mais do que comprar e usar na hora; só muda quando.
+ */
+const CHAVE_BOLSA = 'roll_extra';
+
+/**
  * Quanto vale, em média, o que sai de um `/roll`.
  *
  * Usa a tabela real do `sorteio.js`, então mexer nas chances de raridade
@@ -94,6 +113,7 @@ module.exports = {
     LIMITE_DIARIO,
     GRUPO,
     CHAVE,
+    CHAVE_BOLSA,
     valorEsperadoDoRoll,
     precos,
     precoDoProximo,

@@ -25,6 +25,7 @@ const TIERS = {
         precoBRL: 5,
         ordem: 1,
         rollCooldownMultiplier: 0.90,  // -10%
+        cargasExtras: 0,
         dailyMultiplier: 1.25,
         molduras: ['bronze'],
         podeCorPerfil: true,
@@ -39,6 +40,7 @@ const TIERS = {
         precoBRL: 15,
         ordem: 2,
         rollCooldownMultiplier: 0.80,  // -20%
+        cargasExtras: 0,
         dailyMultiplier: 1.5,
         molduras: ['bronze', 'prata'],
         podeCorPerfil: true,
@@ -53,6 +55,7 @@ const TIERS = {
         precoBRL: 30,
         ordem: 3,
         rollCooldownMultiplier: 0.70,  // -30%
+        cargasExtras: 1,
         dailyMultiplier: 2,
         molduras: ['bronze', 'prata', 'ouro', 'sakura'],
         podeCorPerfil: true,
@@ -67,6 +70,7 @@ const TIERS = {
         precoBRL: 50,
         ordem: 4,
         rollCooldownMultiplier: 0.60,  // -40%
+        cargasExtras: 1,
         dailyMultiplier: 3,
         molduras: ['bronze', 'prata', 'ouro', 'sakura', 'holografica', 'neon'],
         podeCorPerfil: true,
@@ -117,6 +121,7 @@ function getPerks(user) {
             vip: false,
             tier: null,
             rollCooldownMultiplier: 1,
+            cargasExtras: 0,
             dailyMultiplier: 1,
             moldurasDisponiveis: ['nenhuma'],
             podeCorPerfil: false,
@@ -128,6 +133,9 @@ function getPerks(user) {
         vip: true,
         tier,
         rollCooldownMultiplier: tier.rollCooldownMultiplier,
+        // Quantidade, nunca sorte: o assinante ACUMULA mais rolls não
+        // usados, e continua com exatamente a mesma chance de raridade.
+        cargasExtras: tier.cargasExtras || 0,
         dailyMultiplier: tier.dailyMultiplier,
         moldurasDisponiveis: ['nenhuma', ...tier.molduras],
         podeCorPerfil: tier.podeCorPerfil,

@@ -132,6 +132,16 @@ const UserSchema = new Schema({
     elo: { type: Number, default: 1000 },
     picoElo: { type: Number, default: 1000 },
 
+    // XP acumulado. O nível é DERIVADO dele (`utils/nivel.js`), nunca
+    // gravado: dois campos que precisam concordar acabam discordando, e
+    // aí não há como saber qual está certo.
+    //
+    // `nivelEntregue` é outra coisa: é até onde as recompensas já foram
+    // pagas. Sem ele, um jogador que subisse de nível durante uma falha de
+    // entrega receberia de novo na próxima ação — ou nunca receberia.
+    xp: { type: Number, default: 0 },
+    nivelEntregue: { type: Number, default: 1 },
+
     // Troféus conquistados (chave do catálogo em achievements.js).
     conquistas: [{
         chave: String,

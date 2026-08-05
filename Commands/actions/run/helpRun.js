@@ -54,7 +54,7 @@ const PAGES = [
       // sozinho não avisa que existe caminho melhor.
       { nome: '​', desc: '⚠️ *Tirou algo raro? **Não use a venda rápida.** Anuncie no `/market`: lá você recebe o preço cheio que outro jogador pagar, menos 5% de taxa. A venda rápida existe para repetida, não para tesouro.*' },
       { nome: '/loja', desc: 'Troca moedas por itens — gemas de aprimoramento e pergaminhos de proteção. A moeda gasta aqui sai de circulação.' },
-      { nome: '/loja roll-extra', desc: 'Adianta seu próximo `/roll` quando ele está no cooldown. **Até 3 por dia, e o preço sobe a cada um** — o jogo continua dependendo de tempo, não de saldo.' },
+      { nome: '/loja roll-extra', desc: 'Compra um 🎟️ **roll extra** e guarda na bolsa. Use quando quiser com `/roll extra:True` — ele ignora o cooldown e **não consome** seu roll grátis. Até 3 compras por dia, e o preço sobe a cada uma.' },
       { nome: '/bolsa', desc: 'Mostra os itens e as caixas que você tem guardados.' },
       { nome: '/caixa', desc: 'Caixas de cartas com chances próprias. Compre, **guarde na bolsa** e abra quando quiser — da Comum à Lendária, que tem 10% de chance de Mestra.' },
       { nome: '​', desc: '🎯 *A **Caixa Temática** deixa você escolher a série — é a única que mira, e serve para fechar uma série na Pokédex.*' },
@@ -78,6 +78,8 @@ const PAGES = [
       { nome: '/conquistas', desc: 'Seus troféus. 🥉 Bronze, 🥈 Prata, 🥇 Ouro e 💎 **Platina**, que só desbloqueia com todos os outros.' },
       { nome: '/missoes', desc: 'Missões diárias e semanais. O progresso é automático — só volte para resgatar.' },
       { nome: '/ranking', desc: 'Classificação por pontuação de batalha, de Bronze a Mestre.' },
+      { nome: '​', desc: '⭐ **Nível:** tudo que você faz rende XP — rolar, batalhar, trocar, descobrir carta nova, completar missão e coletar o diário. Veja em `/profile`.' },
+      { nome: '​', desc: '🎴 *A cada 10 níveis você **acumula um roll a mais**: os que passarem enquanto você estiver fora deixam de ser perdidos. Isso **não** encurta o cooldown nem muda sua chance de raridade — só evita desperdício.*' },
       { nome: '/daily', desc: 'Recompensa diária **com sequência**: quanto mais dias seguidos, mais vale. Marcos em 7, 14, 30, 60 e 100 dias.' },
       { nome: '​', desc: '⚠️ *Faltou um dia? A sequência zera. É de propósito.*' }
     ]

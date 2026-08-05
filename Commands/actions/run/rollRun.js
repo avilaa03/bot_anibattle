@@ -10,6 +10,9 @@ const { notificarProgresso } = require('../../utils/notificacoes');
 const valores = require('../../utils/valores');
 const telemetria = require('../../utils/telemetria');
 const sorteio = require('../../utils/sorteio');
+const bolsa = require('../../utils/bolsa');
+const rollExtra = require('../../utils/rollExtra');
+const nivel = require('../../utils/nivel');
 
 /**
  * Menciona no canal quem tem a carta na lista de desejos.
@@ -73,20 +76,70 @@ module.exports = async (client, interaction, rollCollect, rollEnd) => {
     const perks = getPerks(user);
     const cooldownEfetivo = Math.round(ROLL_COOLDOWN_MS * perks.rollCooldownMultiplier);
 
-    if (user && user.lastRoll && now - user.lastRoll < cooldownEfetivo) {
-        const timeRemaining = cooldownEfetivo - (now - user.lastRoll);
-        const readyAt = Math.floor((now + timeRemaining) / 1000);
-        const embed = ui.warning('Ainda no cooldown', `Você poderá rolar de novo <t:${readyAt}:R>.`)
-            .addFields(
-                { name: 'Tempo restante', value: ui.duration(timeRemaining), inline: true },
-                { name: 'Seu intervalo', value: ui.duration(cooldownEfetivo), inline: true }
-            );
-        if (perks.vip) {
-            embed.setFooter({ text: `${ui.BRAND} • ${perks.tier.emoji} ${perks.tier.nome}: cooldown reduzido em ${Math.round((1 - perks.rollCooldownMultiplier) * 100)}%` });
+    // Cargas: quantos rolls não usados o jogador acumulou, até o teto do
+    // nível dele. Abaixo do nível 10 o teto é 1, e a conta devolve
+    // exatamente o comportamento de sempre — por isso ninguém que já joga
+    // percebe diferença e não há migração.
+    const nivelAtual = nivel.nivelDoXp(user?.xp);
+    const teto = nivel.maxCargas(nivelAtual) + (perks.cargasExtras || 0);
+    const cargas = nivel.cargasDisponiveis(user?.lastRoll, cooldownEfetivo, teto, now);
+
+    const noCooldown = Boolean(user && user.lastRoll && cargas === 0);
+
+    // O roll extra é um recurso PARALELO ao cooldown.
+    //
+    // Usar um não adianta nem reinicia o relógio normal: quem gastou o
+    // extra às 14h continua com o roll grátis chegando na hora de sempre.
+    // Por isso `usouExtra` desliga a gravação de `lastRoll` lá embaixo —
+    // se ele fosse atualizado, o extra custaria o roll seguinte, e o
+    // jogador teria pago para não ganhar nada.
+    let usouExtra = false;
+
+    if (noCooldown) {
+        const querExtra = interaction.options?.getBoolean?.('extra') ?? false;
+        const guardados = bolsa.quantidadeDe(user, rollExtra.CHAVE_BOLSA);
+
+        if (querExtra) {
+            // Consumo atômico: quem decide se há extra é o banco, na mesma
+            // escrita. Dois `/roll extra` clicados junto gastariam o mesmo.
+            const apos = await bolsa.consumir(interaction.user.id, rollExtra.CHAVE_BOLSA, 1);
+            if (!apos) {
+                return interaction.reply({
+                    embeds: [ui.warning('Você não tem roll extra', [
+                        'Nenhum 🎟️ **roll extra** na sua bolsa.',
+                        '',
+                        'Compre em `/loja roll-extra` — o preço sobe a cada compra do dia.'
+                    ].join('\n'))],
+                    flags: MessageFlags.Ephemeral
+                });
+            }
+            usouExtra = true;
         } else {
-            embed.setFooter({ text: `${ui.BRAND} • Assinantes rolam com até 40% menos espera — veja /vip` });
+            const timeRemaining = cooldownEfetivo - (now - user.lastRoll);
+            const readyAt = Math.floor((now + timeRemaining) / 1000);
+            const embed = ui.warning('Ainda no cooldown', `Você poderá rolar de novo <t:${readyAt}:R>.`)
+                .addFields(
+                    { name: 'Tempo restante', value: ui.duration(timeRemaining), inline: true },
+                    { name: 'Seu intervalo', value: ui.duration(cooldownEfetivo), inline: true }
+                );
+
+            // Só oferece o atalho para quem já tem. Anunciar a loja aqui
+            // seria empurrar compra na hora da frustração.
+            if (guardados > 0) {
+                embed.addFields({
+                    name: '🎟️ Roll extra',
+                    value: `Você tem **${ui.number(guardados)}** guardado(s). Use \`/roll extra:True\` para pular a espera.`,
+                    inline: false
+                });
+            }
+
+            if (perks.vip) {
+                embed.setFooter({ text: `${ui.BRAND} • ${perks.tier.emoji} ${perks.tier.nome}: cooldown reduzido em ${Math.round((1 - perks.rollCooldownMultiplier) * 100)}%` });
+            } else {
+                embed.setFooter({ text: `${ui.BRAND} • Assinantes rolam com até 40% menos espera — veja /vip` });
+            }
+            return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
         }
-        return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
     }
 
     // Telemetria: quanto tempo depois do cooldown vencer este roll chegou.
@@ -98,9 +151,17 @@ module.exports = async (client, interaction, rollCollect, rollEnd) => {
     //
     // Sem await e com catch: telemetria nunca pode atrasar nem derrubar o
     // /roll de ninguém.
-    const prontoEm = user?.lastRoll ? user.lastRoll + cooldownEfetivo : null;
-    telemetria.registrarRoll(interaction.user.id, { agora: now, prontoEm })
-        .catch((err) => console.error('Erro ao registrar telemetria do roll:', err.message));
+    //
+    // Roll extra fica de fora da medição: ele acontece DENTRO do cooldown,
+    // então o "atraso" seria negativo e contaria como pontualidade
+    // sobre-humana. Um jogador que compra extras viraria suspeito de macro
+    // por ter gastado dinheiro — exatamente o falso positivo que a
+    // telemetria existe para evitar.
+    if (!usouExtra) {
+        const prontoEm = user?.lastRoll ? user.lastRoll + cooldownEfetivo : null;
+        telemetria.registrarRoll(interaction.user.id, { agora: now, prontoEm })
+            .catch((err) => console.error('Erro ao registrar telemetria do roll:', err.message));
+    }
 
     await interaction.deferReply();
 
@@ -184,7 +245,17 @@ module.exports = async (client, interaction, rollCollect, rollEnd) => {
         user = new User({ id: interaction.user.id });
     }
 
-    user.lastRoll = now;
+    // Roll extra NÃO mexe no relógio: ele é recurso paralelo, e o roll
+    // grátis continua chegando na hora de sempre. Atualizar `lastRoll`
+    // aqui faria o extra custar o roll seguinte.
+    //
+    // Gastando uma carga, `lastRoll` avança UM cooldown em vez de ir para
+    // agora: o tempo que sobra continua contando para a próxima. Sem isso,
+    // quem tinha 3 cargas e usasse 1 perderia as outras 2.
+    if (!usouExtra) {
+        user.lastRoll = nivel.proximoLastRoll(Math.max(1, cargas), cooldownEfetivo, now);
+    }
+
     // Pela raridade da carta ENTREGUE, não pela sorteada: quando o
     // catálogo não tem carta da raridade sorteada, o jogador recebe uma
     // Comum — e zerar aí faria ele perder a espera acumulada sem ter
