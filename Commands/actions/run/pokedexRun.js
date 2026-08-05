@@ -3,6 +3,7 @@ const Card = require('../../utils/cardSchema');
 const ui = require('../../utils/embeds');
 const { escapeRegex } = require('../../utils/regexUtils');
 const { getDiscoveredSet } = require('../../utils/discovery');
+const discovery = require('../../utils/discovery');
 const { formatarNumero } = require('../../utils/dexNumbers');
 
 const POR_PAGINA = 10;
@@ -19,9 +20,22 @@ async function pokedexRun(client, interaction) {
     const filtroRaridade = (interaction.options.getString('raridade') || '').trim().toLowerCase();
     const apenasFaltantes = interaction.options.getBoolean('faltantes') || false;
 
-    const query = {};
+    // Duas Pokédex separadas.
+    //
+    // A normal existe para ser COMPLETADA — a barra é a promessa. Se as
+    // cartas de evento entrassem nela, a barra de todo mundo cairia a cada
+    // distribuição nova e ninguém mais fecharia 100%: quem não estava no
+    // evento não tem como conseguir.
+    //
+    // Separando, cada uma mede o que dá para medir. A normal continua
+    // fechável; a de evento é o mural do que você participou.
+    const dex = interaction.options.getString('dex') === 'evento' ? 'evento' : 'normal';
+
+    const query = { ...discovery.filtroDaDex(dex) };
     if (filtroSerie) query.series = new RegExp(escapeRegex(filtroSerie), 'i');
-    if (filtroRaridade) query.rarity = filtroRaridade;
+    // A raridade só filtra dentro da dex normal: na de evento todas são
+    // `event`, e deixar escolher outra devolveria uma lista sempre vazia.
+    if (filtroRaridade && dex === 'normal') query.rarity = filtroRaridade;
 
     const [descobertoSet, cartas] = await Promise.all([
         getDiscoveredSet(interaction.user.id),
@@ -30,7 +44,12 @@ async function pokedexRun(client, interaction) {
 
     if (cartas.length === 0) {
         return interaction.editReply({
-            embeds: [ui.neutral('📖 Pokédex', 'Nenhuma carta encontrada com esses filtros.')]
+            embeds: [ui.neutral(
+                dex === 'evento' ? '🎗️ Pokédex de eventos' : '📖 Pokédex',
+                dex === 'evento'
+                    ? 'Nenhuma carta de evento existe ainda. Elas aparecem aqui quando forem distribuídas.'
+                    : 'Nenhuma carta encontrada com esses filtros.'
+            )]
         });
     }
 
@@ -78,7 +97,9 @@ async function pokedexRun(client, interaction) {
             return `\`${numero}\` ${meta.emoji} **${ui.cardName(carta.name)}** — OVR **${carta.overall}**\n└ *${carta.series}*`;
         }).join('\n');
 
-        const titulo = filtroSerie || filtroRaridade
+        const titulo = dex === 'evento'
+            ? '🎗️ Pokédex de eventos'
+            : filtroSerie || filtroRaridade
             ? `📖 Pokédex — ${filtroSerie || ui.getRarity(filtroRaridade).label}`
             : '📖 Pokédex';
 

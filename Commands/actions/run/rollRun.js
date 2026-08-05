@@ -53,7 +53,12 @@ function errorEmbed(description) {
  * em vez de carregar toda a raridade na memória a cada roll. */
 async function sampleCardByRarity(rarity) {
     const results = await Card.aggregate([
-        { $match: { rarity } },
+        // `distribuivel: false` tira a carta de rotação sem apagá-la.
+        //
+        // Carta de evento já estaria fora por outro caminho — a raridade
+        // `event` nunca aparece em `sorteio.tabelaDeChances`. Esta é a
+        // segunda trava, e a que permite recolher uma carta normal.
+        { $match: { rarity, distribuivel: { $ne: false } } },
         { $sample: { size: 1 } }
     ]);
     return results[0] || null;

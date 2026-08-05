@@ -45,7 +45,10 @@
  */
 
 /** Da mais comum para a mais rara. A ordem é usada para comparar. */
-const ORDEM = ['common', 'rare', 'ultra rare', 'legendary', 'master'];
+// Evento entra no fim para as comparações de "é isto ou melhor?"
+// funcionarem. Ela NUNCA aparece em `tabelaDeChances`, entao nao ha
+// caminho para sair de um /roll.
+const ORDEM = ['common', 'rare', 'ultra rare', 'legendary', 'master', 'event'];
 
 /** Taxas fixas. A Comum não está aqui porque é o resto — ver o cabeçalho. */
 const CHANCES = {

@@ -1,6 +1,7 @@
 const BaseSlashCommand = require('../utils/BaseSlashCommand.js');
 const { SlashCommandBuilder, MessageFlags } = require('discord.js');
 const ui = require('../utils/embeds.js');
+const negociabilidade = require('../utils/negociabilidade.js');
 const User = require('../utils/userSchema.js');
 const { desmancharRun } = require('../actions/run/desmancharRun.js');
 const desmancharCollect = require('../actions/collect/desmancharCollect.js');
@@ -20,7 +21,19 @@ module.exports = class DesmancharSlashCommand extends BaseSlashCommand {
             return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
         }
 
-        const matchingCards = user.inventory.filter((c) => c.name.toLowerCase().includes(name));
+        const encontradas = user.inventory.filter((c) => c.name.toLowerCase().includes(name));
+
+        // Carta de evento não desmancha: ela não volta a ser distribuída, e
+        // desmanchar é o único clique do jogo que apaga algo insubstituível.
+        const matchingCards = encontradas.filter(negociabilidade.podeDesmanchar);
+
+        if (encontradas.length > 0 && matchingCards.length === 0) {
+            const embed = ui.error(
+                'Não dá para desmanchar',
+                negociabilidade.motivoDeRecusa(encontradas[0], 'desmanchar')
+            );
+            return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
+        }
 
         if (matchingCards.length === 0) {
             const embed = ui.error('Carta não encontrada', `Nenhuma carta no seu inventário tem "${name}" no nome.`);

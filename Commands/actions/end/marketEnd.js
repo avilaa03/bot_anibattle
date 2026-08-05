@@ -61,6 +61,9 @@ module.exports = async (message, selectedCard, interaction) => {
                     LIF: reserved.LIF ?? 0,
                     POW: reserved.POW ?? 0,
                     obtainedAt: reserved.obtainedAt,
+                    // Só carta negociável chega ao mercado, mas o campo
+                    // viaja junto para a cópia nova nascer coerente.
+                    comercializavel: reserved.comercializavel !== false,
                     // O aprimoramento chega junto com a carta. Anúncios
                     // criados antes deste campo existir vêm sem `nivel`, e
                     // aí a carta é natural mesmo — `base` ausente faz o

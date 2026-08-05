@@ -49,7 +49,12 @@ const VALOR_BASE = {
     rare: 350,
     'ultra rare': 2000,
     legendary: 18000,
-    master: 150000
+    master: 150000,
+    // Acima da Mestra: a carta de evento não pode ser obtida de novo
+    // depois que a distribuição fecha, e escassez permanente é o que o
+    // mercado precifica. É só a REFERÊNCIA — quem decide o preço de
+    // verdade são os jogadores.
+    event: 400000
 };
 
 /**
@@ -62,7 +67,10 @@ const QUICKSELL_PCT = {
     rare: 0.45,
     'ultra rare': 0.35,
     legendary: 0.25,
-    master: 0.15
+    master: 0.15,
+    // A menor de todas: vender carta de evento ao bot deveria ser sempre
+    // o pior negócio possível.
+    event: 0.10
 };
 
 // O overall desloca o valor entre 70% e 130% da base.

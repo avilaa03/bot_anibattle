@@ -21,6 +21,15 @@ module.exports = class PokedexSlashCommand extends BaseSlashCommand {
                     .setRequired(false)
             )
             .addStringOption(option =>
+                option.setName('dex')
+                    .setDescription('Qual Pokédex (padrão: a normal)')
+                    .setRequired(false)
+                    .addChoices(
+                        { name: '📖 Normal', value: 'normal' },
+                        { name: '🎗️ Cartas de evento', value: 'evento' }
+                    )
+            )
+            .addStringOption(option =>
                 option.setName('raridade')
                     .setDescription('Filtrar por raridade')
                     .setRequired(false)

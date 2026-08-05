@@ -69,7 +69,11 @@ function resumirCarta(carta) {
         series: carta.series,
         rarity: carta.rarity,
         overall: carta.overall,
-        marketValue: carta.marketValue
+        marketValue: carta.marketValue,
+        // Só carta negociável entra numa oferta (o menu já filtra),
+        // mas o campo viaja junto para a cópia entregue nascer
+        // coerente do outro lado.
+        comercializavel: carta.comercializavel !== false
     };
 }
 

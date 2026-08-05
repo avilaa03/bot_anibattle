@@ -48,6 +48,47 @@ const cardSchema = new Schema({
     POW: {
         type: Number,
         required: true
+    },
+
+    /**
+     * De onde a carta vem.
+     *
+     * 'roll' é o catálogo normal. 'evento' são as distribuídas à mão —
+     * beta, campanha, prêmio de torneio. Serve para a Pokédex separada e
+     * para o painel filtrar.
+     */
+    origem: {
+        type: String,
+        default: 'roll'
+    },
+
+    /**
+     * A carta pode sair de um sorteio?
+     *
+     * Carta de evento entra com `false`. Na prática ela já estaria fora,
+     * porque a raridade `event` nunca aparece em `sorteio.tabelaDeChances`
+     * nem na distribuição de nenhuma caixa — este campo é a segunda trava,
+     * e serve também para tirar de rotação uma carta normal sem apagá-la.
+     */
+    distribuivel: {
+        type: Boolean,
+        default: true
+    },
+
+    /**
+     * A carta pode trocar de mãos?
+     *
+     * `false` bloqueia mercado, venda rápida, troca e transferência. É o
+     * "vinculado" dos RPGs: a carta é sua e não vira mercadoria.
+     *
+     * ⚠️ Este valor é COPIADO para a cópia do inventário no momento da
+     * entrega, e é a cópia que manda. Mudar aqui depois não afeta quem já
+     * recebeu — ninguém perde o direito de vender algo que ganhou sob
+     * outra regra.
+     */
+    comercializavel: {
+        type: Boolean,
+        default: true
     }
 }, { collection: 'new-cards' });
 

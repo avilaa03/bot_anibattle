@@ -1,6 +1,7 @@
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags } = require('discord.js');
 const ui = require('../../utils/embeds');
 const valores = require('../../utils/valores');
+const negociabilidade = require('../../utils/negociabilidade');
 const { applyMarketTax, MARKET_TAX_RATE } = require('../../utils/economy');
 const User = require('../../utils/userSchema');
 const { sellCollect } = require('../collect/sellCollect.js');
@@ -50,10 +51,20 @@ async function sellRun(client, interaction) {
         const embed = ui.error('Perfil não encontrado', 'Use `/roll` ou `/daily` para criar seu perfil primeiro.');
         return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
     }
-    const matchingCards = user.inventory.filter(card => card.name.toLowerCase().includes(cardName.toLowerCase()));
+    const encontradas = user.inventory.filter(card => card.name.toLowerCase().includes(cardName.toLowerCase()));
+
+    if (encontradas.length === 0) {
+        const embed = ui.error('Carta não encontrada', `Nenhuma carta no seu inventário tem "${cardName}" no nome.`);
+        return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
+    }
+
+    // Ver `utils/negociabilidade.js`: a regra mora num arquivo só porque
+    // precisa valer em seis lugares, e esquecer de um faria a carta
+    // vinculada virar negociável por ali sem dar erro nenhum.
+    const matchingCards = encontradas.filter(negociabilidade.podeNegociar);
 
     if (matchingCards.length === 0) {
-        const embed = ui.error('Carta não encontrada', `Nenhuma carta no seu inventário tem "${cardName}" no nome.`);
+        const embed = ui.error('Carta vinculada', negociabilidade.motivoDeRecusa(encontradas[0]));
         return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
     }
 

@@ -19,7 +19,11 @@ const RARITIES = {
     rare: { label: 'Rara', emoji: '🔵', color: 0x2196F3, weight: 1 },
     'ultra rare': { label: 'Ultra Rara', emoji: '🟣', color: 0xAB47BC, weight: 2 },
     legendary: { label: 'Lendária', emoji: '🟠', color: 0xFF9800, weight: 3 },
-    master: { label: 'Mestra', emoji: '🌟', color: 0xFFD700, weight: 4 }
+    master: { label: 'Mestra', emoji: '🌟', color: 0xFFD700, weight: 4 },
+    // Evento fica ACIMA da Mestra no peso porque ela é a mais exclusiva
+    // do jogo: não sai de roll nem de caixa, só de distribuição direta.
+    // O peso ordena inventário, mercado e escolha de time.
+    event: { label: 'Evento', emoji: '🎗️', color: 0x00E5A0, weight: 5 }
 };
 
 const STATUS_COLORS = {
