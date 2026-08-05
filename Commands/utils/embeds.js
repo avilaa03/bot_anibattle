@@ -83,10 +83,35 @@ function statLines(card) {
     ].join('\n');
 }
 
-/** Nome com a primeira letra maiúscula, sem quebrar nomes já formatados. */
-function cardName(name) {
-    const text = String(name || 'Carta').trim();
-    return text.charAt(0).toUpperCase() + text.slice(1);
+/**
+ * O nome da carta como ele deve aparecer em QUALQUER tela.
+ *
+ * `Sasuke Uchiha` quando natural, `Sasuke Uchiha (+3)` quando aprimorada.
+ *
+ * ## Por que o nível entra aqui e não em cada tela
+ *
+ * O selo precisa aparecer em tudo: inventário, mercado, anúncio, batalha,
+ * troca, torneio, perfil. São mais de trinta pontos, e pendurar o nível em
+ * cada um deles é garantir que alguém esqueça de um — foi exatamente
+ * assim que o overall reconstruído por `marketValue / 10` sobreviveu em
+ * doze arquivos.
+ *
+ * Como todo mundo já passava por aqui para capitalizar o nome, este é o
+ * único lugar que precisa saber a regra.
+ *
+ * @param {object|string} carta a carta inteira (preferido) ou só o nome
+ * @param {number} [nivel] só quando o nome vem solto, sem a carta junto
+ */
+function cardName(carta, nivel) {
+    const ehObjeto = carta !== null && typeof carta === 'object';
+    const nome = ehObjeto ? (carta.name ?? carta.cardName) : carta;
+    const n = nivel ?? (ehObjeto ? carta.nivel : 0);
+
+    const texto = String(nome || 'Carta').trim();
+    const capitalizado = texto.charAt(0).toUpperCase() + texto.slice(1);
+
+    const grau = Math.max(0, Math.floor(Number(n) || 0));
+    return grau > 0 ? `${capitalizado} (+${grau})` : capitalizado;
 }
 
 /** Base de todo embed do bot: rodapé e timestamp padronizados. */

@@ -53,7 +53,7 @@ function ordenarParaBatalha(inventory) {
 /** Linha de uma carta já escolhida, com posição e atributos. */
 function linhaDoTime(card, i) {
     const meta = ui.getRarity(card.rarity);
-    return `\`${i + 1}\` ${meta.emoji} **${ui.cardName(card.name)}** — OVR ${getOvr(card)}\n`
+    return `\`${i + 1}\` ${meta.emoji} **${ui.cardName(card)}** — OVR ${getOvr(card)}\n`
         + `└ ⚔️ ${card.ATA ?? 0} · ❤️ ${card.LIF ?? 0} · 💥 ${card.POW ?? 0}`;
 }
 

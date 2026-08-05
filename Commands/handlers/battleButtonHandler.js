@@ -177,7 +177,7 @@ async function handleBattlePick(client, interaction) {
     }
 
     await interaction.followUp({
-        content: `**${ui.cardName(card.name)}** entrou no seu time! (${deckAtual.length}/3)`,
+        content: `**${ui.cardName(card)}** entrou no seu time! (${deckAtual.length}/3)`,
         flags: MessageFlags.Ephemeral
     }).catch(() => {});
 

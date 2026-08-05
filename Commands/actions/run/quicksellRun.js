@@ -18,7 +18,7 @@ function updateEmbed(card) {
     const meta = ui.getRarity(card.rarity);
 
     const embed = ui.base(meta.color)
-        .setTitle(`🪙 Vender ${ui.cardName(card.name)}?`)
+        .setTitle(`🪙 Vender ${ui.cardName(card)}?`)
         .setDescription([
             `${meta.emoji} ${ui.rarityTag(card.rarity)} • *${card.series || '—'}*`,
             '',

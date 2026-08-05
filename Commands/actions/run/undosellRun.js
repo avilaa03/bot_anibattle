@@ -136,13 +136,18 @@ async function undosellRun(client, interaction) {
                 LIF: listing.LIF ?? listing.lif ?? 0,
                 POW: listing.POW ?? listing.pow ?? 0,
                 obtainedAt: listing.obtainedAt,
+                // Cancelar o anúncio devolve a carta como ela era, com o
+                // aprimoramento. Sem isto, tirar do mercado zeraria o
+                // nível — a mesma perda que a compra tinha.
+                nivel: listing.nivel ?? 0,
+                base: listing.base,
                 marketValue: preco.marketValue,
                 valueToSell: preco.valueToSell
             };
             user.inventory.push(card);
             await user.save();
 
-            const embed = ui.success('Anúncio removido', `**${ui.cardName(listing.cardName)}** voltou para o seu inventário.`);
+            const embed = ui.success('Anúncio removido', `**${ui.cardName(listing)}** voltou para o seu inventário.`);
             await i.update({ embeds: [embed], components: [], files: [] });
             collector.stop();
         }

@@ -61,6 +61,12 @@ module.exports = async (message, selectedCard, interaction) => {
                     LIF: reserved.LIF ?? 0,
                     POW: reserved.POW ?? 0,
                     obtainedAt: reserved.obtainedAt,
+                    // O aprimoramento chega junto com a carta. Anúncios
+                    // criados antes deste campo existir vêm sem `nivel`, e
+                    // aí a carta é natural mesmo — `base` ausente faz o
+                    // /aprimorar tratar os valores atuais como naturais.
+                    nivel: reserved.nivel ?? 0,
+                    base: reserved.base,
                     marketValue: preco.marketValue,
                     valueToSell: preco.valueToSell
                 };
@@ -73,7 +79,7 @@ module.exports = async (message, selectedCard, interaction) => {
 
                 const inedita = catalogoId ? await registerDiscovery(interaction.user.id, catalogoId) : false;
 
-                const embed = ui.success('Compra realizada', `${ui.getRarity(reserved.rarity).emoji} **${ui.cardName(reserved.cardName)}** agora é sua!`)
+                const embed = ui.success('Compra realizada', `${ui.getRarity(reserved.rarity).emoji} **${ui.cardName(reserved)}** agora é sua!`)
                     .addFields(
                         { name: 'Você pagou', value: ui.coins(reserved.listingPrice), inline: true },
                         { name: 'Vendedor recebeu', value: ui.coins(sellerReceives), inline: true },

@@ -51,7 +51,7 @@ module.exports = async (client, interaction, inventoryCollect, inventoryEnd) => 
         const lista = pageCards.map((card, i) => {
             const meta = ui.getRarity(card.rarity);
             const isFav = favCard && card.cardId && card.cardId.equals(user.favCard);
-            return `\`${String(start + i + 1).padStart(2, '0')}\` ${meta.emoji} **${ui.cardName(card.name)}**${isFav ? ' ⭐' : ''}\n`
+            return `\`${String(start + i + 1).padStart(2, '0')}\` ${meta.emoji} **${ui.cardName(card)}**${isFav ? ' ⭐' : ''}\n`
                 + `└ ${card.series || '—'} • OVR **${getOvr(card)}** • ${ui.coins(card.marketValue || 0)}`;
         }).join('\n');
 

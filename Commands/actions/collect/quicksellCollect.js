@@ -41,7 +41,7 @@ async function quicksellCollect(i, indexRef, matchingCards, user, rowNavigation)
 
         const atualizado = await addBalance(user.id, value);
 
-        const embed = ui.success('Carta vendida', `**${ui.cardName(card.name)}** foi vendida por ${ui.coins(value)}.`)
+        const embed = ui.success('Carta vendida', `**${ui.cardName(card)}** foi vendida por ${ui.coins(value)}.`)
             .addFields({ name: 'Saldo atual', value: ui.coins(atualizado?.balance ?? 0), inline: true });
         await i.update({ embeds: [embed], components: [] });
         return 'collected';

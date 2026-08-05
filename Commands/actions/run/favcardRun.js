@@ -35,7 +35,7 @@ module.exports = async (client, interaction, favCardCollect, favCardEnd) => {
 
         const meta = ui.getRarity(card.rarity);
         const embed = ui.base(meta.color)
-            .setTitle(`${meta.emoji} ${ui.cardName(card.name)}`)
+            .setTitle(`${meta.emoji} ${ui.cardName(card)}`)
             .setDescription([
                 `*${card.series || '—'}*`,
                 '',

@@ -19,6 +19,22 @@ const marketSchema = new Schema({
     LIF: Number,
     POW: Number,
     obtainedAt: Date,
+    // O aprimoramento viaja com o anúncio.
+    //
+    // Sem estes dois campos, uma carta +16 vendida no mercado voltaria ao
+    // comprador como carta natural: o anúncio guarda os atributos já
+    // aprimorados, mas sem `base` o próximo `/aprimorar` recalcularia tudo
+    // tratando o valor turbinado como natural — e sem `nivel` a carta
+    // perderia o histórico que é justamente o que a torna única.
+    //
+    // É este par que permite existir mercado de carta aprimorada.
+    nivel: { type: Number, default: 0 },
+    base: {
+        overall: Number,
+        ATA: Number,
+        LIF: Number,
+        POW: Number
+    },
     marketValue: Number,
     listingPrice: Number,  // Novo campo para o preço definido pelo usuário
     status: { type: String, default: 'available' }

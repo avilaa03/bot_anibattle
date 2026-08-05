@@ -44,7 +44,7 @@ function montarEmbedResultado({ nomeX, nomeY, resultado, cor = COR_VITORIA, titu
         const quemVenceu = ganhouX ? nomeX : nomeY;
         const destaques = r.log.filter((l) => l.includes('CRÍTICO') || l.includes('VIRADA') || l.includes('esquivou'));
         const extra = destaques.length > 0 ? `\n└ ${destaques[destaques.length - 1]}` : '';
-        return `\`R${r.round}\` ${ganhouX ? '🟢' : '🔴'} **${ui.cardName(r.cardX)}** vs **${ui.cardName(r.cardY)}** → ${quemVenceu}${extra}`;
+        return `\`R${r.round}\` ${ganhouX ? '🟢' : '🔴'} **${ui.cardName(r.cardX, r.nivelX)}** vs **${ui.cardName(r.cardY, r.nivelY)}** → ${quemVenceu}${extra}`;
     }).join('\n');
 
     embed.addFields({ name: 'Rodadas', value: roundLines.slice(0, 1024), inline: false });
