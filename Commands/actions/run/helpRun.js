@@ -48,6 +48,7 @@ const PAGES = [
       { nome: '/quicksell', desc: 'Vende uma carta na hora, pelo valor base.' },
       { nome: '/loja', desc: 'Troca moedas por itens — gemas de aprimoramento e pergaminhos de proteção. A moeda gasta aqui sai de circulação.' },
       { nome: '/bolsa', desc: 'Mostra os itens que você tem.' },
+      { nome: '/desmanchar', desc: 'Transforma uma carta em gemas. Rende mais que a venda rápida em tudo — **menos na Mestra**, onde vender ainda paga melhor.' },
       { nome: '/sell', desc: 'Anuncia uma carta no mercado pelo preço que você quiser (o mercado cobra 5% de taxa na venda).' },
       { nome: '/market', desc: 'Procura e compra cartas anunciadas por outros jogadores.' },
       { nome: '/mymarket', desc: 'Seus anúncios ativos e histórico de vendas.' },
