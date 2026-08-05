@@ -136,6 +136,7 @@ async function undosellRun(client, interaction) {
                 LIF: listing.LIF ?? listing.lif ?? 0,
                 POW: listing.POW ?? listing.pow ?? 0,
                 obtainedAt: listing.obtainedAt,
+                comercializavel: listing.comercializavel !== false,
                 // Cancelar o anúncio devolve a carta como ela era, com o
                 // aprimoramento. Sem isto, tirar do mercado zeraria o
                 // nível — a mesma perda que a compra tinha.

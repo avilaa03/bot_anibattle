@@ -74,7 +74,10 @@ const GEMAS_POR_DESMANCHE = {
     rare: 3,
     'ultra rare': 10,
     legendary: 40,
-    master: 150
+    master: 150,
+    // Existe para a tabela ficar completa, mas o /desmanchar RECUSA
+    // carta de evento — ver `podeDesmanchar` em utils/negociabilidade.js.
+    event: 200
 };
 
 /**

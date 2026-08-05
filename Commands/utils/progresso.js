@@ -16,7 +16,7 @@ const progressaoDeNivel = require('./progressaoDeNivel');
  * atualizar cinco lugares diferentes — e de esquecer um.
  */
 
-const RARIDADES = ['common', 'rare', 'ultra rare', 'legendary', 'master'];
+const RARIDADES = ['common', 'rare', 'ultra rare', 'legendary', 'master', 'event'];
 
 /**
  * Monta o contexto que as condições de conquista precisam.

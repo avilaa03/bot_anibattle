@@ -23,6 +23,7 @@ const PAGES = [
       { nome: '/pokedex', desc: 'Mostra o que você já descobriu e o que ainda falta. Filtra por série, raridade, ou só o que falta.' },
       { nome: '/ficha', desc: 'Consulta a ficha completa de uma carta registrada, por nome ou número. Funciona mesmo se você já vendeu a carta.' },
       { nome: '/colecionadores', desc: 'Ranking de quem já descobriu mais cartas.' },
+      { nome: '​', desc: '🎗️ *Existe uma **Pokédex separada para cartas de evento**: use `/pokedex dex:Cartas de evento`. Elas são distribuídas em ocasiões especiais e **nunca saem de `/roll` nem de caixa** — por isso ficam fora da dex normal, que continua sendo possível de fechar 100%.*' },
       { nome: '​', desc: '💡 *Cartas não descobertas aparecem como* ⬛ **???** *— vá atrás delas no `/market` ou no `/roll`.*' },
       { nome: '​', desc: '🔢 *Cada carta tem um número fixo. O* `#042` *de hoje é o mesmo amanhã, mesmo com o catálogo crescendo.*' }
     ]
@@ -68,6 +69,7 @@ const PAGES = [
       { nome: '/undosell', desc: 'Retira um anúncio do mercado e devolve a carta ao inventário.' },
       // Sem isto, o jogador acha que o overall é o que define o preço --
       // era assim antes, e é a intuição que todo mundo traz.
+      { nome: '​', desc: '🔒 *Algumas cartas são **vinculadas**: elas são suas e não podem ser vendidas, trocadas nem transferidas. Continuam batalhando normalmente. Cartas de evento também não podem ser desmanchadas — elas não voltam a ser distribuídas.*' },
       { nome: '​', desc: '💰 *O que decide o valor de uma carta é a **raridade**, não o overall. Uma Comum excelente nunca chega perto de uma Mestra ruim; o overall só move o preço dentro da faixa da própria raridade.*' }
     ]
   },

@@ -36,8 +36,17 @@ const soma = tabela.reduce((a, f) => a + f.chance, 0);
 
 check('a soma das chances é 100', Math.abs(soma - 100) < 1e-9, `(${soma})`);
 check('nenhuma chance é negativa', tabela.every((f) => f.chance >= 0));
-check('todas as cinco raridades estão na tabela',
-    tabela.length === 5 && tabela.every((f) => sorteio.ORDEM.includes(f.raridade)));
+// As SORTEÁVEIS são cinco. A raridade `event` existe na ORDEM (para as
+// comparações de "é isto ou melhor?" funcionarem) mas NUNCA entra aqui:
+// carta de evento não sai de roll, e é isso que a torna exclusiva.
+const SORTEAVEIS = sorteio.ORDEM.filter((r) => r !== 'event');
+
+check('as cinco raridades sorteáveis estão na tabela',
+    tabela.length === 5 && tabela.every((f) => SORTEAVEIS.includes(f.raridade)));
+
+check('a raridade de EVENTO nunca entra na tabela',
+    !tabela.some((f) => f.raridade === 'event'),
+    '<- carta de evento não pode sair de roll');
 
 console.log('\n=== As taxas são as da Fase 2 ===');
 const taxa = (r) => tabela.find((f) => f.raridade === r).chance;
@@ -51,11 +60,11 @@ check('Mestra 0,1', taxa('master') === 0.1);
 console.log('\n=== A escassez é monótona ===');
 // Se duas raridades empatarem ou inverterem, a hierarquia do jogo some.
 let monotona = true;
-for (let i = 1; i < sorteio.ORDEM.length; i++) {
-    if (taxa(sorteio.ORDEM[i]) >= taxa(sorteio.ORDEM[i - 1])) monotona = false;
+for (let i = 1; i < SORTEAVEIS.length; i++) {
+    if (taxa(SORTEAVEIS[i]) >= taxa(SORTEAVEIS[i - 1])) monotona = false;
 }
 check('cada raridade é mais rara que a anterior', monotona,
-    `(${sorteio.ORDEM.map((r) => pct(taxa(r))).join(' > ')})`);
+    `(${SORTEAVEIS.map((r) => pct(taxa(r))).join(' > ')})`);
 
 console.log('\n=== A Mestra ficou mais rara que antes ===');
 // A tabela antiga era 55/28/12/4/1. O ponto da Fase 2 é a ponta da
@@ -103,13 +112,13 @@ function geradorPrevisivel(semente = 42) {
 
 const N = 200000;
 const aleatorio = geradorPrevisivel();
-const contagem = Object.fromEntries(sorteio.ORDEM.map((r) => [r, 0]));
+const contagem = Object.fromEntries(SORTEAVEIS.map((r) => [r, 0]));
 for (let i = 0; i < N; i++) {
     // Sem proteção: aqui se mede a tabela pura.
     contagem[sorteio.sortearRaridade({ aleatorio }).raridade]++;
 }
 
-for (const raridade of sorteio.ORDEM) {
+for (const raridade of SORTEAVEIS) {
     const observado = (contagem[raridade] / N) * 100;
     const esperado = taxa(raridade);
     // Margem generosa na cauda: 0,1% de 200 mil são ~200 sorteios, e a

@@ -36,6 +36,12 @@ module.exports = (interaction, card, user, marketValue, valueToSell, rollEnd, mo
                 ATA: card.ATA,
                 LIF: card.LIF,
                 POW: card.POW,
+                // CONGELA a negociabilidade no momento da entrega.
+                //
+                // Marcar a carta como vinculada no catálogo depois não
+                // afeta quem já recebeu: ninguém perde o direito de vender
+                // algo que ganhou sob outra regra.
+                comercializavel: card.comercializavel !== false,
                 obtainedAt: new Date(),
                 marketValue: marketValue,
                 valueToSell: valueToSell

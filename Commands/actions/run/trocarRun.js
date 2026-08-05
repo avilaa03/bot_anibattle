@@ -3,6 +3,7 @@ const User = require('../../utils/userSchema');
 const ui = require('../../utils/embeds');
 const trade = require('../../utils/trade');
 const valores = require('../../utils/valores');
+const negociabilidade = require('../../utils/negociabilidade');
 
 /**
  * /trocar — negociação de carta por carta.
@@ -18,9 +19,15 @@ const MAX_OPCOES = 25;
 
 const getOvr = valores.overallDaCarta;
 
-/** Melhores cartas primeiro — só cabem 25 no menu. */
+/**
+ * Melhores cartas primeiro — só cabem 25 no menu.
+ *
+ * Carta vinculada é removida aqui: se ela aparecesse no menu e fosse
+ * recusada só na confirmação, os dois lados perderiam tempo montando uma
+ * oferta que nunca ia fechar.
+ */
 function ordenar(inventario) {
-    return [...inventario].sort((a, b) => {
+    return [...inventario].filter(negociabilidade.podeNegociar).sort((a, b) => {
         const porRaridade = ui.compareRarityDesc(a.rarity, b.rarity);
         return porRaridade !== 0 ? porRaridade : getOvr(b) - getOvr(a);
     });

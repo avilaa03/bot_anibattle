@@ -181,7 +181,8 @@ async function comprar(interaction) {
 async function sortearCarta(caixa, serie) {
     const raridade = caixas.sortearRaridade(caixa);
 
-    const filtro = { rarity: raridade };
+    // Mesma trava do /roll: carta fora de rotação não sai de caixa.
+    const filtro = { rarity: raridade, distribuivel: { $ne: false } };
     if (serie) filtro.series = serie;
 
     let resultado = await Card.aggregate([{ $match: filtro }, { $sample: { size: 1 } }]);
@@ -190,10 +191,16 @@ async function sortearCarta(caixa, serie) {
     // desistir. O jogador escolheu a MIRA, então errar a raridade é menos
     // grave que entregar carta de outra série.
     if (resultado.length === 0 && serie) {
-        resultado = await Card.aggregate([{ $match: { series: serie } }, { $sample: { size: 1 } }]);
+        resultado = await Card.aggregate([
+            { $match: { series: serie, distribuivel: { $ne: false } } },
+            { $sample: { size: 1 } }
+        ]);
     }
     if (resultado.length === 0) {
-        resultado = await Card.aggregate([{ $match: { rarity: raridade } }, { $sample: { size: 1 } }]);
+        resultado = await Card.aggregate([
+            { $match: { rarity: raridade, distribuivel: { $ne: false } } },
+            { $sample: { size: 1 } }
+        ]);
     }
 
     return resultado[0] || null;
@@ -265,6 +272,8 @@ async function abrir(interaction) {
         ATA: card.ATA,
         LIF: card.LIF,
         POW: card.POW,
+        // Congela a negociabilidade — ver rollCollect.js.
+        comercializavel: card.comercializavel !== false,
         obtainedAt: new Date(),
         marketValue,
         valueToSell

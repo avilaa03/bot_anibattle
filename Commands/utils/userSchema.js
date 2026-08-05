@@ -46,6 +46,15 @@ const UserSchema = new Schema({
         obtainedAt: { type: Date, default: Date.now },
         marketValue: Number,
         valueToSell: Number,
+        // A carta pode trocar de mãos?
+        //
+        // Copiado do catálogo NO MOMENTO DA ENTREGA, e é esta cópia que
+        // manda. Marcar uma carta como vinculada no catálogo depois não
+        // afeta quem já recebeu — ninguém perde o direito de negociar algo
+        // que ganhou sob outra regra.
+        //
+        // Ausente significa negociável: é o caso de todo o acervo anterior.
+        comercializavel: { type: Boolean, default: true },
         // Nível de aprimoramento. Nunca negativo: o overall natural é o
         // chão absoluto, e carta que nunca subiu não tem o que perder.
         // Sem teto — ver `utils/aprimoramento.js`.

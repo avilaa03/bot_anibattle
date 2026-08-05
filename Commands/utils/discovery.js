@@ -36,17 +36,54 @@ async function registerDiscovery(userId, catalogCardId) {
     return (resultado.modifiedCount || resultado.nModified || 0) > 0;
 }
 
-/** Quantas cartas o jogador descobriu e quantas existem no total. */
-async function getProgress(userId) {
+/**
+ * Filtro de catálogo para cada Pokédex.
+ *
+ * ## Por que duas Pokédex, e não uma com filtro na tela
+ *
+ * A dex normal existe para ser COMPLETADA — a barra de progresso é a
+ * promessa. Se as cartas de evento entrassem nela, a barra de todo mundo
+ * cairia toda vez que você distribuísse uma carta nova, e ninguém nunca
+ * mais fecharia 100%: quem não estava no evento não tem como conseguir.
+ *
+ * Separando, cada uma mede o que dá para medir. A dex normal continua
+ * fechável; a de evento é um mural do que você participou.
+ */
+const FILTROS = {
+    normal: { rarity: { $ne: 'event' } },
+    evento: { rarity: 'event' }
+};
+
+function filtroDaDex(dex = 'normal') {
+    return FILTROS[dex] || FILTROS.normal;
+}
+
+/**
+ * Quantas cartas o jogador descobriu e quantas existem no total.
+ *
+ * @param {string} userId
+ * @param {'normal'|'evento'} dex qual Pokédex
+ */
+async function getProgress(userId, dex = 'normal') {
+    const filtro = filtroDaDex(dex);
+
     const [user, totalCatalogo] = await Promise.all([
         User.findOne({ id: userId }).select('discovered').lean(),
-        Card.countDocuments()
+        Card.countDocuments(filtro)
     ]);
 
-    const descobertas = user?.discovered?.length || 0;
+    const ids = (user?.discovered || []).map((d) => d.cardId).filter(Boolean);
+
+    // A contagem precisa passar pelo catálogo: o `discovered` do jogador
+    // guarda as duas dex misturadas, e contar o array inteiro daria o
+    // total errado nas duas.
+    const descobertas = ids.length > 0
+        ? await Card.countDocuments({ ...filtro, _id: { $in: ids } })
+        : 0;
+
     const percentual = totalCatalogo > 0 ? (descobertas / totalCatalogo) * 100 : 0;
 
-    return { descobertas, total: totalCatalogo, percentual };
+    return { descobertas, total: totalCatalogo, percentual, dex };
 }
 
 /** Set com os ids (em string) das cartas já descobertas pelo jogador. */
@@ -56,10 +93,12 @@ async function getDiscoveredSet(userId) {
 }
 
 /** Progresso por raridade, para a tela da Pokédex. */
-async function getProgressByRarity(userId) {
+async function getProgressByRarity(userId, dex = 'normal') {
+    const filtro = filtroDaDex(dex);
+
     const [descobertoSet, totaisPorRaridade] = await Promise.all([
         getDiscoveredSet(userId),
-        Card.aggregate([{ $group: { _id: '$rarity', total: { $sum: 1 } } }])
+        Card.aggregate([{ $match: filtro }, { $group: { _id: '$rarity', total: { $sum: 1 } } }])
     ]);
 
     if (descobertoSet.size === 0) {
@@ -68,7 +107,12 @@ async function getProgressByRarity(userId) {
 
     const ids = [...descobertoSet];
     const descobertasPorRaridade = await Card.aggregate([
-        { $match: { _id: { $in: ids.map((id) => new (require('mongoose').Types.ObjectId)(id)) } } },
+        {
+            $match: {
+                ...filtro,
+                _id: { $in: ids.map((id) => new (require('mongoose').Types.ObjectId)(id)) }
+            }
+        },
         { $group: { _id: '$rarity', total: { $sum: 1 } } }
     ]);
 
@@ -82,6 +126,8 @@ async function getProgressByRarity(userId) {
 }
 
 module.exports = {
+    FILTROS,
+    filtroDaDex,
     registerDiscovery,
     getProgress,
     getDiscoveredSet,

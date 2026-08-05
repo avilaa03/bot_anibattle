@@ -1,6 +1,7 @@
 const BaseSlashCommand = require('../utils/BaseSlashCommand.js');
 const { SlashCommandBuilder, MessageFlags } = require('discord.js');
 const ui = require('../utils/embeds.js');
+const negociabilidade = require('../utils/negociabilidade.js');
 const User = require('../utils/userSchema.js');
 const { quicksellRun } = require('../actions/run/quicksellRun.js');
 const quicksellCollect = require('../actions/collect/quicksellCollect.js');
@@ -20,10 +21,25 @@ module.exports = class QuickSellSlashCommand extends BaseSlashCommand {
             return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
         }
 
-        const matchingCards = user.inventory.filter(c => c.name.toLowerCase().includes(name));
+        const encontradas = user.inventory.filter(c => c.name.toLowerCase().includes(name));
+
+        if (encontradas.length === 0) {
+            const embed = ui.error('Carta não encontrada', `Nenhuma carta no seu inventário tem "${name}" no nome.`);
+            return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
+        }
+
+        // Carta vinculada nem entra na lista: melhor ela não aparecer do
+        // que aparecer e recusar no clique de confirmação, quando o
+        // jogador já decidiu.
+        const matchingCards = encontradas.filter(negociabilidade.podeNegociar);
 
         if (matchingCards.length === 0) {
-            const embed = ui.error('Carta não encontrada', `Nenhuma carta no seu inventário tem "${name}" no nome.`);
+            const embed = ui.error(
+                'Carta vinculada',
+                `${negociabilidade.motivoDeRecusa(encontradas[0])}
+
+Ela continua sua, e continua batalhando normalmente.`
+            );
             return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
         }
 

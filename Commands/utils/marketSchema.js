@@ -19,6 +19,10 @@ const marketSchema = new Schema({
     LIF: Number,
     POW: Number,
     obtainedAt: Date,
+    // Viaja com o anúncio para a cópia entregue ao comprador nascer
+    // coerente. Só carta negociável chega aqui, mas guardar o campo
+    // evita que a cópia nova saia sem ele.
+    comercializavel: { type: Boolean, default: true },
     // O aprimoramento viaja com o anúncio.
     //
     // Sem estes dois campos, uma carta +16 vendida no mercado voltaria ao

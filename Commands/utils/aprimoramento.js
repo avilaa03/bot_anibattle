@@ -60,7 +60,8 @@ const BASE_SUCESSO = {
     rare: 0.80,
     'ultra rare': 0.70,
     legendary: 0.60,
-    master: 0.50
+    master: 0.50,
+    event: 0.45
 };
 
 /** Gemas na primeira tentativa. Cresce com o nível. */
@@ -69,7 +70,8 @@ const CUSTO_BASE = {
     rare: 2,
     'ultra rare': 4,
     legendary: 8,
-    master: 15
+    master: 15,
+    event: 20
 };
 
 // A cada nível, a chance de sucesso vira 88% do que era.

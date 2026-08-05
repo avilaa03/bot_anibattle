@@ -51,6 +51,7 @@ async function sellCollect(interaction, collector, matchingCards, indexRef, list
                 baseImage: card.baseImage,
                 characterImage: card.characterImage,
                 rarity: card.rarity,
+                comercializavel: card.comercializavel !== false,
                 overall: valores.overallDaCarta(card),
                 ATA: card.ATA ?? 0,
                 LIF: card.LIF ?? 0,
