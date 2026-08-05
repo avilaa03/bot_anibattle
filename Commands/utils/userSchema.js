@@ -51,6 +51,15 @@ const UserSchema = new Schema({
         type: Number,
         default: 0
     },
+    // Itens: quantos de cada. Map e não array de propósito — ver o
+    // cabeçalho de `utils/bolsa.js`. Em resumo: `$inc` num Map cria o
+    // campo se faltar e soma se existir, numa escrita só, e não há corrida
+    // capaz de gerar duas entradas do mesmo item.
+    bolsa: {
+        type: Map,
+        of: Number,
+        default: () => new Map()
+    },
     wins: {
         type: Number,
         default: 0
