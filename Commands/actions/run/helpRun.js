@@ -54,7 +54,7 @@ const PAGES = [
       // sozinho não avisa que existe caminho melhor.
       { nome: '​', desc: '⚠️ *Tirou algo raro? **Não use a venda rápida.** Anuncie no `/market`: lá você recebe o preço cheio que outro jogador pagar, menos 5% de taxa. A venda rápida existe para repetida, não para tesouro.*' },
       { nome: '/loja', desc: 'Troca moedas por itens — gemas de aprimoramento e pergaminhos de proteção. A moeda gasta aqui sai de circulação.' },
-      { nome: '/loja roll-extra', desc: 'Adianta seu próximo `/roll` quando ele está no cooldown. **Até 3 por dia, e o preço sobe a cada um** — o jogo continua dependendo de tempo, não de saldo.' },
+      { nome: '/loja roll-extra', desc: 'Compra um 🎟️ **roll extra** e guarda na bolsa. Use quando quiser com `/roll extra:True` — ele ignora o cooldown e **não consome** seu roll grátis. Até 3 compras por dia, e o preço sobe a cada uma.' },
       { nome: '/bolsa', desc: 'Mostra os itens e as caixas que você tem guardados.' },
       { nome: '/caixa', desc: 'Caixas de cartas com chances próprias. Compre, **guarde na bolsa** e abra quando quiser — da Comum à Lendária, que tem 10% de chance de Mestra.' },
       { nome: '​', desc: '🎯 *A **Caixa Temática** deixa você escolher a série — é a única que mira, e serve para fechar uma série na Pokédex.*' },

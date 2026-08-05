@@ -134,20 +134,24 @@ async function comprar(interaction) {
 }
 
 /**
- * Adianta o próximo `/roll`.
+ * Compra um roll extra e GUARDA na bolsa.
  *
- * ## Por que zerar `lastRoll` e não dar uma "carga"
+ * ## Comprar e usar são atos separados
  *
- * O cooldown é medido contra `lastRoll`. Zerar é o efeito exato de
- * "adiantei meu próximo roll", e não cria estado novo para o `/roll`
- * consultar — quanto menos coisa o comando mais usado do bot precisa
- * saber, melhor.
+ * A primeira versão adiantava o roll na hora da compra, e por isso só
+ * deixava comprar durante o cooldown — fora dele a compra não teria
+ * efeito nenhum. O jogador não conseguia estocar para a noite, que é
+ * justamente quando quem trabalha usa o bot.
  *
- * ## Comprar fora do cooldown é recusado
+ * Agora ele é um item: compra quando tem dinheiro, usa quando tem tempo,
+ * com `/roll extra:True`. Mesmo desenho das caixas.
  *
- * Se o jogador já pode rolar, a compra não faria nada e ele perderia a
- * moeda. Recusar é a única leitura possível: ninguém compra de propósito
- * algo que não tem efeito.
+ * ## A trava econômica não mudou de lugar
+ *
+ * O limite diário é de COMPRA. Estocar 3 por dia durante dez dias e
+ * gastar 30 numa tarde não cria nenhuma carta a mais do que comprar e
+ * usar na hora — só muda quando. O que limita a entrada de cartas
+ * continua sendo quantos entram por dia.
  */
 async function comprarRollExtra(interaction) {
     const user = await User.findOne({ id: interaction.user.id });
@@ -155,17 +159,6 @@ async function comprarRollExtra(interaction) {
     if (!user) {
         return interaction.reply({
             embeds: [ui.error('Sem perfil', 'Use `/roll` ou `/daily` uma vez antes.')],
-            flags: MessageFlags.Ephemeral
-        });
-    }
-
-    const perks = getPerks(user);
-    const cooldown = Math.round(ROLL_COOLDOWN_MS * perks.rollCooldownMultiplier);
-    const falta = (Number(user.lastRoll) || 0) + cooldown - Date.now();
-
-    if (falta <= 0) {
-        return interaction.reply({
-            embeds: [ui.neutral('Seu roll já está pronto', 'Não precisa comprar nada — é só usar `/roll`.')],
             flags: MessageFlags.Ephemeral
         });
     }
@@ -208,37 +201,37 @@ async function comprarRollExtra(interaction) {
         });
     }
 
-    // UM cooldown atrás, não zero.
-    //
-    // `lastRoll = 0` significa "nunca rolou", e quem nunca rolou recebe o
-    // teto CHEIO de cargas. Enquanto o teto era 1 isso não fazia diferença;
-    // com as cargas por nível, um roll extra comprado no nível 30 daria
-    // quatro rolls de uma vez. Recuar exatamente um cooldown entrega
-    // exatamente um roll, que é o que foi vendido.
-    await User.updateOne(
-        { id: interaction.user.id },
-        { $set: { lastRoll: Date.now() - cooldown } }
-    );
+    // A moeda já saiu. Se a entrega falhar, ela PRECISA voltar.
+    let guardados;
+    try {
+        guardados = await bolsa.adicionar(interaction.user.id, rollExtra.CHAVE_BOLSA, 1);
+    } catch (err) {
+        await addBalance(interaction.user.id, preco).catch(() => {});
+        await limiteDiario.devolver(interaction.user.id, rollExtra.GRUPO, rollExtra.CHAVE);
+        throw err;
+    }
 
     transacoes.registrar({
         userId: interaction.user.id,
         tipo: 'roll_extra',
+        itens: [{ chave: rollExtra.CHAVE_BOLSA, quantidade: 1 }],
         moedaDelta: -preco,
         saldoDepois: debitado.balance,
-        contexto: { compraDoDia: usados + 1, esperaCortada: falta }
+        contexto: { compraDoDia: usados + 1 }
     });
 
     const proximo = rollExtra.precoDoProximo(usados + 1);
 
     return interaction.reply({
-        embeds: [ui.success('Roll liberado', [
-            `Você cortou ${ui.duration(falta)} de espera por ${ui.coins(preco)}.`,
+        embeds: [ui.success('Roll extra guardado', [
+            `🎟️ **Roll extra** — pagou ${ui.coins(preco)}`,
             `Saldo: ${ui.coins(debitado.balance)}`,
+            `Na bolsa agora: **${ui.number(guardados)}**`,
             '',
-            'Use `/roll` agora.',
+            'Use com `/roll extra:True` quando quiser — ele ignora o cooldown.',
             '',
             proximo === null
-                ? '*Foi o último de hoje.*'
+                ? '*Foi o último de hoje. O limite zera à meia-noite (UTC).*'
                 : `*O próximo de hoje custa ${ui.coins(proximo)} — o preço sobe a cada compra.*`
         ].join('\n'))],
         flags: MessageFlags.Ephemeral
