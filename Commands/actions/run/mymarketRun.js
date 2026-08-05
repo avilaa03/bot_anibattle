@@ -19,7 +19,7 @@ async function mymarketRun(client, interaction) {
         // Antes esta linha mostrava listing.marketValue (o valor base da
         // carta), não o preço que o jogador realmente pediu no anúncio.
         const preco = listing.listingPrice ?? listing.marketValue ?? 0;
-        return `${meta.emoji} **${ui.cardName(listing.cardName)}** — ${ui.coins(preco)}`;
+        return `${meta.emoji} **${ui.cardName(listing)}** — ${ui.coins(preco)}`;
     };
 
     const totalAVenda = disponiveis.reduce((sum, l) => sum + (l.listingPrice ?? l.marketValue ?? 0), 0);

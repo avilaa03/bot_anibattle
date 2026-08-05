@@ -147,7 +147,7 @@ async function undosellRun(client, interaction) {
             user.inventory.push(card);
             await user.save();
 
-            const embed = ui.success('Anúncio removido', `**${ui.cardName(listing.cardName)}** voltou para o seu inventário.`);
+            const embed = ui.success('Anúncio removido', `**${ui.cardName(listing)}** voltou para o seu inventário.`);
             await i.update({ embeds: [embed], components: [], files: [] });
             collector.stop();
         }

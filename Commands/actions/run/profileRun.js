@@ -118,7 +118,7 @@ async function profileRun(client, interaction) {
             {
                 name: '🏆 Melhor carta',
                 value: highestOvrCard
-                    ? `${ui.getRarity(highestOvrCard.rarity).emoji} **${ui.cardName(highestOvrCard.name)}**\nOVR **${getCardOvr(highestOvrCard)}**`
+                    ? `${ui.getRarity(highestOvrCard.rarity).emoji} **${ui.cardName(highestOvrCard)}**\nOVR **${getCardOvr(highestOvrCard)}**`
                     : '—',
                 inline: true
             }
@@ -132,7 +132,7 @@ async function profileRun(client, interaction) {
     }
 
     if (favCard) {
-        embed.setDescription(`⭐ Carta favorita: ${ui.getRarity(favCard.rarity).emoji} **${ui.cardName(favCard.name)}** — *${favCard.series || '—'}*`);
+        embed.setDescription(`⭐ Carta favorita: ${ui.getRarity(favCard.rarity).emoji} **${ui.cardName(favCard)}** — *${favCard.series || '—'}*`);
         if (favCard.characterImage || favCard.baseImage) {
             embed.setThumbnail(favCard.characterImage || favCard.baseImage);
         }

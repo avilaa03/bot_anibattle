@@ -221,5 +221,49 @@ check('nível 0 não tem selo', ap.selo(0) === '');
 check('nível 7 vira "+7"', ap.selo(7) === '+7');
 check('nível negativo não vira selo', ap.selo(-3) === '');
 
+// ---------------------------------------------------------------------
+console.log('\n=== O SELO NO NOME ===');
+//
+// "Sasuke Uchiha (+3)" precisa aparecer em TODA tela onde a carta é vista
+// — inventário, mercado, anúncio, batalha, troca, torneio. São mais de
+// trinta pontos, e por isso a regra mora dentro do `ui.cardName`: pendurar
+// o nível em cada tela é garantir que alguém esqueça de uma.
+
+const ui = require(ROOT + 'embeds.js');
+
+check('carta natural sai sem selo',
+    ui.cardName({ name: 'Sasuke Uchiha', nivel: 0 }) === 'Sasuke Uchiha');
+check('carta aprimorada ganha o selo',
+    ui.cardName({ name: 'Sasuke Uchiha', nivel: 3 }) === 'Sasuke Uchiha (+3)');
+check('anúncio do mercado usa cardName e também ganha selo',
+    ui.cardName({ cardName: 'Sasuke Uchiha', nivel: 3 }) === 'Sasuke Uchiha (+3)',
+    '<- o anúncio guarda o nome em outro campo');
+check('nome solto + nível continua funcionando (narração da batalha)',
+    ui.cardName('Sasuke Uchiha', 7) === 'Sasuke Uchiha (+7)');
+check('nome solto sem nível não inventa selo',
+    ui.cardName('Sasuke Uchiha') === 'Sasuke Uchiha');
+check('continua capitalizando como antes',
+    ui.cardName('sasuke uchiha') === 'Sasuke uchiha');
+check('nível negativo não vira selo',
+    ui.cardName({ name: 'Sasuke', nivel: -2 }) === 'Sasuke');
+check('carta nula não quebra', ui.cardName(null) === 'Carta');
+
+// O motor de combate não pode importar a camada de apresentação (há teste
+// de convenção), então ele repete a regra — e as duas têm que concordar.
+const engine = require(ROOT + 'battleEngine.js');
+const lutador = (nivel) => ({ name: 'Sasuke Uchiha', nivel, rarity: 'master', ATA: 80, LIF: 90, POW: 85 });
+const luta = engine.runBattle
+    ? engine.runBattle([lutador(3), lutador(0), lutador(0)], [lutador(0), lutador(0), lutador(0)])
+    : null;
+if (luta) {
+    check('a batalha carrega o nível nos confrontos',
+        luta.rounds[0].nivelX === 3 && luta.rounds[0].nivelY === 0);
+    check('e o log do combate mostra o selo',
+        luta.rounds[0].log.some((l) => l.includes('Sasuke Uchiha (+3)')),
+        '<- o adversário precisa saber contra o que luta');
+} else {
+    check('runBattle exportado para o teste do selo', false, '<- API mudou');
+}
+
 console.log(falhas === 0 ? '\n*** TODOS OS TESTES DE APRIMORAMENTO PASSARAM ***' : `\n*** ${falhas} FALHA(S) ***`);
 process.exit(falhas ? 1 : 0);

@@ -45,7 +45,7 @@ async function desmancharCollect(i, indexRef, matchingCards, user, rowNavigation
         } catch (err) {
             const embed = ui.error(
                 'A carta foi desmanchada, mas a gema não entrou',
-                `**${ui.cardName(card.name)}** valia **${ui.number(gemas)}** gema(s). Fale com a staff informando este erro.`
+                `**${ui.cardName(card)}** valia **${ui.number(gemas)}** gema(s). Fale com a staff informando este erro.`
             );
             await i.update({ embeds: [embed], components: [] });
             throw err;
@@ -53,7 +53,7 @@ async function desmancharCollect(i, indexRef, matchingCards, user, rowNavigation
 
         const item = itens.getItem('gema');
         const embed = ui.success('Carta desmanchada', [
-            `**${ui.cardName(card.name)}** virou ${item.emoji} **${ui.number(gemas)} ${gemas === 1 ? 'gema' : 'gemas'}**.`,
+            `**${ui.cardName(card)}** virou ${item.emoji} **${ui.number(gemas)} ${gemas === 1 ? 'gema' : 'gemas'}**.`,
             '',
             'A descoberta continua registrada na sua Pokédex.'
         ].join('\n'))

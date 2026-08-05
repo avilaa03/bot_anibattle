@@ -97,14 +97,27 @@ function resolveAttack(atacante, defensor, vidaPercentualAtacante, rng) {
     };
 }
 
+/**
+ * O nome da carta com o selo de aprimoramento, para o log do combate.
+ *
+ * Repete a regra de `embeds.cardName` de propósito: o motor de combate não
+ * importa a camada de apresentação (há teste de convenção sobre isso), e
+ * o narrador não deve chamar de "Sasuke Uchiha" uma carta que está lutando
+ * com os atributos de um "Sasuke Uchiha (+3)".
+ */
+function nomeDaCarta(card) {
+    const nivel = Math.max(0, Math.floor(Number(card?.nivel) || 0));
+    return nivel > 0 ? `${card.name} (+${nivel})` : card.name;
+}
+
 function descreverGolpe(atacante, defensor, resultado, vidaRestante) {
     if (resultado.dodged) {
-        return `💨 **${defensor.name}** esquivou do ataque de **${atacante.name}**!`;
+        return `💨 **${nomeDaCarta(defensor)}** esquivou do ataque de **${nomeDaCarta(atacante)}**!`;
     }
     let prefixo = '';
     if (resultado.desperate) prefixo = '🔥 **VIRADA!** ';
     else if (resultado.crit) prefixo = '💥 **CRÍTICO!** ';
-    return `${prefixo}**${atacante.name}** causou **${resultado.damage}** de dano — **${defensor.name}** ficou com **${Math.max(0, vidaRestante)}** de vida.`;
+    return `${prefixo}**${nomeDaCarta(atacante)}** causou **${resultado.damage}** de dano — **${nomeDaCarta(defensor)}** ficou com **${Math.max(0, vidaRestante)}** de vida.`;
 }
 
 /** Duelo 1v1 entre duas cartas. Retorna vencedor ('A' ou 'B') e o log. */
@@ -136,7 +149,7 @@ function runRound(cardA, cardB, roundIndex, rng = Math.random) {
     };
 
     let vezDeA = rng() < firstStrikeChance(cardA.ATA ?? 0, cardB.ATA ?? 0);
-    const abertura = `⚡ **${vezDeA ? cardA.name : cardB.name}** foi mais rápido e atacou primeiro.`;
+    const abertura = `⚡ **${nomeDaCarta(vezDeA ? cardA : cardB)}** foi mais rápido e atacou primeiro.`;
     log.push(abertura);
     registrar('inicio', { texto: abertura, primeiro: vezDeA ? 'A' : 'B' });
 
@@ -161,14 +174,14 @@ function runRound(cardA, cardB, roundIndex, rng = Math.random) {
         });
 
         if (lifeB <= 0) {
-            const fim = `🏆 **${cardA.name}** venceu o confronto!`;
+            const fim = `🏆 **${nomeDaCarta(cardA)}** venceu o confronto!`;
             log.push(fim);
             lifeB = 0;
             registrar('fim', { texto: fim, vencedor: 'A' });
             return { winner: 'A', loser: 'B', log, eventos, lifeA, lifeB: 0 };
         }
         if (lifeA <= 0) {
-            const fim = `🏆 **${cardB.name}** venceu o confronto!`;
+            const fim = `🏆 **${nomeDaCarta(cardB)}** venceu o confronto!`;
             log.push(fim);
             lifeA = 0;
             registrar('fim', { texto: fim, vencedor: 'B' });
@@ -213,6 +226,8 @@ function runBattle(deckX, deckY, rng = Math.random) {
             round: i + 1,
             cardX: deckX[i].name,
             cardY: deckY[i].name,
+            nivelX: deckX[i].nivel ?? 0,
+            nivelY: deckY[i].nivel ?? 0,
             winner: result.winner,
             log: result.log,
             // A transmissão ao vivo lê daqui. Os nomes vão junto porque o
@@ -221,7 +236,13 @@ function runBattle(deckX, deckY, rng = Math.random) {
             nomeA: deckX[i].name,
             nomeB: deckY[i].name,
             raridadeA: deckX[i].rarity,
-            raridadeB: deckY[i].rarity
+            raridadeB: deckY[i].rarity,
+            // O nível vai junto porque a narração e o placar mostram o
+            // nome da carta, e uma carta aprimorada tem que se anunciar
+            // como tal em toda tela — inclusive nas do adversário, que
+            // precisa saber contra o que está lutando.
+            nivelA: deckX[i].nivel ?? 0,
+            nivelB: deckY[i].nivel ?? 0
         });
         if (result.winner === 'A') winsX++;
         else winsY++;

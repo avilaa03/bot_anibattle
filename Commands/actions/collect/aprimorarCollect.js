@@ -35,7 +35,7 @@ async function gravar(userId, card, resultado) {
 
 function embedDoResultado(card, desfecho, protegido, antes, resultado, gemasRestantes) {
     const meta = ui.getRarity(card.rarity);
-    const nome = ui.cardName(card.name);
+    const nome = ui.cardName(card);
 
     const detalhes = [
         `Overall **${antes.overall}** → **${resultado.overall}**`,
@@ -130,7 +130,7 @@ async function aprimorarCollect(i, indexRef, matchingCards, user, rowNavigation)
         await i.update({
             embeds: [ui.error(
                 'A carta saiu do seu inventário',
-                `As **${ui.number(custo)}** gema(s) foram gastas, mas **${ui.cardName(card.name)}** não está mais lá. Fale com a staff informando este erro.`
+                `As **${ui.number(custo)}** gema(s) foram gastas, mas **${ui.cardName(card)}** não está mais lá. Fale com a staff informando este erro.`
             )],
             components: []
         });

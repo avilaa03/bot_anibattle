@@ -79,7 +79,7 @@ module.exports = async (message, selectedCard, interaction) => {
 
                 const inedita = catalogoId ? await registerDiscovery(interaction.user.id, catalogoId) : false;
 
-                const embed = ui.success('Compra realizada', `${ui.getRarity(reserved.rarity).emoji} **${ui.cardName(reserved.cardName)}** agora é sua!`)
+                const embed = ui.success('Compra realizada', `${ui.getRarity(reserved.rarity).emoji} **${ui.cardName(reserved)}** agora é sua!`)
                     .addFields(
                         { name: 'Você pagou', value: ui.coins(reserved.listingPrice), inline: true },
                         { name: 'Vendedor recebeu', value: ui.coins(sellerReceives), inline: true },

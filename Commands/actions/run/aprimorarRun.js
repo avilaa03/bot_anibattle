@@ -36,8 +36,7 @@ function montarEmbed(card, user) {
     const atual = aprimoramento.statsDoNivel(base, nivel);
     const proximo = aprimoramento.statsDoNivel(base, nivel + 1);
 
-    const selo = aprimoramento.selo(nivel);
-    const titulo = `${ui.cardName(card.name)}${selo ? ` **${selo}**` : ''}`;
+    const titulo = ui.cardName(card);
 
     const linhas = [
         `${meta.emoji} ${ui.rarityTag(card.rarity)} • *${card.series || '—'}*`,

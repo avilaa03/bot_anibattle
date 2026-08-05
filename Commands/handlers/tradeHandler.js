@@ -170,7 +170,7 @@ async function handleTrade(client, interaction) {
 
         const t2 = resultado.trade;
         const resumo = (cartas) => cartas.length > 0
-            ? cartas.map((c) => `${ui.getRarity(c.rarity).emoji} **${ui.cardName(c.name)}**`).join('\n')
+            ? cartas.map((c) => `${ui.getRarity(c.rarity).emoji} **${ui.cardName(c)}**`).join('\n')
             : '*(nada)*';
 
         const sucesso = ui.success('Troca concluída!', 'As cartas trocaram de dono.')

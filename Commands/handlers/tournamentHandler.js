@@ -81,7 +81,7 @@ async function handleTournament(client, interaction) {
         }
 
         const deckTexto = resultado.deck
-            .map((c) => `${ui.getRarity(c.rarity).emoji} **${ui.cardName(c.name)}** — OVR ${c.overall}`)
+            .map((c) => `${ui.getRarity(c.rarity).emoji} **${ui.cardName(c)}** — OVR ${c.overall}`)
             .join('\n');
 
         await interaction.update({

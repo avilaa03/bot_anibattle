@@ -41,7 +41,7 @@ async function showRun(client, interaction) {
 
         const embed = ui.base(meta.color)
             .setAuthor({ name: `Coleção de ${interaction.user.username}`, iconURL: interaction.user.displayAvatarURL() })
-            .setTitle(`${meta.emoji} ${ui.cardName(card.name)}${ui.nivelTag(card.nivel)}`)
+            .setTitle(`${meta.emoji} ${ui.cardName(card)}`)
             .setDescription([
                 `*${card.series || '—'}*`,
                 '',

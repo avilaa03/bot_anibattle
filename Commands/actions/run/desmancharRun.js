@@ -69,7 +69,7 @@ function updateEmbed(card, copias = 1) {
     linhas.push('*A Pokédex guarda a descoberta — ela continua registrada.*');
 
     const embed = ui.base(meta.color)
-        .setTitle(`🔨 Desmanchar ${ui.cardName(card.name)}?`)
+        .setTitle(`🔨 Desmanchar ${ui.cardName(card)}?`)
         .setDescription(linhas.join('\n'));
 
     if (card.characterImage) embed.setThumbnail(card.characterImage);

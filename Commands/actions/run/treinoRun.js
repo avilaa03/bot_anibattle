@@ -59,7 +59,7 @@ const ultimoTreino = new Map();
 function campoTimeRival(sessao) {
     const linhas = sessao.timeRival.map((c, i) => {
         const meta = ui.getRarity(c.rarity);
-        return `\`${i + 1}\` ${meta.emoji} **${ui.cardName(c.name)}** — OVR ${c.overall ?? 0}\n`
+        return `\`${i + 1}\` ${meta.emoji} **${ui.cardName(c)}** — OVR ${c.overall ?? 0}\n`
             + `└ ⚔️ ${c.ATA ?? 0} · ❤️ ${c.LIF ?? 0} · 💥 ${c.POW ?? 0}`;
     }).join('\n');
 

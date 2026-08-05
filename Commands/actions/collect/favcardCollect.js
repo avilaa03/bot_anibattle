@@ -20,7 +20,7 @@ module.exports = (interaction, message, indexRef, matchingCards, user, favCardEn
             const escolhida = matchingCards[indexRef.currentIndex];
             user.favCard = escolhida.cardId;
             await user.save();
-            const embed = ui.success('Carta favorita definida', `⭐ ${ui.getRarity(escolhida.rarity).emoji} **${ui.cardName(escolhida.name)}** agora aparece no seu \`/profile\`.`);
+            const embed = ui.success('Carta favorita definida', `⭐ ${ui.getRarity(escolhida.rarity).emoji} **${ui.cardName(escolhida)}** agora aparece no seu \`/profile\`.`);
             if (escolhida.characterImage) embed.setThumbnail(escolhida.characterImage);
             await i.update({ embeds: [embed], components: [] });
             collector.stop('collected');

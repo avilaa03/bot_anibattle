@@ -68,7 +68,7 @@ async function sellCollect(interaction, collector, matchingCards, indexRef, list
             await listing.save();
 
             const { tax, sellerReceives } = applyMarketTax(listingPrice);
-            const successEmbed = ui.success('Carta anunciada', `${ui.getRarity(card.rarity).emoji} **${ui.cardName(card.name)}** está à venda por ${ui.coins(listingPrice)}.`)
+            const successEmbed = ui.success('Carta anunciada', `${ui.getRarity(card.rarity).emoji} **${ui.cardName(card)}** está à venda por ${ui.coins(listingPrice)}.`)
                 .addFields(
                     { name: 'Você recebe na venda', value: ui.coins(sellerReceives), inline: true },
                     { name: `Taxa do mercado (${Math.round(MARKET_TAX_RATE * 100)}%)`, value: ui.coins(tax), inline: true }

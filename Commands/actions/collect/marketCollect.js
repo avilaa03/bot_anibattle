@@ -49,7 +49,7 @@ module.exports = (interaction, embedMessage, currentPage, listings, cardsPerPage
         const confirmEmbed = ui.base(meta.color)
             .setTitle('🛒 Confirmar compra')
             .setDescription([
-                `${meta.emoji} **${ui.cardName(selectedCard.cardName)}** — OVR **${ovr}**`,
+                `${meta.emoji} **${ui.cardName(selectedCard)}** — OVR **${ovr}**`,
                 `*${selectedCard.series || '—'}*`,
                 '',
                 ui.statLines(selectedCard),
@@ -90,7 +90,7 @@ function buildSelectMenu(listings, page, cardsPerPage) {
         const meta = ui.getRarity(listing.rarity);
         const ovr = valores.overallDaCarta(listing);
         return {
-            label: `${ui.cardName(listing.cardName)} · OVR ${ovr}`.slice(0, 100),
+            label: `${ui.cardName(listing)} · OVR ${ovr}`.slice(0, 100),
             description: `${meta.label} • ${ui.number(listing.listingPrice)} moedas • ${listing.series || '—'}`.slice(0, 100),
             value: String(listing._id),
             emoji: meta.emoji

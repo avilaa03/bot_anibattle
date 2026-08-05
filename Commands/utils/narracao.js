@@ -111,9 +111,9 @@ function montarQuadro({ nomeX, nomeY, rounds, eventos, ate, wager = 0 }) {
         .setTitle(`⚔️ ${nomeX}  ${vitoriasX} — ${vitoriasY}  ${nomeY}`)
         .setDescription(
             `**Round ${atual.round}** de ${rounds.length}   ${placarDosRounds(rounds, atual.round)}\n\n`
-            + `${ui.getRarity(round.raridadeA).emoji} **${ui.cardName(round.nomeA)}**\n`
+            + `${ui.getRarity(round.raridadeA).emoji} **${ui.cardName(round.nomeA, round.nivelA)}**\n`
             + `${barra(atual.vidaA, atual.maxA)}  \`${atual.vidaA}/${atual.maxA}\`\n\n`
-            + `${ui.getRarity(round.raridadeB).emoji} **${ui.cardName(round.nomeB)}**\n`
+            + `${ui.getRarity(round.raridadeB).emoji} **${ui.cardName(round.nomeB, round.nivelB)}**\n`
             + `${barra(atual.vidaB, atual.maxB)}  \`${atual.vidaB}/${atual.maxB}\``
         );
 

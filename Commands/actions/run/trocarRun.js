@@ -30,7 +30,7 @@ function listarOferta(cartas) {
     if (cartas.length === 0) return '*(nada oferecido ainda)*';
     return cartas.map((c) => {
         const meta = ui.getRarity(c.rarity);
-        return `${meta.emoji} **${ui.cardName(c.name)}** — OVR ${c.overall ?? 0} • ${ui.coins(c.marketValue || 0)}`;
+        return `${meta.emoji} **${ui.cardName(c)}** — OVR ${c.overall ?? 0} • ${ui.coins(c.marketValue || 0)}`;
     }).join('\n');
 }
 
@@ -97,7 +97,7 @@ function montarComponentes(t, inventarios) {
         const opcoes = inventario.map((carta) => {
             const meta = ui.getRarity(carta.rarity);
             return {
-                label: `${ui.cardName(carta.name)} · OVR ${getOvr(carta)}`.slice(0, 100),
+                label: `${ui.cardName(carta)} · OVR ${getOvr(carta)}`.slice(0, 100),
                 description: `${meta.label} • ${carta.series || '—'}`.slice(0, 100),
                 value: String(carta._id),
                 emoji: meta.emoji,
