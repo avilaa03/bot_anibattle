@@ -2,6 +2,7 @@ const BaseSlashCommand = require('../utils/BaseSlashCommand.js');
 const { SlashCommandBuilder } = require('discord.js');
 const lojaRun = require('../actions/run/lojaRun.js');
 const itens = require('../utils/itens.js');
+const rollExtra = require('../utils/rollExtra.js');
 
 module.exports = class LojaSlashCommand extends BaseSlashCommand {
     constructor() {
@@ -37,6 +38,11 @@ module.exports = class LojaSlashCommand extends BaseSlashCommand {
                     .setDescription('Quantos (padrão: 1)')
                     .setMinValue(1)
                     .setMaxValue(1000)))
+            .addSubcommand((sub) => sub
+                .setName('roll-extra')
+                .setDescription(
+                    `Adianta seu próximo /roll (até ${rollExtra.LIMITE_DIARIO} por dia, e o preço sobe a cada um)`
+                ))
             .toJSON();
     }
 };

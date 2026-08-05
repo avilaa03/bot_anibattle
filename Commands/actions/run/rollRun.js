@@ -215,3 +215,9 @@ module.exports = async (client, interaction, rollCollect, rollEnd) => {
         }
     });
 };
+
+// O roll extra da /loja precisa saber o mesmo cooldown para calcular
+// quanto de espera está sendo cortado. Exportar daqui mantém uma fonte
+// só — reler o .env do outro lado manteria os dois iguais por disciplina,
+// e disciplina é o que falha primeiro.
+module.exports.ROLL_COOLDOWN_MS = ROLL_COOLDOWN_MS;
