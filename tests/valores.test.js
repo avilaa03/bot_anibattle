@@ -133,8 +133,24 @@ console.log('\n=== NENHUM COMANDO RECONSTRÓI O OVERALL PELO VALOR ===');
 //
 // `valores.js` é o único lugar onde a conta pode aparecer, porque é lá
 // que ela vive isolada, em `overallLegado()`, com nome que denuncia o uso.
+//
+// ## Os dois furos que esta varredura já teve
+//
+// Ela existe desde a migração de valores e mesmo assim deixou passar dois
+// casos, que só apareceram numa releitura:
+//
+// 1. `scripts/` estava em IGNORAR. Mas `grantCards.js` GRAVA a cópia no
+//    inventário: era o único lugar do repositório capaz de criar carta
+//    com preço velho depois da migração, e justamente o que a varredura
+//    não olhava.
+// 2. O padrão exigia `overall` colado no `*`, e o código real escreve
+//    `(carta.overall ?? 0) * 10`. `fichaRun.js` morava dentro de
+//    `Commands/`, era lido a cada varredura e passava limpo.
+//
+// Daí a janela de 20 caracteres entre o campo e o operador: o que se quer
+// proibir é a CONTA, não uma forma específica de escrevê-la.
 
-const IGNORAR = new Set(['node_modules', '.git', '.next', 'preview', 'tests', 'scripts']);
+const IGNORAR = new Set(['node_modules', '.git', '.next', 'preview', 'tests']);
 
 function listarArquivos(dir, acumulado = []) {
     for (const entrada of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -151,19 +167,42 @@ function semComentarios(src) {
     return src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
 }
 
+// O `[^;\n]{0,20}` cobre o `?? 0)` e afins entre o campo e o operador.
+const PROIBIDOS = [
+    // Overall reconstruído pelo preço, ou preço reconstruído pelo overall.
+    /marketValue[^;\n]{0,20}\/\s*10\b/,
+    /overall[^;\n]{0,20}\*\s*10\b/,
+    // A venda rápida era metade do valor. Hoje a fatia depende da
+    // raridade (Comum 50% -> Mestra 15%), e é `valores.js` quem sabe.
+    /marketValue[^;\n]{0,20}\/\s*2\b/
+];
+
 const PERMITIDO = path.join(RAIZ, 'Commands', 'utils', 'valores.js');
 const suspeitos = [];
 
-for (const arquivo of listarArquivos(path.join(RAIZ, 'Commands'))) {
-    if (arquivo === PERMITIDO) continue;
-    const codigo = semComentarios(fs.readFileSync(arquivo, 'utf8'));
-    if (/marketValue\s*\/\s*10/.test(codigo) || /overall\s*\*\s*10\b/.test(codigo)) {
-        suspeitos.push(path.relative(RAIZ, arquivo));
+for (const dir of ['Commands', 'scripts']) {
+    for (const arquivo of listarArquivos(path.join(RAIZ, dir))) {
+        if (arquivo === PERMITIDO) continue;
+        const codigo = semComentarios(fs.readFileSync(arquivo, 'utf8'));
+        if (PROIBIDOS.some((padrao) => padrao.test(codigo))) {
+            suspeitos.push(path.relative(RAIZ, arquivo));
+        }
     }
 }
 
-check('nenhum arquivo deriva overall de marketValue', suspeitos.length === 0,
+check('nenhum arquivo deriva overall ou preço pela fórmula antiga', suspeitos.length === 0,
     suspeitos.length ? `\n     ${suspeitos.join('\n     ')}` : '<- o bug silencioso');
+
+// A varredura precisa provar que pega o que deixou passar antes — senão
+// ela volta a ser uma linha verde que não olha nada.
+const REGRESSOES = [
+    'const marketValue = (carta.overall ?? 0) * 10;',
+    'value: ui.coins((carta.overall ?? 0) * 10),',
+    'valueToSell: Math.floor(marketValue / 2)',
+    'const ovr = Math.round(marketValue / 10);'
+];
+check('a varredura pega as formas que já escaparam',
+    REGRESSOES.every((linha) => PROIBIDOS.some((padrao) => padrao.test(linha))));
 
 console.log(falhas === 0 ? '\n*** TODOS OS TESTES DE VALORES PASSARAM ***' : `\n*** ${falhas} FALHA(S) ***`);
 process.exit(falhas ? 1 : 0);
