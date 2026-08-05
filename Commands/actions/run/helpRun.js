@@ -45,7 +45,14 @@ const PAGES = [
       { nome: '/balance', desc: 'Consulta o saldo e o patrimônio de alguém.' },
       { nome: '/magnata', desc: 'Ranking dos 10 jogadores mais ricos.' },
       { nome: '/give', desc: 'Transfere moedas para outro jogador.' },
-      { nome: '/quicksell', desc: 'Vende uma carta na hora, pelo valor base.' },
+      { nome: '/quicksell', desc: 'Vende uma carta na hora, direto para o bot. **Paga bem em carta comum e mal em carta rara** — de metade do valor na Comum a só 15% na Mestra.' },
+      // O erro mais caro que um jogador pode cometer hoje.
+      //
+      // A venda rápida passou a pagar cada vez menos conforme a raridade
+      // sobe, e quem tirar uma Mestra e clicar em "vender" sem saber disso
+      // perde 85% do valor num clique. O bot mostra o número, mas número
+      // sozinho não avisa que existe caminho melhor.
+      { nome: '​', desc: '⚠️ *Tirou algo raro? **Não use a venda rápida.** Anuncie no `/market`: lá você recebe o preço cheio que outro jogador pagar, menos 5% de taxa. A venda rápida existe para repetida, não para tesouro.*' },
       { nome: '/loja', desc: 'Troca moedas por itens — gemas de aprimoramento e pergaminhos de proteção. A moeda gasta aqui sai de circulação.' },
       { nome: '/bolsa', desc: 'Mostra os itens que você tem.' },
       { nome: '/desmanchar', desc: 'Transforma uma carta em gemas. Rende mais que a venda rápida em tudo — **menos na Mestra**, onde vender ainda paga melhor.' },
@@ -54,7 +61,10 @@ const PAGES = [
       { nome: '/sell', desc: 'Anuncia uma carta no mercado pelo preço que você quiser (o mercado cobra 5% de taxa na venda).' },
       { nome: '/market', desc: 'Procura e compra cartas anunciadas por outros jogadores.' },
       { nome: '/mymarket', desc: 'Seus anúncios ativos e histórico de vendas.' },
-      { nome: '/undosell', desc: 'Retira um anúncio do mercado e devolve a carta ao inventário.' }
+      { nome: '/undosell', desc: 'Retira um anúncio do mercado e devolve a carta ao inventário.' },
+      // Sem isto, o jogador acha que o overall é o que define o preço --
+      // era assim antes, e é a intuição que todo mundo traz.
+      { nome: '​', desc: '💰 *O que decide o valor de uma carta é a **raridade**, não o overall. Uma Comum excelente nunca chega perto de uma Mestra ruim; o overall só move o preço dentro da faixa da própria raridade.*' }
     ]
   },
   {
