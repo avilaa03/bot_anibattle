@@ -46,13 +46,55 @@ async function main() {
     // fôssemos pelo Mongoose, ele já teria preenchido os `_id` em memória
     // e o filtro nunca acharia nada.
     const colecao = mongoose.connection.collection('users');
+
+    // ⚠️ `$elemMatch`, e não `'inventory._id': { $exists: false }`.
+    //
+    // Este script ficou meses dizendo "nenhuma carta sem `_id`" enquanto
+    // havia oito, e o motivo é uma sutileza do Mongo que parece bug do
+    // banco mas é semântica documentada:
+    //
+    //   'inventory._id': { $exists: true }   casa se ALGUM elemento tem
+    //   'inventory._id': { $exists: false }  casa se NENHUM elemento tem
+    //
+    // Ou seja: a consulta antiga só encontrava jogadores cujo inventário
+    // INTEIRO estava quebrado. Quem tinha 3 cartas ruins entre 21 boas
+    // passava batido — as 18 boas faziam o caminho "existir", e a
+    // negação dava falso.
+    //
+    // E o pior é o silêncio: o script terminava com "✓ Nada a fazer",
+    // que é indistinguível de estar tudo certo.
+    //
+    // `$elemMatch` pergunta por ELEMENTO, que é o que sempre se quis.
     const afetados = await colecao.find(
-        { 'inventory._id': { $exists: false }, 'inventory.0': { $exists: true } },
+        { inventory: { $elemMatch: { _id: { $exists: false } } } },
         { projection: { id: 1, inventory: 1 } }
     ).toArray();
 
     if (afetados.length === 0) {
-        console.log('\n✓ Nenhuma carta sem `_id`. Nada a fazer.');
+        // Conferência independente da consulta acima.
+        //
+        // A versão anterior deste script dizia "nada a fazer" com oito
+        // cartas quebradas no banco, porque o filtro estava errado — e
+        // "nada a fazer" é indistinguível de "está tudo certo".
+        //
+        // Esta contagem percorre os documentos em JavaScript, sem depender
+        // da semântica do filtro. Se ela discordar, o problema é a consulta
+        // e não o banco.
+        const todos = await colecao.find({}, { projection: { inventory: 1 } }).toArray();
+        const quebradas = todos.reduce(
+            (total, doc) => total + (doc.inventory || []).filter((c) => !c._id).length,
+            0
+        );
+
+        if (quebradas > 0) {
+            console.log(`\n🚨 A consulta não achou nada, mas existem ${quebradas} carta(s) sem \`_id\`.`);
+            console.log('   Isso é bug NESTE script, não no banco. Rode:');
+            console.log('   npm run diagnosticar:inventario');
+            process.exitCode = 1;
+        } else {
+            console.log('\n✓ Nenhuma carta sem `_id`. Nada a fazer.');
+        }
+
         await mongoose.disconnect();
         return;
     }

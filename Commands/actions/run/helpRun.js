@@ -83,7 +83,9 @@ const PAGES = [
       { nome: '​', desc: '⭐ **Nível:** tudo que você faz rende XP — rolar, batalhar, trocar, descobrir carta nova, completar missão e coletar o diário. Veja em `/profile`.' },
       { nome: '​', desc: '🎴 *A cada 10 níveis você **acumula um roll a mais**: os que passarem enquanto você estiver fora deixam de ser perdidos. Isso **não** encurta o cooldown nem muda sua chance de raridade — só evita desperdício.*' },
       { nome: '/daily', desc: 'Recompensa diária **com sequência**: quanto mais dias seguidos, mais vale. Marcos em 7, 14, 30, 60 e 100 dias.' },
-      { nome: '​', desc: '⚠️ *Faltou um dia? A sequência zera. É de propósito.*' }
+      { nome: '​', desc: '⚠️ *Faltou um dia? A sequência zera. É de propósito.*' },
+      { nome: '/evento', desc: 'Eventos com inscrição aberta. `/evento lista` mostra os que estão rolando e o prêmio de cada um; `/evento entrar` te inscreve.' },
+      { nome: '​', desc: '🎪 *Entrar é de graça e não custa nada além do clique. O prêmio cai na sua conta quando o evento for apurado — pode ser moeda, item ou **carta de evento**, que não sai de `/roll` nem de caixa.*' }
     ]
   },
   {
