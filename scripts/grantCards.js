@@ -84,7 +84,10 @@ function montarCopia(card) {
         POW: card.POW,
         obtainedAt: new Date(),
         marketValue,
-        valueToSell
+        valueToSell,
+        // Congela a negociabilidade, igual ao rollCollect.js e ao painel.
+        // Sem isto, carta vinculada entregue por script sairia negociável.
+        comercializavel: card.comercializavel !== false
     };
 }
 

@@ -204,54 +204,30 @@ async function trocarRun(client, interaction) {
     t.mensagemId = mensagem.id;
     await t.save();
 
-    // O convite (aceitar/recusar) é resolvido aqui; o resto da mesa é
-    // tratado pelo handler global, porque a mesa vive mais que este coletor.
-    const filtro = (i) => i.user.id === alvo.id && [`trade_accept_${t.tradeId}`, `trade_decline_${t.tradeId}`].includes(i.customId);
-    const coletor = mensagem.createMessageComponentCollector({ filter: filtro, time: 60000, max: 1 });
-
-    coletor.on('collect', async (i) => {
-        if (i.customId === `trade_decline_${t.tradeId}`) {
-            await trade.apagar(t.tradeId);
-            return i.update({
+    // Aceitar e recusar agora vão pelo handler global, junto do cancelar.
+    //
+    // Eles moravam num coletor aqui, e isso era a causa do "o bot não
+    // respondeu a tempo": o coletor morre quando o bot reinicia, e com
+    // deploy automático a cada merge, todo convite aberto virava um botão
+    // que ninguém escutava. Ver o cabeçalho do bloco `accept` em
+    // `handlers/tradeHandler.js`.
+    //
+    // Sobra aqui só a expiração, que é um temporizador e não depende de
+    // interação nenhuma. Ele também não sobrevive a um restart — mas o
+    // pior caso é uma proposta velha ficar na tela, e o `temTrocaAtiva`
+    // não trava ninguém porque a varredura de trocas abandonadas continua
+    // rodando.
+    setTimeout(async () => {
+        const atual = await trade.buscar(t.tradeId).catch(() => null);
+        if (atual && atual.fase === 'aguardando') {
+            await trade.apagar(t.tradeId).catch(() => {});
+            mensagem.edit({
                 content: null,
-                embeds: [ui.neutral('Troca recusada', `**${alvo.username}** recusou a proposta.`)],
+                embeds: [ui.neutral('Proposta expirada', `**${alvo.username}** não respondeu a tempo.`)],
                 components: []
-            });
+            }).catch(() => {});
         }
-
-        const atualizada = await trade.buscar(t.tradeId);
-        if (!atualizada) {
-            return i.update({ content: null, embeds: [ui.error('Troca expirada', 'Essa negociação não existe mais.')], components: [] });
-        }
-
-        atualizada.fase = 'montando';
-        await atualizada.save();
-
-        const inventarios = {
-            proponente: docP.inventory,
-            alvo: docA.inventory
-        };
-
-        await i.update({
-            content: `${proponente} ⇄ ${alvo}`,
-            embeds: [montarEmbed(atualizada)],
-            components: montarComponentes(atualizada, inventarios)
-        });
-    });
-
-    coletor.on('end', async (coletadas) => {
-        if (coletadas.size === 0) {
-            const atual = await trade.buscar(t.tradeId);
-            if (atual && atual.fase === 'aguardando') {
-                await trade.apagar(t.tradeId);
-                mensagem.edit({
-                    content: null,
-                    embeds: [ui.neutral('Proposta expirada', `**${alvo.username}** não respondeu a tempo.`)],
-                    components: []
-                }).catch(() => {});
-            }
-        }
-    });
+    }, 60000).unref?.();
 }
 
 module.exports = trocarRun;

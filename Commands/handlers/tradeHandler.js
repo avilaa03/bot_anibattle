@@ -35,9 +35,6 @@ async function handleTrade(client, interaction) {
     const id = interaction.customId;
     if (!id.startsWith('trade_')) return false;
 
-    // O convite (accept/decline) é tratado pelo coletor do próprio comando.
-    if (id.startsWith('trade_accept_') || id.startsWith('trade_decline_')) return false;
-
     const partes = id.split('_');
     const acao = partes[1];
     const tradeId = partes[2];
@@ -56,6 +53,69 @@ async function handleTrade(client, interaction) {
         await interaction.reply({
             embeds: [ui.error('Negociação alheia', 'Você não faz parte desta troca.')],
             flags: MessageFlags.Ephemeral
+        }).catch(() => {});
+        return true;
+    }
+
+    // ---- Aceitar / recusar o convite ----
+    //
+    // ## Por que isto saiu do coletor
+    //
+    // O convite era resolvido por um `createMessageComponentCollector` no
+    // próprio `/trocar`. Dois problemas somados faziam o aceite responder
+    // "o bot não respondeu a tempo":
+    //
+    // 1. **O coletor morre quando o bot reinicia.** Todo deploy derrubava
+    //    os convites abertos, e clicar em Aceitar não encontrava ninguém
+    //    escutando — a interação ficava sem resposta até o Discord
+    //    desistir. Com deploy automático a cada merge, isso era frequente.
+    //
+    // 2. **Não havia `deferUpdate`.** O Discord dá 3 segundos para a
+    //    primeira resposta, e o caminho fazia duas idas ao banco antes de
+    //    responder. Com o Atlas lento, estourava.
+    //
+    // O handler global não morre com restart, e o `deferUpdate` abaixo
+    // compra os 15 minutos de janela. É o mesmo desenho que o botão de
+    // cancelar já usava.
+    if (acao === 'accept' || acao === 'decline') {
+        if (t.alvo.id !== interaction.user.id) {
+            await interaction.reply({
+                embeds: [ui.error('Convite alheio', 'Só quem recebeu a proposta pode aceitar ou recusar.')],
+                flags: MessageFlags.Ephemeral
+            }).catch(() => {});
+            return true;
+        }
+
+        // ANTES de qualquer consulta: é isto que impede o estouro de 3s.
+        await interaction.deferUpdate().catch(() => {});
+
+        if (acao === 'decline') {
+            await trade.apagar(tradeId);
+            await interaction.editReply({
+                content: null,
+                embeds: [ui.neutral('Troca recusada', `**${interaction.user.username}** recusou a proposta.`)],
+                components: []
+            }).catch(() => {});
+            return true;
+        }
+
+        if (t.fase !== 'aguardando') {
+            await interaction.editReply({
+                content: null,
+                embeds: [ui.neutral('Convite já respondido', 'Esta proposta já foi aceita ou recusada.')],
+                components: []
+            }).catch(() => {});
+            return true;
+        }
+
+        t.fase = 'montando';
+        await t.save();
+
+        const inventarios = await carregarInventarios(t);
+        await interaction.editReply({
+            content: `<@${t.proponente.id}> ⇄ <@${t.alvo.id}>`,
+            embeds: [montarEmbed(t)],
+            components: montarComponentes(t, inventarios)
         }).catch(() => {});
         return true;
     }
