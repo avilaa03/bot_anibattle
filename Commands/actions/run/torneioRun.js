@@ -3,28 +3,47 @@ const User = require('../../utils/userSchema');
 const ui = require('../../utils/embeds');
 const torneio = require('../../utils/tournament');
 const { MIN_WAGER } = require('../../utils/economy');
+const { tDaInteracao, tDoUsuario } = require('../../utils/idioma');
 
-/** /torneio — cria um torneio eliminatório no servidor. */
+/**
+ * /torneio — cria um torneio eliminatório no servidor.
+ *
+ * ## Qual idioma cada coisa usa
+ *
+ * O QUADRO do torneio (a mensagem com a lista de inscritos e os botões)
+ * fica no canal por horas e é lido por todo mundo — então ele segue o
+ * idioma do SERVIDOR, não o de quem clicou por último. Se seguisse o
+ * clique, o quadro trocaria de idioma sozinho a cada inscrição.
+ *
+ * Já as respostas privadas ("você não tem cartas", "só o organizador
+ * pode começar") saem no idioma de quem clicou — ninguém mais as vê.
+ *
+ * Convenção: `torneioDoc` é o documento; `t` é sempre o tradutor.
+ */
 
-function montarEmbedInscricoes(t) {
-    const lista = t.participantes.length > 0
-        ? t.participantes.map((p, i) => `\`${i + 1}\` <@${p.id}>`).join('\n')
-        : '*(ninguém inscrito ainda)*';
+function montarEmbedInscricoes(torneioDoc, t) {
+    const lista = torneioDoc.participantes.length > 0
+        ? torneioDoc.participantes.map((p, i) => `\`${i + 1}\` <@${p.id}>`).join('\n')
+        : t('torneio.ninguem_inscrito');
 
     return ui.base(ui.STATUS_COLORS.warning)
-        .setTitle(`🏆 ${t.nome}`)
-        .setDescription(
-            `Torneio eliminatório de **${t.vagas} vagas**.\n\n`
-            + 'Você entra com suas **3 melhores cartas**, e o bot resolve todos os confrontos de uma vez.\n'
-            + '⚠️ *O deck é congelado na inscrição — não dá para trocar depois de ver o adversário.*'
-        )
+        .setTitle(`🏆 ${torneioDoc.nome}`)
+        .setDescription(t('torneio.quadro_descricao', { vagas: torneioDoc.vagas }))
         .addFields(
-            { name: 'Inscritos', value: `**${t.participantes.length}** / ${t.vagas}`, inline: true },
-            { name: 'Inscrição', value: t.taxaInscricao > 0 ? ui.coins(t.taxaInscricao) : 'Grátis', inline: true },
-            { name: '🏅 Prêmio', value: t.premio > 0 ? ui.coins(t.premio) : 'Só a glória', inline: true },
-            { name: 'Participantes', value: lista, inline: false }
+            { name: t('torneio.inscritos'), value: `**${torneioDoc.participantes.length}** / ${torneioDoc.vagas}`, inline: true },
+            {
+                name: t('torneio.inscricao'),
+                value: torneioDoc.taxaInscricao > 0 ? ui.coins(torneioDoc.taxaInscricao, t.locale) : t('torneio.gratis'),
+                inline: true
+            },
+            {
+                name: t('torneio.premio'),
+                value: torneioDoc.premio > 0 ? ui.coins(torneioDoc.premio, t.locale) : t('torneio.so_a_gloria'),
+                inline: true
+            },
+            { name: t('torneio.participantes'), value: lista, inline: false }
         )
-        .setFooter({ text: `${ui.BRAND} • O organizador pode começar a qualquer momento` });
+        .setFooter({ text: `${ui.BRAND} • ${t('torneio.rodape_quadro')}` });
 }
 
 /**
@@ -38,12 +57,12 @@ function montarEmbedInscricoes(t) {
  * de sair do torneio, e levava um "sem permissão" sem entender por quê.
  * Quem entrou sai pelo "Sair"; encerrar não é assunto dele.
  */
-function montarBotoes(t) {
+function montarBotoes(torneioDoc, t) {
     return [new ActionRowBuilder().addComponents(
-        new ButtonBuilder().setCustomId(`tn_join_${t.tournamentId}`).setLabel('Entrar').setEmoji('⚔️').setStyle(ButtonStyle.Success),
-        new ButtonBuilder().setCustomId(`tn_leave_${t.tournamentId}`).setLabel('Sair').setEmoji('🚪').setStyle(ButtonStyle.Secondary),
-        new ButtonBuilder().setCustomId(`tn_start_${t.tournamentId}`).setLabel('Começar (organizador)').setEmoji('🏁').setStyle(ButtonStyle.Primary),
-        new ButtonBuilder().setCustomId(`tn_cancel_${t.tournamentId}`).setLabel('Cancelar (organizador)').setStyle(ButtonStyle.Danger)
+        new ButtonBuilder().setCustomId(`tn_join_${torneioDoc.tournamentId}`).setLabel(t('torneio.botao_entrar')).setEmoji('⚔️').setStyle(ButtonStyle.Success),
+        new ButtonBuilder().setCustomId(`tn_leave_${torneioDoc.tournamentId}`).setLabel(t('torneio.botao_sair')).setEmoji('🚪').setStyle(ButtonStyle.Secondary),
+        new ButtonBuilder().setCustomId(`tn_start_${torneioDoc.tournamentId}`).setLabel(t('torneio.botao_comecar')).setEmoji('🏁').setStyle(ButtonStyle.Primary),
+        new ButtonBuilder().setCustomId(`tn_cancel_${torneioDoc.tournamentId}`).setLabel(t('torneio.botao_cancelar')).setStyle(ButtonStyle.Danger)
     )];
 }
 
@@ -60,8 +79,8 @@ function montarBotoes(t) {
  * 5 minutos travado em execução) e o `npm run torneios:limpar` resolve na
  * hora quando for urgente.
  */
-function podeAdministrar(interaction, t) {
-    return interaction.user.id === t.criadorId;
+function podeAdministrar(interaction, torneioDoc) {
+    return interaction.user.id === torneioDoc.criadorId;
 }
 
 /**
@@ -73,59 +92,72 @@ function podeAdministrar(interaction, t) {
  * pessoa nem lembra. Aqui damos o link direto e, para quem tem permissão,
  * o próprio botão.
  */
-async function avisarTorneioExistente(interaction, t) {
-    const inscritos = t.participantes.length;
-    const criadoEm = Math.floor(new Date(t.criadoEm).getTime() / 1000);
-    const expiraEm = Math.floor((new Date(t.criadoEm).getTime() + torneio.TTL_MS) / 1000);
+async function avisarTorneioExistente(interaction, torneioDoc, t) {
+    const inscritos = torneioDoc.participantes.length;
+    const criadoEm = Math.floor(new Date(torneioDoc.criadoEm).getTime() / 1000);
+    const expiraEm = Math.floor((new Date(torneioDoc.criadoEm).getTime() + torneio.TTL_MS) / 1000);
 
     const embed = ui.warning(
-        'Já tem torneio aberto neste servidor',
-        `**${t.nome}** — criado por <@${t.criadorId}> <t:${criadoEm}:R>.`
+        t('torneio.ja_existe'),
+        t('torneio.ja_existe_texto', {
+            nome: torneioDoc.nome,
+            criador: torneioDoc.criadorId,
+            quando: criadoEm
+        })
     ).addFields(
-        { name: 'Situação', value: t.fase === 'inscricoes' ? 'Inscrições abertas' : 'Executando', inline: true },
-        { name: 'Inscritos', value: `${inscritos} / ${t.vagas}`, inline: true },
-        { name: 'Cancela sozinho', value: `<t:${expiraEm}:R>`, inline: true }
+        {
+            name: t('torneio.situacao'),
+            value: torneioDoc.fase === 'inscricoes' ? t('torneio.fase_inscricoes') : t('torneio.fase_executando'),
+            inline: true
+        },
+        { name: t('torneio.inscritos'), value: `${inscritos} / ${torneioDoc.vagas}`, inline: true },
+        { name: t('torneio.cancela_sozinho'), value: `<t:${expiraEm}:R>`, inline: true }
     );
 
     // Link direto para a mensagem do torneio, onde estão os botões.
-    if (t.canalId && t.mensagemId) {
+    if (torneioDoc.canalId && torneioDoc.mensagemId) {
         embed.addFields({
-            name: 'Onde fica',
-            value: `[Ir para a mensagem do torneio](https://discord.com/channels/${t.guildId}/${t.canalId}/${t.mensagemId})`,
+            name: t('torneio.onde_fica'),
+            value: t('torneio.ir_para_mensagem', {
+                url: `https://discord.com/channels/${torneioDoc.guildId}/${torneioDoc.canalId}/${torneioDoc.mensagemId}`
+            }),
             inline: false
         });
     }
 
     const componentes = [];
-    if (podeAdministrar(interaction, t)) {
+    if (podeAdministrar(interaction, torneioDoc)) {
         componentes.push(new ActionRowBuilder().addComponents(
             new ButtonBuilder()
-                .setCustomId(`tn_cancel_${t.tournamentId}`)
-                .setLabel('Cancelar este torneio')
+                .setCustomId(`tn_cancel_${torneioDoc.tournamentId}`)
+                .setLabel(t('torneio.botao_cancelar_este'))
                 .setEmoji('🗑️')
                 .setStyle(ButtonStyle.Danger)
         ));
-        embed.setFooter({ text: `${ui.BRAND} • Cancelar devolve as inscrições pagas` });
+        embed.setFooter({ text: `${ui.BRAND} • ${t('torneio.rodape_devolve')}` });
     } else {
-        embed.setFooter({
-            text: `${ui.BRAND} • Só quem criou pode cancelar. Sem resposta, cancela sozinho no prazo acima`
-        });
+        embed.setFooter({ text: `${ui.BRAND} • ${t('torneio.rodape_so_criador')}` });
     }
 
     return interaction.reply({ embeds: [embed], components: componentes, flags: MessageFlags.Ephemeral });
 }
 
 async function torneioRun(client, interaction) {
-    const recusar = (titulo, descricao) =>
-        interaction.reply({ embeds: [ui.error(titulo, descricao)], flags: MessageFlags.Ephemeral });
+    const t = await tDaInteracao(interaction);
+
+    const recusar = (tituloChave, descricaoChave, valores) =>
+        interaction.reply({
+            embeds: [ui.error(t(tituloChave), t(descricaoChave, valores))],
+            flags: MessageFlags.Ephemeral
+        });
 
     if (!interaction.guildId) {
-        return recusar('Só em servidor', 'Torneios precisam de um servidor — não funcionam no privado.');
+        return recusar('torneio.so_em_servidor', 'torneio.so_em_servidor_texto');
     }
 
     const existente = await torneio.ativoNoServidor(interaction.guildId);
     if (existente) {
-        return avisarTorneioExistente(interaction, existente);
+        return avisarTorneioExistente(interaction, existente, t);
     }
 
     const nome = interaction.options.getString('nome');
@@ -133,29 +165,38 @@ async function torneioRun(client, interaction) {
     const taxa = interaction.options.getInteger('inscricao') || 0;
 
     if (!torneio.VAGAS_VALIDAS.includes(vagas)) {
-        return recusar('Vagas inválidas', `Use ${torneio.VAGAS_VALIDAS.join(', ')} vagas.`);
+        return recusar('torneio.vagas_invalidas', 'torneio.vagas_invalidas_texto', {
+            opcoes: torneio.VAGAS_VALIDAS.join(', ')
+        });
     }
     if (taxa > 0 && taxa < MIN_WAGER) {
-        return recusar('Inscrição muito baixa', `A inscrição mínima é ${ui.coins(MIN_WAGER)}.`);
+        return recusar('torneio.inscricao_baixa', 'torneio.inscricao_baixa_texto', {
+            minimo: ui.coins(MIN_WAGER, t.locale)
+        });
     }
 
-    const t = await torneio.criar({
+    // O quadro é público e duradouro: idioma do servidor. Ele também
+    // define o nome padrão do torneio, que fica gravado no banco.
+    const tQuadro = await tDoUsuario(null, interaction.guildId);
+
+    const torneioDoc = await torneio.criar({
         guildId: interaction.guildId,
         canalId: interaction.channelId,
         criadorId: interaction.user.id,
         nome,
         taxaInscricao: taxa,
-        vagas
+        vagas,
+        locale: tQuadro.locale
     });
 
     await interaction.reply({
-        embeds: [montarEmbedInscricoes(t)],
-        components: montarBotoes(t)
+        embeds: [montarEmbedInscricoes(torneioDoc, tQuadro)],
+        components: montarBotoes(torneioDoc, tQuadro)
     });
     const mensagem = await interaction.fetchReply();
 
-    t.mensagemId = mensagem.id;
-    await t.save();
+    torneioDoc.mensagemId = mensagem.id;
+    await torneioDoc.save();
 }
 
 module.exports = torneioRun;

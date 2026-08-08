@@ -1,8 +1,10 @@
 const User = require('../../utils/userSchema');
 const Card = require('../../utils/cardSchema');
 const ui = require('../../utils/embeds');
+const { tDaInteracao } = require('../../utils/idioma');
 
 async function colecionadoresRun(client, interaction) {
+    const t = await tDaInteracao(interaction);
     await interaction.deferReply();
 
     const totalCatalogo = await Card.countDocuments();
@@ -16,7 +18,7 @@ async function colecionadoresRun(client, interaction) {
     ]);
 
     if (ranking.length === 0) {
-        const embed = ui.neutral('📖 Colecionadores', 'Ninguém descobriu cartas ainda. Use `/roll` para começar sua Pokédex!');
+        const embed = ui.neutral(t('colecionadores.titulo_curto'), t('colecionadores.vazio'));
         return interaction.editReply({ embeds: [embed] });
     }
 
@@ -24,13 +26,17 @@ async function colecionadoresRun(client, interaction) {
         const pct = totalCatalogo > 0 ? (u.descobertas / totalCatalogo) * 100 : 0;
         const destaque = u.id === interaction.user.id;
         const nome = destaque ? `__<@${u.id}>__` : `<@${u.id}>`;
-        return `${ui.medal(i)} ${nome}\n└ **${ui.number(u.descobertas)}** / ${ui.number(totalCatalogo)} cartas (${pct.toFixed(1)}%)`;
+        return `${ui.medal(i)} ${nome}\n└ ${t('colecionadores.linha', {
+            atual: ui.number(u.descobertas, t.locale),
+            total: ui.number(totalCatalogo, t.locale),
+            pct: pct.toFixed(1)
+        })}`;
     }).join('\n');
 
     const embed = ui.base(ui.STATUS_COLORS.info)
-        .setTitle('📖 Maiores colecionadores')
+        .setTitle(t('colecionadores.titulo'))
         .setDescription(lista)
-        .setFooter({ text: `${ui.BRAND} • ${ui.number(totalCatalogo)} cartas no catálogo` });
+        .setFooter({ text: `${ui.BRAND} • ${t('colecionadores.rodape', { n: ui.number(totalCatalogo, t.locale) })}` });
 
     // Se o autor não está no top 10, mostra a posição dele mesmo assim.
     const noTop = ranking.some((u) => u.id === interaction.user.id);
@@ -43,8 +49,12 @@ async function colecionadoresRun(client, interaction) {
             });
             const pct = totalCatalogo > 0 ? (minhas / totalCatalogo) * 100 : 0;
             embed.addFields({
-                name: 'Sua posição',
-                value: `\`#${acima + 1}\` — **${ui.number(minhas)}** / ${ui.number(totalCatalogo)} cartas (${pct.toFixed(1)}%)`,
+                name: t('comum.sua_posicao'),
+                value: `\`#${acima + 1}\` — ${t('colecionadores.linha', {
+                    atual: ui.number(minhas, t.locale),
+                    total: ui.number(totalCatalogo, t.locale),
+                    pct: pct.toFixed(1)
+                })}`,
                 inline: false
             });
         }

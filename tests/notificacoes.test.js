@@ -38,9 +38,12 @@ check('a maioria é privada (não vira spam)', privados.length > publicos.length
 
 console.log('\n=== Embeds ===');
 const bronze = porTipo('bronze');
+// Nome e descrição não vivem mais no catálogo — vêm do dicionário pela
+// chave do troféu, então o teste compara com o texto já localizado.
+const bronzePt = achievements.localizar(bronze, 'pt-BR');
 const e1 = notif.embedConquista(bronze);
-check('embed tem o nome do troféu', e1.data.title.includes(bronze.nome));
-check('embed tem a descrição', e1.data.description.includes(bronze.descricao));
+check('embed tem o nome do troféu', e1.data.title.includes(bronzePt.nome));
+check('embed tem a descrição', e1.data.description.includes(bronzePt.descricao));
 check('embed usa a cor do tipo', e1.data.color === achievements.TIPOS.bronze.cor);
 check('sem imagem por padrão', !e1.data.image);
 check('com imagem quando pedido', Boolean(notif.embedConquista(bronze, true).data.image));

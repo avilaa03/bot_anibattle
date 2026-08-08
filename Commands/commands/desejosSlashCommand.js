@@ -1,5 +1,6 @@
 const BaseSlashCommand = require('../utils/BaseSlashCommand.js');
 const { SlashCommandBuilder } = require('discord.js');
+const { descricaoBase, localizacoes } = require('../utils/i18n');
 const desejosRun = require('../actions/run/desejosRun.js');
 
 module.exports = class DesejosSlashCommand extends BaseSlashCommand {
@@ -14,10 +15,12 @@ module.exports = class DesejosSlashCommand extends BaseSlashCommand {
     getSlashCommandJSON() {
         return new SlashCommandBuilder()
             .setName(this.name)
-            .setDescription('Mostra sua lista de desejos')
+            .setDescription(descricaoBase('comandos.desejos.descricao'))
+            .setDescriptionLocalizations(localizacoes('comandos.desejos.descricao'))
             .addUserOption(option =>
                 option.setName('user')
-                    .setDescription('Ver a lista de outro jogador')
+                    .setDescription(descricaoBase('comandos.desejos.opcao_user'))
+                    .setDescriptionLocalizations(localizacoes('comandos.desejos.opcao_user'))
                     .setRequired(false)
             )
             .toJSON();

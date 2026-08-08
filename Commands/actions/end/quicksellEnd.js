@@ -1,6 +1,6 @@
-async function quicksellEnd(interaction, reason) {
+async function quicksellEnd(interaction, reason, t) {
     if (reason === 'time') {
-        await interaction.followUp({ content: 'O tempo para vender a carta expirou.', components: [] });
+        await interaction.followUp({ content: t('quicksell.expirou'), components: [] });
     }
 }
 

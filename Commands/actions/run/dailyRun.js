@@ -1,6 +1,7 @@
 const User = require("../../utils/userSchema");
 const ui = require('../../utils/embeds');
-const { getPerks } = require('../../utils/vip');
+const { getPerks, nomeTier } = require('../../utils/vip');
+const { tDaInteracao } = require('../../utils/idioma');
 const { registrar } = require('../../utils/progresso');
 const { chaveDoDia } = require('../../utils/missoes');
 const { MessageFlags } = require('discord.js');
@@ -22,14 +23,20 @@ const BASE = 200;
 const BONUS_POR_DIA = 100;
 const TETO_BONUS = 30;      // a partir do dia 30 o bônus para de crescer
 
-// Marcos: dias em que a recompensa é multiplicada.
+// Marcos: dias em que a recompensa é multiplicada. O nome comemorativo
+// de cada um sai de `daily.marcos.<dia>` no dicionário.
 const MARCOS = {
-    7: { multiplicador: 3, nome: 'Uma semana!' },
-    14: { multiplicador: 4, nome: 'Duas semanas!' },
-    30: { multiplicador: 6, nome: 'Um mês inteiro!' },
-    60: { multiplicador: 8, nome: 'Dois meses!' },
-    100: { multiplicador: 12, nome: 'Cem dias!' }
+    7: { multiplicador: 3 },
+    14: { multiplicador: 4 },
+    30: { multiplicador: 6 },
+    60: { multiplicador: 8 },
+    100: { multiplicador: 12 }
 };
+
+/** Nome comemorativo do marco, no idioma do jogador. */
+function nomeMarco(dia, t) {
+    return t(`daily.marcos.${dia}`);
+}
 
 /** Recompensa base do dia N da sequência, antes do VIP. */
 function calcularRecompensa(diaDaSequencia) {
@@ -58,6 +65,7 @@ function chaveDeOntem() {
 
 async function dailyRun(client, interaction) {
     const userId = interaction.user.id;
+    const t = await tDaInteracao(interaction);
 
     try {
         let user = await User.findOne({ id: userId });
@@ -72,18 +80,23 @@ async function dailyRun(client, interaction) {
             amanha.setHours(0, 0, 0, 0);
 
             const embed = ui.warning(
-                'Recompensa já coletada',
-                `Você já pegou a de hoje. A próxima libera <t:${Math.floor(amanha.getTime() / 1000)}:R>.`
+                t('daily.ja_coletada_titulo'),
+                t('daily.ja_coletada_texto', { quando: Math.floor(amanha.getTime() / 1000) })
             ).addFields(
-                { name: '🔥 Sequência atual', value: `**${user.streak?.atual || 0}** dia(s)`, inline: true },
-                { name: 'Saldo', value: ui.coins(user.balance || 0), inline: true }
+                { name: t('daily.sequencia_atual'), value: t('daily.dias', { n: user.streak?.atual || 0 }), inline: true },
+                { name: t('daily.saldo'), value: ui.coins(user.balance || 0, t.locale), inline: true }
             );
 
             const proximo = proximoMarco(user.streak?.atual || 0);
             if (proximo) {
                 embed.addFields({
-                    name: '🎯 Próximo marco',
-                    value: `Dia **${proximo.dia}** — ${proximo.nome} (recompensa ${proximo.multiplicador}x)\nFaltam **${proximo.dia - (user.streak?.atual || 0)}** dia(s).`,
+                    name: t('daily.proximo_marco'),
+                    value: t('daily.proximo_marco_texto', {
+                        dia: proximo.dia,
+                        nome: nomeMarco(proximo.dia, t),
+                        multiplicador: proximo.multiplicador,
+                        faltam: proximo.dia - (user.streak?.atual || 0)
+                    }),
                     inline: false
                 });
             }
@@ -114,26 +127,37 @@ async function dailyRun(client, interaction) {
         const marco = MARCOS[novaSequencia];
 
         const embed = ui.base(marco ? 0xFFD700 : ui.STATUS_COLORS.success)
-            .setTitle(marco ? `🎉 ${marco.nome}` : '✅ Recompensa diária coletada')
+            .setTitle(marco ? `🎉 ${nomeMarco(novaSequencia, t)}` : t('daily.coletada_titulo'))
             .setDescription(
                 manteve || novaSequencia === 1
-                    ? `Você recebeu ${ui.coins(total)}.`
-                    : `Você recebeu ${ui.coins(total)}.\n\n💔 Sua sequência de **${sequenciaAnterior}** dias foi perdida — você faltou um dia.`
+                    ? t('daily.recebeu', { valor: ui.coins(total, t.locale) })
+                    : t('daily.recebeu_sequencia_perdida', {
+                        valor: ui.coins(total, t.locale),
+                        dias: sequenciaAnterior
+                    })
             )
             .addFields(
-                { name: '🔥 Sequência', value: `**${novaSequencia}** dia(s)`, inline: true },
-                { name: '🏆 Seu recorde', value: `**${user.streak.maior}** dia(s)`, inline: true },
-                { name: '💰 Saldo', value: ui.coins(user.balance), inline: true }
+                { name: t('daily.sequencia'), value: t('daily.dias', { n: novaSequencia }), inline: true },
+                { name: t('daily.recorde'), value: t('daily.dias', { n: user.streak.maior }), inline: true },
+                { name: t('daily.saldo_emoji'), value: ui.coins(user.balance, t.locale), inline: true }
             );
 
         if (marco) {
-            embed.addFields({ name: 'Bônus de marco', value: `Recompensa multiplicada por **${marco.multiplicador}x**!`, inline: false });
+            embed.addFields({
+                name: t('daily.bonus_marco'),
+                value: t('daily.bonus_marco_texto', { multiplicador: marco.multiplicador }),
+                inline: false
+            });
         }
 
         if (perks.vip) {
             embed.addFields({
-                name: 'Bônus VIP',
-                value: `${perks.tier.emoji} **${perks.tier.nome}** — ${perks.dailyMultiplier}x (base era ${ui.coins(base)})`,
+                name: t('daily.bonus_vip'),
+                value: `${perks.tier.emoji} ${t('daily.bonus_vip_texto', {
+                    plano: nomeTier(perks.tier.key, t.locale),
+                    multiplicador: perks.dailyMultiplier,
+                    base: ui.coins(base, t.locale)
+                })}`,
                 inline: false
             });
         }
@@ -141,10 +165,15 @@ async function dailyRun(client, interaction) {
         const proximo = proximoMarco(novaSequencia);
         if (proximo) {
             embed.setFooter({
-                text: `${ui.BRAND} • Dia ${proximo.dia}: ${proximo.nome} (${proximo.multiplicador}x) — faltam ${proximo.dia - novaSequencia} dia(s)`
+                text: `${ui.BRAND} • ${t('daily.rodape_proximo', {
+                    dia: proximo.dia,
+                    nome: nomeMarco(proximo.dia, t),
+                    multiplicador: proximo.multiplicador,
+                    faltam: proximo.dia - novaSequencia
+                })}`
             });
         } else {
-            embed.setFooter({ text: `${ui.BRAND} • Volte amanhã para manter a sequência` });
+            embed.setFooter({ text: `${ui.BRAND} • ${t('daily.rodape_volte')}` });
         }
 
         await interaction.reply({ embeds: [embed] });
@@ -154,7 +183,7 @@ async function dailyRun(client, interaction) {
         await avisarProgresso(interaction, resultado);
     } catch (err) {
         console.error('Erro ao processar a recompensa diária:', err);
-        const embed = ui.error('Erro', 'Houve um erro ao processar sua recompensa diária.');
+        const embed = ui.error(t('comum.erro'), t('daily.erro'));
         const responder = interaction.replied || interaction.deferred
             ? interaction.followUp({ embeds: [embed], flags: MessageFlags.Ephemeral })
             : interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });

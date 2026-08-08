@@ -2,6 +2,7 @@ const Tournament = require('./tournamentSchema');
 const User = require('./userSchema');
 const { runBattle } = require('./battleEngine');
 const { trySpend, addBalance } = require('./economy');
+const { traduzir, DEFAULT_LOCALE } = require('./i18n');
 
 /**
  * Torneios eliminatórios.
@@ -40,13 +41,13 @@ async function buscar(tournamentId) {
     return Tournament.findOne({ tournamentId: String(tournamentId) });
 }
 
-async function criar({ guildId, canalId, criadorId, nome, taxaInscricao, vagas }) {
+async function criar({ guildId, canalId, criadorId, nome, taxaInscricao, vagas, locale = DEFAULT_LOCALE }) {
     return Tournament.create({
         tournamentId: gerarId(),
         guildId,
         canalId,
         criadorId,
-        nome: nome || 'Torneio AniBattle',
+        nome: nome || traduzir(locale, 'torneio.nome_padrao'),
         taxaInscricao: Math.max(0, taxaInscricao || 0),
         vagas: VAGAS_VALIDAS.includes(vagas) ? vagas : 8,
         premio: 0,
@@ -165,7 +166,9 @@ async function executar(tournamentId, rng = Math.random) {
                 confrontos.push({
                     aId: a.id, aNome: a.username,
                     bId: null, bNome: null,
-                    vencedorId: a.id, placar: 'passou direto'
+                    // 'BYE' é código, não texto de tela: o placar fica no
+                    // banco e pode ser exibido meses depois, em outro idioma.
+                    vencedorId: a.id, placar: 'BYE'
                 });
                 continue;
             }
@@ -248,12 +251,17 @@ async function limparAbandonados() {
 }
 
 /** Nome da rodada conforme quantos participantes restam. */
-function nomeRodada(quantosNaRodada) {
-    if (quantosNaRodada <= 2) return 'Final';
-    if (quantosNaRodada <= 4) return 'Semifinal';
-    if (quantosNaRodada <= 8) return 'Quartas de final';
-    if (quantosNaRodada <= 16) return 'Oitavas de final';
-    return `Rodada de ${quantosNaRodada}`;
+function nomeRodada(quantosNaRodada, locale = DEFAULT_LOCALE) {
+    if (quantosNaRodada <= 2) return traduzir(locale, 'torneio.rodada_final');
+    if (quantosNaRodada <= 4) return traduzir(locale, 'torneio.rodada_semi');
+    if (quantosNaRodada <= 8) return traduzir(locale, 'torneio.rodada_quartas');
+    if (quantosNaRodada <= 16) return traduzir(locale, 'torneio.rodada_oitavas');
+    return traduzir(locale, 'torneio.rodada_de', { n: quantosNaRodada });
+}
+
+/** Placar de um confronto, já em texto. 'BYE' vira "passou direto". */
+function placarTexto(placar, locale = DEFAULT_LOCALE) {
+    return placar === 'BYE' ? traduzir(locale, 'torneio.passou_direto') : placar;
 }
 
 module.exports = {
@@ -271,5 +279,6 @@ module.exports = {
     cancelar,
     limparAbandonados,
     nomeRodada,
+    placarTexto,
     embaralhar
 };

@@ -1,5 +1,6 @@
 const BaseSlashCommand = require('../utils/BaseSlashCommand.js');
 const { SlashCommandBuilder } = require('discord.js');
+const { descricaoBase, localizacoes } = require('../utils/i18n');
 const favCardRun = require('../actions/run/favcardRun.js');
 const favCardCollect = require('../actions/collect/favcardCollect.js');
 const favCardEnd = require('../actions/end/favcardEnd.js');
@@ -16,10 +17,12 @@ module.exports = class FavCardSlashCommand extends BaseSlashCommand {
     getSlashCommandJSON() {
         return new SlashCommandBuilder()
             .setName(this.name)
-            .setDescription('Favorita uma carta')
+            .setDescription(descricaoBase('comandos.favcard.descricao'))
+            .setDescriptionLocalizations(localizacoes('comandos.favcard.descricao'))
             .addStringOption(option =>
                 option.setName('name')
-                    .setDescription('O nome da carta que você quer favoritar')
+                    .setDescription(descricaoBase('comandos.favcard.opcao_name'))
+                    .setDescriptionLocalizations(localizacoes('comandos.favcard.opcao_name'))
                     .setRequired(true)
             );
     }

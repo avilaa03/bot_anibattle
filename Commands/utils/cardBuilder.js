@@ -1,4 +1,5 @@
 const { createCanvas, loadImage } = require('canvas');
+const { traduzir, DEFAULT_LOCALE } = require('./i18n');
 
 const CARD_W = 500;
 const CARD_H = 700;
@@ -129,10 +130,14 @@ class CardBuilder {
      * @param {object} [opcoes]
      * @param {string} [opcoes.moldura] moldura cosmética de VIP ('nenhuma' por padrão).
      *   É puramente visual: desenhada por cima, nunca altera atributo.
+     * @param {string} [opcoes.locale] idioma dos rótulos desenhados na arte
+     *   (siglas dos atributos e selo de raridade). Só isso muda entre os
+     *   idiomas — nome, série e números são iguais nos dois.
      */
     constructor(cardData = {}, opcoes = {}) {
         this.cardData = cardData;
         this.moldura = opcoes.moldura || 'nenhuma';
+        this.locale = opcoes.locale || DEFAULT_LOCALE;
         this.canvas = createCanvas(CARD_W, CARD_H);
         this.context = this.canvas.getContext('2d');
     }
@@ -406,8 +411,11 @@ class CardBuilder {
         drawSpacedText(ctx, 'OVR', bx + badgeSize / 2, by + badgeSize - 13, 1.5);
         ctx.globalAlpha = 1;
 
-        // Pílula de raridade
-        const rarityLabel = String(this.cardData.rarity || 'common').toUpperCase();
+        // Pílula de raridade. O texto vem do dicionário, não da chave do
+        // banco — senão a carta sairia escrita "ULTRA RARE" mesmo com o
+        // bot todo em português.
+        const chaveRaridade = String(this.cardData.rarity || 'common').toLowerCase().trim().replace(/ /g, '_');
+        const rarityLabel = traduzir(this.locale, `raridades.${chaveRaridade}`, {}).toUpperCase();
         ctx.font = `bold 15px ${FONT}`;
         const labelChars = [...rarityLabel];
         const labelWidth = labelChars.reduce((sum, c) => sum + ctx.measureText(c).width, 0) + 2 * (labelChars.length - 1);
@@ -444,7 +452,7 @@ class CardBuilder {
             ctx.restore();
         }
 
-        const name = String(this.cardData.name || 'Carta').trim();
+        const name = String(this.cardData.name || traduzir(this.locale, 'comum.carta')).trim();
         const displayName = name.charAt(0).toUpperCase() + name.slice(1);
 
         ctx.textAlign = 'left';
@@ -476,9 +484,9 @@ class CardBuilder {
 
         // Atributos
         const stats = [
-            { label: 'ATA', value: this.cardData.ATA ?? 0 },
-            { label: 'LIF', value: this.cardData.LIF ?? 0 },
-            { label: 'POW', value: this.cardData.POW ?? 0 }
+            { label: traduzir(this.locale, 'atributos.ata'), value: this.cardData.ATA ?? 0 },
+            { label: traduzir(this.locale, 'atributos.lif'), value: this.cardData.LIF ?? 0 },
+            { label: traduzir(this.locale, 'atributos.pow'), value: this.cardData.POW ?? 0 }
         ];
         const colWidth = (CARD_W - PAD * 2) / 3;
 

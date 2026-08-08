@@ -2,6 +2,8 @@ const { AttachmentBuilder, MessageFlags } = require('discord.js');
 const ui = require('./embeds');
 const achievements = require('./achievements');
 const progressaoDeNivel = require('./progressaoDeNivel');
+const { criarT, DEFAULT_LOCALE } = require('./i18n');
+const { resolverIdioma } = require('./idioma');
 
 /**
  * Avisos de progresso.
@@ -29,11 +31,11 @@ function ehPublica(conquista) {
 }
 
 /** Gera a imagem do troféu; devolve null se o canvas não estiver disponível. */
-function imagemTrofeu(conquista) {
+function imagemTrofeu(conquista, locale = DEFAULT_LOCALE) {
     try {
         const { buildTrophy } = require('./trophyBuilder');
         const tipo = achievements.TIPOS[conquista.tipo];
-        const buffer = buildTrophy(conquista, tipo);
+        const buffer = buildTrophy(achievements.localizar(conquista, locale), tipo, locale);
         return new AttachmentBuilder(buffer, { name: 'trofeu.png' });
     } catch (err) {
         if (!avisouCanvasIndisponivel) {
@@ -45,47 +47,58 @@ function imagemTrofeu(conquista) {
 }
 
 /** Embed de troféu. `comImagem` usa o banner desenhado em canvas. */
-function embedConquista(conquista, comImagem = false) {
+function embedConquista(conquista, comImagem = false, locale = DEFAULT_LOCALE) {
+    const t = criarT(locale);
+    const traduzida = achievements.localizar(conquista, locale);
     const tipo = achievements.TIPOS[conquista.tipo];
     const embed = ui.base(tipo.cor)
-        .setAuthor({ name: 'Troféu desbloqueado!' })
-        .setTitle(`${tipo.emoji} ${conquista.nome}`)
-        .setDescription(`*${conquista.descricao}*`)
-        .setFooter({ text: `${ui.BRAND} • Troféu de ${tipo.nome} • +${tipo.pontos} pontos` });
+        .setAuthor({ name: t('notificacoes.trofeu_desbloqueado') })
+        .setTitle(`${tipo.emoji} ${traduzida.nome}`)
+        .setDescription(`*${traduzida.descricao}*`)
+        .setFooter({ text: `${ui.BRAND} • ${t('notificacoes.trofeu_rodape', { tipo: achievements.nomeTipo(conquista.tipo, locale), pontos: tipo.pontos })}` });
 
     if (comImagem) embed.setImage('attachment://trofeu.png');
     return embed;
 }
 
 /** Anúncio de troféu raro, para o canal. */
-function embedAnuncio(conquista, userId) {
+function embedAnuncio(conquista, userId, locale = DEFAULT_LOCALE) {
+    const t = criarT(locale);
     const tipo = achievements.TIPOS[conquista.tipo];
+    const traduzida = achievements.localizar(conquista, locale);
     const ehPlatina = conquista.tipo === 'platina';
 
     const embed = ui.base(tipo.cor)
-        .setTitle(ehPlatina ? '💎 PLATINA CONQUISTADA!' : `${tipo.emoji} Troféu de Ouro!`)
-        .setDescription(
-            ehPlatina
-                ? `<@${userId}> conquistou **todos os troféus do AniBattle**.\n\n**${conquista.nome}** — *${conquista.descricao}*`
-                : `<@${userId}> desbloqueou **${conquista.nome}**\n\n*${conquista.descricao}*`
-        )
+        .setTitle(ehPlatina ? t('notificacoes.platina_titulo') : t('notificacoes.ouro_titulo', { emoji: tipo.emoji }))
+        .setDescription(t(
+            ehPlatina ? 'notificacoes.platina_descricao' : 'notificacoes.ouro_descricao',
+            { userId, nome: traduzida.nome, descricao: traduzida.descricao }
+        ))
         .setImage('attachment://trofeu.png')
-        .setFooter({ text: `${ui.BRAND} • Veja os seus em /conquistas` });
+        .setFooter({ text: `${ui.BRAND} • ${t('notificacoes.anuncio_rodape')}` });
 
     return embed;
 }
 
-function embedMissoes(missoesCompletas) {
-    const linhas = missoesCompletas.map(
-        (m) => `✅ **${m.nome}** — ${m.descricao}\n└ Recompensa: ${ui.coins(m.recompensa)}`
-    ).join('\n');
+function embedMissoes(missoesCompletas, locale = DEFAULT_LOCALE) {
+    const t = criarT(locale);
+    const missoes = require('./missoes');
+
+    const linhas = missoesCompletas.map((m) => {
+        const def = missoes.localizar(m, locale);
+        return t('notificacoes.missao_linha', {
+            nome: def.nome,
+            descricao: def.descricao,
+            recompensa: ui.coins(m.recompensa, locale)
+        });
+    }).join('\n');
 
     const total = missoesCompletas.reduce((s, m) => s + m.recompensa, 0);
 
-    return ui.success('Missão completa!', linhas)
+    return ui.success(t('notificacoes.missao_completa'), linhas)
         .addFields({
-            name: 'Para receber',
-            value: `Use \`/missoes\` e clique em **Resgatar** (${ui.coins(total)} disponíveis).`,
+            name: t('notificacoes.missao_para_receber'),
+            value: t('notificacoes.missao_resgate', { total: ui.coins(total, locale) }),
             inline: false
         });
 }
@@ -102,25 +115,26 @@ function embedMissoes(missoesCompletas) {
  * com frequência — anunciar cada um publicamente viraria ruído, e o que
  * merece o canal são os troféus de ouro e platina, que são raros.
  */
-function embedNivel(progressaoNivel) {
+function embedNivel(progressaoNivel, locale = DEFAULT_LOCALE) {
+    const t = criarT(locale);
     const { nivelDepois, entregues } = progressaoNivel;
 
     const embed = ui.base(0xFFD700)
-        .setTitle(`⭐ Nível ${nivelDepois}!`)
+        .setTitle(t('nivel.subiu_titulo', { nivel: nivelDepois }))
         .setDescription(
             entregues.length > 1
-                ? `Você subiu **${entregues.length} níveis** de uma vez.`
-                : 'Você subiu de nível.'
+                ? t('nivel.subiu_varios', { n: entregues.length })
+                : t('nivel.subiu_um')
         );
 
     for (const { nivel: n, recompensa } of entregues.slice(0, 5)) {
         const linhas = progressaoDeNivel.descrever(recompensa);
         if (linhas.length > 0) {
-            embed.addFields({ name: `Nível ${n}`, value: linhas.join('\n'), inline: false });
+            embed.addFields({ name: t('nivel.nivel_n', { n }), value: linhas.join('\n'), inline: false });
         }
     }
 
-    embed.setFooter({ text: `${ui.BRAND} • Veja seu progresso em /profile` });
+    embed.setFooter({ text: `${ui.BRAND} • ${t('nivel.rodape')}` });
     return embed;
 }
 
@@ -131,6 +145,8 @@ async function notificarProgresso(interaction, resultado) {
     const subiuDeNivel = Boolean(progressaoNivel?.subiu);
     if (conquistas.length === 0 && missoesCompletas.length === 0 && !subiuDeNivel) return;
 
+    const locale = await resolverIdioma(interaction);
+
     const publicas = conquistas.filter(ehPublica);
     const privadas = conquistas.filter((c) => !ehPublica(c));
 
@@ -138,9 +154,9 @@ async function notificarProgresso(interaction, resultado) {
     const embedsPrivados = [
         // O nível vem primeiro: é a recompensa maior, e o Discord mostra os
         // embeds na ordem em que chegam.
-        ...(subiuDeNivel ? [embedNivel(progressaoNivel)] : []),
-        ...privadas.slice(0, 3).map((c) => embedConquista(c)),
-        ...(missoesCompletas.length > 0 ? [embedMissoes(missoesCompletas)] : [])
+        ...(subiuDeNivel ? [embedNivel(progressaoNivel, locale)] : []),
+        ...privadas.slice(0, 3).map((c) => embedConquista(c, false, locale)),
+        ...(missoesCompletas.length > 0 ? [embedMissoes(missoesCompletas, locale)] : [])
     ];
 
     if (embedsPrivados.length > 0) {
@@ -152,12 +168,17 @@ async function notificarProgresso(interaction, resultado) {
     }
 
     // ---- Público: ouro e platina, um de cada vez para cada um ter destaque ----
+    const t = criarT(locale);
     for (const conquista of publicas.slice(0, 2)) {
         try {
-            const anexo = imagemTrofeu(conquista);
+            const anexo = imagemTrofeu(conquista, locale);
             await interaction.followUp({
-                content: conquista.tipo === 'platina' ? `🎉 <@${interaction.user.id}> PLATINOU O ANIBATTLE! 🎉` : null,
-                embeds: [anexo ? embedAnuncio(conquista, interaction.user.id) : embedConquista(conquista)],
+                content: conquista.tipo === 'platina'
+                    ? t('notificacoes.platinou', { userId: interaction.user.id })
+                    : null,
+                embeds: [anexo
+                    ? embedAnuncio(conquista, interaction.user.id, locale)
+                    : embedConquista(conquista, false, locale)],
                 files: anexo ? [anexo] : []
             });
         } catch (err) { /* idem */ }
@@ -172,10 +193,12 @@ async function notificarProgresso(interaction, resultado) {
  * @param {string} userId
  * @param {Array} conquistas
  * @param {import('discord.js').TextBasedChannel|null} canal
+ * @param {string} [locale] idioma do jogador que conquistou
  */
-async function anunciarConquistas(client, userId, conquistas, canal = null) {
+async function anunciarConquistas(client, userId, conquistas, canal = null, locale = DEFAULT_LOCALE) {
     if (!conquistas || conquistas.length === 0) return;
 
+    const t = criarT(locale);
     const publicas = conquistas.filter(ehPublica);
     const privadas = conquistas.filter((c) => !ehPublica(c));
 
@@ -183,15 +206,17 @@ async function anunciarConquistas(client, userId, conquistas, canal = null) {
 
     if (privadas.length > 0 && usuario) {
         await usuario.send({
-            embeds: privadas.slice(0, 3).map((c) => embedConquista(c))
+            embeds: privadas.slice(0, 3).map((c) => embedConquista(c, false, locale))
         }).catch(() => {});
     }
 
     for (const conquista of publicas.slice(0, 2)) {
-        const anexo = imagemTrofeu(conquista);
+        const anexo = imagemTrofeu(conquista, locale);
         const payload = {
-            content: conquista.tipo === 'platina' ? `🎉 <@${userId}> PLATINOU O ANIBATTLE! 🎉` : null,
-            embeds: [anexo ? embedAnuncio(conquista, userId) : embedConquista(conquista)],
+            content: conquista.tipo === 'platina' ? t('notificacoes.platinou', { userId }) : null,
+            embeds: [anexo
+                ? embedAnuncio(conquista, userId, locale)
+                : embedConquista(conquista, false, locale)],
             files: anexo ? [anexo] : []
         };
 

@@ -3,6 +3,7 @@ const User = require('../../utils/userSchema');
 const ui = require('../../utils/embeds');
 const achievements = require('../../utils/achievements');
 const { montarContexto, verificarConquistas } = require('../../utils/progresso');
+const { tDaInteracao } = require('../../utils/idioma');
 
 const POR_PAGINA = 8;
 
@@ -13,6 +14,7 @@ function barra(atual, alvo, tamanho = 10) {
 }
 
 async function conquistasRun(client, interaction) {
+    const t = await tDaInteracao(interaction);
     const alvo = interaction.options.getUser('user') || interaction.user;
     const ehProprio = alvo.id === interaction.user.id;
 
@@ -26,7 +28,9 @@ async function conquistasRun(client, interaction) {
     const user = await User.findOne({ id: alvo.id }).lean();
     if (!user) {
         return interaction.editReply({
-            embeds: [ui.error('Perfil não encontrado', `${ehProprio ? 'Você ainda não tem' : `**${alvo.username}** ainda não tem`} um perfil. Use \`/roll\` ou \`/daily\` para começar.`)]
+            embeds: [ui.error(t('comum.perfil_nao_encontrado'), ehProprio
+                ? t('balance.sem_perfil_voce')
+                : t('balance.sem_perfil_outro', { jogador: alvo.username }))]
         });
     }
 
@@ -69,40 +73,46 @@ async function conquistasRun(client, interaction) {
 
         const linhas = fatia.map((c) => {
             const tipo = achievements.TIPOS[c.tipo];
+            const info = achievements.localizar(c, t.locale);
             const tem = conquistadas.has(c.chave);
 
             if (tem) {
                 const quando = conquistadas.get(c.chave);
                 const data = quando ? `<t:${Math.floor(new Date(quando).getTime() / 1000)}:d>` : '';
-                return `${tipo.emoji} **${c.nome}** ✅\n└ ${c.descricao} ${data}`;
+                return `${tipo.emoji} **${info.nome}** ✅\n└ ${info.descricao} ${data}`;
             }
 
             // Platina bloqueada mostra quantos faltam.
             if (c.chave === 'platina') {
                 const faltam = achievements.CONQUISTAS.length - (conquistadas.size - (temPlatina ? 1 : 0));
-                return `${tipo.emoji} **${c.nome}** 🔒\n└ ${c.descricao} — faltam **${faltam}** troféu(s)`;
+                return `${tipo.emoji} **${info.nome}** 🔒\n└ ${info.descricao} — ${t('conquistas_ui.faltam', { n: faltam })}`;
             }
 
             let extra = '';
             if (typeof c.progresso === 'function') {
                 try {
                     const p = c.progresso(contexto);
-                    extra = `\n└ ${barra(p.atual, p.alvo)} ${ui.number(Math.min(p.atual, p.alvo))}/${ui.number(p.alvo)}`;
+                    extra = `\n└ ${barra(p.atual, p.alvo)} ${ui.number(Math.min(p.atual, p.alvo), t.locale)}/${ui.number(p.alvo, t.locale)}`;
                 } catch (err) { /* progresso é opcional */ }
             }
-            return `${tipo.emoji} **${c.nome}** 🔒\n└ ${c.descricao}${extra}`;
+            return `${tipo.emoji} **${info.nome}** 🔒\n└ ${info.descricao}${extra}`;
         }).join('\n');
 
         return ui.base(temPlatina ? achievements.TIPOS.platina.cor : ui.STATUS_COLORS.info)
-            .setAuthor({ name: `Troféus de ${alvo.username}`, iconURL: alvo.displayAvatarURL() })
-            .setTitle(temPlatina ? '💎 Platinado!' : '🏆 Conquistas')
+            .setAuthor({ name: t('conquistas_ui.autor', { jogador: alvo.username }), iconURL: alvo.displayAvatarURL() })
+            .setTitle(temPlatina ? t('conquistas_ui.platinado') : t('conquistas_ui.titulo'))
             .setDescription(
                 `${resumo}\n\n` +
                 `${barra(conquistadas.size, todas.length, 16)} **${percentual.toFixed(0)}%**\n` +
-                `**${conquistadas.size}** de **${todas.length}** troféus • Nível **${nivel}** (${ui.number(pontos)} pontos)\n\n` +
+                `${t('conquistas_ui.resumo', {
+                    obtidos: conquistadas.size,
+                    total: todas.length,
+                    nivel,
+                    pontos: ui.number(pontos, t.locale)
+                })}\n\n` +
                 linhas
             )
-            .setFooter({ text: `${ui.BRAND} • Página ${pagina + 1} de ${totalPaginas}` });
+            .setFooter({ text: `${ui.BRAND} • ${t('comum.pagina', { atual: pagina + 1, total: totalPaginas })}` });
     };
 
     const montarBotoes = (pagina) => [new ActionRowBuilder().addComponents(
