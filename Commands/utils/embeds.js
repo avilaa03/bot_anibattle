@@ -1,4 +1,5 @@
 const { EmbedBuilder } = require('discord.js');
+const { traduzir, normalizar, DEFAULT_LOCALE } = require('./i18n');
 
 /**
  * Identidade visual compartilhada por todas as respostas do bot.
@@ -6,6 +7,11 @@ const { EmbedBuilder } = require('discord.js');
  * A ideia é que nenhum comando monte cor, emoji ou rótulo de raridade na
  * mão — tudo sai daqui, então mudar a cara do bot é mexer em um arquivo só
  * e todos os comandos acompanham.
+ *
+ * Tudo que vira texto (rótulo de raridade, número, duração) recebe o
+ * `locale` como último argumento. Ele é opcional e cai em português
+ * quando não vem — nenhuma chamada antiga quebra, mas toda chamada nova
+ * deve passar o idioma resolvido da interação.
  */
 
 const BRAND = 'AniBattle';
@@ -13,13 +19,14 @@ const COIN = '<:coin:0>'; // trocar por um emoji custom do servidor, se tiver
 const COIN_FALLBACK = '🪙';
 
 // Raridades: como estão salvas no banco (chave, minúscula) x como devem
-// ser mostradas para o jogador (rótulo em português, emoji e cor).
+// ser mostradas para o jogador. Emoji, cor e peso não mudam com o idioma;
+// só o rótulo, que vem do dicionário.
 const RARITIES = {
-    common: { label: 'Comum', emoji: '⚪', color: 0x9E9E9E, weight: 0 },
-    rare: { label: 'Rara', emoji: '🔵', color: 0x2196F3, weight: 1 },
-    'ultra rare': { label: 'Ultra Rara', emoji: '🟣', color: 0xAB47BC, weight: 2 },
-    legendary: { label: 'Lendária', emoji: '🟠', color: 0xFF9800, weight: 3 },
-    master: { label: 'Mestra', emoji: '🌟', color: 0xFFD700, weight: 4 }
+    common: { emoji: '⚪', color: 0x9E9E9E, weight: 0 },
+    rare: { emoji: '🔵', color: 0x2196F3, weight: 1 },
+    'ultra rare': { emoji: '🟣', color: 0xAB47BC, weight: 2 },
+    legendary: { emoji: '🟠', color: 0xFF9800, weight: 3 },
+    master: { emoji: '🌟', color: 0xFFD700, weight: 4 }
 };
 
 const STATUS_COLORS = {
@@ -30,14 +37,30 @@ const STATUS_COLORS = {
     neutral: 0x9E9E9E
 };
 
-function getRarity(rarity) {
+// Como cada idioma formata número. O separador de milhar muda (1.234 x
+// 1,234) e é a diferença mais visível entre as duas versões.
+const LOCALE_NUMERO = {
+    'pt-BR': 'pt-BR',
+    'en-US': 'en-US'
+};
+
+function getRarity(rarity, locale = DEFAULT_LOCALE) {
     const key = String(rarity || 'common').toLowerCase().trim();
-    return RARITIES[key] || { label: rarity || 'Desconhecida', emoji: '⚪', color: STATUS_COLORS.neutral, weight: -1 };
+    const meta = RARITIES[key];
+    if (!meta) {
+        return {
+            label: rarity || traduzir(locale, 'raridades.desconhecida'),
+            emoji: '⚪',
+            color: STATUS_COLORS.neutral,
+            weight: -1
+        };
+    }
+    return { ...meta, label: traduzir(locale, `raridades.${key.replace(/ /g, '_')}`) };
 }
 
 /** "Ultra Rara" com o emoji na frente — o jeito padrão de mostrar raridade. */
-function rarityTag(rarity) {
-    const meta = getRarity(rarity);
+function rarityTag(rarity, locale = DEFAULT_LOCALE) {
+    const meta = getRarity(rarity, locale);
     return `${meta.emoji} **${meta.label}**`;
 }
 
@@ -50,15 +73,15 @@ function compareRarityDesc(a, b) {
     return getRarity(b).weight - getRarity(a).weight;
 }
 
-/** 12345 -> "12.345 🪙" */
-function coins(amount) {
+/** 12345 -> "12.345 🪙" em pt-BR, "12,345 🪙" em en-US */
+function coins(amount, locale = DEFAULT_LOCALE) {
     const value = Number(amount) || 0;
-    return `**${value.toLocaleString('pt-BR')}** ${COIN_FALLBACK}`;
+    return `**${value.toLocaleString(LOCALE_NUMERO[normalizar(locale)])}** ${COIN_FALLBACK}`;
 }
 
 /** Só o número formatado, sem emoji nem negrito. */
-function number(amount) {
-    return (Number(amount) || 0).toLocaleString('pt-BR');
+function number(amount, locale = DEFAULT_LOCALE) {
+    return (Number(amount) || 0).toLocaleString(LOCALE_NUMERO[normalizar(locale)]);
 }
 
 /**
@@ -71,21 +94,27 @@ function progressBar(value, max = 100, size = 10) {
     return '▰'.repeat(filled) + '▱'.repeat(size - filled);
 }
 
-/** Linha de atributos pronta para embed: ATA/LIF/POW com barras. */
-function statLines(card) {
+/**
+ * Linha de atributos pronta para embed: ATA/LIF/POW com barras.
+ *
+ * As siglas são traduzidas (ATA/LIF/POW -> ATK/HP/PWR) porque aparecem
+ * na carta e no embed o tempo todo — deixá-las em português seria a
+ * primeira coisa a denunciar que a tradução é parcial.
+ */
+function statLines(card, locale = DEFAULT_LOCALE) {
     const ata = card.ATA ?? 0;
     const lif = card.LIF ?? 0;
     const pow = card.POW ?? 0;
     return [
-        `⚔️ \`ATA\` ${progressBar(ata, 100)} **${ata}**`,
-        `❤️ \`LIF\` ${progressBar(lif, 250)} **${lif}**`,
-        `💥 \`POW\` ${progressBar(pow, 100)} **${pow}**`
+        `⚔️ \`${traduzir(locale, 'atributos.ata')}\` ${progressBar(ata, 100)} **${ata}**`,
+        `❤️ \`${traduzir(locale, 'atributos.lif')}\` ${progressBar(lif, 250)} **${lif}**`,
+        `💥 \`${traduzir(locale, 'atributos.pow')}\` ${progressBar(pow, 100)} **${pow}**`
     ].join('\n');
 }
 
 /** Nome com a primeira letra maiúscula, sem quebrar nomes já formatados. */
-function cardName(name) {
-    const text = String(name || 'Carta').trim();
+function cardName(name, locale = DEFAULT_LOCALE) {
+    const text = String(name || traduzir(locale, 'comum.carta')).trim();
     return text.charAt(0).toUpperCase() + text.slice(1);
 }
 
@@ -132,16 +161,16 @@ function medal(index) {
     return ['🥇', '🥈', '🥉'][index] || `\`#${index + 1}\``;
 }
 
-/** Formata um tempo restante em ms para "12 min 30 s". */
-function duration(ms) {
+/** Formata um tempo restante em ms para "12 min 30 s" / "12m 30s". */
+function duration(ms, locale = DEFAULT_LOCALE) {
     const total = Math.max(0, Math.floor(ms / 1000));
     const hours = Math.floor(total / 3600);
     const minutes = Math.floor((total % 3600) / 60);
     const seconds = total % 60;
     const parts = [];
-    if (hours > 0) parts.push(`${hours} h`);
-    if (minutes > 0) parts.push(`${minutes} min`);
-    if (seconds > 0 || parts.length === 0) parts.push(`${seconds} s`);
+    if (hours > 0) parts.push(`${hours}${traduzir(locale, 'tempo.h')}`);
+    if (minutes > 0) parts.push(`${minutes}${traduzir(locale, 'tempo.min')}`);
+    if (seconds > 0 || parts.length === 0) parts.push(`${seconds}${traduzir(locale, 'tempo.s')}`);
     return parts.join(' ');
 }
 

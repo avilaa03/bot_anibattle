@@ -1,5 +1,6 @@
 const BaseSlashCommand = require('../utils/BaseSlashCommand');
 const { SlashCommandBuilder } = require('discord.js');
+const { descricaoBase, localizacoes } = require('../utils/i18n');
 const magnataRun = require('../actions/run/magnataRun');
 
 module.exports = class MagnataSlashCommand extends BaseSlashCommand {
@@ -14,6 +15,7 @@ module.exports = class MagnataSlashCommand extends BaseSlashCommand {
     getSlashCommandJSON() {
         return new SlashCommandBuilder()
             .setName(this.name)
-            .setDescription('Ranking dos jogadores mais ricos do bot (top 10 por moedas)');
+            .setDescription(descricaoBase('comandos.magnata.descricao'))
+            .setDescriptionLocalizations(localizacoes('comandos.magnata.descricao'));
     }
 };

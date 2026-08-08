@@ -1,8 +1,8 @@
 const ui = require('../../utils/embeds');
 
-async function sellEnd(interaction) {
+async function sellEnd(interaction, t) {
     await interaction.followUp({
-        embeds: [ui.neutral('Tempo esgotado', 'O anúncio não foi criado. Use `/sell` de novo se ainda quiser vender.')]
+        embeds: [ui.neutral(t('comum.tempo_esgotado'), t('sell.tempo_esgotado_texto'))]
     }).catch(() => {});
 }
 

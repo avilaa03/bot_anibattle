@@ -2,6 +2,8 @@ const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { createBattle, generateBattleId, cancelBattle, setMessageRefs } = require('../../utils/battleState');
 const { trySpend, addBalance } = require('../../utils/economy');
 const ui = require('../../utils/embeds');
+const { criarT, DEFAULT_LOCALE } = require('../../utils/i18n');
+const { tDoUsuario } = require('../../utils/idioma');
 
 const MAX_CARDS_SHOWN = 25;
 const CARDS_PER_ROW = 5;
@@ -22,34 +24,45 @@ function ordenarParaBatalha(inventory) {
     });
 }
 
-function buildDeckChoiceMessage(battleId, side, inventory, selectedIds, deck, wager = 0) {
+/**
+ * Tela de montar o time, enviada no privado de cada jogador.
+ *
+ * O `t` vem de fora e é o do DONO desta mensagem — os dois lados de um
+ * mesmo duelo podem receber a tela em idiomas diferentes.
+ */
+function buildDeckChoiceMessage(battleId, side, inventory, selectedIds, deck, wager = 0, t = criarT(DEFAULT_LOCALE)) {
     const selecionadas = new Set((selectedIds || []).map(String));
     const completo = deck.length === 3;
 
     const embed = ui.base(completo ? ui.STATUS_COLORS.success : ui.STATUS_COLORS.warning)
-        .setTitle('⚔️ Monte seu time')
+        .setTitle(t('battle.monte_time'))
         .setDescription(
             completo
-                ? '✅ **Time completo!** Aguardando seu oponente escolher...'
+                ? t('battle.time_completo')
                 : [
-                    'Escolha **3 cartas** para batalhar.',
+                    t('battle.escolha_3'),
                     '',
                     `${'🔵'.repeat(deck.length)}${'⚪'.repeat(3 - deck.length)}  **${deck.length}/3**`,
                     '',
-                    '💡 *A ordem importa: sua 1ª carta enfrenta a 1ª do oponente, a 2ª contra a 2ª, e assim por diante.*'
+                    t('battle.ordem_importa')
                 ].join('\n')
         );
 
     if (wager > 0) {
-        embed.addFields({ name: '💰 Em jogo', value: `${ui.coins(wager * 2)} — o vencedor leva tudo`, inline: false });
+        embed.addFields({
+            name: t('battle.em_jogo'),
+            value: t('battle.em_jogo_texto', { valor: ui.coins(wager * 2, t.locale) }),
+            inline: false
+        });
     }
 
     if (deck.length > 0) {
         embed.addFields({
-            name: 'Seu time',
+            name: t('battle.seu_time'),
             value: deck.map((c, i) => {
-                const meta = ui.getRarity(c.rarity);
-                return `\`${i + 1}\` ${meta.emoji} **${ui.cardName(c.name)}** — OVR ${getOvr(c)}\n└ ⚔️ ${c.ATA ?? 0} · ❤️ ${c.LIF ?? 0} · 💥 ${c.POW ?? 0}`;
+                const meta = ui.getRarity(c.rarity, t.locale);
+                return `\`${i + 1}\` ${meta.emoji} **${ui.cardName(c.name, t.locale)}** — ${t('atributos.ovr')} ${getOvr(c)}\n`
+                    + `└ ⚔️ ${c.ATA ?? 0} · ❤️ ${c.LIF ?? 0} · 💥 ${c.POW ?? 0}`;
             }).join('\n')
         });
     }
@@ -57,7 +70,9 @@ function buildDeckChoiceMessage(battleId, side, inventory, selectedIds, deck, wa
     const cardsToShow = ordenarParaBatalha(inventory).slice(0, MAX_CARDS_SHOWN);
 
     if (inventory.length > MAX_CARDS_SHOWN) {
-        embed.setFooter({ text: `${ui.BRAND} • Mostrando suas ${MAX_CARDS_SHOWN} melhores cartas de ${inventory.length}` });
+        embed.setFooter({
+            text: `${ui.BRAND} • ${t('battle.mostrando_melhores', { mostradas: MAX_CARDS_SHOWN, total: inventory.length })}`
+        });
     }
 
     const rows = [];
@@ -69,7 +84,7 @@ function buildDeckChoiceMessage(battleId, side, inventory, selectedIds, deck, wa
             const card = cardsToShow[index];
             const cardId = String(card._id);
             const isSelected = selecionadas.has(cardId);
-            const meta = ui.getRarity(card.rarity);
+            const meta = ui.getRarity(card.rarity, t.locale);
             const nomeCurto = card.name.length > 60 ? card.name.slice(0, 57) + '…' : card.name;
             const label = `${nomeCurto} · ${getOvr(card)}`;
             actionRow.addComponents(
@@ -89,7 +104,7 @@ function buildDeckChoiceMessage(battleId, side, inventory, selectedIds, deck, wa
     return { embed, components: rows };
 }
 
-async function battleCollect(interaction, userX, userY, userXData, userYData, challengeMessage, wager = 0) {
+async function battleCollect(interaction, userX, userY, userXData, userYData, challengeMessage, wager = 0, t = criarT(DEFAULT_LOCALE)) {
     const filter = (i) => ['accept_battle', 'decline_battle'].includes(i.customId) && i.user.id === userY.id;
     const collector = challengeMessage.createMessageComponentCollector({ filter, time: 60000, max: 1 });
 
@@ -97,7 +112,7 @@ async function battleCollect(interaction, userX, userY, userXData, userYData, ch
         if (i.customId === 'decline_battle') {
             await i.update({
                 content: null,
-                embeds: [ui.neutral('Desafio recusado', `**${userY.username}** recusou o duelo.`)],
+                embeds: [ui.neutral(t('battle.recusado'), t('battle.recusado_texto', { jogador: userY.username }))],
                 components: []
             });
             return;
@@ -109,7 +124,10 @@ async function battleCollect(interaction, userX, userY, userXData, userYData, ch
         if (!debitoX) {
             await i.update({
                 content: null,
-                embeds: [ui.error('Aposta não cobrada', `**${userX.username}** não tem mais ${ui.coins(wager)} disponíveis.`)],
+                embeds: [ui.error(t('battle.aposta_nao_cobrada'), t('battle.sem_saldo_jogador', {
+                    jogador: userX.username,
+                    valor: ui.coins(wager, t.locale)
+                }))],
                 components: []
             });
             return;
@@ -120,7 +138,10 @@ async function battleCollect(interaction, userX, userY, userXData, userYData, ch
             await addBalance(userX.id, wager); // devolve
             await i.update({
                 content: null,
-                embeds: [ui.error('Aposta não cobrada', `**${userY.username}** não tem mais ${ui.coins(wager)} disponíveis.`)],
+                embeds: [ui.error(t('battle.aposta_nao_cobrada'), t('battle.sem_saldo_jogador', {
+                    jogador: userY.username,
+                    valor: ui.coins(wager, t.locale)
+                }))],
                 components: []
             });
             return;
@@ -131,23 +152,33 @@ async function battleCollect(interaction, userX, userY, userXData, userYData, ch
 
         await i.update({
             content: null,
-            embeds: [ui.success('Duelo aceito!', `**${userY.username}** topou. ${ui.coins(wager * 2)} em jogo.\n\nOs dois receberam no privado a tela para montar o time.`)],
+            embeds: [ui.success(t('battle.aceito'), t('battle.aceito_texto', {
+                jogador: userY.username,
+                valor: ui.coins(wager * 2, t.locale)
+            }))],
             components: []
         });
 
-        const msgXContent = buildDeckChoiceMessage(battleId, 'X', userXData.inventory, [], [], wager);
-        const msgYContent = buildDeckChoiceMessage(battleId, 'Y', userYData.inventory, [], [], wager);
+        // Cada DM sai no idioma do próprio destinatário — é mensagem
+        // privada, então não há motivo para os dois verem o mesmo idioma.
+        const [tX, tY] = await Promise.all([
+            tDoUsuario(userX.id, interaction.guildId),
+            tDoUsuario(userY.id, interaction.guildId)
+        ]);
+
+        const msgXContent = buildDeckChoiceMessage(battleId, 'X', userXData.inventory, [], [], wager, tX);
+        const msgYContent = buildDeckChoiceMessage(battleId, 'Y', userYData.inventory, [], [], wager, tY);
 
         try {
             const msgX = await userX.send({
-                content: `Você está batalhando contra **${userY.username}**!`,
+                content: tX('battle.dm_contra', { oponente: userY.username }),
                 embeds: [msgXContent.embed],
                 components: msgXContent.components
             });
             await setMessageRefs(battleId, 'X', msgX.id, msgX.channel.id);
 
             const msgY = await userY.send({
-                content: `Você está batalhando contra **${userX.username}**!`,
+                content: tY('battle.dm_contra', { oponente: userX.username }),
                 embeds: [msgYContent.embed],
                 components: msgYContent.components
             });
@@ -157,7 +188,7 @@ async function battleCollect(interaction, userX, userY, userXData, userYData, ch
             // Não conseguiu abrir o privado: cancela devolvendo as apostas.
             await cancelBattle(battleId);
             await interaction.followUp({
-                embeds: [ui.error('Não foi possível iniciar', 'Não consegui enviar mensagem no privado de um dos jogadores. Habilitem mensagens diretas do servidor.\n\nAs apostas foram devolvidas.')]
+                embeds: [ui.error(t('battle.nao_iniciou'), t('battle.nao_iniciou_texto'))]
             }).catch(() => {});
         }
     });

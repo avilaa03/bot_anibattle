@@ -97,14 +97,34 @@ function resolveAttack(atacante, defensor, vidaPercentualAtacante, rng) {
     };
 }
 
+/**
+ * Descreve um golpe como EVENTO, não como frase pronta.
+ *
+ * O motor não sabe em que idioma a batalha vai ser mostrada — e nem
+ * deveria: o mesmo duelo pode ser exibido em português no canal e em
+ * inglês na DM de um dos jogadores. Quem transforma evento em texto é
+ * `narrar()`, na hora de montar o embed.
+ *
+ * Isto também conserta um acoplamento perigoso que existia antes: o
+ * handler contava críticos e viradas procurando as palavras "CRÍTICO" e
+ * "VIRADA" dentro do log com expressão regular. Traduzir uma única
+ * dessas palavras zeraria silenciosamente as conquistas de crítico —
+ * sem erro, sem log, só jogadores reclamando que o troféu não desbloqueia.
+ * Agora a contagem vem de campos booleanos.
+ */
 function descreverGolpe(atacante, defensor, resultado, vidaRestante) {
     if (resultado.dodged) {
-        return `💨 **${defensor.name}** esquivou do ataque de **${atacante.name}**!`;
+        return { tipo: 'esquiva', atacante: atacante.name, defensor: defensor.name };
     }
-    let prefixo = '';
-    if (resultado.desperate) prefixo = '🔥 **VIRADA!** ';
-    else if (resultado.crit) prefixo = '💥 **CRÍTICO!** ';
-    return `${prefixo}**${atacante.name}** causou **${resultado.damage}** de dano — **${defensor.name}** ficou com **${Math.max(0, vidaRestante)}** de vida.`;
+    return {
+        tipo: 'golpe',
+        atacante: atacante.name,
+        defensor: defensor.name,
+        dano: resultado.damage,
+        vidaRestante: Math.max(0, vidaRestante),
+        crit: resultado.crit,
+        desperate: resultado.desperate
+    };
 }
 
 /** Duelo 1v1 entre duas cartas. Retorna vencedor ('A' ou 'B') e o log. */
@@ -116,7 +136,7 @@ function runRound(cardA, cardB, roundIndex, rng = Math.random) {
     const log = [];
 
     let vezDeA = rng() < firstStrikeChance(cardA.ATA ?? 0, cardB.ATA ?? 0);
-    log.push(`⚡ **${vezDeA ? cardA.name : cardB.name}** foi mais rápido e atacou primeiro.`);
+    log.push({ tipo: 'primeiro', carta: vezDeA ? cardA.name : cardB.name });
 
     for (let turno = 0; turno < MAX_TURNS; turno++) {
         const atacante = vezDeA ? cardA : cardB;
@@ -131,11 +151,11 @@ function runRound(cardA, cardB, roundIndex, rng = Math.random) {
         log.push(descreverGolpe(atacante, defensor, resultado, vezDeA ? lifeB : lifeA));
 
         if (lifeB <= 0) {
-            log.push(`🏆 **${cardA.name}** venceu o confronto!`);
+            log.push({ tipo: 'venceu', carta: cardA.name });
             return { winner: 'A', loser: 'B', log, lifeA, lifeB: 0 };
         }
         if (lifeA <= 0) {
-            log.push(`🏆 **${cardB.name}** venceu o confronto!`);
+            log.push({ tipo: 'venceu', carta: cardB.name });
             return { winner: 'B', loser: 'A', log, lifeA: 0, lifeB };
         }
 
@@ -145,7 +165,7 @@ function runRound(cardA, cardB, roundIndex, rng = Math.random) {
     // Estourou o limite de turnos: decide por percentual de vida restante.
     const percentA = lifeA / maxA;
     const percentB = lifeB / maxB;
-    log.push('⏱️ O confronto se estendeu — vence quem está em melhor estado.');
+    log.push({ tipo: 'tempo' });
 
     if (percentA === percentB) {
         const vencedor = (cardA.POW ?? 0) >= (cardB.POW ?? 0) ? 'A' : 'B';
@@ -157,6 +177,37 @@ function runRound(cardA, cardB, roundIndex, rng = Math.random) {
 }
 
 /**
+ * Transforma um evento do log em frase, no idioma pedido.
+ * @param {object} evento entrada de `log`
+ * @param {function} t tradutor já preso a um idioma
+ */
+function narrar(evento, t) {
+    switch (evento.tipo) {
+        case 'primeiro':
+            return t('battle.log_primeiro', { carta: evento.carta });
+        case 'esquiva':
+            return t('battle.log_esquiva', { defensor: evento.defensor, atacante: evento.atacante });
+        case 'golpe': {
+            const prefixo = evento.desperate
+                ? t('battle.log_virada')
+                : evento.crit ? t('battle.log_critico') : '';
+            return prefixo + t('battle.log_dano', {
+                atacante: evento.atacante,
+                dano: evento.dano,
+                defensor: evento.defensor,
+                vida: evento.vidaRestante
+            });
+        }
+        case 'venceu':
+            return t('battle.log_venceu', { carta: evento.carta });
+        case 'tempo':
+            return t('battle.log_tempo');
+        default:
+            return '';
+    }
+}
+
+/**
  * Batalha 3v3: três confrontos 1v1, na ordem em que cada jogador escolheu
  * suas cartas. Quem vencer mais confrontos leva a batalha.
  */
@@ -165,8 +216,19 @@ function runBattle(deckX, deckY, rng = Math.random) {
     let winsX = 0;
     let winsY = 0;
 
+    // Contagem da luta inteira, para missões e conquistas. Vem daqui (e
+    // não de uma varredura de texto no handler) porque o motor é o único
+    // lugar que sabe de verdade o que aconteceu.
+    let criticos = 0;
+    let viradas = 0;
+
     for (let i = 0; i < 3; i++) {
         const result = runRound(deckX[i], deckY[i], i, rng);
+        for (const evento of result.log) {
+            if (evento.tipo !== 'golpe') continue;
+            if (evento.crit) criticos++;
+            if (evento.desperate) viradas++;
+        }
         rounds.push({
             round: i + 1,
             cardX: deckX[i].name,
@@ -179,12 +241,13 @@ function runBattle(deckX, deckY, rng = Math.random) {
     }
 
     const winner = winsX > winsY ? 'X' : winsX < winsY ? 'Y' : null;
-    return { winner, winsX, winsY, rounds };
+    return { winner, winsX, winsY, rounds, criticos, viradas };
 }
 
 module.exports = {
     runRound,
     runBattle,
+    narrar,
     resolveAttack,
     critChance,
     dodgeChance,

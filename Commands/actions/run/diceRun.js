@@ -1,4 +1,5 @@
 const ui = require('../../utils/embeds');
+const { tDaInteracao } = require('../../utils/idioma');
 
 const FACES = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
 
@@ -7,11 +8,12 @@ function Dice() {
 }
 
 async function diceRun(client, interaction) {
+    const t = await tDaInteracao(interaction);
     const dice = Dice();
     const embed = ui.base(ui.STATUS_COLORS.info)
         .setAuthor({ name: interaction.user.username, iconURL: interaction.user.displayAvatarURL() })
-        .setTitle(`${FACES[dice - 1]}  Você tirou ${dice}`)
-        .setDescription('Dado de 6 lados.');
+        .setTitle(`${FACES[dice - 1]}  ${t('dice.tirou', { valor: dice })}`)
+        .setDescription(t('dice.descricao'));
     return interaction.reply({ embeds: [embed] });
 }
 

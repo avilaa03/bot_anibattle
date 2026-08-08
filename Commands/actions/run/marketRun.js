@@ -3,8 +3,10 @@ const Market = require('../../utils/marketSchema.js');
 const { escapeRegex } = require('../../utils/regexUtils.js');
 const ui = require('../../utils/embeds.js');
 const { buildSelectMenu } = require('../collect/marketCollect.js');
+const { tDaInteracao } = require('../../utils/idioma.js');
 
 module.exports = async (client, interaction, marketCollect, marketEnd) => {
+    const t = await tDaInteracao(interaction);
     const cardName = interaction.options.getString('cardname') || '';
     const minValue = interaction.options.getInteger('minvalue') || 0;
     const maxValue = interaction.options.getInteger('maxvalue') || Number.MAX_VALUE;
@@ -27,7 +29,7 @@ module.exports = async (client, interaction, marketCollect, marketEnd) => {
     const listings = await Market.find(query).lean();
 
     if (listings.length === 0) {
-        const embed = ui.neutral('🛒 Mercado', 'Nenhuma carta encontrada com esses filtros. Tente buscar sem filtro ou use `/sell` para anunciar a sua.');
+        const embed = ui.neutral(t('market.titulo_curto'), t('market.vazio'));
         return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
     }
 
@@ -42,16 +44,16 @@ module.exports = async (client, interaction, marketCollect, marketEnd) => {
         const pageCards = listings.slice(start, start + cardsPerPage);
 
         const lista = pageCards.map((listing, index) => {
-            const meta = ui.getRarity(listing.rarity);
+            const meta = ui.getRarity(listing.rarity, t.locale);
             const ovr = listing.overall ?? (listing.marketValue != null ? Math.round(listing.marketValue / 10) : 0);
-            return `\`${index + 1}\` ${meta.emoji} **${ui.cardName(listing.cardName)}** — OVR **${ovr}**\n`
-                + `└ ${listing.series || '—'} • ${ui.coins(listing.listingPrice)} • vendedor <@${listing.sellerId}>`;
+            return `\`${index + 1}\` ${meta.emoji} **${ui.cardName(listing.cardName, t.locale)}** — ${t('atributos.ovr')} **${ovr}**\n`
+                + `└ ${listing.series || t('comum.traco')} • ${ui.coins(listing.listingPrice, t.locale)} • ${t('market.vendedor')} <@${listing.sellerId}>`;
         }).join('\n');
 
         return ui.base(ui.STATUS_COLORS.info)
-            .setTitle('🛒 Mercado de cartas')
-            .setDescription(`${lista}\n\n💡 *Use o menu abaixo para escolher uma carta.*`)
-            .setFooter({ text: `${ui.BRAND} • Página ${page + 1} de ${totalPages} • ${listings.length} anúncio(s)` });
+            .setTitle(t('market.titulo'))
+            .setDescription(`${lista}\n\n${t('market.dica_menu')}`)
+            .setFooter({ text: `${ui.BRAND} • ${t('comum.pagina', { atual: page + 1, total: totalPages })} • ${t('market.anuncios', { n: listings.length })}` });
     };
 
     const generateButtons = (page) => {
@@ -74,7 +76,7 @@ module.exports = async (client, interaction, marketCollect, marketEnd) => {
         );
 
         // O menu de seleção substituiu o "digite o número no chat".
-        return [buildSelectMenu(listings, page, cardsPerPage), navegacao];
+        return [buildSelectMenu(listings, page, cardsPerPage, t), navegacao];
     };
 
     const embedMessage = await interaction.editReply({
@@ -82,5 +84,5 @@ module.exports = async (client, interaction, marketCollect, marketEnd) => {
         components: generateButtons(currentPage)
     });
 
-    marketCollect(interaction, embedMessage, currentPage, listings, cardsPerPage, marketEnd, generateEmbed, generateButtons);
+    marketCollect(interaction, embedMessage, currentPage, listings, cardsPerPage, marketEnd, generateEmbed, generateButtons, t);
 };

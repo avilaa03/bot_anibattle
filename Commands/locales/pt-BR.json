@@ -1,0 +1,1119 @@
+{
+  "comum": {
+    "carta": "Carta",
+    "erro": "Erro",
+    "erro_generico": "Ocorreu um erro ao processar sua ação. Tente novamente.",
+    "erro_titulo": "❌ Erro",
+    "comando_indisponivel": "Comando indisponível",
+    "comando_indisponivel_texto": "Este comando não está disponível no momento.",
+    "nenhum": "Nenhum",
+    "nenhuma": "Nenhuma",
+    "traco": "—",
+    "sim": "Sim",
+    "nao": "Não",
+    "cancelar": "Cancelar",
+    "confirmar": "Confirmar",
+    "anterior": "Anterior",
+    "proxima": "Próxima",
+    "voce": "você",
+    "jogador": "Jogador",
+    "jogadores": "jogadores",
+    "cartas": "cartas",
+    "moedas": "moedas",
+    "sem_permissao": "Sem permissão",
+    "apenas_quem_usou": "Apenas quem usou o comando pode mexer aqui.",
+    "tempo_esgotado": "Tempo esgotado",
+    "inventario_vazio": "Inventário vazio",
+    "inventario_vazio_texto": "Você ainda não tem cartas. Use `/roll` para ganhar a primeira!",
+    "perfil_nao_encontrado": "Perfil não encontrado",
+    "perfil_nao_encontrado_texto": "Use `/roll` ou `/daily` para criar seu perfil primeiro.",
+    "carta_nao_encontrada": "Carta não encontrada",
+    "usuario_nao_encontrado": "Usuário não encontrado",
+    "saldo_insuficiente": "Saldo insuficiente",
+    "pagina": "Página {atual}/{total}",
+    "sua_posicao": "Sua posição",
+    "de": "de"
+  },
+
+  "raridades": {
+    "common": "Comum",
+    "rare": "Rara",
+    "ultra_rare": "Ultra Rara",
+    "legendary": "Lendária",
+    "master": "Mestra",
+    "desconhecida": "Desconhecida"
+  },
+
+  "atributos": {
+    "ata": "ATA",
+    "lif": "LIF",
+    "pow": "POW",
+    "overall": "Overall",
+    "ovr": "OVR"
+  },
+
+  "tempo": {
+    "h": " h",
+    "min": " min",
+    "s": " s",
+    "dia": "dia",
+    "dias": "dias"
+  },
+
+  "moderacao": {
+    "titulo": "Conta suspensa",
+    "descricao": "Sua conta está impedida de usar o AniBattle.",
+    "motivo": "Motivo",
+    "motivo_nao_informado": "Não informado.",
+    "prazo": "Prazo",
+    "prazo_permanente": "Suspensão **permanente**.",
+    "prazo_ate": "Termina <t:{relativo}:R>, em <t:{absoluto}:f>.",
+    "rodape": "Se você acha que foi engano, fale no servidor de suporte"
+  },
+
+  "elo": {
+    "divisoes": {
+      "bronze": "Bronze",
+      "prata": "Prata",
+      "ouro": "Ouro",
+      "platina": "Platina",
+      "diamante": "Diamante",
+      "mestre": "Mestre"
+    }
+  },
+
+  "conquistas": {
+    "tipos": {
+      "bronze": "Bronze",
+      "prata": "Prata",
+      "ouro": "Ouro",
+      "platina": "Platina"
+    },
+    "platina": {
+      "nome": "AniBattle Platinado",
+      "descricao": "Conquiste todos os outros troféus."
+    },
+    "primeira_carta": {
+      "nome": "Primeira de muitas",
+      "descricao": "Guarde sua primeira carta no inventário."
+    },
+    "primeira_vitoria": {
+      "nome": "Estreia vitoriosa",
+      "descricao": "Vença sua primeira batalha."
+    },
+    "primeira_venda": {
+      "nome": "Comerciante",
+      "descricao": "Venda uma carta no mercado."
+    },
+    "primeira_troca": {
+      "nome": "Negociador",
+      "descricao": "Complete uma troca com outro jogador."
+    },
+    "colecionador_10": {
+      "nome": "Começando a coleção",
+      "descricao": "Descubra 10 cartas na Pokédex."
+    },
+    "rico_1000": {
+      "nome": "Primeiro milheiro",
+      "descricao": "Acumule 1.000 moedas."
+    },
+    "streak_3": {
+      "nome": "Criando o hábito",
+      "descricao": "Colete a recompensa diária 3 dias seguidos."
+    },
+    "primeira_rara": {
+      "nome": "Achado raro",
+      "descricao": "Tenha uma carta rara ou melhor."
+    },
+    "favorita": {
+      "nome": "Tenho minha preferida",
+      "descricao": "Defina uma carta favorita."
+    },
+    "colecionador_100": {
+      "nome": "Colecionador",
+      "descricao": "Descubra 100 cartas na Pokédex."
+    },
+    "vitorias_25": {
+      "nome": "Veterano de guerra",
+      "descricao": "Vença 25 batalhas."
+    },
+    "rico_100k": {
+      "nome": "Magnata",
+      "descricao": "Acumule 100.000 moedas."
+    },
+    "streak_7": {
+      "nome": "Uma semana inteira",
+      "descricao": "Mantenha 7 dias de sequência no diário."
+    },
+    "lendaria": {
+      "nome": "Lenda viva",
+      "descricao": "Tenha uma carta lendária."
+    },
+    "trocas_10": {
+      "nome": "Corretor de cartas",
+      "descricao": "Complete 10 trocas."
+    },
+    "serie_completa": {
+      "nome": "Fã de carteirinha",
+      "descricao": "Complete todas as cartas de uma série na Pokédex."
+    },
+    "criticos_50": {
+      "nome": "Golpe certeiro",
+      "descricao": "Acerte 50 golpes críticos em batalha."
+    },
+    "virada": {
+      "nome": "Nunca desista",
+      "descricao": "Vença um confronto com um golpe de virada (abaixo de 40% de vida)."
+    },
+    "elo_1300": {
+      "nome": "Competidor",
+      "descricao": "Alcance 1300 de pontuação no ranking."
+    },
+    "colecionador_500": {
+      "nome": "Arquivista",
+      "descricao": "Descubra 500 cartas na Pokédex."
+    },
+    "pokedex_completa": {
+      "nome": "Catálogo completo",
+      "descricao": "Descubra TODAS as cartas do jogo."
+    },
+    "mestra": {
+      "nome": "Tocado pelos deuses",
+      "descricao": "Tenha uma carta mestra."
+    },
+    "vitorias_100": {
+      "nome": "Invencível",
+      "descricao": "Vença 100 batalhas."
+    },
+    "streak_30": {
+      "nome": "Todo santo dia",
+      "descricao": "Mantenha 30 dias de sequência no diário."
+    },
+    "elo_1600": {
+      "nome": "Lenda da arena",
+      "descricao": "Alcance 1600 de pontuação no ranking."
+    },
+    "torneio": {
+      "nome": "Campeão",
+      "descricao": "Vença um torneio."
+    },
+    "deck_lendario": {
+      "nome": "Time dos sonhos",
+      "descricao": "Tenha 3 cartas lendárias ou mestras ao mesmo tempo."
+    }
+  },
+
+  "missoes_catalogo": {
+    "rolar_3": { "nome": "Aquecimento", "descricao": "Role 3 cartas" },
+    "rolar_5": { "nome": "Caçador", "descricao": "Role 5 cartas" },
+    "vencer_1": { "nome": "Duelista", "descricao": "Vença 1 batalha" },
+    "vencer_3": { "nome": "Dominante", "descricao": "Vença 3 batalhas" },
+    "batalhar_2": { "nome": "Sem medo", "descricao": "Participe de 2 batalhas" },
+    "descobrir_1": { "nome": "Novidade", "descricao": "Descubra 1 carta nova na Pokédex" },
+    "vender_1": { "nome": "Feirante", "descricao": "Venda 1 carta no mercado" },
+    "mostrar_1": { "nome": "Exibido", "descricao": "Use /show ou /ficha 1 vez" },
+    "critico_5": { "nome": "Precisão", "descricao": "Acerte 5 golpes críticos" },
+    "sem_rolar_20": { "nome": "Maratona de rolagens", "descricao": "Role 20 cartas" },
+    "sem_vencer_10": { "nome": "Temporada vitoriosa", "descricao": "Vença 10 batalhas" },
+    "sem_descobrir_10": { "nome": "Explorador", "descricao": "Descubra 10 cartas novas" },
+    "sem_trocar_2": { "nome": "Diplomata", "descricao": "Complete 2 trocas" },
+    "sem_mercado_3": { "nome": "Movimentando o mercado", "descricao": "Venda ou compre 3 cartas" },
+    "sem_diario_5": { "nome": "Presença confirmada", "descricao": "Colete o diário 5 dias" }
+  },
+
+  "vip_catalogo": {
+    "tiers": {
+      "bronze": "Bronze",
+      "prata": "Prata",
+      "ouro": "Ouro",
+      "master": "Master"
+    },
+    "molduras": {
+      "nenhuma": { "nome": "Padrão", "descricao": "A moldura normal da raridade." },
+      "bronze": { "nome": "Bronze", "descricao": "Borda dupla em tom bronze." },
+      "prata": { "nome": "Prata", "descricao": "Borda dupla prateada com brilho." },
+      "ouro": { "nome": "Ouro", "descricao": "Borda dourada com cantos ornamentados." },
+      "sakura": { "nome": "Sakura", "descricao": "Pétalas de cerejeira nos cantos." },
+      "holografica": { "nome": "Holográfica", "descricao": "Faixa iridescente que atravessa a carta." },
+      "neon": { "nome": "Neon", "descricao": "Contorno neon pulsante." }
+    }
+  },
+
+  "notificacoes": {
+    "trofeu_desbloqueado": "Troféu desbloqueado!",
+    "trofeu_rodape": "Troféu de {tipo} • +{pontos} pontos",
+    "platina_titulo": "💎 PLATINA CONQUISTADA!",
+    "ouro_titulo": "{emoji} Troféu de Ouro!",
+    "platina_descricao": "<@{userId}> conquistou **todos os troféus do AniBattle**.\n\n**{nome}** — *{descricao}*",
+    "ouro_descricao": "<@{userId}> desbloqueou **{nome}**\n\n*{descricao}*",
+    "anuncio_rodape": "Veja os seus em /conquistas",
+    "platinou": "🎉 <@{userId}> PLATINOU O ANIBATTLE! 🎉",
+    "missao_completa": "Missão completa!",
+    "missao_linha": "✅ **{nome}** — {descricao}\n└ Recompensa: {recompensa}",
+    "missao_para_receber": "Para receber",
+    "missao_resgate": "Use `/missoes` e clique em **Resgatar** ({total} disponíveis)."
+  },
+
+  "idioma": {
+    "titulo_status": "🌐 Idioma do AniBattle",
+    "descricao_status": "O bot responde em português ou inglês. Use `/idioma idioma:` para mudar.",
+    "campo_voce": "Sua preferência",
+    "campo_servidor": "Padrão do servidor",
+    "campo_efetivo": "Você está vendo",
+    "automatico": "Automático",
+    "em_dm": "Não se aplica em DM",
+    "rodape_ajuda": "escopo:servidor muda para todo mundo (precisa de Gerenciar servidor)",
+    "rodape_individual": "Quem preferir outro idioma pode usar /idioma escopo:mim",
+    "nao_suportado": "Esse idioma não é suportado.",
+    "servidor_em_dm": "Não dá para configurar um servidor a partir de uma DM.",
+    "precisa_gerenciar": "Você precisa da permissão **Gerenciar servidor** para mudar o idioma de todo mundo. Para mudar só o seu, use `/idioma escopo:mim`.",
+    "servidor_alterado_titulo": "Idioma do servidor atualizado",
+    "servidor_alterado": "A partir de agora o bot responde em **{idioma}** neste servidor.",
+    "servidor_automatico": "O servidor voltou ao **automático**: cada jogador vê o bot no idioma do próprio Discord.",
+    "pessoal_alterado_titulo": "Idioma atualizado",
+    "pessoal_alterado": "Agora o bot fala com você em **{idioma}**, em qualquer servidor.",
+    "pessoal_automatico": "Sua preferência foi apagada. Você volta a seguir o servidor — agora você está vendo **{idioma}**."
+  },
+
+  "roll": {
+    "erro_busca": "Houve um erro ao buscar suas informações. Tente novamente.",
+    "sem_cartas": "Nenhuma carta encontrada no banco de dados.",
+    "cooldown_titulo": "Ainda no cooldown",
+    "cooldown_texto": "Você poderá rolar de novo <t:{quando}:R>.",
+    "tempo_restante": "Tempo restante",
+    "seu_intervalo": "Seu intervalo",
+    "rodape_vip": "{plano}: cooldown reduzido em {porcento}%",
+    "rodape_sem_vip": "Assinantes rolam com até 40% menos espera — veja /vip",
+    "autor": "{jogador} rolou uma carta",
+    "linha_raridade": "Raridade {raridade} • Overall **{overall}**",
+    "valor_mercado": "Valor de mercado",
+    "venda_rapida": "Venda rápida",
+    "botao_guardar": "Guardar no inventário",
+    "botao_vender": "Vender por {valor}",
+    "guardada": "🎴 **{carta}** foi guardada no seu inventário.",
+    "nova_pokedex": "📖 **Nova entrada na Pokédex!** Veja em `/pokedex`.",
+    "vendida": "🪙 Você vendeu **{carta}** por {valor}. Saldo: {saldo}",
+    "expirou": "O tempo para coletar a carta expirou.",
+    "desejo_titulo": "💭 Carta da sua lista de desejos apareceu!",
+    "desejo_texto": "{emoji} **{carta}** — *{serie}*\n\nRolada por **{jogador}**. Que tal propor uma troca com `/trocar`?"
+  },
+
+  "daily": {
+    "marcos": {
+      "7": "Uma semana!",
+      "14": "Duas semanas!",
+      "30": "Um mês inteiro!",
+      "60": "Dois meses!",
+      "100": "Cem dias!"
+    },
+    "dias": "**{n}** dia(s)",
+    "ja_coletada_titulo": "Recompensa já coletada",
+    "ja_coletada_texto": "Você já pegou a de hoje. A próxima libera <t:{quando}:R>.",
+    "sequencia_atual": "🔥 Sequência atual",
+    "sequencia": "🔥 Sequência",
+    "recorde": "🏆 Seu recorde",
+    "saldo": "Saldo",
+    "saldo_emoji": "💰 Saldo",
+    "proximo_marco": "🎯 Próximo marco",
+    "proximo_marco_texto": "Dia **{dia}** — {nome} (recompensa {multiplicador}x)\nFaltam **{faltam}** dia(s).",
+    "coletada_titulo": "✅ Recompensa diária coletada",
+    "recebeu": "Você recebeu {valor}.",
+    "recebeu_sequencia_perdida": "Você recebeu {valor}.\n\n💔 Sua sequência de **{dias}** dias foi perdida — você faltou um dia.",
+    "bonus_marco": "Bônus de marco",
+    "bonus_marco_texto": "Recompensa multiplicada por **{multiplicador}x**!",
+    "bonus_vip": "Bônus VIP",
+    "bonus_vip_texto": "**{plano}** — {multiplicador}x (base era {base})",
+    "rodape_proximo": "Dia {dia}: {nome} ({multiplicador}x) — faltam {faltam} dia(s)",
+    "rodape_volte": "Volte amanhã para manter a sequência",
+    "erro": "Houve um erro ao processar sua recompensa diária."
+  },
+
+  "quicksell": {
+    "nenhuma_com_nome": "Nenhuma carta no seu inventário tem \"{nome}\" no nome.",
+    "expirou": "O tempo para vender a carta expirou.",
+    "titulo": "🪙 Vender {carta}?",
+    "recebera": "Você receberá {valor} por esta carta.",
+    "irreversivel": "⚠️ *Esta ação não pode ser desfeita.*",
+    "vendida": "Carta vendida",
+    "vendida_texto": "**{carta}** foi vendida por {valor}.",
+    "saldo_atual": "Saldo atual",
+    "cancelada": "Venda cancelada"
+  },
+
+  "inventory": {
+    "autor": "Coleção de {jogador}",
+    "total_cartas": "Total de cartas",
+    "valor_colecao": "Valor da coleção"
+  },
+
+  "show": {
+    "contador": "Carta {atual} de {total}"
+  },
+
+  "market": {
+    "titulo": "🛒 Mercado de cartas",
+    "titulo_curto": "🛒 Mercado",
+    "vazio": "Nenhuma carta encontrada com esses filtros. Tente buscar sem filtro ou use `/sell` para anunciar a sua.",
+    "vendedor": "vendedor",
+    "vendedor_linha": "Vendedor: <@{id}>",
+    "preco": "Preço: {valor}",
+    "dica_menu": "💡 *Use o menu abaixo para escolher uma carta.*",
+    "anuncios": "{n} anúncio(s)",
+    "placeholder": "Escolha uma carta para comprar",
+    "indisponivel": "Carta indisponível",
+    "anuncio_sumiu": "Esse anúncio não existe mais.",
+    "ja_vendida": "Esta carta já foi vendida para outro jogador.",
+    "anuncio_seu": "Anúncio seu",
+    "anuncio_seu_texto": "Você não pode comprar a própria carta. Use `/undosell` para retirá-la.",
+    "confirmar_titulo": "🛒 Confirmar compra",
+    "botao_comprar": "Comprar",
+    "sem_saldo": "Esta carta custa {valor} e você não tem esse valor.",
+    "compra_titulo": "Compra realizada",
+    "compra_texto": "{emoji} **{carta}** agora é sua!",
+    "voce_pagou": "Você pagou",
+    "vendedor_recebeu": "Vendedor recebeu",
+    "taxa": "Taxa ({porcento}%)",
+    "seu_saldo": "Seu saldo",
+    "nova_pokedex": "📖 **Nova entrada na Pokédex!**",
+    "cancelada": "Compra cancelada",
+    "cancelada_texto": "Nenhuma moeda foi gasta."
+  },
+
+  "sell": {
+    "titulo": "🏪 Anunciar {carta}",
+    "preco_anuncio": "Preço do anúncio: {valor}",
+    "voce_recebe": "Você recebe: {valor} *(taxa de {porcento}%)*",
+    "botao_anunciar": "Anunciar por {valor}",
+    "erro_render": "Erro ao gerar a carta",
+    "erro_timeout": "A imagem demorou demais para carregar. Tente novamente.",
+    "erro_exibir": "Não foi possível exibir a carta. Tente novamente.",
+    "sumiu_do_inventario": "Essa carta não está mais no seu inventário.",
+    "anunciada": "Carta anunciada",
+    "anunciada_texto": "{emoji} **{carta}** está à venda por {valor}.",
+    "recebe_na_venda": "Você recebe na venda",
+    "taxa_mercado": "Taxa do mercado ({porcento}%)",
+    "rodape_undosell": "Use /undosell para retirar o anúncio",
+    "cancelado": "Anúncio cancelado",
+    "cancelado_texto": "Sua carta continua no inventário.",
+    "tempo_esgotado_texto": "O anúncio não foi criado. Use `/sell` de novo se ainda quiser vender."
+  },
+
+  "undosell": {
+    "nome_invalido": "Nome inválido",
+    "nome_invalido_texto": "Informe o nome da carta que você quer retirar do mercado.",
+    "nao_encontrado": "Anúncio não encontrado",
+    "nao_encontrado_texto": "Nenhum anúncio seu com esse nome (ou a carta já foi vendida).",
+    "titulo": "📋 Retirar do mercado",
+    "confirme": "Confirme a retirada — a carta volta para o seu inventário.",
+    "preco_anuncio": "Preço no anúncio",
+    "raridade": "Raridade",
+    "contador": "Anúncio {atual} de {total}",
+    "botao_confirmar": "Confirmar retirada",
+    "cancelado": "Cancelado",
+    "cancelado_texto": "Nenhuma alteração feita.",
+    "perfil_sumiu": "Não foi possível localizar seu perfil.",
+    "removido": "Anúncio removido",
+    "removido_texto": "**{carta}** voltou para o seu inventário."
+  },
+
+  "mymarket": {
+    "vazio_titulo": "📋 Seus anúncios",
+    "vazio_texto": "Você não tem cartas anunciadas. Use `/sell` para colocar uma à venda.",
+    "autor": "Anúncios de {jogador}",
+    "titulo": "🏪 Sua banca no mercado",
+    "a_venda": "🟢 À venda ({n})",
+    "vendidas": "✅ Já vendidas ({n})",
+    "e_mais": "...e mais {n}",
+    "anunciado_agora": "Anunciado agora",
+    "total_vendido": "Total já vendido",
+    "botao_limpar": "Limpar histórico de vendas",
+    "historico_limpo": "Histórico limpo",
+    "historico_limpo_texto": "{n} venda(s) removida(s) do seu histórico."
+  },
+
+  "balance": {
+    "titulo": "🪙 Carteira",
+    "titulo_curto": "🪙 Saldo",
+    "sem_perfil_voce": "Você ainda não tem um perfil. Use `/daily` ou `/roll` para começar.",
+    "sem_perfil_outro": "**{jogador}** ainda não tem um perfil. Use `/daily` ou `/roll` para começar.",
+    "em_moedas": "Em moedas",
+    "em_cartas": "Em cartas",
+    "patrimonio": "Patrimônio total",
+    "erro": "Houve um erro ao buscar o saldo."
+  },
+
+  "give": {
+    "destinatario_invalido": "Destinatário inválido",
+    "si_mesmo": "Você não pode transferir moedas para si mesmo.",
+    "bot": "Bots não recebem moedas.",
+    "valor_invalido": "Valor inválido",
+    "valor_invalido_texto": "Informe uma quantia maior que zero.",
+    "sem_saldo": "Você tem {saldo} e precisa de {precisa}.",
+    "confirmar_titulo": "Confirmar transferência",
+    "confirmar_texto": "Você vai enviar {valor} para **{jogador}**.",
+    "saldo_agora": "Seu saldo agora",
+    "saldo_depois": "Depois da transferência",
+    "rodape_prazo": "Você tem 30 segundos para confirmar",
+    "cancelada": "Transferência cancelada",
+    "cancelada_texto": "Nenhuma moeda foi movida.",
+    "saldo_mudou": "Seu saldo mudou e não dá mais para completar essa transferência.",
+    "concluida": "Transferência concluída",
+    "concluida_texto": "{valor} enviadas para <@{id}>.",
+    "seu_saldo": "Seu saldo",
+    "saldo_destinatario": "Saldo do destinatário",
+    "expirou": "A transferência foi cancelada porque você não confirmou a tempo.",
+    "erro": "Houve um erro ao executar a transferência."
+  },
+
+  "ping": {
+    "calculando": "Calculando...",
+    "titulo": "🏓 Pong",
+    "resposta": "Resposta",
+    "status": "Status",
+    "excelente": "🟢 Excelente",
+    "aceitavel": "🟡 Aceitável",
+    "lento": "🔴 Lento"
+  },
+
+  "dice": {
+    "tirou": "Você tirou {valor}",
+    "descricao": "Dado de 6 lados."
+  },
+
+  "info": {
+    "descricao": "Bot de coleção e batalha de cards de personagens de anime.",
+    "jogadores": "👥 Jogadores",
+    "cartas": "🎴 Cartas no catálogo",
+    "servidores": "🌐 Servidores",
+    "online_ha": "⏱️ Online há",
+    "latencia": "📡 Latência",
+    "criador": "👤 Criador",
+    "codigo": "💻 Código"
+  },
+
+  "magnata": {
+    "titulo": "💰 Magnatas do AniBattle",
+    "titulo_curto": "💰 Magnatas",
+    "vazio": "Nenhum jogador com saldo registrado ainda. Use `/daily` para começar!",
+    "erro": "Houve um erro ao buscar o ranking."
+  },
+
+  "colecionadores": {
+    "titulo": "📖 Maiores colecionadores",
+    "titulo_curto": "📖 Colecionadores",
+    "vazio": "Ninguém descobriu cartas ainda. Use `/roll` para começar sua Pokédex!",
+    "linha": "**{atual}** / {total} cartas ({pct}%)",
+    "rodape": "{n} cartas no catálogo"
+  },
+
+  "ranking": {
+    "titulo": "⚔️ Ranking de batalha",
+    "titulo_curto": "⚔️ Ranking",
+    "vazio": "Ninguém batalhou ainda. Use `/battle` para inaugurar a arena!",
+    "linha": "**{pontos}** pts • {vitorias}V {derrotas}D ({pct}%)",
+    "pontos": "{n} pts",
+    "faltam": "Faltam **{pts}** pts para {emoji} {divisao}",
+    "divisao_maxima": "Você está na divisão mais alta!",
+    "nunca_batalhou": "Você ainda não batalhou. Use `/battle` para entrar no ranking.",
+    "divisoes": "Divisões"
+  },
+
+  "battle": {
+    "usuario_necessario": "Usuário necessário",
+    "usuario_necessario_texto": "Você precisa mencionar alguém para desafiar.",
+    "alvo_invalido": "Alvo inválido",
+    "sem_bots": "Você não pode desafiar bots.",
+    "sem_si_mesmo": "Você não pode desafiar a si mesmo.",
+    "em_andamento": "Batalha em andamento",
+    "em_andamento_texto": "Você já está em uma batalha. Termine ela antes de começar outra.",
+    "oponente_ocupado": "Oponente ocupado",
+    "oponente_ocupado_texto": "**{jogador}** já está em uma batalha no momento.",
+    "muito_rapido": "Muito rápido",
+    "muito_rapido_texto": "Vocês dois acabaram de duelar. Esperem {tempo} antes de batalhar de novo.",
+    "cartas_insuficientes": "Cartas insuficientes",
+    "cartas_insuficientes_texto": "Você precisa de pelo menos **3 cartas** para batalhar. Use `/roll` para conseguir mais.",
+    "oponente_sem_cartas": "Oponente sem cartas",
+    "oponente_sem_cartas_texto": "**{jogador}** não tem 3 cartas para batalhar.",
+    "sem_saldo_texto": "A aposta é de {aposta} e você tem {saldo}.",
+    "oponente_sem_saldo": "Oponente sem saldo",
+    "oponente_sem_saldo_texto": "**{jogador}** não tem {aposta} para cobrir a aposta.",
+    "desafio_titulo": "⚔️ Desafio de batalha",
+    "desafio_texto": "**{desafiante}** desafiou **{desafiado}** para um duelo 3 vs 3!\n\n💰 Aposta: {aposta} de cada lado — **o vencedor leva** {premio}.",
+    "ficha_jogador": "🎴 {cartas} cartas\n⚔️ {vitorias}V — {derrotas}D",
+    "vs": "vs",
+    "rodape_expira": "O desafio expira em 60 segundos",
+    "botao_aceitar": "Aceitar e apostar {valor}",
+    "botao_recusar": "Recusar",
+    "mencao_desafio": "{desafiado}, você foi desafiado por {desafiante}!",
+    "expirado": "Desafio expirado",
+    "expirado_texto": "**{jogador}** não respondeu a tempo. Nenhuma moeda foi cobrada.",
+    "recusado": "Desafio recusado",
+    "recusado_texto": "**{jogador}** recusou o duelo.",
+    "aposta_nao_cobrada": "Aposta não cobrada",
+    "sem_saldo_jogador": "**{jogador}** não tem mais {valor} disponíveis.",
+    "aceito": "Duelo aceito!",
+    "aceito_texto": "**{jogador}** topou. {valor} em jogo.\n\nOs dois receberam no privado a tela para montar o time.",
+    "dm_contra": "Você está batalhando contra **{oponente}**!",
+    "nao_iniciou": "Não foi possível iniciar",
+    "nao_iniciou_texto": "Não consegui enviar mensagem no privado de um dos jogadores. Habilitem mensagens diretas do servidor.\n\nAs apostas foram devolvidas.",
+    "monte_time": "⚔️ Monte seu time",
+    "time_completo": "✅ **Time completo!** Aguardando seu oponente escolher...",
+    "escolha_3": "Escolha **3 cartas** para batalhar.",
+    "ordem_importa": "💡 *A ordem importa: sua 1ª carta enfrenta a 1ª do oponente, a 2ª contra a 2ª, e assim por diante.*",
+    "em_jogo": "💰 Em jogo",
+    "em_jogo_texto": "{valor} — o vencedor leva tudo",
+    "seu_time": "Seu time",
+    "mostrando_melhores": "Mostrando suas {mostradas} melhores cartas de {total}",
+    "expirou_ou_concluida": "Esta batalha expirou ou já foi concluída.",
+    "nao_e_jogador": "Você não é um dos jogadores desta batalha.",
+    "carta_ja_escolhida": "Você já escolheu esta carta.",
+    "ja_tem_3": "Você já escolheu 3 cartas! Aguarde o oponente.",
+    "carta_no_time": "**{carta}** entrou no seu time! ({n}/3)",
+    "jogador_1": "Jogador 1",
+    "jogador_2": "Jogador 2",
+    "cancelada": "Batalha cancelada",
+    "cancelada_texto": "Cartas escolhidas não estão mais no inventário de {culpados}.",
+    "apostas_devolvidas": "As apostas foram devolvidas.",
+    "e": " e ",
+    "fim_titulo": "⚔️ Fim da batalha",
+    "empate_titulo": "⚔️ Empate",
+    "fim_texto": "👑 **{vencedor}** venceu — {x} {placar} {y}",
+    "empate_texto": "Ninguém levou vantagem — {x} {placar} {y}",
+    "rodadas": "Rodadas",
+    "aposta": "💰 Aposta",
+    "aposta_vencedor": "👑 **{vencedor}** levou {premio}\n💸 **{perdedor}** perdeu {perda}\n\nSaldo do vencedor: {saldo}",
+    "aposta_empate": "Empate — cada jogador recebeu {valor} de volta.",
+    "ranking": "📊 Ranking",
+    "ranking_texto": "👑 **{vencedor}** {emojiV} {ptsV} pts (**+{ganho}**)\n💤 **{perdedor}** {emojiP} {ptsP} pts (**-{perda}**)",
+    "log_primeiro": "⚡ **{carta}** foi mais rápido e atacou primeiro.",
+    "log_esquiva": "💨 **{defensor}** esquivou do ataque de **{atacante}**!",
+    "log_virada": "🔥 **VIRADA!** ",
+    "log_critico": "💥 **CRÍTICO!** ",
+    "log_dano": "**{atacante}** causou **{dano}** de dano — **{defensor}** ficou com **{vida}** de vida.",
+    "log_venceu": "🏆 **{carta}** venceu o confronto!",
+    "log_tempo": "⏱️ O confronto se estendeu — vence quem está em melhor estado."
+  },
+
+  "trocar": {
+    "usuario_necessario": "Usuário necessário",
+    "usuario_necessario_texto": "Mencione com quem você quer trocar.",
+    "sem_bots": "Bots não trocam cartas.",
+    "sem_si_mesmo": "Você não pode trocar consigo mesmo.",
+    "em_andamento": "Negociação em andamento",
+    "em_andamento_texto": "Você já tem uma troca aberta. Termine ou cancele antes de abrir outra.",
+    "jogador_ocupado": "Jogador ocupado",
+    "jogador_ocupado_texto": "**{jogador}** já está em uma negociação.",
+    "voce_sem_cartas": "Você não tem cartas para trocar. Use `/roll` primeiro.",
+    "alvo_sem_cartas": "**{jogador}** não tem cartas para trocar.",
+    "proposta_titulo": "🔄 Proposta de troca",
+    "proposta_texto": "**{proponente}** quer trocar cartas com **{alvo}**.",
+    "n_cartas": "🎴 {n} cartas",
+    "rodape_convite": "O convite expira em 60 segundos",
+    "botao_aceitar": "Aceitar",
+    "mencao_proposta": "{alvo}, você recebeu uma proposta de troca!",
+    "recusada": "Troca recusada",
+    "recusada_texto": "**{jogador}** recusou a proposta.",
+    "proposta_expirada": "Proposta expirada",
+    "proposta_expirada_texto": "**{jogador}** não respondeu a tempo.",
+    "mesa_titulo": "🔄 Mesa de troca",
+    "mesa_descricao": "Cada um escolhe o que oferece nos menus abaixo e confirma.\n⚠️ *Mexer na oferta cancela as confirmações dos dois lados.*",
+    "oferece": "{jogador} oferece",
+    "nada_oferecido": "*(nada oferecido ainda)*",
+    "total": "**Total:** {valor}",
+    "desequilibrada": "⚠️ Troca desequilibrada",
+    "desequilibrada_texto": "Um lado está oferecendo bem mais que o outro. Confira antes de confirmar.",
+    "rodape_executando": "Os dois confirmaram — executando...",
+    "rodape_expira": "A negociação expira em 10 minutos",
+    "placeholder": "{jogador}: escolher cartas para oferecer",
+    "botao_confirmar": "Confirmar troca",
+    "expirada": "Troca expirada",
+    "expirada_texto": "Essa negociação não existe mais.",
+    "alheia": "Negociação alheia",
+    "alheia_texto": "Você não faz parte desta troca.",
+    "cancelada": "Troca cancelada",
+    "cancelada_texto": "**{jogador}** cancelou a negociação. Nenhuma carta mudou de dono.",
+    "menu_do_oponente": "Menu do oponente",
+    "menu_do_oponente_texto": "Use o menu com o seu nome.",
+    "oferta_vazia": "Oferta vazia",
+    "oferta_vazia_texto": "Pelo menos um dos lados precisa oferecer alguma carta.",
+    "falta_posse": "Cartas que não estão mais no inventário: {cartas}.\n\nNinguém perdeu nada.",
+    "falhou": "Não foi possível concluir a troca. Nenhuma carta mudou de dono.",
+    "concluida": "Troca concluída!",
+    "concluida_texto": "As cartas trocaram de dono.",
+    "recebeu": "{jogador} recebeu",
+    "nada": "*(nada)*"
+  },
+
+  "favcard": {
+    "instrucao": "Clique em **Favoritar** para deixar esta carta no seu perfil.",
+    "botao_favoritar": "Favoritar",
+    "definida": "Carta favorita definida",
+    "definida_texto": "⭐ {emoji} **{carta}** agora aparece no seu `/profile`.",
+    "cancelado_texto": "Sua carta favorita continua a mesma."
+  },
+
+  "desejos": {
+    "titulo": "💭 Lista de desejos",
+    "vazia": "💭 Lista de desejos vazia",
+    "vazia_propria": "Use `/desejar nome:Gojo` para marcar as cartas que você está caçando.\n\nVocê é avisado quando alguém rolar uma delas.",
+    "vazia_outro": "**{jogador}** ainda não marcou nenhuma carta.",
+    "autor": "Desejos de {jogador}",
+    "tambem_procuram": "{n} também procuram",
+    "legenda": "🎴 você tem  📖 já registrou"
+  },
+
+  "desejar": {
+    "informe": "Informe o que procurar",
+    "informe_texto": "Use `/desejar nome:Gojo` ou `/desejar numero:42`.",
+    "sem_numero": "Não existe carta com o número {numero}.",
+    "sem_nome": "Nenhuma carta no catálogo tem \"{nome}\" no nome.",
+    "varias": "Várias cartas encontradas",
+    "varias_texto": "{lista}\n\nUse `/desejar numero:<número>` para escolher uma.",
+    "removida": "Removida dos desejos",
+    "removida_texto": "{emoji} **{carta}** saiu da sua lista.",
+    "nao_estava": "Não estava na lista",
+    "nao_estava_texto": "{emoji} **{carta}** não estava nos seus desejos.",
+    "ja_na_lista": "Já está na lista",
+    "ja_na_lista_texto": "{emoji} **{carta}** já está nos seus desejos.\n\nUse `/desejar nome:{nome} remover:True` para tirar.",
+    "lista_cheia": "Lista cheia",
+    "lista_cheia_texto": "Você já tem **{total}** cartas desejadas (limite {limite}).\n\nRemova alguma com `remover:True`, ou assine um plano em `/vip` para aumentar o limite.",
+    "adicionada": "Adicionada aos desejos",
+    "adicionada_texto": "{emoji} **{carta}** — *{serie}*",
+    "numero": "Número",
+    "sua_lista": "Sua lista",
+    "tambem_procuram": "Também procuram",
+    "n_jogadores": "{n} jogador(es)",
+    "o_que_faz": "O que isso faz",
+    "o_que_faz_texto": "Quando alguém rolar esta carta, você é avisado e pode propor uma troca ou uma compra.\n⚠️ Desejar **não** disputa a carta: ela fica com quem rolou.",
+    "rodape": "O aviso é só para você saber com quem negociar",
+    "ja_registrou": "💡 *Você já registrou essa carta na Pokédex — talvez queira caçar outra.*"
+  },
+
+  "conquistas_ui": {
+    "titulo": "🏆 Conquistas",
+    "platinado": "💎 Platinado!",
+    "autor": "Troféus de {jogador}",
+    "resumo": "**{obtidos}** de **{total}** troféus • Nível **{nivel}** ({pontos} pontos)",
+    "faltam": "faltam **{n}** troféu(s)"
+  },
+
+  "profile": {
+    "autor": "Perfil de {jogador}",
+    "saldo": "🪙 Saldo",
+    "cartas": "🎴 Cartas",
+    "patrimonio": "💎 Patrimônio",
+    "batalhas": "⚔️ Batalhas",
+    "batalhas_texto": "**{vitorias}**V — **{derrotas}**D  ({pct}% de vitórias)",
+    "sem_batalhas": "Nenhuma batalha ainda",
+    "ranking": "⚔️ Ranking",
+    "sem_partidas": "Sem partidas ainda",
+    "sequencia": "🔥 Sequência",
+    "sequencia_texto": "**{atual}** dia(s) (recorde: {recorde})",
+    "sem_sequencia": "Nenhuma — use `/daily`",
+    "trofeus": "🏆 Troféus",
+    "trofeus_texto": "**{obtidos}**/{total} • Nível {nivel}",
+    "pokedex": "📖 Pokédex",
+    "pokedex_texto": "**{descobertas}** / {total} cartas descobertas ({pct}%)",
+    "colecao": "📚 Coleção",
+    "melhor_carta": "🏆 Melhor carta",
+    "assinatura": "✨ Assinatura",
+    "assinatura_texto": "**{plano}** — renova {quando}",
+    "vitalicio": "vitalício",
+    "favorita": "⭐ Carta favorita: {emoji} **{carta}** — *{serie}*",
+    "sem_favorita": "⭐ Nenhuma carta favorita definida. Use `/favcard` para escolher uma."
+  },
+
+  "pokedex": {
+    "titulo": "📖 Pokédex",
+    "titulo_filtrado": "📖 Pokédex — {filtro}",
+    "autor": "Pokédex de {jogador}",
+    "sem_resultado": "Nenhuma carta encontrada com esses filtros.",
+    "completa": "📖 Pokédex completa!",
+    "completa_texto": "Você já descobriu todas as cartas desse filtro. 🎉",
+    "contagem": "**{descobertas}** de **{total}** cartas descobertas",
+    "so_faltantes": "mostrando só as que faltam"
+  },
+
+  "ficha": {
+    "informe": "Informe o que procurar",
+    "informe_texto": "Use `/ficha nome:Kirito` ou `/ficha numero:42`.",
+    "sem_numero": "Não existe nenhuma carta com o número **{numero}** no catálogo.",
+    "nao_registrada": "Carta não registrada",
+    "nao_registrada_uma": "Você ainda não registrou **{numero}** na sua Pokédex.\n\nVocê precisa ter tido essa carta pelo menos uma vez para consultá-la aqui.",
+    "nao_registrada_varias": "Nenhuma das {n} cartas com esse nome está registrada na sua Pokédex.\n\nVocê precisa ter tido a carta pelo menos uma vez para consultá-la aqui.",
+    "como_conseguir": "Como conseguir",
+    "como_conseguir_texto": "Use `/roll` para sortear ou procure no `/market`.",
+    "seu_progresso": "Seu progresso",
+    "progresso_texto": "{descobertas} de {total} cartas descobertas",
+    "registrada_em": "📖 Registrada em",
+    "no_inventario": "🎴 No seu inventário",
+    "copias": "**{n}** cópia(s)",
+    "nenhuma_copia": "Nenhuma no momento",
+    "valor_mercado": "💰 Valor de mercado",
+    "procuram": "💭 Procuram",
+    "resultado": "Resultado {atual} de {total}",
+    "de_fora": "Alguns resultados ficaram de fora",
+    "de_fora_texto": "{n} carta(s) com esse nome ainda não estão na sua Pokédex."
+  },
+
+  "help": {
+    "raridades": "Raridades",
+    "paginas": [
+      {
+        "titulo": "🎴 Cartas e coleção",
+        "descricao": "O básico: consiga cartas e organize sua coleção.",
+        "comandos": [
+          { "nome": "/roll", "desc": "Sorteia uma carta aleatória. Você escolhe se guarda ou vende na hora." },
+          { "nome": "/inventory", "desc": "Sua coleção completa, ordenada das cartas mais raras para as mais comuns." },
+          { "nome": "/show", "desc": "Mostra uma carta que você tem **agora** no inventário, com a arte completa." },
+          { "nome": "/favcard", "desc": "Define sua carta favorita — ela aparece no seu perfil." },
+          { "nome": "/profile", "desc": "Seu perfil: saldo, coleção, Pokédex e retrospecto de batalhas." }
+        ]
+      },
+      {
+        "titulo": "📖 Pokédex",
+        "descricao": "Toda carta que passa pelo seu inventário fica registrada para sempre — mesmo que você venda depois.",
+        "comandos": [
+          { "nome": "/pokedex", "desc": "Mostra o que você já descobriu e o que ainda falta. Filtra por série, raridade, ou só o que falta." },
+          { "nome": "/ficha", "desc": "Consulta a ficha completa de uma carta registrada, por nome ou número. Funciona mesmo se você já vendeu a carta." },
+          { "nome": "/colecionadores", "desc": "Ranking de quem já descobriu mais cartas." },
+          { "nome": "​", "desc": "💡 *Cartas não descobertas aparecem como* ⬛ **???** *— vá atrás delas no `/market` ou no `/roll`.*" },
+          { "nome": "​", "desc": "🔢 *Cada carta tem um número fixo. O* `#042` *de hoje é o mesmo amanhã, mesmo com o catálogo crescendo.*" }
+        ]
+      },
+      {
+        "titulo": "⚔️ Batalhas",
+        "descricao": "Desafie outros jogadores em duelos 3 vs 3 apostando moedas.",
+        "comandos": [
+          { "nome": "/battle", "desc": "Desafia outro jogador. A aposta mínima é de 10 moedas, e o vencedor leva o dobro." },
+          { "nome": "​", "desc": "**Como funciona:** cada rodada é um 1 vs 1. Sua 1ª carta enfrenta a 1ª do oponente, a 2ª contra a 2ª, e assim por diante. Quem vencer 2 das 3 rodadas leva o duelo e o pote." },
+          { "nome": "​", "desc": "**Atributos:** ⚔️ `ATA` pesa na ordem dos turnos, no crítico e na esquiva · ❤️ `LIF` é a vida · 💥 `POW` é o dano." },
+          { "nome": "​", "desc": "**Sorte:** existe dano variável, crítico e esquiva — mas tudo pende para a carta melhor. E quem cai abaixo de 40% de vida entra em **modo desespero**, com muito mais chance de crítico. Viradas acontecem." }
+        ]
+      },
+      {
+        "titulo": "🪙 Economia e mercado",
+        "descricao": "Ganhe moedas e negocie cartas com outros jogadores.",
+        "comandos": [
+          { "nome": "/balance", "desc": "Consulta o saldo e o patrimônio de alguém." },
+          { "nome": "/magnata", "desc": "Ranking dos 10 jogadores mais ricos." },
+          { "nome": "/give", "desc": "Transfere moedas para outro jogador." },
+          { "nome": "/quicksell", "desc": "Vende uma carta na hora, pelo valor base." },
+          { "nome": "/sell", "desc": "Anuncia uma carta no mercado pelo preço que você quiser (o mercado cobra 5% de taxa na venda)." },
+          { "nome": "/market", "desc": "Procura e compra cartas anunciadas por outros jogadores." },
+          { "nome": "/mymarket", "desc": "Seus anúncios ativos e histórico de vendas." },
+          { "nome": "/undosell", "desc": "Retira um anúncio do mercado e devolve a carta ao inventário." }
+        ]
+      },
+      {
+        "titulo": "🏆 Progressão",
+        "descricao": "Troféus, missões e ranking — o que dá objetivo de longo prazo.",
+        "comandos": [
+          { "nome": "/conquistas", "desc": "Seus troféus. 🥉 Bronze, 🥈 Prata, 🥇 Ouro e 💎 **Platina**, que só desbloqueia com todos os outros." },
+          { "nome": "/missoes", "desc": "Missões diárias e semanais. O progresso é automático — só volte para resgatar." },
+          { "nome": "/ranking", "desc": "Classificação por pontuação de batalha, de Bronze a Mestre." },
+          { "nome": "/daily", "desc": "Recompensa diária **com sequência**: quanto mais dias seguidos, mais vale. Marcos em 7, 14, 30, 60 e 100 dias." },
+          { "nome": "​", "desc": "⚠️ *Faltou um dia? A sequência zera. É de propósito.*" }
+        ]
+      },
+      {
+        "titulo": "🤝 Social",
+        "descricao": "Troque e negocie com outros jogadores.",
+        "comandos": [
+          { "nome": "/trocar", "desc": "Troca carta por carta. Os dois montam a oferta e os dois confirmam — mexeu na oferta, as confirmações caem." },
+          { "nome": "/desejar", "desc": "Marca uma carta que você quer. Quando alguém rolar ela, você fica sabendo e pode propor uma troca ou uma compra." },
+          { "nome": "/desejos", "desc": "Sua lista de desejos, com quantos jogadores também procuram cada carta." },
+          { "nome": "​", "desc": "💡 *Desejar **não** disputa a carta com ninguém. Quem rolou fica com ela; o aviso serve só para você saber com quem negociar.*" },
+          { "nome": "/torneio", "desc": "Cria um torneio eliminatório. Entra com um clique e o bot resolve tudo." }
+        ]
+      },
+      {
+        "titulo": "✨ VIP e cosméticos",
+        "descricao": "Apoie o bot e leve estilo — sem vantagem de combate.",
+        "comandos": [
+          { "nome": "/vip", "desc": "Vê os planos e o status da sua assinatura." },
+          { "nome": "/cosmeticos", "desc": "Equipa suas molduras de carta e cor de perfil." },
+          { "nome": "​", "desc": "🛡️ **Nenhum plano dá vantagem de combate.** Atributos, chance de raridade e resultado de batalha são iguais para todos. O que muda é aparência (molduras, cores, emblemas) e conveniência (cooldown e daily)." }
+        ]
+      },
+      {
+        "titulo": "🎲 Outros",
+        "descricao": "Comandos diversos.",
+        "comandos": [
+          { "nome": "/idioma", "desc": "Troca o idioma do bot entre português e inglês, só para você ou para o servidor inteiro." },
+          { "nome": "/help", "desc": "Esta lista de comandos." },
+          { "nome": "/info", "desc": "Informações sobre o bot." },
+          { "nome": "/ping", "desc": "Testa a latência do bot." },
+          { "nome": "/dice", "desc": "Rola um dado de 6 lados." }
+        ]
+      }
+    ]
+  },
+
+  "vip_ui": {
+    "titulo": "✨ Planos VIP do AniBattle",
+    "ativo": "Você é **{emoji} {plano}**!\nSua assinatura expira {quando}.\n\nUse `/cosmeticos` para equipar suas molduras.",
+    "vitalicio": "nunca (vitalício)",
+    "inativo": "Apoie o bot e leve vantagens de aparência e conveniência.\n\n🛡️ **Nenhum plano dá vantagem de combate.** Atributos das cartas, chance de raridade e resultado de batalha são exatamente iguais para todo mundo — quem paga leva estilo e comodidade, não poder.",
+    "seu_plano": " ← seu plano",
+    "cabecalho_plano": "{emoji} {plano} — R$ {preco}/mês{marcador}",
+    "vantagem_cooldown": "⏱️ Cooldown do `/roll` **-{porcento}%**",
+    "vantagem_daily": "🎁 Recompensa diária **{multiplicador}x**",
+    "vantagem_molduras": "🖼️ {n} moldura(s) de carta: {lista}",
+    "vantagem_emblema": "{emoji} Emblema **{plano}** no perfil e nos rankings",
+    "vantagem_cor": "🎨 Cor personalizada de perfil",
+    "vantagem_banner": "🏞️ Banner de perfil",
+    "vantagem_destaque": "✨ Nome destacado nos rankings",
+    "rodape": "Cancelável a qualquer momento • Renovar antes de expirar acumula os dias restantes",
+    "botao_assinar": "Assinar"
+  },
+
+  "cosmeticos": {
+    "titulo": "🎨 Seus cosméticos",
+    "titulo_curto": "Cosméticos",
+    "so_vip": "Os cosméticos são exclusivos para assinantes.\n\nVeja os planos em `/vip` — a partir de **R$ 5,00/mês** você já desbloqueia molduras de carta e cor de perfil.",
+    "descricao": "Plano **{emoji} {plano}**\n\nEscolha nos menus abaixo. As mudanças valem para todas as suas cartas.",
+    "moldura_equipada": "Moldura equipada",
+    "cor_perfil": "Cor de perfil",
+    "cor_padrao": "Padrão do bot",
+    "liberadas": "Molduras liberadas no seu plano",
+    "placeholder_moldura": "Escolher moldura de carta",
+    "placeholder_cor": "Escolher cor do perfil",
+    "indisponivel": "Indisponível",
+    "indisponivel_texto": "Essa moldura não está liberada no seu plano.",
+    "cores": {
+      "vermelho": "Vermelho",
+      "azul": "Azul",
+      "verde": "Verde",
+      "roxo": "Roxo",
+      "dourado": "Dourado",
+      "rosa": "Rosa",
+      "preto": "Preto"
+    }
+  },
+
+  "missoes_ui": {
+    "titulo": "📋 Suas missões",
+    "autor": "Missões de {jogador}",
+    "diarias": "📅 Diárias — renovam <t:{quando}:R>",
+    "semanais": "🗓️ Semanais — renovam na segunda-feira",
+    "nenhuma": "Nenhuma.",
+    "resgatada": "*(resgatada)*",
+    "pronta": "**— pronta!**",
+    "tem_prontas": "🎁 Você tem **{n}** missão(ões) pronta(s) — {valor} esperando!",
+    "sem_prontas": "Complete as missões jogando normalmente. O progresso é automático.",
+    "botao_resgatar": "Resgatar recompensas",
+    "nada_resgatar": "Nada para resgatar",
+    "nada_resgatar_texto": "Você já resgatou tudo que estava pronto.",
+    "resgatadas": "Recompensas resgatadas",
+    "n_missoes": "{n} missão(ões)"
+  },
+
+  "pagamento": {
+    "titulo": "{emoji} Bem-vindo ao VIP {plano}!",
+    "descricao": "Obrigado por apoiar o AniBattle. Suas vantagens já estão ativas.",
+    "valido_ate": "Válido até",
+    "nunca": "nunca",
+    "proximo_passo": "Próximo passo",
+    "proximo_passo_texto": "Use `/cosmeticos` para equipar suas molduras."
+  },
+
+  "torneio": {
+    "vagas_escolha": "{n} vagas",
+    "nome_padrao": "Torneio AniBattle",
+    "so_em_servidor": "Só em servidor",
+    "so_em_servidor_texto": "Torneios precisam de um servidor — não funcionam no privado.",
+    "vagas_invalidas": "Vagas inválidas",
+    "vagas_invalidas_texto": "Use {opcoes} vagas.",
+    "inscricao_baixa": "Inscrição muito baixa",
+    "inscricao_baixa_texto": "A inscrição mínima é {minimo}.",
+    "quadro_descricao": "Torneio eliminatório de **{vagas} vagas**.\n\nVocê entra com suas **3 melhores cartas**, e o bot resolve todos os confrontos de uma vez.\n⚠️ *O deck é congelado na inscrição — não dá para trocar depois de ver o adversário.*",
+    "ninguem_inscrito": "*(ninguém inscrito ainda)*",
+    "inscritos": "Inscritos",
+    "inscricao": "Inscrição",
+    "gratis": "Grátis",
+    "premio": "🏅 Prêmio",
+    "premio_para": "{valor} para <@{campeao}>",
+    "so_a_gloria": "Só a glória",
+    "participantes": "Participantes",
+    "rodape_quadro": "O organizador pode começar a qualquer momento",
+    "botao_entrar": "Entrar",
+    "botao_sair": "Sair",
+    "botao_comecar": "Começar (organizador)",
+    "botao_cancelar": "Cancelar (organizador)",
+    "botao_cancelar_este": "Cancelar este torneio",
+    "ja_existe": "Já tem torneio aberto neste servidor",
+    "ja_existe_texto": "**{nome}** — criado por <@{criador}> <t:{quando}:R>.",
+    "situacao": "Situação",
+    "fase_inscricoes": "Inscrições abertas",
+    "fase_executando": "Executando",
+    "cancela_sozinho": "Cancela sozinho",
+    "onde_fica": "Onde fica",
+    "ir_para_mensagem": "[Ir para a mensagem do torneio]({url})",
+    "rodape_devolve": "Cancelar devolve as inscrições pagas",
+    "rodape_so_criador": "Só quem criou pode cancelar. Sem resposta, cancela sozinho no prazo acima",
+    "nao_encontrado": "Torneio não encontrado",
+    "nao_encontrado_texto": "Esse torneio não existe mais.",
+    "nao_entrou": "Não deu para entrar",
+    "erro_fechado": "As inscrições já foram encerradas.",
+    "erro_ja_inscrito": "Você já está inscrito neste torneio.",
+    "erro_lotado": "Todas as vagas foram preenchidas.",
+    "erro_sem_cartas": "Você precisa de pelo menos **3 cartas** para participar. Use `/roll`.",
+    "erro_sem_saldo": "Você não tem {valor} para pagar a inscrição.",
+    "erro_desconhecido": "Erro desconhecido.",
+    "inscrito": "Inscrito!",
+    "inscrito_texto": "Seu time no torneio:\n\n{deck}",
+    "rodape_melhores": "Suas 3 melhores cartas foram escolhidas automaticamente",
+    "nao_saiu": "Não deu para sair",
+    "erro_nao_inscrito": "Você não está inscrito neste torneio.",
+    "so_criador_cancela": "Só quem criou o torneio pode cancelar. Se você entrou e quer desistir, use o botão **Sair**.",
+    "so_criador_comeca": "Só quem criou o torneio pode começar.",
+    "cancelado": "Torneio cancelado",
+    "cancelado_texto": "**{nome}** foi cancelado.",
+    "cancelado_com_devolucao": "**{nome}** foi cancelado e as inscrições foram devolvidas.",
+    "nao_comecou": "Não deu para começar",
+    "erro_poucos": "É preciso pelo menos 2 participantes. As inscrições foram devolvidas.",
+    "erro_iniciar": "Erro ao iniciar o torneio.",
+    "resultado_titulo": "🏆 {nome} — Resultado",
+    "resultado_descricao": "👑 Campeão: <@{campeao}>\n\n{n} participante(s)",
+    "passou_direto": "passou direto",
+    "passou_direto_linha": "<@{id}> passou direto",
+    "rodada_final": "Final",
+    "rodada_semi": "Semifinal",
+    "rodada_quartas": "Quartas de final",
+    "rodada_oitavas": "Oitavas de final",
+    "rodada_de": "Rodada de {n}"
+  },
+
+  "comandos": {
+    "idioma": {
+      "descricao": "Escolhe o idioma das respostas do bot (português ou inglês)",
+      "opcao_idioma": "Idioma desejado, ou automático para seguir o Discord",
+      "opcao_escopo": "Só para você (padrão) ou para o servidor inteiro"
+    },
+    "balance": {
+      "descricao": "Mostra a quantidade de moedas do usuário",
+      "opcao_user": "Usuário que deseja mencionar"
+    },
+    "battle": {
+      "descricao": "Desafie outro jogador para um duelo 3v3 apostando moedas",
+      "opcao_user": "O jogador que você quer desafiar",
+      "opcao_aposta": "Quanto apostar (mínimo {minimo}). O vencedor leva o dobro."
+    },
+    "colecionadores": {
+      "descricao": "Ranking de quem descobriu mais cartas na Pokédex"
+    },
+    "conquistas": {
+      "descricao": "Mostra seus troféus e o que falta para platinar",
+      "opcao_user": "Ver os troféus de outro jogador"
+    },
+    "cosmeticos": {
+      "descricao": "Equipa suas molduras de carta e cor de perfil (exclusivo VIP)"
+    },
+    "daily": {
+      "descricao": "Coletar recompensa diária de dinheiro"
+    },
+    "desejar": {
+      "descricao": "Adiciona uma carta à sua lista de desejos (ou remove)",
+      "opcao_nome": "Nome da carta",
+      "opcao_numero": "Número da carta na Pokédex",
+      "opcao_remover": "Marque para tirar a carta da lista"
+    },
+    "desejos": {
+      "descricao": "Mostra sua lista de desejos",
+      "opcao_user": "Ver a lista de outro jogador"
+    },
+    "dice": {
+      "descricao": "Rola um dado de 1 a 6"
+    },
+    "favcard": {
+      "descricao": "Favorita uma carta",
+      "opcao_name": "O nome da carta que você quer favoritar"
+    },
+    "ficha": {
+      "descricao": "Consulta a ficha de uma carta que você já registrou na Pokédex",
+      "opcao_nome": "Nome da carta (ex: Kirito)",
+      "opcao_numero": "Número da carta na Pokédex (ex: 42)"
+    },
+    "give": {
+      "descricao": "Dá moedas para outro usuário",
+      "opcao_user": "Usuário que deseja mencionar",
+      "opcao_amount": "Quantidade de dinheiro"
+    },
+    "help": {
+      "descricao": "Lista todos os comandos e explica como o jogo funciona"
+    },
+    "info": {
+      "descricao": "Informações sobre o bot, o site e o suporte"
+    },
+    "inventory": {
+      "descricao": "Mostra as cartas no seu inventário"
+    },
+    "magnata": {
+      "descricao": "Ranking dos jogadores mais ricos do bot (top 10 por moedas)"
+    },
+    "market": {
+      "descricao": "Procura por cartas no mercado e permite a compra",
+      "opcao_cardname": "Nome da carta",
+      "opcao_series": "Filtrar por série",
+      "opcao_rarity": "Raridade da carta",
+      "opcao_minvalue": "Valor mínimo",
+      "opcao_maxvalue": "Valor máximo"
+    },
+    "missoes": {
+      "descricao": "Suas missões diárias e semanais, e o resgate das recompensas"
+    },
+    "mymarket": {
+      "descricao": "Mostra as suas cartas anunciadas no mercado"
+    },
+    "ping": {
+      "descricao": "Mostra o tempo de resposta do bot"
+    },
+    "pokedex": {
+      "descricao": "Mostra quais cartas você já descobriu e quais ainda faltam",
+      "opcao_serie": "Filtrar por anime/série",
+      "opcao_raridade": "Filtrar por raridade",
+      "opcao_faltantes": "Mostrar apenas as cartas que você ainda não tem"
+    },
+    "profile": {
+      "descricao": "Mostra o perfil de um jogador (o seu, se não mencionar ninguém)",
+      "opcao_user": "Jogador que você quer ver o perfil"
+    },
+    "quicksell": {
+      "descricao": "Vende rapidamente uma carta do seu inventário",
+      "opcao_name": "O nome da carta que você quer vender rápido"
+    },
+    "ranking": {
+      "descricao": "Classificação dos melhores duelistas por pontuação"
+    },
+    "roll": {
+      "descricao": "Rola uma carta aleatória baseada em raridade"
+    },
+    "sell": {
+      "descricao": "Lista uma carta do seu inventário no mercado",
+      "opcao_cardname": "Nome da carta",
+      "opcao_price": "Preço de venda"
+    },
+    "show": {
+      "descricao": "Mostra uma carta do seu inventário pelo nome",
+      "opcao_name": "O nome da carta que você quer mostrar"
+    },
+    "torneio": {
+      "descricao": "Cria um torneio eliminatório no servidor",
+      "opcao_nome": "Nome do torneio",
+      "opcao_vagas": "Quantas vagas (4, 8 ou 16)",
+      "opcao_inscricao": "Taxa de inscrição em moedas (vira prêmio do campeão)"
+    },
+    "trocar": {
+      "descricao": "Propõe uma troca de cartas com outro jogador",
+      "opcao_user": "Com quem você quer trocar"
+    },
+    "undosell": {
+      "descricao": "Desfaz o anúncio de uma carta no mercado",
+      "opcao_cardname": "Nome da carta"
+    },
+    "vip": {
+      "descricao": "Mostra os planos VIP e o status da sua assinatura"
+    }
+  }
+}

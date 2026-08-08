@@ -5,6 +5,7 @@ const ui = require('../../utils/embeds');
 const { escapeRegex } = require('../../utils/regexUtils');
 const { formatarNumero } = require('../../utils/dexNumbers');
 const wishlist = require('../../utils/wishlist');
+const { tDaInteracao } = require('../../utils/idioma');
 
 /**
  * /desejar — adiciona ou remove uma carta da lista de desejos.
@@ -13,13 +14,14 @@ const wishlist = require('../../utils/wishlist');
  * — é justamente esse o ponto: marcar o que você está caçando.
  */
 async function desejarRun(client, interaction) {
+    const t = await tDaInteracao(interaction);
     const nome = (interaction.options.getString('nome') || '').trim();
     const numero = interaction.options.getInteger('numero');
     const remover = interaction.options.getBoolean('remover') || false;
 
     if (!nome && numero == null) {
         return interaction.reply({
-            embeds: [ui.error('Informe o que procurar', 'Use `/desejar nome:Gojo` ou `/desejar numero:42`.')],
+            embeds: [ui.error(t('desejar.informe'), t('desejar.informe_texto'))],
             flags: MessageFlags.Ephemeral
         });
     }
@@ -35,35 +37,36 @@ async function desejarRun(client, interaction) {
 
     if (encontradas.length === 0) {
         return interaction.editReply({
-            embeds: [ui.error('Carta não encontrada', numero != null
-                ? `Não existe carta com o número ${formatarNumero(numero, totalCatalogo)}.`
-                : `Nenhuma carta no catálogo tem "${nome}" no nome.`)]
+            embeds: [ui.error(t('comum.carta_nao_encontrada'), numero != null
+                ? t('desejar.sem_numero', { numero: formatarNumero(numero, totalCatalogo) })
+                : t('desejar.sem_nome', { nome }))]
         });
     }
 
     // Mais de um resultado: pede para escolher.
     if (encontradas.length > 1) {
         const lista = encontradas.map((c) => {
-            const meta = ui.getRarity(c.rarity);
-            return `${formatarNumero(c.numero, totalCatalogo)} ${meta.emoji} **${ui.cardName(c.name)}** — *${c.series}*`;
+            const meta = ui.getRarity(c.rarity, t.locale);
+            return `${formatarNumero(c.numero, totalCatalogo)} ${meta.emoji} **${ui.cardName(c.name, t.locale)}** — *${c.series}*`;
         }).join('\n');
 
         return interaction.editReply({
-            embeds: [ui.neutral('Várias cartas encontradas', `${lista}\n\nUse \`/desejar numero:<número>\` para escolher uma.`)]
+            embeds: [ui.neutral(t('desejar.varias'), t('desejar.varias_texto', { lista }))]
         });
     }
 
     const carta = encontradas[0];
-    const meta = ui.getRarity(carta.rarity);
+    const meta = ui.getRarity(carta.rarity, t.locale);
     const user = await User.findOne({ id: interaction.user.id }).lean();
 
     // ---- Remover ----
     if (remover) {
         const removeu = await wishlist.remover(interaction.user.id, carta._id);
+        const nomeCarta = ui.cardName(carta.name, t.locale);
         return interaction.editReply({
             embeds: [removeu
-                ? ui.success('Removida dos desejos', `${meta.emoji} **${ui.cardName(carta.name)}** saiu da sua lista.`)
-                : ui.neutral('Não estava na lista', `${meta.emoji} **${ui.cardName(carta.name)}** não estava nos seus desejos.`)]
+                ? ui.success(t('desejar.removida'), t('desejar.removida_texto', { emoji: meta.emoji, carta: nomeCarta }))
+                : ui.neutral(t('desejar.nao_estava'), t('desejar.nao_estava_texto', { emoji: meta.emoji, carta: nomeCarta }))]
         });
     }
 
@@ -73,38 +76,51 @@ async function desejarRun(client, interaction) {
     if (!resultado.ok) {
         if (resultado.motivo === 'JA_TEM') {
             return interaction.editReply({
-                embeds: [ui.neutral('Já está na lista', `${meta.emoji} **${ui.cardName(carta.name)}** já está nos seus desejos.\n\nUse \`/desejar nome:${carta.name} remover:True\` para tirar.`)]
+                embeds: [ui.neutral(t('desejar.ja_na_lista'), t('desejar.ja_na_lista_texto', {
+                    emoji: meta.emoji,
+                    carta: ui.cardName(carta.name, t.locale),
+                    nome: carta.name
+                }))]
             });
         }
         if (resultado.motivo === 'LIMITE') {
             return interaction.editReply({
-                embeds: [ui.warning('Lista cheia', `Você já tem **${resultado.total}** cartas desejadas (limite ${resultado.limite}).\n\nRemova alguma com \`remover:True\`, ou assine um plano em \`/vip\` para aumentar o limite.`)]
+                embeds: [ui.warning(t('desejar.lista_cheia'), t('desejar.lista_cheia_texto', {
+                    total: resultado.total,
+                    limite: resultado.limite
+                }))]
             });
         }
         return interaction.editReply({
-            embeds: [ui.error('Perfil não encontrado', 'Use `/roll` ou `/daily` para criar seu perfil primeiro.')]
+            embeds: [ui.error(t('comum.perfil_nao_encontrado'), t('comum.perfil_nao_encontrado_texto'))]
         });
     }
 
     const jaTem = (user?.discovered || []).some((d) => String(d.cardId) === String(carta._id));
     const quantosDesejam = await wishlist.contarDesejos(carta._id);
 
-    const embed = ui.success('Adicionada aos desejos', `${meta.emoji} **${ui.cardName(carta.name)}** — *${carta.series}*`)
+    const embed = ui.success(
+        t('desejar.adicionada'),
+        t('desejar.adicionada_texto', {
+            emoji: meta.emoji,
+            carta: ui.cardName(carta.name, t.locale),
+            serie: carta.series
+        })
+    )
         .addFields(
-            { name: 'Número', value: formatarNumero(carta.numero, totalCatalogo), inline: true },
-            { name: 'Sua lista', value: `${resultado.total} / ${resultado.limite}`, inline: true },
-            { name: 'Também procuram', value: `${quantosDesejam} jogador(es)`, inline: true }
+            { name: t('desejar.numero'), value: formatarNumero(carta.numero, totalCatalogo), inline: true },
+            { name: t('desejar.sua_lista'), value: `${resultado.total} / ${resultado.limite}`, inline: true },
+            { name: t('desejar.tambem_procuram'), value: t('desejar.n_jogadores', { n: quantosDesejam }), inline: true }
         )
         .addFields({
-            name: 'O que isso faz',
-            value: 'Quando alguém rolar esta carta, você é avisado e pode propor uma troca ou uma compra.\n'
-                + '⚠️ Desejar **não** disputa a carta: ela fica com quem rolou.',
+            name: t('desejar.o_que_faz'),
+            value: t('desejar.o_que_faz_texto'),
             inline: false
         })
-        .setFooter({ text: `${ui.BRAND} • O aviso é só para você saber com quem negociar` });
+        .setFooter({ text: `${ui.BRAND} • ${t('desejar.rodape')}` });
 
     if (jaTem) {
-        embed.setDescription(`${embed.data.description}\n\n💡 *Você já registrou essa carta na Pokédex — talvez queira caçar outra.*`);
+        embed.setDescription(`${embed.data.description}\n\n${t('desejar.ja_registrou')}`);
     }
 
     return interaction.editReply({ embeds: [embed] });

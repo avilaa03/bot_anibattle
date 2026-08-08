@@ -5,19 +5,19 @@ function getValueToSell(card) {
     return card.valueToSell ?? (card.marketValue != null ? Math.floor(card.marketValue / 2) : 0);
 }
 
-function updateEmbed(card) {
+function updateEmbed(card, t) {
     const value = getValueToSell(card);
-    const meta = ui.getRarity(card.rarity);
+    const meta = ui.getRarity(card.rarity, t.locale);
 
     const embed = ui.base(meta.color)
-        .setTitle(`🪙 Vender ${ui.cardName(card.name)}?`)
+        .setTitle(t('quicksell.titulo', { carta: ui.cardName(card.name, t.locale) }))
         .setDescription([
-            `${meta.emoji} ${ui.rarityTag(card.rarity)} • *${card.series || '—'}*`,
+            `${meta.emoji} ${ui.rarityTag(card.rarity, t.locale)} • *${card.series || t('comum.traco')}*`,
             '',
-            ui.statLines(card),
+            ui.statLines(card, t.locale),
             '',
-            `Você receberá ${ui.coins(value)} por esta carta.`,
-            '⚠️ *Esta ação não pode ser desfeita.*'
+            t('quicksell.recebera', { valor: ui.coins(value, t.locale) }),
+            t('quicksell.irreversivel')
         ].join('\n'));
 
     if (card.characterImage) embed.setThumbnail(card.characterImage);
@@ -25,15 +25,15 @@ function updateEmbed(card) {
     return embed;
 }
 
-function buildConfirmationRow(card) {
+function buildConfirmationRow(card, t) {
     const value = getValueToSell(card);
     return new ActionRowBuilder().addComponents(
-        new ButtonBuilder().setCustomId('confirm_sell').setLabel(`Vender por ${ui.number(value)}`).setEmoji('🪙').setStyle(ButtonStyle.Success),
-        new ButtonBuilder().setCustomId('cancel_sell').setLabel('Cancelar').setStyle(ButtonStyle.Secondary)
+        new ButtonBuilder().setCustomId('confirm_sell').setLabel(t('roll.botao_vender', { valor: ui.number(value, t.locale) })).setEmoji('🪙').setStyle(ButtonStyle.Success),
+        new ButtonBuilder().setCustomId('cancel_sell').setLabel(t('comum.cancelar')).setStyle(ButtonStyle.Secondary)
     );
 }
 
-async function quicksellRun(client, interaction, user, matchingCards) {
+async function quicksellRun(client, interaction, user, matchingCards, t) {
     await interaction.deferReply();
 
     const indexRef = { currentIndex: 0 };
@@ -45,8 +45,8 @@ async function quicksellRun(client, interaction, user, matchingCards) {
         );
 
     const message = await interaction.editReply({
-        embeds: [updateEmbed(matchingCards[0])],
-        components: [rowNavigation, buildConfirmationRow(matchingCards[0])]
+        embeds: [updateEmbed(matchingCards[0], t)],
+        components: [rowNavigation, buildConfirmationRow(matchingCards[0], t)]
     });
 
     return { message, indexRef, rowNavigation };

@@ -1,5 +1,6 @@
 const BaseSlashCommand = require('../utils/BaseSlashCommand.js');
 const { SlashCommandBuilder } = require('discord.js');
+const { descricaoBase, localizacoes } = require('../utils/i18n');
 const fichaRun = require('../actions/run/fichaRun.js');
 
 module.exports = class FichaSlashCommand extends BaseSlashCommand {
@@ -14,15 +15,18 @@ module.exports = class FichaSlashCommand extends BaseSlashCommand {
     getSlashCommandJSON() {
         return new SlashCommandBuilder()
             .setName(this.name)
-            .setDescription('Consulta a ficha de uma carta que você já registrou na Pokédex')
+            .setDescription(descricaoBase('comandos.ficha.descricao'))
+            .setDescriptionLocalizations(localizacoes('comandos.ficha.descricao'))
             .addStringOption(option =>
                 option.setName('nome')
-                    .setDescription('Nome da carta (ex: Kirito)')
+                    .setDescription(descricaoBase('comandos.ficha.opcao_nome'))
+                    .setDescriptionLocalizations(localizacoes('comandos.ficha.opcao_nome'))
                     .setRequired(false)
             )
             .addIntegerOption(option =>
                 option.setName('numero')
-                    .setDescription('Número da carta na Pokédex (ex: 42)')
+                    .setDescription(descricaoBase('comandos.ficha.opcao_numero'))
+                    .setDescriptionLocalizations(localizacoes('comandos.ficha.opcao_numero'))
                     .setMinValue(1)
                     .setRequired(false)
             )

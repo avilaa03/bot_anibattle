@@ -11,7 +11,7 @@ const ui = require('../../utils/embeds');
 // NÃO marcar como async: quem chama usa o retorno como coletor
 // (`collector.on(...)`). Se a função for async ela devolve uma Promise
 // e a chamada quebra com "collector.on is not a function".
-module.exports = (interaction, embedMessage, currentPage, listings, cardsPerPage, marketEnd, generateEmbed, generateButtons) => {
+module.exports = (interaction, embedMessage, currentPage, listings, cardsPerPage, marketEnd, generateEmbed, generateButtons, t) => {
     const totalPages = Math.ceil(listings.length / cardsPerPage);
 
     const filtro = (i) =>
@@ -35,33 +35,33 @@ module.exports = (interaction, embedMessage, currentPage, listings, cardsPerPage
         const escolhidoId = i.values?.[0];
         const selectedCard = listings.find((l) => String(l._id) === escolhidoId);
         if (!selectedCard) {
-            return i.reply({ embeds: [ui.error('Carta indisponível', 'Esse anúncio não existe mais.')], flags: MessageFlags.Ephemeral });
+            return i.reply({ embeds: [ui.error(t('market.indisponivel'), t('market.anuncio_sumiu'))], flags: MessageFlags.Ephemeral });
         }
 
         if (selectedCard.sellerId === interaction.user.id) {
-            return i.reply({ embeds: [ui.error('Anúncio seu', 'Você não pode comprar a própria carta. Use `/undosell` para retirá-la.')], flags: MessageFlags.Ephemeral });
+            return i.reply({ embeds: [ui.error(t('market.anuncio_seu'), t('market.anuncio_seu_texto'))], flags: MessageFlags.Ephemeral });
         }
 
-        const meta = ui.getRarity(selectedCard.rarity);
+        const meta = ui.getRarity(selectedCard.rarity, t.locale);
         const ovr = selectedCard.overall ?? (selectedCard.marketValue != null ? Math.round(selectedCard.marketValue / 10) : 0);
 
         const confirmEmbed = ui.base(meta.color)
-            .setTitle('🛒 Confirmar compra')
+            .setTitle(t('market.confirmar_titulo'))
             .setDescription([
-                `${meta.emoji} **${ui.cardName(selectedCard.cardName)}** — OVR **${ovr}**`,
-                `*${selectedCard.series || '—'}*`,
+                `${meta.emoji} **${ui.cardName(selectedCard.cardName, t.locale)}** — ${t('atributos.ovr')} **${ovr}**`,
+                `*${selectedCard.series || t('comum.traco')}*`,
                 '',
-                ui.statLines(selectedCard),
+                ui.statLines(selectedCard, t.locale),
                 '',
-                `Preço: ${ui.coins(selectedCard.listingPrice)}`,
-                `Vendedor: <@${selectedCard.sellerId}>`
+                t('market.preco', { valor: ui.coins(selectedCard.listingPrice, t.locale) }),
+                t('market.vendedor_linha', { id: selectedCard.sellerId })
             ].join('\n'));
 
         if (selectedCard.characterImage) confirmEmbed.setThumbnail(selectedCard.characterImage);
 
         const confirmButtons = new ActionRowBuilder().addComponents(
-            new ButtonBuilder().setCustomId('confirm_buy').setLabel('Comprar').setEmoji('🪙').setStyle(ButtonStyle.Success),
-            new ButtonBuilder().setCustomId('cancel_buy').setLabel('Cancelar').setStyle(ButtonStyle.Secondary)
+            new ButtonBuilder().setCustomId('confirm_buy').setLabel(t('market.botao_comprar')).setEmoji('🪙').setStyle(ButtonStyle.Success),
+            new ButtonBuilder().setCustomId('cancel_buy').setLabel(t('comum.cancelar')).setStyle(ButtonStyle.Secondary)
         );
 
         await i.reply({
@@ -70,7 +70,7 @@ module.exports = (interaction, embedMessage, currentPage, listings, cardsPerPage
         });
         const confirmMessage = await i.fetchReply();
 
-        marketEnd(confirmMessage, selectedCard, interaction);
+        marketEnd(confirmMessage, selectedCard, interaction, t);
     });
 
     collector.on('end', () => {
@@ -81,16 +81,16 @@ module.exports = (interaction, embedMessage, currentPage, listings, cardsPerPage
 };
 
 /** Monta o menu de seleção com as cartas da página atual. */
-function buildSelectMenu(listings, page, cardsPerPage) {
+function buildSelectMenu(listings, page, cardsPerPage, t) {
     const inicio = page * cardsPerPage;
     const pageCards = listings.slice(inicio, inicio + cardsPerPage);
 
     const options = pageCards.map((listing) => {
-        const meta = ui.getRarity(listing.rarity);
+        const meta = ui.getRarity(listing.rarity, t.locale);
         const ovr = listing.overall ?? (listing.marketValue != null ? Math.round(listing.marketValue / 10) : 0);
         return {
-            label: `${ui.cardName(listing.cardName)} · OVR ${ovr}`.slice(0, 100),
-            description: `${meta.label} • ${ui.number(listing.listingPrice)} moedas • ${listing.series || '—'}`.slice(0, 100),
+            label: `${ui.cardName(listing.cardName, t.locale)} · ${t('atributos.ovr')} ${ovr}`.slice(0, 100),
+            description: `${meta.label} • ${ui.number(listing.listingPrice, t.locale)} ${t('comum.moedas')} • ${listing.series || t('comum.traco')}`.slice(0, 100),
             value: String(listing._id),
             emoji: meta.emoji
         };
@@ -99,7 +99,7 @@ function buildSelectMenu(listings, page, cardsPerPage) {
     return new ActionRowBuilder().addComponents(
         new StringSelectMenuBuilder()
             .setCustomId('market_select')
-            .setPlaceholder('Escolha uma carta para comprar')
+            .setPlaceholder(t('market.placeholder'))
             .addOptions(options)
     );
 }

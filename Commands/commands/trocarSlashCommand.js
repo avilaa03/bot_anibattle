@@ -1,5 +1,6 @@
 const BaseSlashCommand = require('../utils/BaseSlashCommand.js');
 const { SlashCommandBuilder } = require('discord.js');
+const { descricaoBase, localizacoes } = require('../utils/i18n');
 const trocarRun = require('../actions/run/trocarRun.js');
 
 module.exports = class TrocarSlashCommand extends BaseSlashCommand {
@@ -14,10 +15,12 @@ module.exports = class TrocarSlashCommand extends BaseSlashCommand {
     getSlashCommandJSON() {
         return new SlashCommandBuilder()
             .setName(this.name)
-            .setDescription('Propõe uma troca de cartas com outro jogador')
+            .setDescription(descricaoBase('comandos.trocar.descricao'))
+            .setDescriptionLocalizations(localizacoes('comandos.trocar.descricao'))
             .addUserOption(option =>
                 option.setName('user')
-                    .setDescription('Com quem você quer trocar')
+                    .setDescription(descricaoBase('comandos.trocar.opcao_user'))
+                    .setDescriptionLocalizations(localizacoes('comandos.trocar.opcao_user'))
                     .setRequired(true)
             )
             .toJSON();

@@ -1,5 +1,6 @@
 const BaseSlashCommand = require("../utils/BaseSlashCommand.js");
 const { SlashCommandBuilder } = require('discord.js');
+const { descricaoBase, localizacoes, traduzir } = require('../utils/i18n');
 const { battleRun } = require('../actions/run/battleRun.js');
 const { battleCollect } = require('../actions/collect/battleCollect.js');
 const { battleEnd } = require('../actions/end/battleEnd.js');
@@ -17,25 +18,33 @@ module.exports = class BattleSlashCommand extends BaseSlashCommand {
         // abaixo estouraria um TypeError.
         if (!resultado) return;
 
-        const { userX, userY, userXData, userYData, challengeMessage, wager } = resultado;
+        const { userX, userY, userXData, userYData, challengeMessage, wager, t } = resultado;
 
-        const collector = await battleCollect(interaction, userX, userY, userXData, userYData, challengeMessage, wager);
+        const collector = await battleCollect(interaction, userX, userY, userXData, userYData, challengeMessage, wager, t);
 
-        battleEnd(collector, interaction, userY);
+        battleEnd(collector, interaction, userY, t);
     }
 
     getSlashCommandJSON() {
         return new SlashCommandBuilder()
             .setName(this.name)
-            .setDescription('Desafie outro jogador para um duelo 3v3 apostando moedas')
+            .setDescription(descricaoBase('comandos.battle.descricao'))
+            .setDescriptionLocalizations(localizacoes('comandos.battle.descricao'))
             .addUserOption(option =>
                 option.setName('user')
-                    .setDescription('O jogador que você quer desafiar')
+                    .setDescription(descricaoBase('comandos.battle.opcao_user'))
+                    .setDescriptionLocalizations(localizacoes('comandos.battle.opcao_user'))
                     .setRequired(true)
             )
             .addIntegerOption(option =>
                 option.setName('aposta')
-                    .setDescription(`Quanto apostar (mínimo ${MIN_WAGER}). O vencedor leva o dobro.`)
+                    // Esta descrição tem o valor mínimo dentro do texto, então
+                    // não dá para usar descricaoBase() direto — cada idioma
+                    // precisa da interpolação feita nele mesmo.
+                    .setDescription(traduzir('pt-BR', 'comandos.battle.opcao_aposta', { minimo: MIN_WAGER }))
+                    .setDescriptionLocalizations({
+                        'en-US': traduzir('en-US', 'comandos.battle.opcao_aposta', { minimo: MIN_WAGER })
+                    })
                     .setMinValue(MIN_WAGER)
                     .setMaxValue(1000000)
                     .setRequired(false)

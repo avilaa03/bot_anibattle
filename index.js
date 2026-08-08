@@ -50,6 +50,8 @@ const rest = new REST({ version: '10' }).setToken(process.env.TOKEN);
 
 const { bloquearSeBanido } = require('./Commands/utils/moderacao');
 const presenca = require('./Commands/utils/presenca');
+const { tDaInteracao } = require('./Commands/utils/idioma');
+const { criarT, DEFAULT_LOCALE } = require('./Commands/utils/i18n');
 
 client.on('interactionCreate', async (interaction) => {
   try {
@@ -70,9 +72,10 @@ client.on('interactionCreate', async (interaction) => {
         // cair no catch logo abaixo.
         await cmd.run(client, interaction);
       } else {
+        const t = await tDaInteracao(interaction);
         const embed = new EmbedBuilder()
-          .setTitle('❌ Comando indisponível')
-          .setDescription('Este comando não está disponível no momento.')
+          .setTitle(`❌ ${t('comum.comando_indisponivel')}`)
+          .setDescription(t('comum.comando_indisponivel_texto'))
           .setColor('#E53935');
         interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
       }
@@ -98,9 +101,13 @@ client.on('interactionCreate', async (interaction) => {
       guildId: interaction.guildId
     });
     if (interaction.isRepliable() && !interaction.replied) {
+      // Resolver o idioma aqui pode falhar (é o caminho de erro, afinal),
+      // então o catch cai no português em vez de deixar o jogador sem
+      // resposta nenhuma.
+      const t = await tDaInteracao(interaction).catch(() => criarT(DEFAULT_LOCALE));
       const embed = new EmbedBuilder()
-        .setTitle('❌ Erro')
-        .setDescription('Ocorreu um erro ao processar sua ação. Tente novamente.')
+        .setTitle(`❌ ${t('comum.erro')}`)
+        .setDescription(t('comum.erro_generico'))
         .setColor('#E53935');
       // Se já tiver dado deferReply, precisa editar a resposta pendente em
       // vez de tentar responder de novo (o que geraria um outro erro).

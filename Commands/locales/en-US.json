@@ -1,0 +1,1119 @@
+{
+  "comum": {
+    "carta": "Card",
+    "erro": "Error",
+    "erro_generico": "Something went wrong while processing your action. Try again.",
+    "erro_titulo": "❌ Error",
+    "comando_indisponivel": "Command unavailable",
+    "comando_indisponivel_texto": "This command isn't available right now.",
+    "nenhum": "None",
+    "nenhuma": "None",
+    "traco": "—",
+    "sim": "Yes",
+    "nao": "No",
+    "cancelar": "Cancel",
+    "confirmar": "Confirm",
+    "anterior": "Previous",
+    "proxima": "Next",
+    "voce": "you",
+    "jogador": "Player",
+    "jogadores": "players",
+    "cartas": "cards",
+    "moedas": "coins",
+    "sem_permissao": "Not allowed",
+    "apenas_quem_usou": "Only the person who ran the command can use these controls.",
+    "tempo_esgotado": "Time's up",
+    "inventario_vazio": "Empty inventory",
+    "inventario_vazio_texto": "You don't have any cards yet. Use `/roll` to get your first one!",
+    "perfil_nao_encontrado": "Profile not found",
+    "perfil_nao_encontrado_texto": "Use `/roll` or `/daily` to create your profile first.",
+    "carta_nao_encontrada": "Card not found",
+    "usuario_nao_encontrado": "User not found",
+    "saldo_insuficiente": "Not enough coins",
+    "pagina": "Page {atual}/{total}",
+    "sua_posicao": "Your position",
+    "de": "of"
+  },
+
+  "raridades": {
+    "common": "Common",
+    "rare": "Rare",
+    "ultra_rare": "Ultra Rare",
+    "legendary": "Legendary",
+    "master": "Master",
+    "desconhecida": "Unknown"
+  },
+
+  "atributos": {
+    "ata": "ATK",
+    "lif": "HP",
+    "pow": "PWR",
+    "overall": "Overall",
+    "ovr": "OVR"
+  },
+
+  "tempo": {
+    "h": "h",
+    "min": "m",
+    "s": "s",
+    "dia": "day",
+    "dias": "days"
+  },
+
+  "moderacao": {
+    "titulo": "Account suspended",
+    "descricao": "Your account is blocked from using AniBattle.",
+    "motivo": "Reason",
+    "motivo_nao_informado": "Not specified.",
+    "prazo": "Duration",
+    "prazo_permanente": "**Permanent** suspension.",
+    "prazo_ate": "Ends <t:{relativo}:R>, on <t:{absoluto}:f>.",
+    "rodape": "If you think this is a mistake, reach out on the support server"
+  },
+
+  "elo": {
+    "divisoes": {
+      "bronze": "Bronze",
+      "prata": "Silver",
+      "ouro": "Gold",
+      "platina": "Platinum",
+      "diamante": "Diamond",
+      "mestre": "Master"
+    }
+  },
+
+  "conquistas": {
+    "tipos": {
+      "bronze": "Bronze",
+      "prata": "Silver",
+      "ouro": "Gold",
+      "platina": "Platinum"
+    },
+    "platina": {
+      "nome": "AniBattle Platinum",
+      "descricao": "Unlock every other trophy."
+    },
+    "primeira_carta": {
+      "nome": "First of many",
+      "descricao": "Keep your first card in your inventory."
+    },
+    "primeira_vitoria": {
+      "nome": "Winning debut",
+      "descricao": "Win your first battle."
+    },
+    "primeira_venda": {
+      "nome": "Merchant",
+      "descricao": "Sell a card on the market."
+    },
+    "primeira_troca": {
+      "nome": "Dealmaker",
+      "descricao": "Complete a trade with another player."
+    },
+    "colecionador_10": {
+      "nome": "Getting started",
+      "descricao": "Discover 10 cards in the Pokédex."
+    },
+    "rico_1000": {
+      "nome": "First thousand",
+      "descricao": "Save up 1,000 coins."
+    },
+    "streak_3": {
+      "nome": "Building the habit",
+      "descricao": "Claim the daily reward 3 days in a row."
+    },
+    "primeira_rara": {
+      "nome": "Rare find",
+      "descricao": "Own a rare card or better."
+    },
+    "favorita": {
+      "nome": "Got my favorite",
+      "descricao": "Set a favorite card."
+    },
+    "colecionador_100": {
+      "nome": "Collector",
+      "descricao": "Discover 100 cards in the Pokédex."
+    },
+    "vitorias_25": {
+      "nome": "War veteran",
+      "descricao": "Win 25 battles."
+    },
+    "rico_100k": {
+      "nome": "Tycoon",
+      "descricao": "Save up 100,000 coins."
+    },
+    "streak_7": {
+      "nome": "A whole week",
+      "descricao": "Keep a 7-day daily streak."
+    },
+    "lendaria": {
+      "nome": "Living legend",
+      "descricao": "Own a legendary card."
+    },
+    "trocas_10": {
+      "nome": "Card broker",
+      "descricao": "Complete 10 trades."
+    },
+    "serie_completa": {
+      "nome": "Certified fan",
+      "descricao": "Complete every card of one series in the Pokédex."
+    },
+    "criticos_50": {
+      "nome": "Dead aim",
+      "descricao": "Land 50 critical hits in battle."
+    },
+    "virada": {
+      "nome": "Never give up",
+      "descricao": "Win a clash with a comeback hit (below 40% health)."
+    },
+    "elo_1300": {
+      "nome": "Contender",
+      "descricao": "Reach 1300 ranking points."
+    },
+    "colecionador_500": {
+      "nome": "Archivist",
+      "descricao": "Discover 500 cards in the Pokédex."
+    },
+    "pokedex_completa": {
+      "nome": "Full catalog",
+      "descricao": "Discover EVERY card in the game."
+    },
+    "mestra": {
+      "nome": "Touched by the gods",
+      "descricao": "Own a master card."
+    },
+    "vitorias_100": {
+      "nome": "Unbeatable",
+      "descricao": "Win 100 battles."
+    },
+    "streak_30": {
+      "nome": "Every single day",
+      "descricao": "Keep a 30-day daily streak."
+    },
+    "elo_1600": {
+      "nome": "Arena legend",
+      "descricao": "Reach 1600 ranking points."
+    },
+    "torneio": {
+      "nome": "Champion",
+      "descricao": "Win a tournament."
+    },
+    "deck_lendario": {
+      "nome": "Dream team",
+      "descricao": "Own 3 legendary or master cards at the same time."
+    }
+  },
+
+  "missoes_catalogo": {
+    "rolar_3": { "nome": "Warm-up", "descricao": "Roll 3 cards" },
+    "rolar_5": { "nome": "Hunter", "descricao": "Roll 5 cards" },
+    "vencer_1": { "nome": "Duelist", "descricao": "Win 1 battle" },
+    "vencer_3": { "nome": "Dominant", "descricao": "Win 3 battles" },
+    "batalhar_2": { "nome": "Fearless", "descricao": "Take part in 2 battles" },
+    "descobrir_1": { "nome": "Something new", "descricao": "Discover 1 new card in the Pokédex" },
+    "vender_1": { "nome": "Stallholder", "descricao": "Sell 1 card on the market" },
+    "mostrar_1": { "nome": "Show-off", "descricao": "Use /show or /ficha once" },
+    "critico_5": { "nome": "Precision", "descricao": "Land 5 critical hits" },
+    "sem_rolar_20": { "nome": "Rolling marathon", "descricao": "Roll 20 cards" },
+    "sem_vencer_10": { "nome": "Winning season", "descricao": "Win 10 battles" },
+    "sem_descobrir_10": { "nome": "Explorer", "descricao": "Discover 10 new cards" },
+    "sem_trocar_2": { "nome": "Diplomat", "descricao": "Complete 2 trades" },
+    "sem_mercado_3": { "nome": "Market mover", "descricao": "Sell or buy 3 cards" },
+    "sem_diario_5": { "nome": "Present and accounted for", "descricao": "Claim the daily 5 days" }
+  },
+
+  "vip_catalogo": {
+    "tiers": {
+      "bronze": "Bronze",
+      "prata": "Silver",
+      "ouro": "Gold",
+      "master": "Master"
+    },
+    "molduras": {
+      "nenhuma": { "nome": "Default", "descricao": "The regular frame for the rarity." },
+      "bronze": { "nome": "Bronze", "descricao": "Double border in bronze." },
+      "prata": { "nome": "Silver", "descricao": "Double silver border with a shine." },
+      "ouro": { "nome": "Gold", "descricao": "Golden border with ornate corners." },
+      "sakura": { "nome": "Sakura", "descricao": "Cherry blossom petals in the corners." },
+      "holografica": { "nome": "Holographic", "descricao": "Iridescent band across the card." },
+      "neon": { "nome": "Neon", "descricao": "Pulsing neon outline." }
+    }
+  },
+
+  "notificacoes": {
+    "trofeu_desbloqueado": "Trophy unlocked!",
+    "trofeu_rodape": "{tipo} trophy • +{pontos} points",
+    "platina_titulo": "💎 PLATINUM UNLOCKED!",
+    "ouro_titulo": "{emoji} Gold trophy!",
+    "platina_descricao": "<@{userId}> has unlocked **every AniBattle trophy**.\n\n**{nome}** — *{descricao}*",
+    "ouro_descricao": "<@{userId}> unlocked **{nome}**\n\n*{descricao}*",
+    "anuncio_rodape": "See yours with /conquistas",
+    "platinou": "🎉 <@{userId}> PLATINUMED ANIBATTLE! 🎉",
+    "missao_completa": "Quest complete!",
+    "missao_linha": "✅ **{nome}** — {descricao}\n└ Reward: {recompensa}",
+    "missao_para_receber": "To claim",
+    "missao_resgate": "Use `/missoes` and click **Claim** ({total} available)."
+  },
+
+  "idioma": {
+    "titulo_status": "🌐 AniBattle language",
+    "descricao_status": "The bot replies in Portuguese or English. Use `/language language:` to change it.",
+    "campo_voce": "Your preference",
+    "campo_servidor": "Server default",
+    "campo_efetivo": "You're seeing",
+    "automatico": "Automatic",
+    "em_dm": "Not applicable in DMs",
+    "rodape_ajuda": "scope:server changes it for everyone (needs Manage Server)",
+    "rodape_individual": "Anyone who prefers another language can use /language scope:me",
+    "nao_suportado": "That language isn't supported.",
+    "servidor_em_dm": "You can't configure a server from a DM.",
+    "precisa_gerenciar": "You need the **Manage Server** permission to change the language for everyone. To change only your own, use `/language scope:me`.",
+    "servidor_alterado_titulo": "Server language updated",
+    "servidor_alterado": "From now on the bot replies in **{idioma}** on this server.",
+    "servidor_automatico": "The server is back to **automatic**: each player sees the bot in their own Discord language.",
+    "pessoal_alterado_titulo": "Language updated",
+    "pessoal_alterado": "The bot now talks to you in **{idioma}**, on any server.",
+    "pessoal_automatico": "Your preference was cleared. You follow the server again — right now you're seeing **{idioma}**."
+  },
+
+  "roll": {
+    "erro_busca": "Something went wrong loading your data. Try again.",
+    "sem_cartas": "No cards found in the database.",
+    "cooldown_titulo": "Still on cooldown",
+    "cooldown_texto": "You can roll again <t:{quando}:R>.",
+    "tempo_restante": "Time left",
+    "seu_intervalo": "Your interval",
+    "rodape_vip": "{plano}: cooldown reduced by {porcento}%",
+    "rodape_sem_vip": "Subscribers roll with up to 40% less waiting — see /vip",
+    "autor": "{jogador} rolled a card",
+    "linha_raridade": "Rarity {raridade} • Overall **{overall}**",
+    "valor_mercado": "Market value",
+    "venda_rapida": "Quick sell",
+    "botao_guardar": "Keep in inventory",
+    "botao_vender": "Sell for {valor}",
+    "guardada": "🎴 **{carta}** was added to your inventory.",
+    "nova_pokedex": "📖 **New Pokédex entry!** Check it with `/pokedex`.",
+    "vendida": "🪙 You sold **{carta}** for {valor}. Balance: {saldo}",
+    "expirou": "Time ran out to claim the card.",
+    "desejo_titulo": "💭 A card from your wishlist showed up!",
+    "desejo_texto": "{emoji} **{carta}** — *{serie}*\n\nRolled by **{jogador}**. How about proposing a trade with `/trocar`?"
+  },
+
+  "daily": {
+    "marcos": {
+      "7": "One week!",
+      "14": "Two weeks!",
+      "30": "A whole month!",
+      "60": "Two months!",
+      "100": "One hundred days!"
+    },
+    "dias": "**{n}** day(s)",
+    "ja_coletada_titulo": "Already claimed",
+    "ja_coletada_texto": "You already claimed today's. The next one unlocks <t:{quando}:R>.",
+    "sequencia_atual": "🔥 Current streak",
+    "sequencia": "🔥 Streak",
+    "recorde": "🏆 Your record",
+    "saldo": "Balance",
+    "saldo_emoji": "💰 Balance",
+    "proximo_marco": "🎯 Next milestone",
+    "proximo_marco_texto": "Day **{dia}** — {nome} ({multiplicador}x reward)\n**{faltam}** day(s) to go.",
+    "coletada_titulo": "✅ Daily reward claimed",
+    "recebeu": "You received {valor}.",
+    "recebeu_sequencia_perdida": "You received {valor}.\n\n💔 Your **{dias}**-day streak was lost — you missed a day.",
+    "bonus_marco": "Milestone bonus",
+    "bonus_marco_texto": "Reward multiplied by **{multiplicador}x**!",
+    "bonus_vip": "VIP bonus",
+    "bonus_vip_texto": "**{plano}** — {multiplicador}x (base was {base})",
+    "rodape_proximo": "Day {dia}: {nome} ({multiplicador}x) — {faltam} day(s) to go",
+    "rodape_volte": "Come back tomorrow to keep the streak",
+    "erro": "Something went wrong processing your daily reward."
+  },
+
+  "quicksell": {
+    "nenhuma_com_nome": "No card in your inventory has \"{nome}\" in its name.",
+    "expirou": "Time ran out to sell the card.",
+    "titulo": "🪙 Sell {carta}?",
+    "recebera": "You'll get {valor} for this card.",
+    "irreversivel": "⚠️ *This can't be undone.*",
+    "vendida": "Card sold",
+    "vendida_texto": "**{carta}** was sold for {valor}.",
+    "saldo_atual": "Current balance",
+    "cancelada": "Sale cancelled"
+  },
+
+  "inventory": {
+    "autor": "{jogador}'s collection",
+    "total_cartas": "Total cards",
+    "valor_colecao": "Collection value"
+  },
+
+  "show": {
+    "contador": "Card {atual} of {total}"
+  },
+
+  "market": {
+    "titulo": "🛒 Card market",
+    "titulo_curto": "🛒 Market",
+    "vazio": "No cards match those filters. Try searching without filters, or use `/sell` to list yours.",
+    "vendedor": "seller",
+    "vendedor_linha": "Seller: <@{id}>",
+    "preco": "Price: {valor}",
+    "dica_menu": "💡 *Use the menu below to pick a card.*",
+    "anuncios": "{n} listing(s)",
+    "placeholder": "Pick a card to buy",
+    "indisponivel": "Card unavailable",
+    "anuncio_sumiu": "That listing no longer exists.",
+    "ja_vendida": "This card was already sold to another player.",
+    "anuncio_seu": "Your own listing",
+    "anuncio_seu_texto": "You can't buy your own card. Use `/undosell` to take it down.",
+    "confirmar_titulo": "🛒 Confirm purchase",
+    "botao_comprar": "Buy",
+    "sem_saldo": "This card costs {valor} and you don't have that much.",
+    "compra_titulo": "Purchase complete",
+    "compra_texto": "{emoji} **{carta}** is yours now!",
+    "voce_pagou": "You paid",
+    "vendedor_recebeu": "Seller received",
+    "taxa": "Fee ({porcento}%)",
+    "seu_saldo": "Your balance",
+    "nova_pokedex": "📖 **New Pokédex entry!**",
+    "cancelada": "Purchase cancelled",
+    "cancelada_texto": "No coins were spent."
+  },
+
+  "sell": {
+    "titulo": "🏪 List {carta}",
+    "preco_anuncio": "Asking price: {valor}",
+    "voce_recebe": "You get: {valor} *({porcento}% fee)*",
+    "botao_anunciar": "List for {valor}",
+    "erro_render": "Couldn't render the card",
+    "erro_timeout": "The image took too long to load. Try again.",
+    "erro_exibir": "The card couldn't be displayed. Try again.",
+    "sumiu_do_inventario": "That card isn't in your inventory anymore.",
+    "anunciada": "Card listed",
+    "anunciada_texto": "{emoji} **{carta}** is on sale for {valor}.",
+    "recebe_na_venda": "You get on sale",
+    "taxa_mercado": "Market fee ({porcento}%)",
+    "rodape_undosell": "Use /undosell to take the listing down",
+    "cancelado": "Listing cancelled",
+    "cancelado_texto": "Your card is still in your inventory.",
+    "tempo_esgotado_texto": "The listing wasn't created. Run `/sell` again if you still want to sell."
+  },
+
+  "undosell": {
+    "nome_invalido": "Invalid name",
+    "nome_invalido_texto": "Tell me the name of the card you want to take off the market.",
+    "nao_encontrado": "Listing not found",
+    "nao_encontrado_texto": "No listing of yours with that name (or the card was already sold).",
+    "titulo": "📋 Take off the market",
+    "confirme": "Confirm the removal — the card goes back to your inventory.",
+    "preco_anuncio": "Listed price",
+    "raridade": "Rarity",
+    "contador": "Listing {atual} of {total}",
+    "botao_confirmar": "Confirm removal",
+    "cancelado": "Cancelled",
+    "cancelado_texto": "Nothing was changed.",
+    "perfil_sumiu": "Couldn't find your profile.",
+    "removido": "Listing removed",
+    "removido_texto": "**{carta}** is back in your inventory."
+  },
+
+  "mymarket": {
+    "vazio_titulo": "📋 Your listings",
+    "vazio_texto": "You have no cards listed. Use `/sell` to put one up for sale.",
+    "autor": "{jogador}'s listings",
+    "titulo": "🏪 Your market stall",
+    "a_venda": "🟢 On sale ({n})",
+    "vendidas": "✅ Already sold ({n})",
+    "e_mais": "...and {n} more",
+    "anunciado_agora": "Listed right now",
+    "total_vendido": "Total sold so far",
+    "botao_limpar": "Clear sales history",
+    "historico_limpo": "History cleared",
+    "historico_limpo_texto": "{n} sale(s) removed from your history."
+  },
+
+  "balance": {
+    "titulo": "🪙 Wallet",
+    "titulo_curto": "🪙 Balance",
+    "sem_perfil_voce": "You don't have a profile yet. Use `/daily` or `/roll` to get started.",
+    "sem_perfil_outro": "**{jogador}** doesn't have a profile yet. They can use `/daily` or `/roll` to get started.",
+    "em_moedas": "In coins",
+    "em_cartas": "In cards",
+    "patrimonio": "Total net worth",
+    "erro": "Something went wrong loading the balance."
+  },
+
+  "give": {
+    "destinatario_invalido": "Invalid recipient",
+    "si_mesmo": "You can't send coins to yourself.",
+    "bot": "Bots don't receive coins.",
+    "valor_invalido": "Invalid amount",
+    "valor_invalido_texto": "Enter an amount greater than zero.",
+    "sem_saldo": "You have {saldo} and you need {precisa}.",
+    "confirmar_titulo": "Confirm transfer",
+    "confirmar_texto": "You're about to send {valor} to **{jogador}**.",
+    "saldo_agora": "Your balance now",
+    "saldo_depois": "After the transfer",
+    "rodape_prazo": "You have 30 seconds to confirm",
+    "cancelada": "Transfer cancelled",
+    "cancelada_texto": "No coins were moved.",
+    "saldo_mudou": "Your balance changed and this transfer can no longer be completed.",
+    "concluida": "Transfer complete",
+    "concluida_texto": "{valor} sent to <@{id}>.",
+    "seu_saldo": "Your balance",
+    "saldo_destinatario": "Recipient's balance",
+    "expirou": "The transfer was cancelled because you didn't confirm in time.",
+    "erro": "Something went wrong running the transfer."
+  },
+
+  "ping": {
+    "calculando": "Calculating...",
+    "titulo": "🏓 Pong",
+    "resposta": "Response",
+    "status": "Status",
+    "excelente": "🟢 Excellent",
+    "aceitavel": "🟡 Acceptable",
+    "lento": "🔴 Slow"
+  },
+
+  "dice": {
+    "tirou": "You rolled {valor}",
+    "descricao": "Six-sided die."
+  },
+
+  "info": {
+    "descricao": "A Discord bot for collecting and battling with anime character cards.",
+    "jogadores": "👥 Players",
+    "cartas": "🎴 Cards in the catalog",
+    "servidores": "🌐 Servers",
+    "online_ha": "⏱️ Online for",
+    "latencia": "📡 Latency",
+    "criador": "👤 Creator",
+    "codigo": "💻 Source"
+  },
+
+  "magnata": {
+    "titulo": "💰 AniBattle tycoons",
+    "titulo_curto": "💰 Tycoons",
+    "vazio": "No player has a recorded balance yet. Use `/daily` to get started!",
+    "erro": "Something went wrong loading the leaderboard."
+  },
+
+  "colecionadores": {
+    "titulo": "📖 Top collectors",
+    "titulo_curto": "📖 Collectors",
+    "vazio": "Nobody has discovered any cards yet. Use `/roll` to start your Pokédex!",
+    "linha": "**{atual}** / {total} cards ({pct}%)",
+    "rodape": "{n} cards in the catalog"
+  },
+
+  "ranking": {
+    "titulo": "⚔️ Battle ranking",
+    "titulo_curto": "⚔️ Ranking",
+    "vazio": "Nobody has battled yet. Use `/battle` to open the arena!",
+    "linha": "**{pontos}** pts • {vitorias}W {derrotas}L ({pct}%)",
+    "pontos": "{n} pts",
+    "faltam": "**{pts}** pts to reach {emoji} {divisao}",
+    "divisao_maxima": "You're in the highest division!",
+    "nunca_batalhou": "You haven't battled yet. Use `/battle` to enter the ranking.",
+    "divisoes": "Divisions"
+  },
+
+  "battle": {
+    "usuario_necessario": "Player required",
+    "usuario_necessario_texto": "You need to mention someone to challenge.",
+    "alvo_invalido": "Invalid target",
+    "sem_bots": "You can't challenge bots.",
+    "sem_si_mesmo": "You can't challenge yourself.",
+    "em_andamento": "Battle in progress",
+    "em_andamento_texto": "You're already in a battle. Finish it before starting another.",
+    "oponente_ocupado": "Opponent busy",
+    "oponente_ocupado_texto": "**{jogador}** is already in a battle right now.",
+    "muito_rapido": "Too soon",
+    "muito_rapido_texto": "You two just duelled. Wait {tempo} before battling again.",
+    "cartas_insuficientes": "Not enough cards",
+    "cartas_insuficientes_texto": "You need at least **3 cards** to battle. Use `/roll` to get more.",
+    "oponente_sem_cartas": "Opponent has no cards",
+    "oponente_sem_cartas_texto": "**{jogador}** doesn't have 3 cards to battle with.",
+    "sem_saldo_texto": "The wager is {aposta} and you have {saldo}.",
+    "oponente_sem_saldo": "Opponent can't cover it",
+    "oponente_sem_saldo_texto": "**{jogador}** doesn't have {aposta} to cover the wager.",
+    "desafio_titulo": "⚔️ Battle challenge",
+    "desafio_texto": "**{desafiante}** challenged **{desafiado}** to a 3 vs 3 duel!\n\n💰 Wager: {aposta} from each side — **the winner takes** {premio}.",
+    "ficha_jogador": "🎴 {cartas} cards\n⚔️ {vitorias}W — {derrotas}L",
+    "vs": "vs",
+    "rodape_expira": "The challenge expires in 60 seconds",
+    "botao_aceitar": "Accept and wager {valor}",
+    "botao_recusar": "Decline",
+    "mencao_desafio": "{desafiado}, you've been challenged by {desafiante}!",
+    "expirado": "Challenge expired",
+    "expirado_texto": "**{jogador}** didn't answer in time. No coins were charged.",
+    "recusado": "Challenge declined",
+    "recusado_texto": "**{jogador}** turned down the duel.",
+    "aposta_nao_cobrada": "Wager not charged",
+    "sem_saldo_jogador": "**{jogador}** no longer has {valor} available.",
+    "aceito": "Duel accepted!",
+    "aceito_texto": "**{jogador}** is in. {valor} on the line.\n\nBoth of you got the team-building screen in your DMs.",
+    "dm_contra": "You're battling **{oponente}**!",
+    "nao_iniciou": "Couldn't start",
+    "nao_iniciou_texto": "I couldn't DM one of the players. Please enable direct messages from server members.\n\nThe wagers were refunded.",
+    "monte_time": "⚔️ Build your team",
+    "time_completo": "✅ **Team complete!** Waiting for your opponent to pick...",
+    "escolha_3": "Pick **3 cards** to battle with.",
+    "ordem_importa": "💡 *Order matters: your 1st card faces your opponent's 1st, the 2nd faces the 2nd, and so on.*",
+    "em_jogo": "💰 On the line",
+    "em_jogo_texto": "{valor} — winner takes all",
+    "seu_time": "Your team",
+    "mostrando_melhores": "Showing your best {mostradas} cards out of {total}",
+    "expirou_ou_concluida": "This battle expired or has already finished.",
+    "nao_e_jogador": "You're not one of the players in this battle.",
+    "carta_ja_escolhida": "You already picked this card.",
+    "ja_tem_3": "You already picked 3 cards! Wait for your opponent.",
+    "carta_no_time": "**{carta}** joined your team! ({n}/3)",
+    "jogador_1": "Player 1",
+    "jogador_2": "Player 2",
+    "cancelada": "Battle cancelled",
+    "cancelada_texto": "Picked cards are no longer in the inventory of {culpados}.",
+    "apostas_devolvidas": "The wagers were refunded.",
+    "e": " and ",
+    "fim_titulo": "⚔️ Battle over",
+    "empate_titulo": "⚔️ Draw",
+    "fim_texto": "👑 **{vencedor}** won — {x} {placar} {y}",
+    "empate_texto": "Nobody came out ahead — {x} {placar} {y}",
+    "rodadas": "Rounds",
+    "aposta": "💰 Wager",
+    "aposta_vencedor": "👑 **{vencedor}** took {premio}\n💸 **{perdedor}** lost {perda}\n\nWinner's balance: {saldo}",
+    "aposta_empate": "Draw — each player got {valor} back.",
+    "ranking": "📊 Ranking",
+    "ranking_texto": "👑 **{vencedor}** {emojiV} {ptsV} pts (**+{ganho}**)\n💤 **{perdedor}** {emojiP} {ptsP} pts (**-{perda}**)",
+    "log_primeiro": "⚡ **{carta}** was faster and struck first.",
+    "log_esquiva": "💨 **{defensor}** dodged **{atacante}**'s attack!",
+    "log_virada": "🔥 **COMEBACK!** ",
+    "log_critico": "💥 **CRITICAL!** ",
+    "log_dano": "**{atacante}** dealt **{dano}** damage — **{defensor}** is down to **{vida}** health.",
+    "log_venceu": "🏆 **{carta}** won the clash!",
+    "log_tempo": "⏱️ The clash dragged on — whoever is in better shape wins."
+  },
+
+  "trocar": {
+    "usuario_necessario": "Player required",
+    "usuario_necessario_texto": "Mention who you want to trade with.",
+    "sem_bots": "Bots don't trade cards.",
+    "sem_si_mesmo": "You can't trade with yourself.",
+    "em_andamento": "Trade in progress",
+    "em_andamento_texto": "You already have an open trade. Finish or cancel it before starting another.",
+    "jogador_ocupado": "Player busy",
+    "jogador_ocupado_texto": "**{jogador}** is already in a trade.",
+    "voce_sem_cartas": "You have no cards to trade. Use `/roll` first.",
+    "alvo_sem_cartas": "**{jogador}** has no cards to trade.",
+    "proposta_titulo": "🔄 Trade proposal",
+    "proposta_texto": "**{proponente}** wants to trade cards with **{alvo}**.",
+    "n_cartas": "🎴 {n} cards",
+    "rodape_convite": "The invite expires in 60 seconds",
+    "botao_aceitar": "Accept",
+    "mencao_proposta": "{alvo}, you got a trade proposal!",
+    "recusada": "Trade declined",
+    "recusada_texto": "**{jogador}** turned down the proposal.",
+    "proposta_expirada": "Proposal expired",
+    "proposta_expirada_texto": "**{jogador}** didn't answer in time.",
+    "mesa_titulo": "🔄 Trading table",
+    "mesa_descricao": "Each side picks what they're offering in the menus below, then confirms.\n⚠️ *Changing an offer clears both confirmations.*",
+    "oferece": "{jogador} offers",
+    "nada_oferecido": "*(nothing offered yet)*",
+    "total": "**Total:** {valor}",
+    "desequilibrada": "⚠️ Lopsided trade",
+    "desequilibrada_texto": "One side is offering a lot more than the other. Double-check before confirming.",
+    "rodape_executando": "Both confirmed — executing...",
+    "rodape_expira": "The trade expires in 10 minutes",
+    "placeholder": "{jogador}: pick cards to offer",
+    "botao_confirmar": "Confirm trade",
+    "expirada": "Trade expired",
+    "expirada_texto": "That trade no longer exists.",
+    "alheia": "Someone else's trade",
+    "alheia_texto": "You're not part of this trade.",
+    "cancelada": "Trade cancelled",
+    "cancelada_texto": "**{jogador}** called off the trade. No cards changed hands.",
+    "menu_do_oponente": "Opponent's menu",
+    "menu_do_oponente_texto": "Use the menu with your own name on it.",
+    "oferta_vazia": "Empty offer",
+    "oferta_vazia_texto": "At least one side needs to offer a card.",
+    "falta_posse": "Cards that are no longer in the inventory: {cartas}.\n\nNobody lost anything.",
+    "falhou": "The trade couldn't be completed. No cards changed hands.",
+    "concluida": "Trade complete!",
+    "concluida_texto": "The cards changed hands.",
+    "recebeu": "{jogador} received",
+    "nada": "*(nothing)*"
+  },
+
+  "favcard": {
+    "instrucao": "Click **Set favorite** to show this card on your profile.",
+    "botao_favoritar": "Set favorite",
+    "definida": "Favorite card set",
+    "definida_texto": "⭐ {emoji} **{carta}** now shows on your `/profile`.",
+    "cancelado_texto": "Your favorite card is unchanged."
+  },
+
+  "desejos": {
+    "titulo": "💭 Wishlist",
+    "vazia": "💭 Empty wishlist",
+    "vazia_propria": "Use `/desejar nome:Gojo` to mark the cards you're hunting.\n\nYou get pinged when someone rolls one of them.",
+    "vazia_outro": "**{jogador}** hasn't marked any cards yet.",
+    "autor": "{jogador}'s wishlist",
+    "tambem_procuram": "{n} others want it too",
+    "legenda": "🎴 you own  📖 already registered"
+  },
+
+  "desejar": {
+    "informe": "Tell me what to look for",
+    "informe_texto": "Use `/desejar nome:Gojo` or `/desejar numero:42`.",
+    "sem_numero": "There's no card numbered {numero}.",
+    "sem_nome": "No card in the catalog has \"{nome}\" in its name.",
+    "varias": "Several cards found",
+    "varias_texto": "{lista}\n\nUse `/desejar numero:<number>` to pick one.",
+    "removida": "Removed from wishlist",
+    "removida_texto": "{emoji} **{carta}** left your list.",
+    "nao_estava": "Wasn't on the list",
+    "nao_estava_texto": "{emoji} **{carta}** wasn't on your wishlist.",
+    "ja_na_lista": "Already on the list",
+    "ja_na_lista_texto": "{emoji} **{carta}** is already on your wishlist.\n\nUse `/desejar nome:{nome} remover:True` to take it off.",
+    "lista_cheia": "List is full",
+    "lista_cheia_texto": "You already have **{total}** cards on your wishlist (limit {limite}).\n\nRemove one with `remover:True`, or subscribe via `/vip` to raise the limit.",
+    "adicionada": "Added to wishlist",
+    "adicionada_texto": "{emoji} **{carta}** — *{serie}*",
+    "numero": "Number",
+    "sua_lista": "Your list",
+    "tambem_procuram": "Also wanted by",
+    "n_jogadores": "{n} player(s)",
+    "o_que_faz": "What this does",
+    "o_que_faz_texto": "When someone rolls this card, you get pinged and can offer a trade or a purchase.\n⚠️ Wishing does **not** compete for the card: it stays with whoever rolled it.",
+    "rodape": "The ping just tells you who to negotiate with",
+    "ja_registrou": "💡 *You've already registered this card in your Pokédex — maybe hunt a different one.*"
+  },
+
+  "conquistas_ui": {
+    "titulo": "🏆 Trophies",
+    "platinado": "💎 Platinum!",
+    "autor": "{jogador}'s trophies",
+    "resumo": "**{obtidos}** of **{total}** trophies • Level **{nivel}** ({pontos} points)",
+    "faltam": "**{n}** trophy(ies) to go"
+  },
+
+  "profile": {
+    "autor": "{jogador}'s profile",
+    "saldo": "🪙 Balance",
+    "cartas": "🎴 Cards",
+    "patrimonio": "💎 Net worth",
+    "batalhas": "⚔️ Battles",
+    "batalhas_texto": "**{vitorias}**W — **{derrotas}**L  ({pct}% win rate)",
+    "sem_batalhas": "No battles yet",
+    "ranking": "⚔️ Ranking",
+    "sem_partidas": "No matches yet",
+    "sequencia": "🔥 Streak",
+    "sequencia_texto": "**{atual}** day(s) (record: {recorde})",
+    "sem_sequencia": "None — use `/daily`",
+    "trofeus": "🏆 Trophies",
+    "trofeus_texto": "**{obtidos}**/{total} • Level {nivel}",
+    "pokedex": "📖 Pokédex",
+    "pokedex_texto": "**{descobertas}** / {total} cards discovered ({pct}%)",
+    "colecao": "📚 Collection",
+    "melhor_carta": "🏆 Best card",
+    "assinatura": "✨ Subscription",
+    "assinatura_texto": "**{plano}** — renews {quando}",
+    "vitalicio": "lifetime",
+    "favorita": "⭐ Favorite card: {emoji} **{carta}** — *{serie}*",
+    "sem_favorita": "⭐ No favorite card set. Use `/favcard` to pick one."
+  },
+
+  "pokedex": {
+    "titulo": "📖 Pokédex",
+    "titulo_filtrado": "📖 Pokédex — {filtro}",
+    "autor": "{jogador}'s Pokédex",
+    "sem_resultado": "No cards match those filters.",
+    "completa": "📖 Pokédex complete!",
+    "completa_texto": "You've discovered every card in this filter. 🎉",
+    "contagem": "**{descobertas}** of **{total}** cards discovered",
+    "so_faltantes": "showing only what's missing"
+  },
+
+  "ficha": {
+    "informe": "Tell me what to look for",
+    "informe_texto": "Use `/ficha nome:Kirito` or `/ficha numero:42`.",
+    "sem_numero": "There's no card numbered **{numero}** in the catalog.",
+    "nao_registrada": "Card not registered",
+    "nao_registrada_uma": "You haven't registered **{numero}** in your Pokédex yet.\n\nYou need to have owned that card at least once to look it up here.",
+    "nao_registrada_varias": "None of the {n} cards with that name are registered in your Pokédex.\n\nYou need to have owned the card at least once to look it up here.",
+    "como_conseguir": "How to get it",
+    "como_conseguir_texto": "Use `/roll` to draw one, or look on the `/market`.",
+    "seu_progresso": "Your progress",
+    "progresso_texto": "{descobertas} of {total} cards discovered",
+    "registrada_em": "📖 Registered on",
+    "no_inventario": "🎴 In your inventory",
+    "copias": "**{n}** copy(ies)",
+    "nenhuma_copia": "None right now",
+    "valor_mercado": "💰 Market value",
+    "procuram": "💭 Wanted by",
+    "resultado": "Result {atual} of {total}",
+    "de_fora": "Some results were left out",
+    "de_fora_texto": "{n} card(s) with that name aren't in your Pokédex yet."
+  },
+
+  "help": {
+    "raridades": "Rarities",
+    "paginas": [
+      {
+        "titulo": "🎴 Cards and collection",
+        "descricao": "The basics: get cards and organize your collection.",
+        "comandos": [
+          { "nome": "/roll", "desc": "Draws a random card. You choose whether to keep it or sell it on the spot." },
+          { "nome": "/inventory", "desc": "Your full collection, sorted from rarest to most common." },
+          { "nome": "/show", "desc": "Shows a card you own **right now**, with the full art." },
+          { "nome": "/favcard", "desc": "Sets your favorite card — it shows up on your profile." },
+          { "nome": "/profile", "desc": "Your profile: balance, collection, Pokédex and battle record." }
+        ]
+      },
+      {
+        "titulo": "📖 Pokédex",
+        "descricao": "Every card that passes through your inventory is registered forever — even if you sell it later.",
+        "comandos": [
+          { "nome": "/pokedex", "desc": "Shows what you've discovered and what's still missing. Filter by series, rarity, or only what's missing." },
+          { "nome": "/ficha", "desc": "Looks up the full sheet of a registered card, by name or number. Works even if you already sold it." },
+          { "nome": "/colecionadores", "desc": "Leaderboard of who has discovered the most cards." },
+          { "nome": "​", "desc": "💡 *Undiscovered cards show up as* ⬛ **???** *— go hunt them on the `/market` or with `/roll`.*" },
+          { "nome": "​", "desc": "🔢 *Every card has a fixed number. Today's* `#042` *is the same tomorrow, even as the catalog grows.*" }
+        ]
+      },
+      {
+        "titulo": "⚔️ Battles",
+        "descricao": "Challenge other players to 3 vs 3 duels with coins on the line.",
+        "comandos": [
+          { "nome": "/battle", "desc": "Challenges another player. The minimum wager is 10 coins, and the winner takes double." },
+          { "nome": "​", "desc": "**How it works:** each round is a 1 vs 1. Your 1st card faces their 1st, the 2nd faces the 2nd, and so on. Win 2 of 3 rounds and you take the duel and the pot." },
+          { "nome": "​", "desc": "**Stats:** ⚔️ `ATK` drives turn order, crits and dodges · ❤️ `HP` is health · 💥 `PWR` is damage." },
+          { "nome": "​", "desc": "**Luck:** there's variable damage, crits and dodges — but it all leans toward the better card. And anyone who drops below 40% health enters **desperation mode**, with a much higher crit chance. Comebacks happen." }
+        ]
+      },
+      {
+        "titulo": "🪙 Economy and market",
+        "descricao": "Earn coins and trade cards with other players.",
+        "comandos": [
+          { "nome": "/balance", "desc": "Checks someone's balance and net worth." },
+          { "nome": "/magnata", "desc": "Leaderboard of the 10 richest players." },
+          { "nome": "/give", "desc": "Transfers coins to another player." },
+          { "nome": "/quicksell", "desc": "Sells a card instantly, at its base value." },
+          { "nome": "/sell", "desc": "Lists a card on the market at whatever price you want (the market charges a 5% fee on the sale)." },
+          { "nome": "/market", "desc": "Browses and buys cards listed by other players." },
+          { "nome": "/mymarket", "desc": "Your active listings and sales history." },
+          { "nome": "/undosell", "desc": "Pulls a listing off the market and returns the card to your inventory." }
+        ]
+      },
+      {
+        "titulo": "🏆 Progression",
+        "descricao": "Trophies, quests and ranking — what gives you long-term goals.",
+        "comandos": [
+          { "nome": "/conquistas", "desc": "Your trophies. 🥉 Bronze, 🥈 Silver, 🥇 Gold and 💎 **Platinum**, which only unlocks with all the others." },
+          { "nome": "/missoes", "desc": "Daily and weekly quests. Progress is automatic — just come back to claim." },
+          { "nome": "/ranking", "desc": "Standings by battle rating, from Bronze to Master." },
+          { "nome": "/daily", "desc": "Daily reward **with a streak**: the more days in a row, the more it's worth. Milestones at 7, 14, 30, 60 and 100 days." },
+          { "nome": "​", "desc": "⚠️ *Missed a day? The streak resets. That's on purpose.*" }
+        ]
+      },
+      {
+        "titulo": "🤝 Social",
+        "descricao": "Trade and deal with other players.",
+        "comandos": [
+          { "nome": "/trocar", "desc": "Card-for-card trading. Both sides build the offer and both confirm — change the offer and the confirmations reset." },
+          { "nome": "/desejar", "desc": "Marks a card you want. When someone rolls it, you find out and can offer a trade or a purchase." },
+          { "nome": "/desejos", "desc": "Your wishlist, with how many players are also after each card." },
+          { "nome": "​", "desc": "💡 *Wishing does **not** compete for the card. Whoever rolled it keeps it; the ping just tells you who to negotiate with.*" },
+          { "nome": "/torneio", "desc": "Creates a knockout tournament. Join with one click and the bot resolves everything." }
+        ]
+      },
+      {
+        "titulo": "✨ VIP and cosmetics",
+        "descricao": "Support the bot and get some style — with no combat advantage.",
+        "comandos": [
+          { "nome": "/vip", "desc": "See the plans and your subscription status." },
+          { "nome": "/cosmeticos", "desc": "Equip your card frames and profile color." },
+          { "nome": "​", "desc": "🛡️ **No plan grants a combat advantage.** Stats, rarity odds and battle outcomes are the same for everyone. What changes is looks (frames, colors, badges) and convenience (cooldown and daily)." }
+        ]
+      },
+      {
+        "titulo": "🎲 Other",
+        "descricao": "Miscellaneous commands.",
+        "comandos": [
+          { "nome": "/language", "desc": "Switches the bot between Portuguese and English, just for you or for the whole server." },
+          { "nome": "/help", "desc": "This command list." },
+          { "nome": "/info", "desc": "Information about the bot." },
+          { "nome": "/ping", "desc": "Tests the bot's latency." },
+          { "nome": "/dice", "desc": "Rolls a six-sided die." }
+        ]
+      }
+    ]
+  },
+
+  "vip_ui": {
+    "titulo": "✨ AniBattle VIP plans",
+    "ativo": "You're **{emoji} {plano}**!\nYour subscription expires {quando}.\n\nUse `/cosmeticos` to equip your frames.",
+    "vitalicio": "never (lifetime)",
+    "inativo": "Support the bot and get perks for looks and convenience.\n\n🛡️ **No plan grants a combat advantage.** Card stats, rarity odds and battle outcomes are exactly the same for everyone — paying gets you style and comfort, not power.",
+    "seu_plano": " ← your plan",
+    "cabecalho_plano": "{emoji} {plano} — R$ {preco}/month{marcador}",
+    "vantagem_cooldown": "⏱️ `/roll` cooldown **-{porcento}%**",
+    "vantagem_daily": "🎁 Daily reward **{multiplicador}x**",
+    "vantagem_molduras": "🖼️ {n} card frame(s): {lista}",
+    "vantagem_emblema": "{emoji} **{plano}** badge on your profile and leaderboards",
+    "vantagem_cor": "🎨 Custom profile color",
+    "vantagem_banner": "🏞️ Profile banner",
+    "vantagem_destaque": "✨ Highlighted name on leaderboards",
+    "rodape": "Cancel any time • Renewing before it expires stacks the remaining days",
+    "botao_assinar": "Subscribe"
+  },
+
+  "cosmeticos": {
+    "titulo": "🎨 Your cosmetics",
+    "titulo_curto": "Cosmetics",
+    "so_vip": "Cosmetics are subscribers only.\n\nCheck the plans with `/vip` — from **R$ 5.00/month** you already unlock card frames and a profile color.",
+    "descricao": "Plan **{emoji} {plano}**\n\nPick from the menus below. Changes apply to all your cards.",
+    "moldura_equipada": "Equipped frame",
+    "cor_perfil": "Profile color",
+    "cor_padrao": "Bot default",
+    "liberadas": "Frames unlocked by your plan",
+    "placeholder_moldura": "Choose a card frame",
+    "placeholder_cor": "Choose a profile color",
+    "indisponivel": "Unavailable",
+    "indisponivel_texto": "That frame isn't unlocked by your plan.",
+    "cores": {
+      "vermelho": "Red",
+      "azul": "Blue",
+      "verde": "Green",
+      "roxo": "Purple",
+      "dourado": "Gold",
+      "rosa": "Pink",
+      "preto": "Black"
+    }
+  },
+
+  "missoes_ui": {
+    "titulo": "📋 Your quests",
+    "autor": "{jogador}'s quests",
+    "diarias": "📅 Daily — refresh <t:{quando}:R>",
+    "semanais": "🗓️ Weekly — refresh on Monday",
+    "nenhuma": "None.",
+    "resgatada": "*(claimed)*",
+    "pronta": "**— ready!**",
+    "tem_prontas": "🎁 You have **{n}** quest(s) ready — {valor} waiting!",
+    "sem_prontas": "Complete quests just by playing. Progress is automatic.",
+    "botao_resgatar": "Claim rewards",
+    "nada_resgatar": "Nothing to claim",
+    "nada_resgatar_texto": "You've already claimed everything that was ready.",
+    "resgatadas": "Rewards claimed",
+    "n_missoes": "{n} quest(s)"
+  },
+
+  "pagamento": {
+    "titulo": "{emoji} Welcome to {plano} VIP!",
+    "descricao": "Thanks for supporting AniBattle. Your perks are already active.",
+    "valido_ate": "Valid until",
+    "nunca": "never",
+    "proximo_passo": "Next step",
+    "proximo_passo_texto": "Use `/cosmeticos` to equip your frames."
+  },
+
+  "torneio": {
+    "vagas_escolha": "{n} slots",
+    "nome_padrao": "AniBattle Tournament",
+    "so_em_servidor": "Servers only",
+    "so_em_servidor_texto": "Tournaments need a server — they don't work in DMs.",
+    "vagas_invalidas": "Invalid slot count",
+    "vagas_invalidas_texto": "Use {opcoes} slots.",
+    "inscricao_baixa": "Entry fee too low",
+    "inscricao_baixa_texto": "The minimum entry fee is {minimo}.",
+    "quadro_descricao": "Knockout tournament with **{vagas} slots**.\n\nYou enter with your **3 best cards**, and the bot resolves every match at once.\n⚠️ *Your deck is locked at sign-up — you can't swap it after seeing your opponent.*",
+    "ninguem_inscrito": "*(nobody signed up yet)*",
+    "inscritos": "Signed up",
+    "inscricao": "Entry fee",
+    "gratis": "Free",
+    "premio": "🏅 Prize",
+    "premio_para": "{valor} for <@{campeao}>",
+    "so_a_gloria": "Glory only",
+    "participantes": "Participants",
+    "rodape_quadro": "The organizer can start at any time",
+    "botao_entrar": "Join",
+    "botao_sair": "Leave",
+    "botao_comecar": "Start (organizer)",
+    "botao_cancelar": "Cancel (organizer)",
+    "botao_cancelar_este": "Cancel this tournament",
+    "ja_existe": "There's already an open tournament on this server",
+    "ja_existe_texto": "**{nome}** — created by <@{criador}> <t:{quando}:R>.",
+    "situacao": "Status",
+    "fase_inscricoes": "Sign-ups open",
+    "fase_executando": "Running",
+    "cancela_sozinho": "Auto-cancels",
+    "onde_fica": "Where it is",
+    "ir_para_mensagem": "[Go to the tournament message]({url})",
+    "rodape_devolve": "Cancelling refunds paid entry fees",
+    "rodape_so_criador": "Only the creator can cancel. With no answer, it cancels itself by the time above",
+    "nao_encontrado": "Tournament not found",
+    "nao_encontrado_texto": "That tournament no longer exists.",
+    "nao_entrou": "Couldn't join",
+    "erro_fechado": "Sign-ups are already closed.",
+    "erro_ja_inscrito": "You're already signed up for this tournament.",
+    "erro_lotado": "All slots have been filled.",
+    "erro_sem_cartas": "You need at least **3 cards** to take part. Use `/roll`.",
+    "erro_sem_saldo": "You don't have {valor} to pay the entry fee.",
+    "erro_desconhecido": "Unknown error.",
+    "inscrito": "You're in!",
+    "inscrito_texto": "Your tournament team:\n\n{deck}",
+    "rodape_melhores": "Your 3 best cards were picked automatically",
+    "nao_saiu": "Couldn't leave",
+    "erro_nao_inscrito": "You're not signed up for this tournament.",
+    "so_criador_cancela": "Only the tournament's creator can cancel it. If you joined and want out, use the **Leave** button.",
+    "so_criador_comeca": "Only the tournament's creator can start it.",
+    "cancelado": "Tournament cancelled",
+    "cancelado_texto": "**{nome}** was cancelled.",
+    "cancelado_com_devolucao": "**{nome}** was cancelled and the entry fees were refunded.",
+    "nao_comecou": "Couldn't start",
+    "erro_poucos": "You need at least 2 participants. The entry fees were refunded.",
+    "erro_iniciar": "Error starting the tournament.",
+    "resultado_titulo": "🏆 {nome} — Results",
+    "resultado_descricao": "👑 Champion: <@{campeao}>\n\n{n} participant(s)",
+    "passou_direto": "bye",
+    "passou_direto_linha": "<@{id}> got a bye",
+    "rodada_final": "Final",
+    "rodada_semi": "Semifinal",
+    "rodada_quartas": "Quarterfinals",
+    "rodada_oitavas": "Round of 16",
+    "rodada_de": "Round of {n}"
+  },
+
+  "comandos": {
+    "idioma": {
+      "descricao": "Choose the language the bot replies in (Portuguese or English)",
+      "opcao_idioma": "Language you want, or automatic to follow Discord",
+      "opcao_escopo": "Just you (default) or the whole server"
+    },
+    "balance": {
+      "descricao": "Shows how many coins a player has",
+      "opcao_user": "Player you want to check"
+    },
+    "battle": {
+      "descricao": "Challenge another player to a 3v3 duel with coins on the line",
+      "opcao_user": "The player you want to challenge",
+      "opcao_aposta": "How much to wager (minimum {minimo}). The winner takes double."
+    },
+    "colecionadores": {
+      "descricao": "Leaderboard of who discovered the most cards in the Pokédex"
+    },
+    "conquistas": {
+      "descricao": "Shows your trophies and what's left to platinum",
+      "opcao_user": "See another player's trophies"
+    },
+    "cosmeticos": {
+      "descricao": "Equip your card frames and profile color (VIP only)"
+    },
+    "daily": {
+      "descricao": "Claim your daily coin reward"
+    },
+    "desejar": {
+      "descricao": "Add a card to your wishlist (or remove it)",
+      "opcao_nome": "Card name",
+      "opcao_numero": "Card number in the Pokédex",
+      "opcao_remover": "Check this to take the card off the list"
+    },
+    "desejos": {
+      "descricao": "Shows your wishlist",
+      "opcao_user": "See another player's list"
+    },
+    "dice": {
+      "descricao": "Rolls a die from 1 to 6"
+    },
+    "favcard": {
+      "descricao": "Set a card as your favorite",
+      "opcao_name": "The name of the card you want to favorite"
+    },
+    "ficha": {
+      "descricao": "Look up a card you've already registered in the Pokédex",
+      "opcao_nome": "Card name (e.g. Kirito)",
+      "opcao_numero": "Card number in the Pokédex (e.g. 42)"
+    },
+    "give": {
+      "descricao": "Give coins to another player",
+      "opcao_user": "Player you want to send coins to",
+      "opcao_amount": "Amount of coins"
+    },
+    "help": {
+      "descricao": "Lists every command and explains how the game works"
+    },
+    "info": {
+      "descricao": "About the bot, the website and support"
+    },
+    "inventory": {
+      "descricao": "Shows the cards in your inventory"
+    },
+    "magnata": {
+      "descricao": "Leaderboard of the richest players (top 10 by coins)"
+    },
+    "market": {
+      "descricao": "Search the market for cards and buy them",
+      "opcao_cardname": "Card name",
+      "opcao_series": "Filter by series",
+      "opcao_rarity": "Card rarity",
+      "opcao_minvalue": "Minimum price",
+      "opcao_maxvalue": "Maximum price"
+    },
+    "missoes": {
+      "descricao": "Your daily and weekly quests, and claiming their rewards"
+    },
+    "mymarket": {
+      "descricao": "Shows the cards you have listed on the market"
+    },
+    "ping": {
+      "descricao": "Shows the bot's response time"
+    },
+    "pokedex": {
+      "descricao": "Shows which cards you've discovered and which are still missing",
+      "opcao_serie": "Filter by anime/series",
+      "opcao_raridade": "Filter by rarity",
+      "opcao_faltantes": "Show only the cards you don't have yet"
+    },
+    "profile": {
+      "descricao": "Shows a player's profile (yours, if you don't mention anyone)",
+      "opcao_user": "Player whose profile you want to see"
+    },
+    "quicksell": {
+      "descricao": "Quickly sell a card from your inventory",
+      "opcao_name": "The name of the card you want to quick-sell"
+    },
+    "ranking": {
+      "descricao": "Leaderboard of the best duelists by rating"
+    },
+    "roll": {
+      "descricao": "Rolls a random card based on rarity"
+    },
+    "sell": {
+      "descricao": "List a card from your inventory on the market",
+      "opcao_cardname": "Card name",
+      "opcao_price": "Asking price"
+    },
+    "show": {
+      "descricao": "Shows a card from your inventory by name",
+      "opcao_name": "The name of the card you want to show"
+    },
+    "torneio": {
+      "descricao": "Creates a knockout tournament on the server",
+      "opcao_nome": "Tournament name",
+      "opcao_vagas": "How many slots (4, 8 or 16)",
+      "opcao_inscricao": "Entry fee in coins (becomes the champion's prize)"
+    },
+    "trocar": {
+      "descricao": "Propose a card trade with another player",
+      "opcao_user": "Who you want to trade with"
+    },
+    "undosell": {
+      "descricao": "Cancel a card listing on the market",
+      "opcao_cardname": "Card name"
+    },
+    "vip": {
+      "descricao": "Shows the VIP plans and your subscription status"
+    }
+  }
+}

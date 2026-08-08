@@ -3,24 +3,26 @@ const { renderCard } = require('../../utils/cardRenderer.js');
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags } = require('discord.js');
 const ui = require('../../utils/embeds');
 const { molduraEfetiva } = require('../../utils/vip');
+const { tDaInteracao } = require('../../utils/idioma');
 
 // Coletores ativos por usuário (ver rollRun.js para o motivo de não usar
 // mais uma única variável de módulo compartilhada entre todos os usuários).
 const activeCollectors = new Map();
 
 module.exports = async (client, interaction, favCardCollect, favCardEnd) => {
+    const t = await tDaInteracao(interaction);
     const name = interaction.options.getString('name').toLowerCase();
     const user = await User.findOne({ id: interaction.user.id });
 
     if (!user || user.inventory.length === 0) {
-        const embed = ui.neutral('📋 Inventário vazio', 'Você ainda não tem cartas. Use `/roll` para ganhar a primeira!');
+        const embed = ui.neutral(`📋 ${t('comum.inventario_vazio')}`, t('comum.inventario_vazio_texto'));
         return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
     }
 
     const matchingCards = user.inventory.filter(c => c.name.toLowerCase().includes(name));
 
     if (matchingCards.length === 0) {
-        const embed = ui.error('Carta não encontrada', `Nenhuma carta no seu inventário tem "${name}" no nome.`);
+        const embed = ui.error(t('comum.carta_nao_encontrada'), t('quicksell.nenhuma_com_nome', { nome: name }));
         return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
     }
 
@@ -30,23 +32,26 @@ module.exports = async (client, interaction, favCardCollect, favCardEnd) => {
 
     const updateEmbed = async (index) => {
         const card = matchingCards[index];
-        const render = await renderCard(card, { moldura: molduraEfetiva(user) });
+        const render = await renderCard(card, { moldura: molduraEfetiva(user), locale: t.locale });
         const attachment = render.attachment;
 
-        const meta = ui.getRarity(card.rarity);
+        const meta = ui.getRarity(card.rarity, t.locale);
         const embed = ui.base(meta.color)
-            .setTitle(`${meta.emoji} ${ui.cardName(card.name)}`)
+            .setTitle(`${meta.emoji} ${ui.cardName(card.name, t.locale)}`)
             .setDescription([
-                `*${card.series || '—'}*`,
+                `*${card.series || t('comum.traco')}*`,
                 '',
-                ui.statLines(card),
+                ui.statLines(card, t.locale),
                 '',
-                `Raridade ${ui.rarityTag(card.rarity)} • Overall **${card.overall ?? 0}**`,
+                t('roll.linha_raridade', {
+                    raridade: ui.rarityTag(card.rarity, t.locale),
+                    overall: card.overall ?? 0
+                }),
                 '',
-                'Clique em **Favoritar** para deixar esta carta no seu perfil.'
+                t('favcard.instrucao')
             ].join('\n'))
             .setImage(render.url)
-            .setFooter({ text: `${ui.BRAND} • Carta ${index + 1} de ${matchingCards.length}` });
+            .setFooter({ text: `${ui.BRAND} • ${t('show.contador', { atual: index + 1, total: matchingCards.length })}` });
         return { embed, attachment };
     };
 
@@ -55,21 +60,21 @@ module.exports = async (client, interaction, favCardCollect, favCardEnd) => {
             .addComponents(
                 new ButtonBuilder()
                     .setCustomId('prev')
-                    .setLabel('Anterior')
+                    .setLabel(t('comum.anterior'))
                     .setStyle(ButtonStyle.Primary)
                     .setDisabled(matchingCards.length === 1),
                 new ButtonBuilder()
                     .setCustomId('next')
-                    .setLabel('Próximo')
+                    .setLabel(t('comum.proxima'))
                     .setStyle(ButtonStyle.Primary)
                     .setDisabled(matchingCards.length === 1),
                 new ButtonBuilder()
                     .setCustomId('fav')
-                    .setLabel('Favoritar')
+                    .setLabel(t('favcard.botao_favoritar'))
                     .setStyle(ButtonStyle.Success),
                 new ButtonBuilder()
                     .setCustomId('cancel')
-                    .setLabel('Cancelar')
+                    .setLabel(t('comum.cancelar'))
                     .setStyle(ButtonStyle.Danger)
             );
     };
@@ -82,7 +87,7 @@ module.exports = async (client, interaction, favCardCollect, favCardEnd) => {
     const { embed, attachment } = await updateEmbed(0);
     const message = await interaction.editReply({ embeds: [embed], components: [createRow()], files: [attachment] });
 
-    const collector = favCardCollect(interaction, message, { currentIndex }, matchingCards, user, favCardEnd, updateEmbed, createRow);
+    const collector = favCardCollect(interaction, message, { currentIndex }, matchingCards, user, favCardEnd, updateEmbed, createRow, t);
     activeCollectors.set(interaction.user.id, collector);
     collector.on('end', () => {
         if (activeCollectors.get(interaction.user.id) === collector) {

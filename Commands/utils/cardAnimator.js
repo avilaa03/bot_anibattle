@@ -203,10 +203,11 @@ const EFEITOS = {
  *
  * @param {object} cardData
  * @param {string} moldura
+ * @param {string} [locale] idioma dos rótulos desenhados na carta base
  * @returns {Promise<Buffer>} buffer do GIF
  * @throws se `gif-encoder-2` não estiver instalado
  */
-async function buildAnimatedCard(cardData, moldura) {
+async function buildAnimatedCard(cardData, moldura, locale) {
     const efeito = EFEITOS[moldura];
     if (!efeito) throw new Error(`Moldura "${moldura}" não tem animação.`);
 
@@ -216,7 +217,7 @@ async function buildAnimatedCard(cardData, moldura) {
     const GIFEncoder = require('gif-encoder-2');
 
     // 1) Carta estática, renderizada uma única vez.
-    const builder = new CardBuilder(cardData, { moldura: 'nenhuma' });
+    const builder = new CardBuilder(cardData, { moldura: 'nenhuma', locale });
     const baseBuffer = await builder.build();
     const { loadImage } = require('canvas');
     const baseImage = await loadImage(baseBuffer);

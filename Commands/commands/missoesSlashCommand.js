@@ -1,5 +1,6 @@
 const BaseSlashCommand = require('../utils/BaseSlashCommand.js');
 const { SlashCommandBuilder } = require('discord.js');
+const { descricaoBase, localizacoes } = require('../utils/i18n');
 const missoesRun = require('../actions/run/missoesRun.js');
 
 module.exports = class MissoesSlashCommand extends BaseSlashCommand {
@@ -14,7 +15,8 @@ module.exports = class MissoesSlashCommand extends BaseSlashCommand {
     getSlashCommandJSON() {
         return new SlashCommandBuilder()
             .setName(this.name)
-            .setDescription('Suas missões diárias e semanais, e o resgate das recompensas')
+            .setDescription(descricaoBase('comandos.missoes.descricao'))
+            .setDescriptionLocalizations(localizacoes('comandos.missoes.descricao'))
             .toJSON();
     }
 };

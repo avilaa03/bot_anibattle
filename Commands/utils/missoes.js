@@ -1,4 +1,5 @@
 const User = require('./userSchema');
+const { traduzir, DEFAULT_LOCALE } = require('./i18n');
 
 /**
  * Missões diárias e semanais.
@@ -10,28 +11,42 @@ const User = require('./userSchema');
  *
  * As missões são sorteadas por jogador e trocam sozinhas quando o dia
  * (ou a semana) vira.
+ *
+ * Igual às conquistas: o catálogo guarda só a mecânica (evento, alvo,
+ * recompensa). Nome e descrição saem de `missoes_catalogo.<chave>` no
+ * dicionário — passe a missão por `localizar()` antes de exibir.
  */
 
 const CATALOGO_DIARIAS = [
-    { chave: 'rolar_3', nome: 'Aquecimento', descricao: 'Role 3 cartas', evento: 'roll', alvo: 3, recompensa: 300 },
-    { chave: 'rolar_5', nome: 'Caçador', descricao: 'Role 5 cartas', evento: 'roll', alvo: 5, recompensa: 500 },
-    { chave: 'vencer_1', nome: 'Duelista', descricao: 'Vença 1 batalha', evento: 'vitoria', alvo: 1, recompensa: 400 },
-    { chave: 'vencer_3', nome: 'Dominante', descricao: 'Vença 3 batalhas', evento: 'vitoria', alvo: 3, recompensa: 900 },
-    { chave: 'batalhar_2', nome: 'Sem medo', descricao: 'Participe de 2 batalhas', evento: 'batalha', alvo: 2, recompensa: 350 },
-    { chave: 'descobrir_1', nome: 'Novidade', descricao: 'Descubra 1 carta nova na Pokédex', evento: 'descoberta', alvo: 1, recompensa: 500 },
-    { chave: 'vender_1', nome: 'Feirante', descricao: 'Venda 1 carta no mercado', evento: 'venda', alvo: 1, recompensa: 300 },
-    { chave: 'mostrar_1', nome: 'Exibido', descricao: 'Use /show ou /ficha 1 vez', evento: 'consulta', alvo: 1, recompensa: 150 },
-    { chave: 'critico_5', nome: 'Precisão', descricao: 'Acerte 5 golpes críticos', evento: 'critico', alvo: 5, recompensa: 450 }
+    { chave: 'rolar_3', evento: 'roll', alvo: 3, recompensa: 300 },
+    { chave: 'rolar_5', evento: 'roll', alvo: 5, recompensa: 500 },
+    { chave: 'vencer_1', evento: 'vitoria', alvo: 1, recompensa: 400 },
+    { chave: 'vencer_3', evento: 'vitoria', alvo: 3, recompensa: 900 },
+    { chave: 'batalhar_2', evento: 'batalha', alvo: 2, recompensa: 350 },
+    { chave: 'descobrir_1', evento: 'descoberta', alvo: 1, recompensa: 500 },
+    { chave: 'vender_1', evento: 'venda', alvo: 1, recompensa: 300 },
+    { chave: 'mostrar_1', evento: 'consulta', alvo: 1, recompensa: 150 },
+    { chave: 'critico_5', evento: 'critico', alvo: 5, recompensa: 450 }
 ];
 
 const CATALOGO_SEMANAIS = [
-    { chave: 'sem_rolar_20', nome: 'Maratona de rolagens', descricao: 'Role 20 cartas', evento: 'roll', alvo: 20, recompensa: 2500 },
-    { chave: 'sem_vencer_10', nome: 'Temporada vitoriosa', descricao: 'Vença 10 batalhas', evento: 'vitoria', alvo: 10, recompensa: 3500 },
-    { chave: 'sem_descobrir_10', nome: 'Explorador', descricao: 'Descubra 10 cartas novas', evento: 'descoberta', alvo: 10, recompensa: 4000 },
-    { chave: 'sem_trocar_2', nome: 'Diplomata', descricao: 'Complete 2 trocas', evento: 'troca', alvo: 2, recompensa: 3000 },
-    { chave: 'sem_mercado_3', nome: 'Movimentando o mercado', descricao: 'Venda ou compre 3 cartas', evento: 'mercado', alvo: 3, recompensa: 2800 },
-    { chave: 'sem_diario_5', nome: 'Presença confirmada', descricao: 'Colete o diário 5 dias', evento: 'diario', alvo: 5, recompensa: 3200 }
+    { chave: 'sem_rolar_20', evento: 'roll', alvo: 20, recompensa: 2500 },
+    { chave: 'sem_vencer_10', evento: 'vitoria', alvo: 10, recompensa: 3500 },
+    { chave: 'sem_descobrir_10', evento: 'descoberta', alvo: 10, recompensa: 4000 },
+    { chave: 'sem_trocar_2', evento: 'troca', alvo: 2, recompensa: 3000 },
+    { chave: 'sem_mercado_3', evento: 'mercado', alvo: 3, recompensa: 2800 },
+    { chave: 'sem_diario_5', evento: 'diario', alvo: 5, recompensa: 3200 }
 ];
+
+/** Devolve a missão com `nome` e `descricao` no idioma pedido. */
+function localizar(missao, locale = DEFAULT_LOCALE) {
+    if (!missao) return null;
+    return {
+        ...missao,
+        nome: traduzir(locale, `missoes_catalogo.${missao.chave}.nome`),
+        descricao: traduzir(locale, `missoes_catalogo.${missao.chave}.descricao`)
+    };
+}
 
 const QTD_DIARIAS = 3;
 const QTD_SEMANAIS = 2;
@@ -198,6 +213,7 @@ async function resgatar(userId) {
 module.exports = {
     CATALOGO_DIARIAS,
     CATALOGO_SEMANAIS,
+    localizar,
     chaveDoDia,
     chaveDaSemana,
     definicao,

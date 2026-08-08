@@ -1,5 +1,6 @@
 const BaseSlashCommand = require('../utils/BaseSlashCommand');
 const { SlashCommandBuilder } = require('discord.js');
+const { descricaoBase, localizacoes } = require('../utils/i18n');
 const helpRun = require('../actions/run/helpRun')
 
 module.exports = class HelpSlashCommand extends BaseSlashCommand {
@@ -14,7 +15,8 @@ module.exports = class HelpSlashCommand extends BaseSlashCommand {
     getSlashCommandJSON() {
         return new SlashCommandBuilder()
         .setName(this.name)
-        .setDescription('help command')
+        .setDescription(descricaoBase('comandos.help.descricao'))
+            .setDescriptionLocalizations(localizacoes('comandos.help.descricao'))
         .toJSON();
     }
 }

@@ -1,5 +1,6 @@
 const BaseSlashCommand = require('../utils/BaseSlashCommand.js');
 const { SlashCommandBuilder } = require('discord.js');
+const { descricaoBase, localizacoes, escolhasRaridade } = require('../utils/i18n');
 const pokedexRun = require('../actions/run/pokedexRun.js');
 
 module.exports = class PokedexSlashCommand extends BaseSlashCommand {
@@ -14,27 +15,25 @@ module.exports = class PokedexSlashCommand extends BaseSlashCommand {
     getSlashCommandJSON() {
         return new SlashCommandBuilder()
             .setName(this.name)
-            .setDescription('Mostra quais cartas você já descobriu e quais ainda faltam')
+            .setDescription(descricaoBase('comandos.pokedex.descricao'))
+            .setDescriptionLocalizations(localizacoes('comandos.pokedex.descricao'))
             .addStringOption(option =>
                 option.setName('serie')
-                    .setDescription('Filtrar por anime/série')
+                    .setDescription(descricaoBase('comandos.pokedex.opcao_serie'))
+                    .setDescriptionLocalizations(localizacoes('comandos.pokedex.opcao_serie'))
                     .setRequired(false)
             )
             .addStringOption(option =>
                 option.setName('raridade')
-                    .setDescription('Filtrar por raridade')
+                    .setDescription(descricaoBase('comandos.pokedex.opcao_raridade'))
+                    .setDescriptionLocalizations(localizacoes('comandos.pokedex.opcao_raridade'))
                     .setRequired(false)
-                    .addChoices(
-                        { name: '⚪ Comum', value: 'common' },
-                        { name: '🔵 Rara', value: 'rare' },
-                        { name: '🟣 Ultra Rara', value: 'ultra rare' },
-                        { name: '🟠 Lendária', value: 'legendary' },
-                        { name: '🌟 Mestra', value: 'master' }
-                    )
+                    .addChoices(...escolhasRaridade())
             )
             .addBooleanOption(option =>
                 option.setName('faltantes')
-                    .setDescription('Mostrar apenas as cartas que você ainda não tem')
+                    .setDescription(descricaoBase('comandos.pokedex.opcao_faltantes'))
+                    .setDescriptionLocalizations(localizacoes('comandos.pokedex.opcao_faltantes'))
                     .setRequired(false)
             )
             .toJSON();

@@ -5,11 +5,13 @@ const ui = require('../../utils/embeds.js');
 const { renderCard } = require('../../utils/cardRenderer.js');
 const { escapeRegex } = require('../../utils/regexUtils.js');
 const { molduraEfetiva } = require('../../utils/vip.js');
+const { tDaInteracao } = require('../../utils/idioma.js');
 
 async function undosellRun(client, interaction) {
+    const t = await tDaInteracao(interaction);
     const cardName = (interaction.options.getString('cardname') || '').trim();
     if (!cardName) {
-        const embed = ui.error('Nome inválido', 'Informe o nome da carta que você quer retirar do mercado.');
+        const embed = ui.error(t('undosell.nome_invalido'), t('undosell.nome_invalido_texto'));
         return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
     }
 
@@ -20,7 +22,7 @@ async function undosellRun(client, interaction) {
     }).lean();
 
     if (!listings || listings.length === 0) {
-        const embed = ui.error('Anúncio não encontrado', 'Nenhum anúncio seu com esse nome (ou a carta já foi vendida).');
+        const embed = ui.error(t('undosell.nao_encontrado'), t('undosell.nao_encontrado_texto'));
         return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
     }
 
@@ -44,19 +46,19 @@ async function undosellRun(client, interaction) {
             LIF: listing.LIF ?? listing.lif ?? 0,
             POW: listing.POW ?? listing.pow ?? 0
         };
-        const render = await renderCard(cardData, { moldura });
+        const render = await renderCard(cardData, { moldura, locale: t.locale });
         const attachment = render.attachment;
 
-        const embed = ui.base(ui.getRarity(listing.rarity).color)
-            .setTitle('📋 Retirar do mercado')
-            .setDescription('Confirme a retirada — a carta volta para o seu inventário.')
+        const embed = ui.base(ui.getRarity(listing.rarity, t.locale).color)
+            .setTitle(t('undosell.titulo'))
+            .setDescription(t('undosell.confirme'))
             .addFields(
-                { name: 'Carta', value: listing.cardName || '—', inline: true },
-                { name: 'Preço no anúncio', value: ui.coins(price), inline: true },
-                { name: 'Raridade', value: ui.rarityTag(listing.rarity), inline: true }
+                { name: t('comum.carta'), value: listing.cardName || t('comum.traco'), inline: true },
+                { name: t('undosell.preco_anuncio'), value: ui.coins(price, t.locale), inline: true },
+                { name: t('undosell.raridade'), value: ui.rarityTag(listing.rarity, t.locale), inline: true }
             )
             .setImage(render.url)
-            .setFooter({ text: listings.length > 1 ? `${ui.BRAND} • Anúncio ${indexRef.currentIndex + 1} de ${listings.length}` : ui.BRAND });
+            .setFooter({ text: listings.length > 1 ? `${ui.BRAND} • ${t('undosell.contador', { atual: indexRef.currentIndex + 1, total: listings.length })}` : ui.BRAND });
         return { embed, attachment };
     }
 
@@ -72,8 +74,8 @@ async function undosellRun(client, interaction) {
         }
         rows.push(
             new ActionRowBuilder().addComponents(
-                new ButtonBuilder().setCustomId('undosell_confirm').setLabel('Confirmar retirada').setStyle(ButtonStyle.Success),
-                new ButtonBuilder().setCustomId('undosell_cancel').setLabel('Cancelar').setStyle(ButtonStyle.Danger)
+                new ButtonBuilder().setCustomId('undosell_confirm').setLabel(t('undosell.botao_confirmar')).setStyle(ButtonStyle.Success),
+                new ButtonBuilder().setCustomId('undosell_cancel').setLabel(t('comum.cancelar')).setStyle(ButtonStyle.Danger)
             )
         );
         return rows;
@@ -105,7 +107,7 @@ async function undosellRun(client, interaction) {
             return;
         }
         if (i.customId === 'undosell_cancel') {
-            await i.update({ embeds: [ui.neutral('Cancelado', 'Nenhuma alteração feita.')], components: [], files: [] });
+            await i.update({ embeds: [ui.neutral(t('undosell.cancelado'), t('undosell.cancelado_texto'))], components: [], files: [] });
             collector.stop();
             return;
         }
@@ -115,7 +117,7 @@ async function undosellRun(client, interaction) {
 
             const user = await User.findOne({ id: interaction.user.id });
             if (!user) {
-                await i.update({ embeds: [ui.error('Perfil não encontrado', 'Não foi possível localizar seu perfil.')], components: [], files: [] });
+                await i.update({ embeds: [ui.error(t('comum.perfil_nao_encontrado'), t('undosell.perfil_sumiu'))], components: [], files: [] });
                 return;
             }
             const card = {
@@ -138,7 +140,7 @@ async function undosellRun(client, interaction) {
             user.inventory.push(card);
             await user.save();
 
-            const embed = ui.success('Anúncio removido', `**${ui.cardName(listing.cardName)}** voltou para o seu inventário.`);
+            const embed = ui.success(t('undosell.removido'), t('undosell.removido_texto', { carta: ui.cardName(listing.cardName, t.locale) }));
             await i.update({ embeds: [embed], components: [], files: [] });
             collector.stop();
         }

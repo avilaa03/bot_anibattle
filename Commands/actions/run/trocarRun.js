@@ -2,6 +2,7 @@ const { ActionRowBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder, M
 const User = require('../../utils/userSchema');
 const ui = require('../../utils/embeds');
 const trade = require('../../utils/trade');
+const { tDaInteracao } = require('../../utils/idioma');
 
 /**
  * /trocar — negociação de carta por carta.
@@ -11,6 +12,9 @@ const trade = require('../../utils/trade');
  *
  * Qualquer mudança na oferta zera as duas confirmações, então ninguém
  * consegue confirmar uma coisa e entregar outra.
+ *
+ * Convenção deste arquivo: `troca` é o documento da negociação e `t` é o
+ * tradutor — igual ao resto do bot.
  */
 
 const MAX_OPCOES = 25;
@@ -27,11 +31,11 @@ function ordenar(inventario) {
     });
 }
 
-function listarOferta(cartas) {
-    if (cartas.length === 0) return '*(nada oferecido ainda)*';
+function listarOferta(cartas, t) {
+    if (cartas.length === 0) return t('trocar.nada_oferecido');
     return cartas.map((c) => {
-        const meta = ui.getRarity(c.rarity);
-        return `${meta.emoji} **${ui.cardName(c.name)}** — OVR ${c.overall ?? 0} • ${ui.coins(c.marketValue || 0)}`;
+        const meta = ui.getRarity(c.rarity, t.locale);
+        return `${meta.emoji} **${ui.cardName(c.name, t.locale)}** — ${t('atributos.ovr')} ${c.overall ?? 0} • ${ui.coins(c.marketValue || 0, t.locale)}`;
     }).join('\n');
 }
 
@@ -40,27 +44,26 @@ function valorTotal(cartas) {
 }
 
 /** Embed da mesa de negociação. */
-function montarEmbed(t) {
-    const valorP = valorTotal(t.proponente.cartas);
-    const valorA = valorTotal(t.alvo.cartas);
+function montarEmbed(troca, t) {
+    const valorP = valorTotal(troca.proponente.cartas);
+    const valorA = valorTotal(troca.alvo.cartas);
 
-    const marca = (lado) => t[lado].confirmou ? '✅' : '⏳';
+    const marca = (lado) => troca[lado].confirmou ? '✅' : '⏳';
+    const bloco = (lado, valor) =>
+        `${listarOferta(troca[lado].cartas, t)}\n\n${t('trocar.total', { valor: ui.coins(valor, t.locale) })}`;
 
-    const embed = ui.base(trade.ambosConfirmaram(t) ? ui.STATUS_COLORS.success : ui.STATUS_COLORS.warning)
-        .setTitle('🔄 Mesa de troca')
-        .setDescription(
-            'Cada um escolhe o que oferece nos menus abaixo e confirma.\n'
-            + '⚠️ *Mexer na oferta cancela as confirmações dos dois lados.*'
-        )
+    const embed = ui.base(trade.ambosConfirmaram(troca) ? ui.STATUS_COLORS.success : ui.STATUS_COLORS.warning)
+        .setTitle(t('trocar.mesa_titulo'))
+        .setDescription(t('trocar.mesa_descricao'))
         .addFields(
             {
-                name: `${marca('proponente')} ${t.proponente.username} oferece`,
-                value: `${listarOferta(t.proponente.cartas)}\n\n**Total:** ${ui.coins(valorP)}`,
+                name: `${marca('proponente')} ${t('trocar.oferece', { jogador: troca.proponente.username })}`,
+                value: bloco('proponente', valorP),
                 inline: true
             },
             {
-                name: `${marca('alvo')} ${t.alvo.username} oferece`,
-                value: `${listarOferta(t.alvo.cartas)}\n\n**Total:** ${ui.coins(valorA)}`,
+                name: `${marca('alvo')} ${t('trocar.oferece', { jogador: troca.alvo.username })}`,
+                value: bloco('alvo', valorA),
                 inline: true
             }
         );
@@ -70,36 +73,36 @@ function montarEmbed(t) {
     const menor = Math.min(valorP, valorA);
     if (maior > 0 && menor > 0 && maior >= menor * 3) {
         embed.addFields({
-            name: '⚠️ Troca desequilibrada',
-            value: 'Um lado está oferecendo bem mais que o outro. Confira antes de confirmar.',
+            name: t('trocar.desequilibrada'),
+            value: t('trocar.desequilibrada_texto'),
             inline: false
         });
     }
 
-    if (trade.ambosConfirmaram(t)) {
-        embed.setFooter({ text: `${ui.BRAND} • Os dois confirmaram — executando...` });
+    if (trade.ambosConfirmaram(troca)) {
+        embed.setFooter({ text: `${ui.BRAND} • ${t('trocar.rodape_executando')}` });
     } else {
-        embed.setFooter({ text: `${ui.BRAND} • A negociação expira em 10 minutos` });
+        embed.setFooter({ text: `${ui.BRAND} • ${t('trocar.rodape_expira')}` });
     }
 
     return embed;
 }
 
 /** Menus de seleção e botões da mesa. */
-function montarComponentes(t, inventarios) {
+function montarComponentes(troca, inventarios, t) {
     const linhas = [];
 
     for (const lado of ['proponente', 'alvo']) {
         const inventario = ordenar(inventarios[lado] || []).slice(0, MAX_OPCOES);
         if (inventario.length === 0) continue;
 
-        const selecionadas = new Set(t[lado].cartas.map((c) => String(c.inventoryId)));
+        const selecionadas = new Set(troca[lado].cartas.map((c) => String(c.inventoryId)));
 
         const opcoes = inventario.map((carta) => {
-            const meta = ui.getRarity(carta.rarity);
+            const meta = ui.getRarity(carta.rarity, t.locale);
             return {
-                label: `${ui.cardName(carta.name)} · OVR ${getOvr(carta)}`.slice(0, 100),
-                description: `${meta.label} • ${carta.series || '—'}`.slice(0, 100),
+                label: `${ui.cardName(carta.name, t.locale)} · ${t('atributos.ovr')} ${getOvr(carta)}`.slice(0, 100),
+                description: `${meta.label} • ${carta.series || t('comum.traco')}`.slice(0, 100),
                 value: String(carta._id),
                 emoji: meta.emoji,
                 default: selecionadas.has(String(carta._id))
@@ -108,8 +111,8 @@ function montarComponentes(t, inventarios) {
 
         linhas.push(new ActionRowBuilder().addComponents(
             new StringSelectMenuBuilder()
-                .setCustomId(`trade_pick_${t.tradeId}_${lado}`)
-                .setPlaceholder(`${t[lado].username}: escolher cartas para oferecer`)
+                .setCustomId(`trade_pick_${troca.tradeId}_${lado}`)
+                .setPlaceholder(t('trocar.placeholder', { jogador: troca[lado].username }).slice(0, 150))
                 .setMinValues(0)
                 .setMaxValues(Math.min(trade.MAX_CARTAS, opcoes.length))
                 .addOptions(opcoes)
@@ -118,13 +121,13 @@ function montarComponentes(t, inventarios) {
 
     linhas.push(new ActionRowBuilder().addComponents(
         new ButtonBuilder()
-            .setCustomId(`trade_confirm_${t.tradeId}`)
-            .setLabel('Confirmar troca')
+            .setCustomId(`trade_confirm_${troca.tradeId}`)
+            .setLabel(t('trocar.botao_confirmar'))
             .setEmoji('✅')
             .setStyle(ButtonStyle.Success),
         new ButtonBuilder()
-            .setCustomId(`trade_cancel_${t.tradeId}`)
-            .setLabel('Cancelar')
+            .setCustomId(`trade_cancel_${troca.tradeId}`)
+            .setLabel(t('comum.cancelar'))
             .setStyle(ButtonStyle.Danger)
     ));
 
@@ -132,21 +135,25 @@ function montarComponentes(t, inventarios) {
 }
 
 async function trocarRun(client, interaction) {
+    const t = await tDaInteracao(interaction);
     const proponente = interaction.user;
     const alvo = interaction.options.getUser('user');
 
-    const recusar = (titulo, descricao) =>
-        interaction.reply({ embeds: [ui.error(titulo, descricao)], flags: MessageFlags.Ephemeral });
+    const recusar = (tituloChave, descricaoChave, valores) =>
+        interaction.reply({
+            embeds: [ui.error(t(tituloChave), t(descricaoChave, valores))],
+            flags: MessageFlags.Ephemeral
+        });
 
-    if (!alvo) return recusar('Usuário necessário', 'Mencione com quem você quer trocar.');
-    if (alvo.bot) return recusar('Alvo inválido', 'Bots não trocam cartas.');
-    if (alvo.id === proponente.id) return recusar('Alvo inválido', 'Você não pode trocar consigo mesmo.');
+    if (!alvo) return recusar('trocar.usuario_necessario', 'trocar.usuario_necessario_texto');
+    if (alvo.bot) return recusar('battle.alvo_invalido', 'trocar.sem_bots');
+    if (alvo.id === proponente.id) return recusar('battle.alvo_invalido', 'trocar.sem_si_mesmo');
 
     if (await trade.temTrocaAtiva(proponente.id)) {
-        return recusar('Negociação em andamento', 'Você já tem uma troca aberta. Termine ou cancele antes de abrir outra.');
+        return recusar('trocar.em_andamento', 'trocar.em_andamento_texto');
     }
     if (await trade.temTrocaAtiva(alvo.id)) {
-        return recusar('Jogador ocupado', `**${alvo.username}** já está em uma negociação.`);
+        return recusar('trocar.jogador_ocupado', 'trocar.jogador_ocupado_texto', { jogador: alvo.username });
     }
 
     const [docP, docA] = await Promise.all([
@@ -155,57 +162,71 @@ async function trocarRun(client, interaction) {
     ]);
 
     if (!docP || (docP.inventory || []).length === 0) {
-        return recusar('Inventário vazio', 'Você não tem cartas para trocar. Use `/roll` primeiro.');
+        return recusar('comum.inventario_vazio', 'trocar.voce_sem_cartas');
     }
     if (!docA || (docA.inventory || []).length === 0) {
-        return recusar('Inventário vazio', `**${alvo.username}** não tem cartas para trocar.`);
+        return recusar('comum.inventario_vazio', 'trocar.alvo_sem_cartas', { jogador: alvo.username });
     }
 
-    const t = await trade.criar(proponente, alvo, interaction.channelId);
+    const troca = await trade.criar(proponente, alvo, interaction.channelId);
 
     const convite = ui.base(ui.STATUS_COLORS.warning)
-        .setTitle('🔄 Proposta de troca')
-        .setDescription(`**${proponente.username}** quer trocar cartas com **${alvo.username}**.`)
+        .setTitle(t('trocar.proposta_titulo'))
+        .setDescription(t('trocar.proposta_texto', {
+            proponente: proponente.username,
+            alvo: alvo.username
+        }))
         .addFields(
-            { name: proponente.username, value: `🎴 ${docP.inventory.length} cartas`, inline: true },
+            { name: proponente.username, value: t('trocar.n_cartas', { n: docP.inventory.length }), inline: true },
             { name: '⇄', value: '​', inline: true },
-            { name: alvo.username, value: `🎴 ${docA.inventory.length} cartas`, inline: true }
+            { name: alvo.username, value: t('trocar.n_cartas', { n: docA.inventory.length }), inline: true }
         )
-        .setFooter({ text: `${ui.BRAND} • O convite expira em 60 segundos` });
+        .setFooter({ text: `${ui.BRAND} • ${t('trocar.rodape_convite')}` });
 
     const botoes = new ActionRowBuilder().addComponents(
-        new ButtonBuilder().setCustomId(`trade_accept_${t.tradeId}`).setLabel('Aceitar').setEmoji('🔄').setStyle(ButtonStyle.Success),
-        new ButtonBuilder().setCustomId(`trade_decline_${t.tradeId}`).setLabel('Recusar').setStyle(ButtonStyle.Secondary)
+        new ButtonBuilder().setCustomId(`trade_accept_${troca.tradeId}`).setLabel(t('trocar.botao_aceitar')).setEmoji('🔄').setStyle(ButtonStyle.Success),
+        new ButtonBuilder().setCustomId(`trade_decline_${troca.tradeId}`).setLabel(t('battle.botao_recusar')).setStyle(ButtonStyle.Secondary)
     );
 
     await interaction.reply({
-        content: `${alvo}, você recebeu uma proposta de troca!`,
+        content: t('trocar.mencao_proposta', { alvo: String(alvo) }),
         embeds: [convite],
         components: [botoes]
     });
     const mensagem = await interaction.fetchReply();
 
-    t.mensagemId = mensagem.id;
-    await t.save();
+    troca.mensagemId = mensagem.id;
+    await troca.save();
 
     // O convite (aceitar/recusar) é resolvido aqui; o resto da mesa é
     // tratado pelo handler global, porque a mesa vive mais que este coletor.
-    const filtro = (i) => i.user.id === alvo.id && [`trade_accept_${t.tradeId}`, `trade_decline_${t.tradeId}`].includes(i.customId);
+    const filtro = (i) => i.user.id === alvo.id && [`trade_accept_${troca.tradeId}`, `trade_decline_${troca.tradeId}`].includes(i.customId);
     const coletor = mensagem.createMessageComponentCollector({ filter: filtro, time: 60000, max: 1 });
 
     coletor.on('collect', async (i) => {
-        if (i.customId === `trade_decline_${t.tradeId}`) {
-            await trade.apagar(t.tradeId);
+        // Quem clica aqui é o ALVO, não quem abriu o comando — então a
+        // mesa passa a falar o idioma dele a partir deste ponto.
+        const tAlvo = await tDaInteracao(i);
+
+        if (i.customId === `trade_decline_${troca.tradeId}`) {
+            await trade.apagar(troca.tradeId);
             return i.update({
                 content: null,
-                embeds: [ui.neutral('Troca recusada', `**${alvo.username}** recusou a proposta.`)],
+                embeds: [ui.neutral(
+                    tAlvo('trocar.recusada'),
+                    tAlvo('trocar.recusada_texto', { jogador: alvo.username })
+                )],
                 components: []
             });
         }
 
-        const atualizada = await trade.buscar(t.tradeId);
+        const atualizada = await trade.buscar(troca.tradeId);
         if (!atualizada) {
-            return i.update({ content: null, embeds: [ui.error('Troca expirada', 'Essa negociação não existe mais.')], components: [] });
+            return i.update({
+                content: null,
+                embeds: [ui.error(tAlvo('trocar.expirada'), tAlvo('trocar.expirada_texto'))],
+                components: []
+            });
         }
 
         atualizada.fase = 'montando';
@@ -218,19 +239,22 @@ async function trocarRun(client, interaction) {
 
         await i.update({
             content: `${proponente} ⇄ ${alvo}`,
-            embeds: [montarEmbed(atualizada)],
-            components: montarComponentes(atualizada, inventarios)
+            embeds: [montarEmbed(atualizada, tAlvo)],
+            components: montarComponentes(atualizada, inventarios, tAlvo)
         });
     });
 
     coletor.on('end', async (coletadas) => {
         if (coletadas.size === 0) {
-            const atual = await trade.buscar(t.tradeId);
+            const atual = await trade.buscar(troca.tradeId);
             if (atual && atual.fase === 'aguardando') {
-                await trade.apagar(t.tradeId);
+                await trade.apagar(troca.tradeId);
                 mensagem.edit({
                     content: null,
-                    embeds: [ui.neutral('Proposta expirada', `**${alvo.username}** não respondeu a tempo.`)],
+                    embeds: [ui.neutral(
+                        t('trocar.proposta_expirada'),
+                        t('trocar.proposta_expirada_texto', { jogador: alvo.username })
+                    )],
                     components: []
                 }).catch(() => {});
             }

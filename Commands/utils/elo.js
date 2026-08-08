@@ -10,18 +10,27 @@
  * caçando jogador fraco para subir.
  */
 
+const { traduzir, DEFAULT_LOCALE } = require('./i18n');
+
 const ELO_INICIAL = 1000;
 const K = 32;             // quanto uma partida pode mexer na pontuação
 const PISO = 100;         // ninguém cai abaixo disso
 
+// `chave` é o que identifica a divisão no código e no dicionário; o nome
+// visível sai de `elo.divisoes.<chave>`.
 const DIVISOES = [
-    { nome: 'Bronze', emoji: '🥉', min: 0, cor: 0xCD7F32 },
-    { nome: 'Prata', emoji: '🥈', min: 1100, cor: 0xC0C0C0 },
-    { nome: 'Ouro', emoji: '🥇', min: 1250, cor: 0xFFD700 },
-    { nome: 'Platina', emoji: '💎', min: 1400, cor: 0x5DADE2 },
-    { nome: 'Diamante', emoji: '💠', min: 1550, cor: 0x00E5FF },
-    { nome: 'Mestre', emoji: '🌟', min: 1700, cor: 0xE91E63 }
+    { chave: 'bronze', emoji: '🥉', min: 0, cor: 0xCD7F32 },
+    { chave: 'prata', emoji: '🥈', min: 1100, cor: 0xC0C0C0 },
+    { chave: 'ouro', emoji: '🥇', min: 1250, cor: 0xFFD700 },
+    { chave: 'platina', emoji: '💎', min: 1400, cor: 0x5DADE2 },
+    { chave: 'diamante', emoji: '💠', min: 1550, cor: 0x00E5FF },
+    { chave: 'mestre', emoji: '🌟', min: 1700, cor: 0xE91E63 }
 ];
+
+/** Nome da divisão no idioma pedido ("Prata" / "Silver"). */
+function nomeDivisao(chave, locale = DEFAULT_LOCALE) {
+    return traduzir(locale, `elo.divisoes.${chave}`);
+}
 
 /** Probabilidade esperada de A vencer B. */
 function expectativa(eloA, eloB) {
@@ -61,14 +70,17 @@ function calcularEmpate(eloA, eloB) {
     };
 }
 
-function divisao(elo) {
-    return [...DIVISOES].reverse().find((d) => elo >= d.min) || DIVISOES[0];
+function divisao(elo, locale = DEFAULT_LOCALE) {
+    const d = [...DIVISOES].reverse().find((x) => elo >= x.min) || DIVISOES[0];
+    return { ...d, nome: nomeDivisao(d.chave, locale) };
 }
 
 /** Quanto falta para a próxima divisão (null se já está na última). */
-function proximaDivisao(elo) {
+function proximaDivisao(elo, locale = DEFAULT_LOCALE) {
     const acima = DIVISOES.find((d) => d.min > elo);
-    return acima ? { ...acima, faltam: acima.min - elo } : null;
+    return acima
+        ? { ...acima, nome: nomeDivisao(acima.chave, locale), faltam: acima.min - elo }
+        : null;
 }
 
 module.exports = {
@@ -76,6 +88,7 @@ module.exports = {
     K,
     PISO,
     DIVISOES,
+    nomeDivisao,
     expectativa,
     calcular,
     calcularEmpate,
