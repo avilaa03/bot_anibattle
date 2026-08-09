@@ -1,4 +1,5 @@
 const { createCanvas } = require('canvas');
+const { traduzir, DEFAULT_LOCALE } = require('./i18n');
 
 /**
  * Desenha o troféu como imagem, no estilo do pop-up de troféu da PSN.
@@ -143,7 +144,12 @@ function desenharFaiscas(ctx, cx, cy, estilo, quantidade) {
  * @param {object} tipo entrada de achievements.TIPOS
  * @returns {Buffer} PNG
  */
-function buildTrophy(conquista, tipo) {
+/**
+ * @param {object} conquista já passada por achievements.localizar()
+ * @param {object} tipo entrada de achievements.TIPOS
+ * @param {string} [locale] idioma do texto desenhado na imagem
+ */
+function buildTrophy(conquista, tipo, locale = DEFAULT_LOCALE) {
     const estilo = ESTILOS[conquista.tipo] || ESTILOS.bronze;
     const canvas = createCanvas(W, H);
     const ctx = canvas.getContext('2d');
@@ -193,7 +199,7 @@ function buildTrophy(conquista, tipo) {
     ctx.textAlign = 'left';
     ctx.fillStyle = estilo.principal;
     ctx.font = `bold 17px ${FONT}`;
-    ctx.fillText('TROFÉU DESBLOQUEADO', textoX, 58);
+    ctx.fillText(traduzir(locale, 'notificacoes.trofeu_desbloqueado').toUpperCase().replace(/!$/, ''), textoX, 58);
 
     ctx.fillStyle = '#FFFFFF';
     ctx.shadowColor = 'rgba(0,0,0,0.8)';
@@ -209,7 +215,8 @@ function buildTrophy(conquista, tipo) {
     ctx.fillText(conquista.descricao, textoX, 140);
 
     // Selo do tipo, canto inferior direito
-    const rotulo = `${tipo.nome.toUpperCase()}  •  +${tipo.pontos} PTS`;
+    const nomeTipo = traduzir(locale, `conquistas.tipos.${tipo.chave || conquista.tipo}`);
+    const rotulo = `${nomeTipo.toUpperCase()}  •  +${tipo.pontos} PTS`;
     ctx.font = `bold 14px ${FONT}`;
     const larguraSelo = ctx.measureText(rotulo).width + 28;
     const seloX = W - larguraSelo - 26;

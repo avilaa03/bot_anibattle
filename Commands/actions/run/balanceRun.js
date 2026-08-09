@@ -1,15 +1,25 @@
 const User = require('../../utils/userSchema');
 const ui = require('../../utils/embeds');
 const { MessageFlags } = require('discord.js');
+const { tDaInteracao } = require('../../utils/idioma');
 
 async function balanceRun(client, interaction) {
+    const t = await tDaInteracao(interaction);
     const alvo = interaction.options.getUser('user') || interaction.user;
 
     try {
         const user = await User.findOne({ id: alvo.id });
 
         if (!user) {
-            const embed = ui.neutral('🪙 Saldo', `${alvo.id === interaction.user.id ? 'Você ainda não tem' : `**${alvo.username}** ainda não tem`} um perfil. Use \`/daily\` ou \`/roll\` para começar.`);
+            // A frase muda conforme o alvo é você ou outra pessoa. Em vez
+            // de montar meia frase no código, cada caso é uma chave — nem
+            // todo idioma corta a frase no mesmo lugar.
+            const embed = ui.neutral(
+                t('balance.titulo_curto'),
+                alvo.id === interaction.user.id
+                    ? t('balance.sem_perfil_voce')
+                    : t('balance.sem_perfil_outro', { jogador: alvo.username })
+            );
             return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
         }
 
@@ -17,17 +27,17 @@ async function balanceRun(client, interaction) {
 
         const embed = ui.base(ui.STATUS_COLORS.warning)
             .setAuthor({ name: alvo.username, iconURL: alvo.displayAvatarURL() })
-            .setTitle('🪙 Carteira')
+            .setTitle(t('balance.titulo'))
             .addFields(
-                { name: 'Em moedas', value: ui.coins(user.balance || 0), inline: true },
-                { name: 'Em cartas', value: ui.coins(inventoryValue), inline: true },
-                { name: 'Patrimônio total', value: ui.coins((user.balance || 0) + inventoryValue), inline: true }
+                { name: t('balance.em_moedas'), value: ui.coins(user.balance || 0, t.locale), inline: true },
+                { name: t('balance.em_cartas'), value: ui.coins(inventoryValue, t.locale), inline: true },
+                { name: t('balance.patrimonio'), value: ui.coins((user.balance || 0) + inventoryValue, t.locale), inline: true }
             );
 
         return interaction.reply({ embeds: [embed] });
     } catch (err) {
         console.error('Erro ao buscar o saldo do usuário:', err);
-        const embed = ui.error('Erro', 'Houve um erro ao buscar o saldo.');
+        const embed = ui.error(t('comum.erro'), t('balance.erro'));
         return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
     }
 }

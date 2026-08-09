@@ -60,11 +60,43 @@ function montarEmbedResultado({ nomeX, nomeY, resultado, cor = COR_VITORIA, titu
  * é justamente o que o treino serve para descobrir.
  */
 function contarDestaques(resultado) {
-    const log = resultado.rounds.flatMap((r) => r.log).join('\n');
-    return {
-        criticos: (log.match(/CRÍTICO/g) || []).length,
-        viradas: (log.match(/VIRADA/g) || []).length
-    };
+    // Conta pelos EVENTOS, não varrendo o texto da narração.
+    //
+    // Isto era `log.match(/CRÍTICO/g)`: uma expressão regular procurando a
+    // palavra dentro da frase mostrada na tela. Funcionava, mas amarrava a
+    // progressão do jogador ao texto — traduzir a narração, ou só trocar
+    // "CRÍTICO" por "Crítico", zeraria em silêncio o troféu "Golpe
+    // certeiro" e a missão "Precisão". Sem erro e sem log: só jogador
+    // reclamando que não desbloqueia.
+    //
+    // Os eventos já carregam `crit` e `desperate` como booleano desde que
+    // a transmissão ao vivo passou a existir.
+    let criticos = 0;
+    let viradas = 0;
+
+    for (const rodada of resultado.rounds) {
+        for (const evento of rodada.eventos || []) {
+            if (evento.tipo !== 'golpe') continue;
+
+            // O `!evento.desperate` reproduz de propósito o que a regex
+            // fazia, e vale explicar porque parece errado à primeira vista.
+            //
+            // `desperate` só é verdadeiro quando `crit` também é — ou seja,
+            // TODA virada é, mecanicamente, um crítico. Mas `descreverGolpe`
+            // usa `if/else if` e escreve só "VIRADA!" nesses casos, então a
+            // varredura de texto nunca enxergava esses críticos.
+            //
+            // Contá-los agora deixaria a conta mais correta, mas aceleraria
+            // o troféu "Golpe certeiro" e a missão "Precisão" para todo
+            // mundo. Mudar taxa de desbloqueio é decisão de jogo, não efeito
+            // colateral de uma limpeza — então fica como está, e a diferença
+            // está registrada aqui para ser decidida à parte.
+            if (evento.crit && !evento.desperate) criticos++;
+            if (evento.desperate) viradas++;
+        }
+    }
+
+    return { criticos, viradas };
 }
 
 module.exports = { COR_VITORIA, montarEmbedResultado, contarDestaques };

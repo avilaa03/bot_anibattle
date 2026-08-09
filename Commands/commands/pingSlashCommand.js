@@ -1,5 +1,6 @@
 const BaseSlashCommand = require('../utils/BaseSlashCommand');
 const { SlashCommandBuilder } = require('discord.js');
+const { descricaoBase, localizacoes } = require('../utils/i18n');
 const pingRun = require('../actions/run/pingRun')
 
 module.exports = class PingSlashCommand extends BaseSlashCommand {
@@ -14,7 +15,8 @@ module.exports = class PingSlashCommand extends BaseSlashCommand {
     getSlashCommandJSON() {
         return new SlashCommandBuilder()
         .setName(this.name)
-        .setDescription('ping command')
+        .setDescription(descricaoBase('comandos.ping.descricao'))
+            .setDescriptionLocalizations(localizacoes('comandos.ping.descricao'))
         .toJSON();
     }
 }

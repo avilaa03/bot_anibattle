@@ -1,8 +1,10 @@
 const User = require('../../utils/userSchema');
 const ui = require('../../utils/embeds');
 const { MessageFlags } = require('discord.js');
+const { tDaInteracao } = require('../../utils/idioma');
 
 async function magnataRun(client, interaction) {
+    const t = await tDaInteracao(interaction);
     try {
         await interaction.deferReply();
 
@@ -12,7 +14,7 @@ async function magnataRun(client, interaction) {
             .lean();
 
         if (!users || users.length === 0) {
-            const embed = ui.neutral('💰 Magnatas', 'Nenhum jogador com saldo registrado ainda. Use `/daily` para começar!');
+            const embed = ui.neutral(t('magnata.titulo_curto'), t('magnata.vazio'));
             return interaction.editReply({ embeds: [embed] });
         }
 
@@ -26,17 +28,17 @@ async function magnataRun(client, interaction) {
         const lista = users.map((u, i) => {
             const destaque = u.id === interaction.user.id;
             const nome = destaque ? `__<@${u.id}>__` : `<@${u.id}>`;
-            return `${ui.medal(i)} ${nome}\n└ ${ui.coins(u.balance || 0)}`;
+            return `${ui.medal(i)} ${nome}\n└ ${ui.coins(u.balance || 0, t.locale)}`;
         }).join('\n');
 
         const embed = ui.base(ui.STATUS_COLORS.warning)
-            .setTitle('💰 Magnatas do AniBattle')
+            .setTitle(t('magnata.titulo'))
             .setDescription(lista);
 
         if (posicaoDoAutor && posicaoDoAutor.posicao > 10) {
             embed.addFields({
-                name: 'Sua posição',
-                value: `\`#${posicaoDoAutor.posicao}\` — ${ui.coins(posicaoDoAutor.balance)}`,
+                name: t('comum.sua_posicao'),
+                value: `\`#${posicaoDoAutor.posicao}\` — ${ui.coins(posicaoDoAutor.balance, t.locale)}`,
                 inline: false
             });
         }
@@ -44,7 +46,7 @@ async function magnataRun(client, interaction) {
         return interaction.editReply({ embeds: [embed] });
     } catch (err) {
         console.error('Erro ao buscar magnatas:', err);
-        const embed = ui.error('Erro', 'Houve um erro ao buscar o ranking.');
+        const embed = ui.error(t('comum.erro'), t('magnata.erro'));
         try {
             if (interaction.deferred) await interaction.editReply({ embeds: [embed] });
             else await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });

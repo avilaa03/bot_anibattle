@@ -1,44 +1,55 @@
 const { ActionRowBuilder, StringSelectMenuBuilder, MessageFlags } = require('discord.js');
 const User = require('../../utils/userSchema');
 const ui = require('../../utils/embeds');
-const { MOLDURAS, getPerks, isVipAtivo } = require('../../utils/vip');
+const { MOLDURAS, getPerks, isVipAtivo, nomeTier, localizarMoldura } = require('../../utils/vip');
+const { tDaInteracao } = require('../../utils/idioma');
 
+// O nome de cada cor sai do dicionário (`cosmeticos.cores.<chave>`).
 const CORES = [
-    { nome: 'Vermelho', valor: 0xE53935, emoji: '🔴' },
-    { nome: 'Azul', valor: 0x2196F3, emoji: '🔵' },
-    { nome: 'Verde', valor: 0x4CAF50, emoji: '🟢' },
-    { nome: 'Roxo', valor: 0x9C27B0, emoji: '🟣' },
-    { nome: 'Dourado', valor: 0xFFD700, emoji: '🟡' },
-    { nome: 'Rosa', valor: 0xE91E63, emoji: '🩷' },
-    { nome: 'Preto', valor: 0x2C2C2C, emoji: '⚫' }
+    { chave: 'vermelho', valor: 0xE53935, emoji: '🔴' },
+    { chave: 'azul', valor: 0x2196F3, emoji: '🔵' },
+    { chave: 'verde', valor: 0x4CAF50, emoji: '🟢' },
+    { chave: 'roxo', valor: 0x9C27B0, emoji: '🟣' },
+    { chave: 'dourado', valor: 0xFFD700, emoji: '🟡' },
+    { chave: 'rosa', valor: 0xE91E63, emoji: '🩷' },
+    { chave: 'preto', valor: 0x2C2C2C, emoji: '⚫' }
 ];
 
-function montarEmbed(user) {
+function montarEmbed(user, t) {
     const perks = getPerks(user);
     const molduraAtual = user?.cosmetics?.moldura || 'nenhuma';
     const corAtual = user?.cosmetics?.corPerfil;
 
     if (!perks.vip) {
-        return ui.warning('Cosméticos', 'Os cosméticos são exclusivos para assinantes.\n\nVeja os planos em `/vip` — a partir de **R$ 5,00/mês** você já desbloqueia molduras de carta e cor de perfil.');
+        return ui.warning(t('cosmeticos.titulo_curto'), t('cosmeticos.so_vip'));
     }
 
-    const nomeCor = CORES.find((c) => c.valor === corAtual)?.nome || 'padrão do bot';
+    const corEscolhida = CORES.find((c) => c.valor === corAtual);
+    const nomeCor = corEscolhida
+        ? t(`cosmeticos.cores.${corEscolhida.chave}`)
+        : t('cosmeticos.cor_padrao');
 
     return ui.base(perks.tier.cor)
-        .setTitle('🎨 Seus cosméticos')
-        .setDescription(`Plano **${perks.tier.emoji} ${perks.tier.nome}**\n\nEscolha nos menus abaixo. As mudanças valem para todas as suas cartas.`)
+        .setTitle(t('cosmeticos.titulo'))
+        .setDescription(t('cosmeticos.descricao', {
+            emoji: perks.tier.emoji,
+            plano: nomeTier(perks.tier.key, t.locale)
+        }))
         .addFields(
-            { name: 'Moldura equipada', value: `${MOLDURAS[molduraAtual]?.nome || 'Padrão'}`, inline: true },
-            { name: 'Cor de perfil', value: nomeCor, inline: true },
+            { name: t('cosmeticos.moldura_equipada'), value: localizarMoldura(molduraAtual, t.locale).nome, inline: true },
+            { name: t('cosmeticos.cor_perfil'), value: nomeCor, inline: true },
             {
-                name: 'Molduras liberadas no seu plano',
-                value: perks.moldurasDisponiveis.map((m) => `• **${MOLDURAS[m]?.nome || m}** — ${MOLDURAS[m]?.descricao || ''}`).join('\n'),
+                name: t('cosmeticos.liberadas'),
+                value: perks.moldurasDisponiveis.map((m) => {
+                    const info = localizarMoldura(m, t.locale);
+                    return `• **${info.nome}** — ${info.descricao}`;
+                }).join('\n'),
                 inline: false
             }
         );
 }
 
-function montarComponentes(user) {
+function montarComponentes(user, t) {
     const perks = getPerks(user);
     if (!perks.vip) return [];
 
@@ -47,24 +58,27 @@ function montarComponentes(user) {
 
     const menuMoldura = new StringSelectMenuBuilder()
         .setCustomId('cosm_moldura')
-        .setPlaceholder('Escolher moldura de carta')
-        .addOptions(perks.moldurasDisponiveis.map((m) => ({
-            label: MOLDURAS[m]?.nome || m,
-            description: (MOLDURAS[m]?.descricao || '').slice(0, 100),
-            value: m,
-            default: m === molduraAtual
-        })));
+        .setPlaceholder(t('cosmeticos.placeholder_moldura'))
+        .addOptions(perks.moldurasDisponiveis.map((m) => {
+            const info = localizarMoldura(m, t.locale);
+            return {
+                label: info.nome,
+                description: info.descricao.slice(0, 100),
+                value: m,
+                default: m === molduraAtual
+            };
+        }));
 
     const componentes = [new ActionRowBuilder().addComponents(menuMoldura)];
 
     if (perks.podeCorPerfil) {
         const menuCor = new StringSelectMenuBuilder()
             .setCustomId('cosm_cor')
-            .setPlaceholder('Escolher cor do perfil')
+            .setPlaceholder(t('cosmeticos.placeholder_cor'))
             .addOptions([
-                { label: 'Padrão do bot', value: 'padrao', emoji: '⚪', default: !corAtual },
+                { label: t('cosmeticos.cor_padrao'), value: 'padrao', emoji: '⚪', default: !corAtual },
                 ...CORES.map((c) => ({
-                    label: c.nome,
+                    label: t(`cosmeticos.cores.${c.chave}`),
                     value: String(c.valor),
                     emoji: c.emoji,
                     default: c.valor === corAtual
@@ -77,15 +91,16 @@ function montarComponentes(user) {
 }
 
 async function cosmeticosRun(client, interaction) {
+    const t = await tDaInteracao(interaction);
     const user = await User.findOne({ id: interaction.user.id }).lean();
 
     if (!isVipAtivo(user)) {
-        return interaction.reply({ embeds: [montarEmbed(user)], flags: MessageFlags.Ephemeral });
+        return interaction.reply({ embeds: [montarEmbed(user, t)], flags: MessageFlags.Ephemeral });
     }
 
     await interaction.reply({
-        embeds: [montarEmbed(user)],
-        components: montarComponentes(user)
+        embeds: [montarEmbed(user, t)],
+        components: montarComponentes(user, t)
     });
     const mensagem = await interaction.fetchReply();
 
@@ -102,7 +117,10 @@ async function cosmeticosRun(client, interaction) {
             const atual = await User.findOne({ id: interaction.user.id }).lean();
             const perks = getPerks(atual);
             if (!perks.moldurasDisponiveis.includes(escolha)) {
-                return i.reply({ embeds: [ui.error('Indisponível', 'Essa moldura não está liberada no seu plano.')], flags: MessageFlags.Ephemeral });
+                return i.reply({
+                    embeds: [ui.error(t('cosmeticos.indisponivel'), t('cosmeticos.indisponivel_texto'))],
+                    flags: MessageFlags.Ephemeral
+                });
             }
             atualizacao['cosmetics.moldura'] = escolha;
         } else {
@@ -116,8 +134,8 @@ async function cosmeticosRun(client, interaction) {
         ).lean();
 
         await i.update({
-            embeds: [montarEmbed(atualizado)],
-            components: montarComponentes(atualizado)
+            embeds: [montarEmbed(atualizado, t)],
+            components: montarComponentes(atualizado, t)
         });
     });
 

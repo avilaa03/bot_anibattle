@@ -1,5 +1,6 @@
 const BaseSlashCommand = require('../utils/BaseSlashCommand.js');
 const { SlashCommandBuilder } = require('discord.js');
+const { descricaoBase, localizacoes } = require('../utils/i18n');
 const conquistasRun = require('../actions/run/conquistasRun.js');
 
 module.exports = class ConquistasSlashCommand extends BaseSlashCommand {
@@ -14,10 +15,12 @@ module.exports = class ConquistasSlashCommand extends BaseSlashCommand {
     getSlashCommandJSON() {
         return new SlashCommandBuilder()
             .setName(this.name)
-            .setDescription('Mostra seus troféus e o que falta para platinar')
+            .setDescription(descricaoBase('comandos.conquistas.descricao'))
+            .setDescriptionLocalizations(localizacoes('comandos.conquistas.descricao'))
             .addUserOption(option =>
                 option.setName('user')
-                    .setDescription('Ver os troféus de outro jogador')
+                    .setDescription(descricaoBase('comandos.conquistas.opcao_user'))
+                    .setDescriptionLocalizations(localizacoes('comandos.conquistas.opcao_user'))
                     .setRequired(false)
             )
             .toJSON();

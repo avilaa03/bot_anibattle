@@ -106,16 +106,24 @@ async function avisarUsuario(client, discordUserId, tierKey, user) {
     if (!usuario) return;
 
     const ui = require('./embeds');
+    const { nomeTier } = require('./vip');
+    const { tDoUsuario } = require('./idioma');
+
+    // O webhook vem do provedor de pagamento, não de uma interação: não
+    // existe servidor nem clique para tirar o idioma. Sobra a preferência
+    // do próprio jogador — e português quando ele nunca escolheu.
+    const t = await tDoUsuario(discordUserId);
+
     const expira = user?.vip?.expiresAt
         ? `<t:${Math.floor(new Date(user.vip.expiresAt).getTime() / 1000)}:D>`
-        : 'nunca';
+        : t('pagamento.nunca');
 
     const embed = ui.base(tier.cor)
-        .setTitle(`${tier.emoji} Bem-vindo ao VIP ${tier.nome}!`)
-        .setDescription('Obrigado por apoiar o AniBattle. Suas vantagens já estão ativas.')
+        .setTitle(t('pagamento.titulo', { emoji: tier.emoji, plano: nomeTier(tierKey, t.locale) }))
+        .setDescription(t('pagamento.descricao'))
         .addFields(
-            { name: 'Válido até', value: expira, inline: true },
-            { name: 'Próximo passo', value: 'Use `/cosmeticos` para equipar suas molduras.', inline: false }
+            { name: t('pagamento.valido_ate'), value: expira, inline: true },
+            { name: t('pagamento.proximo_passo'), value: t('pagamento.proximo_passo_texto'), inline: false }
         );
 
     await usuario.send({ embeds: [embed] }).catch(() => {});

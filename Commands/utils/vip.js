@@ -16,10 +16,11 @@
  * limitada — ver ROLL_COOLDOWN_MULTIPLIER de cada plano.
  */
 
+const { traduzir, DEFAULT_LOCALE } = require('./i18n');
+
 const TIERS = {
     bronze: {
         key: 'bronze',
-        nome: 'Bronze',
         emoji: '🥉',
         cor: 0xCD7F32,
         precoBRL: 5,
@@ -34,7 +35,6 @@ const TIERS = {
     },
     prata: {
         key: 'prata',
-        nome: 'Prata',
         emoji: '🥈',
         cor: 0xC0C0C0,
         precoBRL: 15,
@@ -49,7 +49,6 @@ const TIERS = {
     },
     ouro: {
         key: 'ouro',
-        nome: 'Ouro',
         emoji: '🥇',
         cor: 0xFFD700,
         precoBRL: 30,
@@ -64,7 +63,6 @@ const TIERS = {
     },
     master: {
         key: 'master',
-        nome: 'Master',
         emoji: '🌟',
         cor: 0xE91E63,
         precoBRL: 50,
@@ -86,13 +84,13 @@ const ORDEM_TIERS = ['bronze', 'prata', 'ouro', 'master'];
  * carta no cardBuilder, sem tocar em atributo nenhum.
  */
 const MOLDURAS = {
-    nenhuma: { key: 'nenhuma', nome: 'Padrão', descricao: 'A moldura normal da raridade.' },
-    bronze: { key: 'bronze', nome: 'Bronze', descricao: 'Borda dupla em tom bronze.', cores: ['#CD7F32', '#8B5A2B'] },
-    prata: { key: 'prata', nome: 'Prata', descricao: 'Borda dupla prateada com brilho.', cores: ['#E8E8E8', '#9E9E9E'] },
-    ouro: { key: 'ouro', nome: 'Ouro', descricao: 'Borda dourada com cantos ornamentados.', cores: ['#FFD700', '#B8860B'] },
-    sakura: { key: 'sakura', nome: 'Sakura', descricao: 'Pétalas de cerejeira nos cantos.', cores: ['#FFB7C5', '#FF69B4'] },
-    holografica: { key: 'holografica', nome: 'Holográfica', descricao: 'Faixa iridescente que atravessa a carta.', cores: ['#FF00CC', '#00E5FF'] },
-    neon: { key: 'neon', nome: 'Neon', descricao: 'Contorno neon pulsante.', cores: ['#39FF14', '#00E5FF'] }
+    nenhuma: { key: 'nenhuma' },
+    bronze: { key: 'bronze', cores: ['#CD7F32', '#8B5A2B'] },
+    prata: { key: 'prata', cores: ['#E8E8E8', '#9E9E9E'] },
+    ouro: { key: 'ouro', cores: ['#FFD700', '#B8860B'] },
+    sakura: { key: 'sakura', cores: ['#FFB7C5', '#FF69B4'] },
+    holografica: { key: 'holografica', cores: ['#FF00CC', '#00E5FF'] },
+    neon: { key: 'neon', cores: ['#39FF14', '#00E5FF'] }
 };
 
 /** O VIP do usuário está ativo agora? */
@@ -180,7 +178,31 @@ function calcularExpiracao(user, meses = 1) {
     return new Date(base + meses * 30 * 24 * 60 * 60 * 1000);
 }
 
+/** Nome do plano no idioma pedido ("Prata" / "Silver"). */
+function nomeTier(key, locale = DEFAULT_LOCALE) {
+    return traduzir(locale, `vip_catalogo.tiers.${key}`);
+}
+
+/** Moldura com nome e descrição no idioma pedido. */
+function localizarMoldura(key, locale = DEFAULT_LOCALE) {
+    const base = MOLDURAS[key] || MOLDURAS.nenhuma;
+    return {
+        ...base,
+        nome: traduzir(locale, `vip_catalogo.molduras.${base.key}.nome`),
+        descricao: traduzir(locale, `vip_catalogo.molduras.${base.key}.descricao`)
+    };
+}
+
+/** Plano com `nome` já traduzido. */
+function localizarTier(tier, locale = DEFAULT_LOCALE) {
+    if (!tier) return null;
+    return { ...tier, nome: nomeTier(tier.key, locale) };
+}
+
 module.exports = {
+    nomeTier,
+    localizarTier,
+    localizarMoldura,
     TIERS,
     ORDEM_TIERS,
     MOLDURAS,

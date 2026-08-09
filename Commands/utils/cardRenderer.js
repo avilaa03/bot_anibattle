@@ -31,14 +31,16 @@ function comTimeout(promessa, ms) {
  * @param {object} cardData dados da carta
  * @param {object} [opcoes]
  * @param {string} [opcoes.moldura] moldura cosmética equipada
+ * @param {string} [opcoes.locale] idioma dos rótulos desenhados na carta
  * @returns {Promise<{attachment: AttachmentBuilder, filename: string, url: string, animated: boolean}>}
  */
 async function renderCard(cardData, opcoes = {}) {
     const moldura = opcoes.moldura || 'nenhuma';
+    const locale = opcoes.locale;
 
     if (ehAnimada(moldura)) {
         try {
-            const buffer = await comTimeout(buildAnimatedCard(cardData, moldura), TIMEOUT_GIF_MS);
+            const buffer = await comTimeout(buildAnimatedCard(cardData, moldura, locale), TIMEOUT_GIF_MS);
             const filename = 'cardImage.gif';
             return {
                 attachment: new AttachmentBuilder(buffer, { name: filename }),
@@ -61,7 +63,7 @@ async function renderCard(cardData, opcoes = {}) {
         }
     }
 
-    const builder = new CardBuilder(cardData, { moldura });
+    const builder = new CardBuilder(cardData, { moldura, locale });
     const buffer = await builder.build();
     const filename = 'cardImage.png';
     return {

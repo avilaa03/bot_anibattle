@@ -1,5 +1,6 @@
 const BaseSlashCommand = require('../utils/BaseSlashCommand.js');
 const { SlashCommandBuilder } = require('discord.js');
+const { descricaoBase, localizacoes } = require('../utils/i18n');
 const cosmeticosRun = require('../actions/run/cosmeticosRun.js');
 
 module.exports = class CosmeticosSlashCommand extends BaseSlashCommand {
@@ -14,7 +15,8 @@ module.exports = class CosmeticosSlashCommand extends BaseSlashCommand {
     getSlashCommandJSON() {
         return new SlashCommandBuilder()
             .setName(this.name)
-            .setDescription('Equipa suas molduras de carta e cor de perfil (exclusivo VIP)')
+            .setDescription(descricaoBase('comandos.cosmeticos.descricao'))
+            .setDescriptionLocalizations(localizacoes('comandos.cosmeticos.descricao'))
             .toJSON();
     }
 };

@@ -1,4 +1,5 @@
 const { SlashCommandBuilder } = require('discord.js');
+const { descricaoBase, localizacoes, escolhasRaridade } = require('../utils/i18n');
 const BaseSlashCommand = require('../utils/BaseSlashCommand');
 const marketRun = require('../actions/run/marketRun');
 const marketCollect = require('../actions/collect/marketCollect');
@@ -16,19 +17,19 @@ module.exports = class MarketSlashCommand extends BaseSlashCommand {
     getSlashCommandJSON() {
         return new SlashCommandBuilder()
             .setName(this.name)
-            .setDescription('Procura por cartas no mercado e permite a compra')
-            .addStringOption(option => option.setName('cardname').setDescription('Nome da carta').setRequired(false))
-            .addStringOption(option => option.setName('series').setDescription('Filtrar por série').setRequired(false))
+            .setDescription(descricaoBase('comandos.market.descricao'))
+            .setDescriptionLocalizations(localizacoes('comandos.market.descricao'))
+            .addStringOption(option => option.setName('cardname').setDescription(descricaoBase('comandos.market.opcao_cardname'))
+                    .setDescriptionLocalizations(localizacoes('comandos.market.opcao_cardname')).setRequired(false))
+            .addStringOption(option => option.setName('series').setDescription(descricaoBase('comandos.market.opcao_series'))
+                    .setDescriptionLocalizations(localizacoes('comandos.market.opcao_series')).setRequired(false))
             .addStringOption(option =>
-                option.setName('rarity').setDescription('Raridade da carta').setRequired(false)
-                    .addChoices(
-                        { name: 'Common', value: 'common' },
-                        { name: 'Rare', value: 'rare' },
-                        { name: 'Ultra Rare', value: 'ultra rare' },
-                        { name: 'Legendary', value: 'legendary' },
-                        { name: 'Master', value: 'master' }
-                    ))
-            .addIntegerOption(option => option.setName('minvalue').setDescription('Valor mínimo').setRequired(false))
-            .addIntegerOption(option => option.setName('maxvalue').setDescription('Valor máximo').setRequired(false));
+                option.setName('rarity').setDescription(descricaoBase('comandos.market.opcao_rarity'))
+                    .setDescriptionLocalizations(localizacoes('comandos.market.opcao_rarity')).setRequired(false)
+                    .addChoices(...escolhasRaridade()))
+            .addIntegerOption(option => option.setName('minvalue').setDescription(descricaoBase('comandos.market.opcao_minvalue'))
+                    .setDescriptionLocalizations(localizacoes('comandos.market.opcao_minvalue')).setRequired(false))
+            .addIntegerOption(option => option.setName('maxvalue').setDescription(descricaoBase('comandos.market.opcao_maxvalue'))
+                    .setDescriptionLocalizations(localizacoes('comandos.market.opcao_maxvalue')).setRequired(false));
     }
 };

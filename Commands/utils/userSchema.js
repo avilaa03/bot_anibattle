@@ -11,6 +11,15 @@ const UserSchema = new Schema({
         type: Number,
         default: 0
     },
+    // Idioma preferido do jogador: 'pt-BR', 'en-US' ou null.
+    //
+    // Nulo (o padrão) significa "não escolhi" — aí o bot segue o idioma do
+    // servidor e, na falta dele, o idioma do próprio cliente Discord. Ver
+    // a ordem completa em utils/idioma.js.
+    idioma: {
+        type: String,
+        default: null
+    },
     // Proteção contra azar: rolls seguidos sem tirar a raridade em
     // questão ou melhor. Zeram sozinhos quando a sorte vem, e ao chegar no
     // limite o próximo roll vem garantido. Ver `utils/sorteio.js` para as

@@ -1,5 +1,5 @@
-module.exports = (interaction, reason) => {
+module.exports = (interaction, reason, t) => {
     if (reason === 'time') {
-        interaction.followUp({ content: 'O tempo para coletar a carta expirou.', components: [] });
+        interaction.followUp({ content: t('roll.expirou'), components: [] });
     }
 };

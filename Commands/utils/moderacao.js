@@ -1,6 +1,8 @@
 const User = require('./userSchema');
 const ui = require('./embeds');
 const { MessageFlags } = require('discord.js');
+const { criarT, DEFAULT_LOCALE } = require('./i18n');
+const { resolverIdioma } = require('./idioma');
 
 /**
  * Banimento de jogadores.
@@ -75,17 +77,27 @@ async function consultarBanimento(userId) {
 }
 
 /** Embed mostrado ao jogador suspenso. */
-function embedBanimento(banimento) {
-    const prazo = banimento.expiraEm
-        ? `Termina <t:${Math.floor(new Date(banimento.expiraEm).getTime() / 1000)}:R>, em <t:${Math.floor(new Date(banimento.expiraEm).getTime() / 1000)}:f>.`
-        : 'Suspensão **permanente**.';
+function embedBanimento(banimento, locale = DEFAULT_LOCALE) {
+    const t = criarT(locale);
 
-    return ui.error('Conta suspensa', 'Sua conta está impedida de usar o AniBattle.')
+    // O motivo é escrito por um administrador no painel do site, então é
+    // texto livre — sai como veio, sem tradução. Traduzir só a moldura da
+    // mensagem é o certo aqui: inventar uma tradução do motivo seria pior
+    // que mostrá-lo no idioma original.
+    const segundos = banimento.expiraEm
+        ? Math.floor(new Date(banimento.expiraEm).getTime() / 1000)
+        : null;
+
+    const prazo = segundos
+        ? t('moderacao.prazo_ate', { relativo: segundos, absoluto: segundos })
+        : t('moderacao.prazo_permanente');
+
+    return ui.error(t('moderacao.titulo'), t('moderacao.descricao'))
         .addFields(
-            { name: 'Motivo', value: banimento.motivo || 'Não informado.', inline: false },
-            { name: 'Prazo', value: prazo, inline: false }
+            { name: t('moderacao.motivo'), value: banimento.motivo || t('moderacao.motivo_nao_informado'), inline: false },
+            { name: t('moderacao.prazo'), value: prazo, inline: false }
         )
-        .setFooter({ text: `${ui.BRAND} • Se você acha que foi engano, fale no servidor de suporte` });
+        .setFooter({ text: `${ui.BRAND} • ${t('moderacao.rodape')}` });
 }
 
 /**
@@ -98,8 +110,9 @@ async function bloquearSeBanido(interaction) {
     if (!banimento) return false;
 
     if (interaction.isRepliable()) {
+        const locale = await resolverIdioma(interaction);
         await interaction.reply({
-            embeds: [embedBanimento(banimento)],
+            embeds: [embedBanimento(banimento, locale)],
             flags: MessageFlags.Ephemeral
         }).catch(() => {});
     }

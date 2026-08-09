@@ -2,9 +2,11 @@ const User = require('../../utils/userSchema');
 const ui = require('../../utils/embeds');
 const elo = require('../../utils/elo');
 const { badge } = require('../../utils/vip');
+const { tDaInteracao } = require('../../utils/idioma');
 
 /** /ranking — classificação por pontuação de batalha. */
 async function rankingRun(client, interaction) {
+    const t = await tDaInteracao(interaction);
     await interaction.deferReply();
 
     // Só entra no ranking quem já batalhou — evita a lista ficar cheia
@@ -19,12 +21,12 @@ async function rankingRun(client, interaction) {
 
     if (top.length === 0) {
         return interaction.editReply({
-            embeds: [ui.neutral('⚔️ Ranking', 'Ninguém batalhou ainda. Use `/battle` para inaugurar a arena!')]
+            embeds: [ui.neutral(t('ranking.titulo_curto'), t('ranking.vazio'))]
         });
     }
 
     const lista = top.map((u, i) => {
-        const div = elo.divisao(u.elo || elo.ELO_INICIAL);
+        const div = elo.divisao(u.elo || elo.ELO_INICIAL, t.locale);
         const total = (u.wins || 0) + (u.losses || 0);
         const aproveitamento = total > 0 ? Math.round(((u.wins || 0) / total) * 100) : 0;
         const destaque = u.id === interaction.user.id;
@@ -32,11 +34,16 @@ async function rankingRun(client, interaction) {
         const emblema = badge(u);
 
         return `${ui.medal(i)} ${emblema}${nome} ${div.emoji}\n`
-            + `└ **${ui.number(u.elo || elo.ELO_INICIAL)}** pts • ${u.wins || 0}V ${u.losses || 0}D (${aproveitamento}%)`;
+            + `└ ${t('ranking.linha', {
+                pontos: ui.number(u.elo || elo.ELO_INICIAL, t.locale),
+                vitorias: u.wins || 0,
+                derrotas: u.losses || 0,
+                pct: aproveitamento
+            })}`;
     }).join('\n');
 
     const embed = ui.base(ui.STATUS_COLORS.warning)
-        .setTitle('⚔️ Ranking de batalha')
+        .setTitle(t('ranking.titulo'))
         .setDescription(lista);
 
     // Posição do autor, se ele não estiver no top 10.
@@ -48,27 +55,31 @@ async function rankingRun(client, interaction) {
         if (eu && totalPartidas > 0) {
             const meuElo = eu.elo || elo.ELO_INICIAL;
             const acima = await User.countDocuments({ ...filtro, elo: { $gt: meuElo } });
-            const div = elo.divisao(meuElo);
-            const proxima = elo.proximaDivisao(meuElo);
+            const div = elo.divisao(meuElo, t.locale);
+            const proxima = elo.proximaDivisao(meuElo, t.locale);
 
             embed.addFields({
-                name: 'Sua posição',
-                value: `\`#${acima + 1}\` ${div.emoji} **${div.nome}** — ${ui.number(meuElo)} pts`
-                    + (proxima ? `\n└ Faltam **${proxima.faltam}** pts para ${proxima.emoji} ${proxima.nome}` : '\n└ Você está na divisão mais alta!'),
+                name: t('comum.sua_posicao'),
+                value: `\`#${acima + 1}\` ${div.emoji} **${div.nome}** — ${t('ranking.pontos', { n: ui.number(meuElo, t.locale) })}`
+                    + (proxima
+                        ? `\n└ ${t('ranking.faltam', { pts: proxima.faltam, emoji: proxima.emoji, divisao: proxima.nome })}`
+                        : `\n└ ${t('ranking.divisao_maxima')}`),
                 inline: false
             });
         } else {
             embed.addFields({
-                name: 'Sua posição',
-                value: 'Você ainda não batalhou. Use `/battle` para entrar no ranking.',
+                name: t('comum.sua_posicao'),
+                value: t('ranking.nunca_batalhou'),
                 inline: false
             });
         }
     }
 
     embed.addFields({
-        name: 'Divisões',
-        value: elo.DIVISOES.map((d) => `${d.emoji} ${d.nome} ${d.min > 0 ? `(${d.min}+)` : ''}`).join(' · '),
+        name: t('ranking.divisoes'),
+        value: elo.DIVISOES
+            .map((d) => `${d.emoji} ${elo.nomeDivisao(d.chave, t.locale)} ${d.min > 0 ? `(${d.min}+)` : ''}`)
+            .join(' · '),
         inline: false
     });
 

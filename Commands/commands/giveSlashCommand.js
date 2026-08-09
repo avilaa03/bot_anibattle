@@ -1,5 +1,6 @@
 const BaseSlashCommand = require('../utils/BaseSlashCommand');
 const { SlashCommandBuilder } = require('discord.js');
+const { descricaoBase, localizacoes } = require('../utils/i18n');
 const { giveRun } = require('../actions/run/giveRun.js');
 
 module.exports = class GiveSlashCommand extends BaseSlashCommand {
@@ -14,16 +15,19 @@ module.exports = class GiveSlashCommand extends BaseSlashCommand {
     getSlashCommandJSON() {
         return new SlashCommandBuilder()
             .setName(this.name)
-            .setDescription('Dá moedas para outro usuário')
+            .setDescription(descricaoBase('comandos.give.descricao'))
+            .setDescriptionLocalizations(localizacoes('comandos.give.descricao'))
             .addUserOption(option =>
                 option
                     .setName('user')
-                    .setDescription('Usuário que deseja mencionar')
+                    .setDescription(descricaoBase('comandos.give.opcao_user'))
+                    .setDescriptionLocalizations(localizacoes('comandos.give.opcao_user'))
                     .setRequired(true))
             .addNumberOption(option =>
                 option
                     .setName('amount')
-                    .setDescription('Quantidade de dinheiro')
+                    .setDescription(descricaoBase('comandos.give.opcao_amount'))
+                    .setDescriptionLocalizations(localizacoes('comandos.give.opcao_amount'))
                     .setMinValue(0)
                     .setMaxValue(9999999999)
                     .setRequired(true));
