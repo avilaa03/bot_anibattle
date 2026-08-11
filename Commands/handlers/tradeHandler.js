@@ -1,12 +1,12 @@
 const User = require('../utils/userSchema');
 const ui = require('../utils/embeds');
 const trade = require('../utils/trade');
-const { registrar } = require('../utils/progresso');
-const { anunciarConquistas } = require('../utils/notificacoes');
-const { montarEmbed, montarComponentes } = require('../actions/run/trocarRun');
+const { registrar } = require('../utils/progress');
+const { anunciarConquistas } = require('../utils/notifications');
+const { montarEmbed, montarComponentes } = require('../actions/run/tradeRun');
 const { MessageFlags } = require('discord.js');
-const { podeCancelarTroca, mensagem } = require('../utils/cicloDeVida');
-const { tDaInteracao, tDoUsuario } = require('../utils/idioma');
+const { podeCancelarTroca, mensagem } = require('../utils/lifecycle');
+const { tDaInteracao, tDoUsuario } = require('../utils/language');
 
 /**
  * Botões e menus da mesa de troca.

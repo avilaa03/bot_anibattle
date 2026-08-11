@@ -1,7 +1,7 @@
 const Trade = require('./tradeSchema');
 const User = require('./userSchema');
 const { registerDiscovery } = require('./discovery');
-const { PRAZOS_TROCA, filtroExpirados, podeCancelarTroca } = require('./cicloDeVida');
+const { PRAZOS_TROCA, filtroExpirados, podeCancelarTroca } = require('./lifecycle');
 
 /**
  * Trocas de carta por carta.

@@ -5,16 +5,16 @@ const { ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags } = require('
 const ui = require('../../utils/embeds');
 const vip = require('../../utils/vip');
 const { getPerks, molduraEfetiva } = vip;
-const { tDaInteracao, tDoUsuario } = require('../../utils/idioma');
+const { tDaInteracao, tDoUsuario } = require('../../utils/language');
 const wishlist = require('../../utils/wishlist');
-const { registrar } = require('../../utils/progresso');
-const { notificarProgresso } = require('../../utils/notificacoes');
-const valores = require('../../utils/valores');
-const telemetria = require('../../utils/telemetria');
-const sorteio = require('../../utils/sorteio');
-const bolsa = require('../../utils/bolsa');
-const rollExtra = require('../../utils/rollExtra');
-const nivel = require('../../utils/nivel');
+const { registrar } = require('../../utils/progress');
+const { notificarProgresso } = require('../../utils/notifications');
+const valores = require('../../utils/cardValues');
+const telemetria = require('../../utils/telemetry');
+const sorteio = require('../../utils/draw');
+const bolsa = require('../../utils/bag');
+const rollExtra = require('../../utils/extraRoll');
+const nivel = require('../../utils/level');
 
 /**
  * Menciona no canal quem tem a carta na lista de desejos.

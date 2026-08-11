@@ -2,7 +2,7 @@ const { ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags } = require('
 const Market = require('../../utils/marketSchema.js');
 const { mymarketCollect } = require('../collect/mymarketCollect.js');
 const ui = require('../../utils/embeds.js');
-const { tDaInteracao } = require('../../utils/idioma.js');
+const { tDaInteracao } = require('../../utils/language.js');
 
 async function mymarketRun(client, interaction) {
     const t = await tDaInteracao(interaction);

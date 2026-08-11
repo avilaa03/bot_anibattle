@@ -15,7 +15,7 @@ let canvasDisponivel = true;
 try { require('canvas'); } catch (e) { canvasDisponivel = false; }
 
 const achievements = require(UTILS + 'achievements.js');
-const notif = require(UTILS + 'notificacoes.js');
+const notif = require(UTILS + 'notifications.js');
 
 let falhas = 0;
 const check = (nome, cond, extra = '') => {

@@ -1,8 +1,8 @@
 const { MessageFlags } = require('discord.js');
 const ui = require('../utils/embeds');
-const treino = require('../utils/treino');
-const treinoRun = require('../actions/run/treinoRun');
-const { tDaInteracao } = require('../utils/idioma');
+const treino = require('../utils/training');
+const treinoRun = require('../actions/run/trainingRun');
+const { tDaInteracao } = require('../utils/language');
 
 /**
  * Botões do modo treino.

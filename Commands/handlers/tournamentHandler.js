@@ -1,11 +1,11 @@
 const User = require('../utils/userSchema');
 const ui = require('../utils/embeds');
 const tournament = require('../utils/tournament');
-const { verificarConquistas } = require('../utils/progresso');
-const { anunciarConquistas } = require('../utils/notificacoes');
-const { montarEmbedInscricoes, montarBotoes, podeAdministrar } = require('../actions/run/torneioRun');
+const { verificarConquistas } = require('../utils/progress');
+const { anunciarConquistas } = require('../utils/notifications');
+const { montarEmbedInscricoes, montarBotoes, podeAdministrar } = require('../actions/run/tournamentRun');
 const { MessageFlags } = require('discord.js');
-const { tDaInteracao, tDoUsuario } = require('../utils/idioma');
+const { tDaInteracao, tDoUsuario } = require('../utils/language');
 
 /**
  * Botões do torneio: entrar, sair, começar, cancelar.

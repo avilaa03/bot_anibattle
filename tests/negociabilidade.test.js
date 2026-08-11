@@ -23,13 +23,13 @@ const path = require('path');
 const RAIZ = path.join(__dirname, '..');
 const ROOT = path.join(RAIZ, 'Commands', 'utils') + path.sep;
 
-const negociabilidade = require(ROOT + 'negociabilidade.js');
-const sorteio = require(ROOT + 'sorteio.js');
-const caixas = require(ROOT + 'caixas.js');
-const valores = require(ROOT + 'valores.js');
+const negociabilidade = require(ROOT + 'tradability.js');
+const sorteio = require(ROOT + 'draw.js');
+const caixas = require(ROOT + 'boxes.js');
+const valores = require(ROOT + 'cardValues.js');
 const ui = require(ROOT + 'embeds.js');
-const aprimoramento = require(ROOT + 'aprimoramento.js');
-const itens = require(ROOT + 'itens.js');
+const aprimoramento = require(ROOT + 'upgrading.js');
+const itens = require(ROOT + 'items.js');
 
 let falhas = 0;
 const check = (nome, cond, extra = '') => {
@@ -136,9 +136,9 @@ console.log('\n=== TODO CAMINHO DE VENDA CONSULTA A REGRA ===');
 
 const CAMINHOS_DE_SAIDA = [
     'Commands/actions/run/sellRun.js',
-    'Commands/actions/run/trocarRun.js',
+    'Commands/actions/run/tradeRun.js',
     'Commands/commands/quicksellSlashCommand.js',
-    'Commands/commands/desmancharSlashCommand.js'
+    'Commands/commands/salvageSlashCommand.js'
 ];
 
 const semGuarda = CAMINHOS_DE_SAIDA.filter((arquivo) => {
@@ -156,7 +156,7 @@ console.log('\n=== O SORTEIO EXCLUI CARTA FORA DE ROTAÇÃO ===');
 // recolhida voltaria a sair sem ninguém perceber.
 const SORTEIOS = [
     'Commands/actions/run/rollRun.js',
-    'Commands/actions/run/caixaRun.js'
+    'Commands/actions/run/boxRun.js'
 ];
 
 const semFiltro = SORTEIOS.filter((arquivo) => {
@@ -172,7 +172,7 @@ console.log('\n=== A CÓPIA CONGELA A NEGOCIABILIDADE ===');
 // já a tinha o direito de vendê-la.
 const ENTREGAS = [
     'Commands/actions/collect/rollCollect.js',
-    'Commands/actions/run/caixaRun.js'
+    'Commands/actions/run/boxRun.js'
 ];
 
 const semCopia = ENTREGAS.filter((arquivo) => {

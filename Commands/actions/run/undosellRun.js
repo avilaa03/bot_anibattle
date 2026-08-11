@@ -2,11 +2,11 @@ const User = require('../../utils/userSchema.js');
 const Market = require('../../utils/marketSchema.js');
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags } = require('discord.js');
 const ui = require('../../utils/embeds.js');
-const valores = require('../../utils/valores.js');
+const valores = require('../../utils/cardValues.js');
 const { renderCard } = require('../../utils/cardRenderer.js');
 const { escapeRegex } = require('../../utils/regexUtils.js');
 const { molduraEfetiva } = require('../../utils/vip.js');
-const { tDaInteracao } = require('../../utils/idioma.js');
+const { tDaInteracao } = require('../../utils/language.js');
 
 async function undosellRun(client, interaction) {
     const t = await tDaInteracao(interaction);

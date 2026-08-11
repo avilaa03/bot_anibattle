@@ -1,7 +1,7 @@
 const User = require('../../utils/userSchema');
 const ui = require('../../utils/embeds');
 const { MessageFlags } = require('discord.js');
-const { tDaInteracao } = require('../../utils/idioma');
+const { tDaInteracao } = require('../../utils/language');
 
 async function balanceRun(client, interaction) {
     const t = await tDaInteracao(interaction);

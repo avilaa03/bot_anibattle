@@ -11,7 +11,7 @@ const path = require('path');
 const ROOT = path.join(__dirname, '..', 'Commands', 'utils') + path.sep;
 
 const { runBattle } = require(ROOT + 'battleEngine.js');
-const narracao = require(ROOT + 'narracao.js');
+const narracao = require(ROOT + 'narration.js');
 const { criarT } = require(ROOT + 'i18n.js');
 
 const tPt = criarT('pt-BR');

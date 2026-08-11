@@ -3,9 +3,9 @@ const User = require('../../utils/userSchema');
 const { addBalance } = require('../../utils/economy');
 const ui = require('../../utils/embeds');
 const { registerDiscovery } = require('../../utils/discovery');
-const { registrar } = require('../../utils/progresso');
-const { notificarProgresso } = require('../../utils/notificacoes');
-const telemetria = require('../../utils/telemetria');
+const { registrar } = require('../../utils/progress');
+const { notificarProgresso } = require('../../utils/notifications');
+const telemetria = require('../../utils/telemetry');
 const { criarT, DEFAULT_LOCALE } = require('../../utils/i18n');
 
 module.exports = (interaction, card, user, marketValue, valueToSell, rollEnd, mostradoEm = null, t = criarT(DEFAULT_LOCALE)) => {

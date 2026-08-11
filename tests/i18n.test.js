@@ -15,7 +15,7 @@ const UTILS = path.join(RAIZ, 'Commands', 'utils');
 const i18n = require(path.join(UTILS, 'i18n.js'));
 const ui = require(path.join(UTILS, 'embeds.js'));
 const achievements = require(path.join(UTILS, 'achievements.js'));
-const missoes = require(path.join(UTILS, 'missoes.js'));
+const missoes = require(path.join(UTILS, 'missions.js'));
 const vip = require(path.join(UTILS, 'vip.js'));
 const elo = require(path.join(UTILS, 'elo.js'));
 
@@ -184,9 +184,9 @@ console.log('\n=== Catálogos têm texto em todos os idiomas ===');
 // e a descrição vêm do dicionário, e uma chave sem texto volta como o
 // próprio caminho (`conquistas.primeira_carta.nome`) — feio na tela, mas
 // sem erro nenhum no log. É o que estes testes procuram.
-const itens = require(path.join(UTILS, 'itens.js'));
-const caixas = require(path.join(UTILS, 'caixas.js'));
-const treino = require(path.join(UTILS, 'treino.js'));
+const itens = require(path.join(UTILS, 'items.js'));
+const caixas = require(path.join(UTILS, 'boxes.js'));
+const treino = require(path.join(UTILS, 'training.js'));
 
 for (const locale of i18n.LOCALES) {
     const semTextoConquista = achievements.todas().filter((c) => {

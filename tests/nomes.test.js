@@ -21,7 +21,7 @@ const path = require('path');
 const RAIZ = path.join(__dirname, '..');
 const UTILS = path.join(RAIZ, 'Commands', 'utils');
 
-const nomes = require(path.join(UTILS, 'nomesDeComando.js'));
+const nomes = require(path.join(UTILS, 'commandNames.js'));
 const i18n = require(path.join(UTILS, 'i18n.js'));
 
 let falhas = 0;

@@ -11,7 +11,7 @@
 const path = require('path');
 const ROOT = path.join(__dirname, '..', 'Commands', 'utils') + path.sep;
 
-const ciclo = require(ROOT + 'cicloDeVida.js');
+const ciclo = require(ROOT + 'lifecycle.js');
 
 let falhas = 0;
 const check = (nome, cond, extra = '') => {

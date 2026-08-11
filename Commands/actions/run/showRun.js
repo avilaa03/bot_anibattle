@@ -4,10 +4,10 @@ const User = require('../../utils/userSchema.js');
 const { showEnd } = require('../end/showEnd.js');
 const { renderCard } = require('../../utils/cardRenderer.js');
 const ui = require('../../utils/embeds.js');
-const valores = require('../../utils/valores.js');
+const valores = require('../../utils/cardValues.js');
 const { molduraEfetiva } = require('../../utils/vip.js');
-const { registrar } = require('../../utils/progresso.js');
-const { tDaInteracao } = require('../../utils/idioma.js');
+const { registrar } = require('../../utils/progress.js');
+const { tDaInteracao } = require('../../utils/language.js');
 
 async function showRun(client, interaction) {
     const t = await tDaInteracao(interaction);

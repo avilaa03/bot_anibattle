@@ -25,8 +25,8 @@ const RAIZ = path.join(__dirname, '..');
 const UTILS = path.join(RAIZ, 'Commands', 'utils') + path.sep;
 const RUN = path.join(RAIZ, 'Commands', 'actions', 'run') + path.sep;
 
-const fonteSchema = fs.readFileSync(UTILS + 'eventoSchema.js', 'utf8');
-const fonteRun = fs.readFileSync(RUN + 'eventoRun.js', 'utf8');
+const fonteSchema = fs.readFileSync(UTILS + 'eventSchema.js', 'utf8');
+const fonteRun = fs.readFileSync(RUN + 'eventRun.js', 'utf8');
 
 let falhas = 0;
 const check = (nome, cond, extra = '') => {

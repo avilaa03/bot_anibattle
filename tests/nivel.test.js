@@ -17,7 +17,7 @@
 const path = require('path');
 const ROOT = path.join(__dirname, '..', 'Commands', 'utils') + path.sep;
 
-const nivel = require(ROOT + 'nivel.js');
+const nivel = require(ROOT + 'level.js');
 
 let falhas = 0;
 const check = (nome, cond, extra = '') => {

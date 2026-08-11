@@ -1,7 +1,7 @@
 const { SlashCommandBuilder } = require('discord.js');
 const { descricaoBase, localizacoes, escolhasRaridade } = require('../utils/i18n');
 const BaseSlashCommand = require('../utils/BaseSlashCommand');
-const nomes = require('../utils/nomesDeComando.js');
+const nomes = require('../utils/commandNames.js');
 const marketRun = require('../actions/run/marketRun');
 const marketCollect = require('../actions/collect/marketCollect');
 const marketEnd = require('../actions/end/marketEnd');

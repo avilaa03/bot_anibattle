@@ -1,5 +1,5 @@
 const ui = require('../../utils/embeds');
-const { tDaInteracao } = require('../../utils/idioma');
+const { tDaInteracao } = require('../../utils/language');
 
 async function pingRun(client, interaction) {
     const t = await tDaInteracao(interaction);

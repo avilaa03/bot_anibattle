@@ -3,7 +3,7 @@ const User = require("../../utils/userSchema");
 const ui = require('../../utils/embeds');
 const { MIN_WAGER } = require('../../utils/economy');
 const { temBatalhaAtiva, cooldownRestante } = require('../../utils/battleState');
-const { tDaInteracao } = require('../../utils/idioma');
+const { tDaInteracao } = require('../../utils/language');
 
 async function battleRun(interaction) {
     // O duelo tem dois donos, mas uma mensagem só. Ela sai no idioma de

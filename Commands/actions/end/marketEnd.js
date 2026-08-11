@@ -2,9 +2,9 @@ const User = require('../../utils/userSchema');
 const Market = require('../../utils/marketSchema');
 const { trySpend, addBalance, applyMarketTax, MARKET_TAX_RATE } = require('../../utils/economy');
 const { registerDiscovery } = require('../../utils/discovery');
-const { registrar } = require('../../utils/progresso');
+const { registrar } = require('../../utils/progress');
 const ui = require('../../utils/embeds');
-const valores = require('../../utils/valores');
+const valores = require('../../utils/cardValues');
 const { criarT, DEFAULT_LOCALE } = require('../../utils/i18n');
 
 module.exports = async (message, selectedCard, interaction, t = criarT(DEFAULT_LOCALE)) => {

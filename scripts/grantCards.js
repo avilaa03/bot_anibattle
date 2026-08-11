@@ -28,7 +28,7 @@ mongoose.set('strictQuery', false);
 const User = require('../Commands/utils/userSchema');
 const Card = require('../Commands/utils/cardSchema');
 const { registerDiscovery } = require('../Commands/utils/discovery');
-const valores = require('../Commands/utils/valores');
+const valores = require('../Commands/utils/cardValues');
 
 const RARIDADES = ['common', 'rare', 'ultra rare', 'legendary', 'master'];
 const LIMITE_SEM_CONFIRMAR = 25;

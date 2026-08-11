@@ -13,14 +13,14 @@ const {
 const { runBattle } = require('../utils/battleEngine');
 const { addBalance } = require('../utils/economy');
 const elo = require('../utils/elo');
-const { registrar } = require('../utils/progresso');
-const { anunciarConquistas } = require('../utils/notificacoes');
+const { registrar } = require('../utils/progress');
+const { anunciarConquistas } = require('../utils/notifications');
 const { buildDeckChoiceMessage } = require('../actions/collect/battleCollect');
 const { MessageFlags } = require('discord.js');
-const { podeCancelarBatalha, mensagem } = require('../utils/cicloDeVida');
-const transmissao = require('../utils/transmissao');
-const { montarEmbedResultado, contarDestaques } = require('../utils/resultadoBatalha');
-const { tDaInteracao, tDoUsuario } = require('../utils/idioma');
+const { podeCancelarBatalha, mensagem } = require('../utils/lifecycle');
+const transmissao = require('../utils/broadcast');
+const { montarEmbedResultado, contarDestaques } = require('../utils/battleResult');
+const { tDaInteracao, tDoUsuario } = require('../utils/language');
 
 /** Busca o inventário atual do jogador direto do banco. */
 async function carregarInventario(userId) {

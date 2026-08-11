@@ -1,9 +1,9 @@
 const { createBattle, generateBattleId, cancelBattle, setMessageRefs } = require('../../utils/battleState');
 const { trySpend, addBalance } = require('../../utils/economy');
 const ui = require('../../utils/embeds');
-const { montarEscolhaDeTime, ordenarParaBatalha } = require('../../utils/escolhaDeTime');
+const { montarEscolhaDeTime, ordenarParaBatalha } = require('../../utils/teamPicker');
 const { criarT, DEFAULT_LOCALE } = require('../../utils/i18n');
-const { tDoUsuario } = require('../../utils/idioma');
+const { tDoUsuario } = require('../../utils/language');
 
 /**
  * Tela de escolha de time do `/battle`.

@@ -1,10 +1,10 @@
 const Market = require('../../utils/marketSchema');
 const User = require('../../utils/userSchema');
 const ui = require('../../utils/embeds');
-const valores = require('../../utils/valores');
-const aprimoramento = require('../../utils/aprimoramento');
+const valores = require('../../utils/cardValues');
+const aprimoramento = require('../../utils/upgrading');
 const { applyMarketTax, MARKET_TAX_RATE } = require('../../utils/economy');
-const { registrar } = require('../../utils/progresso');
+const { registrar } = require('../../utils/progress');
 const { criarT, DEFAULT_LOCALE } = require('../../utils/i18n');
 
 async function sellCollect(interaction, collector, matchingCards, indexRef, listingPrice, user, rowNavigation, rowConfirmation, buildSellEmbed, t = criarT(DEFAULT_LOCALE)) {
