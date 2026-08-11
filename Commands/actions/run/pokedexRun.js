@@ -5,6 +5,7 @@ const { escapeRegex } = require('../../utils/regexUtils');
 const { getDiscoveredSet } = require('../../utils/discovery');
 const discovery = require('../../utils/discovery');
 const { formatarNumero } = require('../../utils/dexNumbers');
+const { tDaInteracao } = require('../../utils/idioma');
 
 const POR_PAGINA = 10;
 
@@ -15,6 +16,8 @@ function barraProgresso(descobertas, total) {
 
 async function pokedexRun(client, interaction) {
     await interaction.deferReply();
+
+    const t = await tDaInteracao(interaction);
 
     const filtroSerie = (interaction.options.getString('serie') || '').trim();
     const filtroRaridade = (interaction.options.getString('raridade') || '').trim().toLowerCase();
@@ -45,10 +48,8 @@ async function pokedexRun(client, interaction) {
     if (cartas.length === 0) {
         return interaction.editReply({
             embeds: [ui.neutral(
-                dex === 'evento' ? '🎗️ Pokédex de eventos' : '📖 Pokédex',
-                dex === 'evento'
-                    ? 'Nenhuma carta de evento existe ainda. Elas aparecem aqui quando forem distribuídas.'
-                    : 'Nenhuma carta encontrada com esses filtros.'
+                t(dex === 'evento' ? 'pokedex.titulo_eventos' : 'pokedex.titulo'),
+                t(dex === 'evento' ? 'pokedex.sem_eventos' : 'pokedex.sem_resultado')
             )]
         });
     }
@@ -73,7 +74,7 @@ async function pokedexRun(client, interaction) {
 
     if (listadas.length === 0) {
         return interaction.editReply({
-            embeds: [ui.success('📖 Pokédex completa!', 'Você já descobriu todas as cartas desse filtro. 🎉')]
+            embeds: [ui.success(t('pokedex.completa'), t('pokedex.completa_texto'))]
         });
     }
 
@@ -88,26 +89,37 @@ async function pokedexRun(client, interaction) {
             // aparece aqui é o mesmo número que a `/ficha` mostra.
             const numero = formatarNumero(carta.numero, totalNoFiltro);
             const achou = descobertoSet.has(String(carta._id));
-            const meta = ui.getRarity(carta.rarity);
+            const meta = ui.getRarity(carta.rarity, t.locale);
 
             if (!achou) {
                 // Carta não descoberta aparece censurada, como na Pokédex.
                 return `\`${numero}\` ⬛ **???** — *${carta.series}*`;
             }
-            return `\`${numero}\` ${meta.emoji} **${ui.cardName(carta.name)}** — OVR **${carta.overall}**\n└ *${carta.series}*`;
+            return `\`${numero}\` ${meta.emoji} **${ui.cardName(carta)}** — ${t('atributos.ovr')} **${carta.overall}**\n└ *${carta.series}*`;
         }).join('\n');
 
         const titulo = dex === 'evento'
-            ? '🎗️ Pokédex de eventos'
+            ? t('pokedex.titulo_eventos')
             : filtroSerie || filtroRaridade
-            ? `📖 Pokédex — ${filtroSerie || ui.getRarity(filtroRaridade).label}`
-            : '📖 Pokédex';
+            ? t('pokedex.titulo_filtrado', {
+                filtro: filtroSerie || ui.getRarity(filtroRaridade, t.locale).label
+            })
+            : t('pokedex.titulo');
 
         return ui.base(ui.STATUS_COLORS.info)
-            .setAuthor({ name: `Pokédex de ${interaction.user.username}`, iconURL: interaction.user.displayAvatarURL() })
+            .setAuthor({
+                name: t('pokedex.autor', { jogador: interaction.user.username }),
+                iconURL: interaction.user.displayAvatarURL()
+            })
             .setTitle(titulo)
-            .setDescription(`${barraProgresso(descobertasNoFiltro, totalNoFiltro)}\n**${descobertasNoFiltro}** de **${totalNoFiltro}** cartas descobertas\n\n${linhas}`)
-            .setFooter({ text: `${ui.BRAND} • Página ${pagina + 1} de ${totalPaginas}${apenasFaltantes ? ' • mostrando só as que faltam' : ''}` });
+            .setDescription(
+                `${barraProgresso(descobertasNoFiltro, totalNoFiltro)}\n`
+                + `${t('pokedex.contagem', { descobertas: descobertasNoFiltro, total: totalNoFiltro })}\n\n${linhas}`
+            )
+            .setFooter({
+                text: `${ui.BRAND} • ${t('comum.pagina', { atual: pagina + 1, total: totalPaginas })}`
+                    + (apenasFaltantes ? ` • ${t('pokedex.so_faltantes')}` : '')
+            });
     };
 
     const montarBotoes = (pagina) => [new ActionRowBuilder().addComponents(

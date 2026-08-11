@@ -889,6 +889,8 @@
   },
   "pokedex": {
     "titulo": "📖 Pokédex",
+    "titulo_eventos": "🎗️ Pokédex de eventos",
+    "sem_eventos": "Nenhuma carta de evento existe ainda. Elas aparecem aqui quando forem distribuídas.",
     "titulo_filtrado": "📖 Pokédex — {filtro}",
     "autor": "Pokédex de {jogador}",
     "sem_resultado": "Nenhuma carta encontrada com esses filtros.",

@@ -2,6 +2,7 @@ const { ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags } = require('
 const User = require('../../utils/userSchema');
 const ui = require('../../utils/embeds');
 const valores = require('../../utils/valores');
+const { tDaInteracao } = require('../../utils/idioma');
 
 // Coletores ativos por usuário (ver rollRun.js para o motivo de não usar
 // mais uma única variável de módulo compartilhada entre todos os usuários).
@@ -12,10 +13,12 @@ const CARDS_PER_PAGE = 8;
 const getOvr = valores.overallDaCarta;
 
 module.exports = async (client, interaction, inventoryCollect, inventoryEnd) => {
+    const t = await tDaInteracao(interaction);
+
     const user = await User.findOne({ id: interaction.user.id });
 
     if (!user || user.inventory.length === 0) {
-        const embed = ui.neutral('📋 Inventário vazio', 'Você ainda não tem cartas. Use `/roll` para ganhar a primeira!');
+        const embed = ui.neutral(t('inventory.vazio_titulo'), t('comum.inventario_vazio_texto'));
         return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
     }
 
@@ -49,20 +52,24 @@ module.exports = async (client, interaction, inventoryCollect, inventoryEnd) => 
         const pageCards = cards.slice(start, start + CARDS_PER_PAGE);
 
         const lista = pageCards.map((card, i) => {
-            const meta = ui.getRarity(card.rarity);
+            const meta = ui.getRarity(card.rarity, t.locale);
             const isFav = favCard && card.cardId && card.cardId.equals(user.favCard);
             return `\`${String(start + i + 1).padStart(2, '0')}\` ${meta.emoji} **${ui.cardName(card)}**${isFav ? ' ⭐' : ''}\n`
-                + `└ ${card.series || '—'} • OVR **${getOvr(card)}** • ${ui.coins(card.marketValue || 0)}`;
+                + `└ ${card.series || t('comum.traco')} • ${t('atributos.ovr')} **${getOvr(card)}**`
+                + ` • ${ui.coins(card.marketValue || 0, t.locale)}`;
         }).join('\n');
 
         const embed = ui.base(ui.STATUS_COLORS.info)
-            .setAuthor({ name: `Coleção de ${interaction.user.username}`, iconURL: interaction.user.displayAvatarURL() })
+            .setAuthor({
+                name: t('inventory.autor', { jogador: interaction.user.username }),
+                iconURL: interaction.user.displayAvatarURL()
+            })
             .setDescription(`${rarityResumo}\n\n${lista}`)
             .addFields(
-                { name: 'Total de cartas', value: `**${ui.number(cards.length)}**`, inline: true },
-                { name: 'Valor da coleção', value: ui.coins(totalValue), inline: true }
+                { name: t('inventory.total_cartas'), value: `**${ui.number(cards.length, t.locale)}**`, inline: true },
+                { name: t('inventory.valor_colecao'), value: ui.coins(totalValue, t.locale), inline: true }
             )
-            .setFooter({ text: `${ui.BRAND} • Página ${page + 1} de ${totalPages}` });
+            .setFooter({ text: `${ui.BRAND} • ${t('comum.pagina', { atual: page + 1, total: totalPages })}` });
 
         if (favCard && (favCard.characterImage || favCard.baseImage)) {
             embed.setThumbnail(favCard.characterImage || favCard.baseImage);
