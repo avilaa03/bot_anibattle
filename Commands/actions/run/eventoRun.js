@@ -73,7 +73,7 @@ async function listar(interaction, t) {
 }
 
 async function entrar(interaction, t) {
-    const nome = interaction.options.getString('nome', true);
+    const nome = interaction.options.getString('name', true);
 
     const evento = await Evento.findOne({
         tipo: 'inscricao',
@@ -136,6 +136,6 @@ async function entrar(interaction, t) {
 module.exports = async (client, interaction) => {
     const t = await tDaInteracao(interaction);
     const sub = interaction.options.getSubcommand();
-    if (sub === 'entrar') return entrar(interaction, t);
+    if (sub === 'join') return entrar(interaction, t);
     return listar(interaction, t);
 };

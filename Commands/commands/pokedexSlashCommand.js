@@ -1,4 +1,5 @@
 const BaseSlashCommand = require('../utils/BaseSlashCommand.js');
+const nomes = require('../utils/nomesDeComando.js');
 const { SlashCommandBuilder } = require('discord.js');
 const pokedexRun = require('../actions/run/pokedexRun.js');
 const { descricaoBase, localizacoes, escolha, escolhasRaridade } = require('../utils/i18n.js');
@@ -18,7 +19,8 @@ module.exports = class PokedexSlashCommand extends BaseSlashCommand {
             .setDescription(descricaoBase('comandos.pokedex.descricao'))
             .setDescriptionLocalizations(localizacoes('comandos.pokedex.descricao'))
             .addStringOption(option =>
-                option.setName('serie')
+                option.setName('series')
+                .setNameLocalizations(nomes.opcao('series'))
                     .setDescription(descricaoBase('comandos.pokedex.opcao_serie'))
                     .setDescriptionLocalizations(localizacoes('comandos.pokedex.opcao_serie'))
                     .setRequired(false)
@@ -34,7 +36,8 @@ module.exports = class PokedexSlashCommand extends BaseSlashCommand {
                     )
             )
             .addStringOption(option =>
-                option.setName('raridade')
+                option.setName('rarity')
+                .setNameLocalizations(nomes.opcao('rarity'))
                     .setDescription(descricaoBase('comandos.pokedex.opcao_raridade'))
                     .setDescriptionLocalizations(localizacoes('comandos.pokedex.opcao_raridade'))
                     .setRequired(false)
@@ -43,7 +46,8 @@ module.exports = class PokedexSlashCommand extends BaseSlashCommand {
                     .addChoices(...escolhasRaridade())
             )
             .addBooleanOption(option =>
-                option.setName('faltantes')
+                option.setName('missing')
+                .setNameLocalizations(nomes.opcao('missing'))
                     .setDescription(descricaoBase('comandos.pokedex.opcao_faltantes'))
                     .setDescriptionLocalizations(localizacoes('comandos.pokedex.opcao_faltantes'))
                     .setRequired(false)

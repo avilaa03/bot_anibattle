@@ -62,7 +62,7 @@ function embedDaLoja(user, t) {
 
 async function comprar(interaction, t) {
     const chave = interaction.options.getString('item');
-    const quantidade = interaction.options.getInteger('quantidade') ?? 1;
+    const quantidade = interaction.options.getInteger('amount') ?? 1;
 
     const item = itens.localizarPorChave(chave, t.locale);
     if (!item || item.preco == null) {
@@ -257,8 +257,8 @@ module.exports = async (client, interaction) => {
     const t = await tDaInteracao(interaction);
     const sub = interaction.options.getSubcommand(false);
 
-    if (sub === 'comprar') return comprar(interaction, t);
-    if (sub === 'roll-extra') return comprarRollExtra(interaction, t);
+    if (sub === 'buy') return comprar(interaction, t);
+    if (sub === 'extra-roll') return comprarRollExtra(interaction, t);
 
     const user = await User.findOne({ id: interaction.user.id }).lean();
     return interaction.reply({ embeds: [embedDaLoja(user, t)], flags: MessageFlags.Ephemeral });

@@ -320,13 +320,13 @@
   "itens_catalogo": {
     "gema": {
       "nome": "Gema de mejora",
-      "descricao": "Material de `/aprimorar`. Se consume al usarla, salga bien o mal.",
-      "detalhe": "También sale de `/desmanchar` — desmontar rinde más que la venta rápida en todo, menos en la Maestra."
+      "descricao": "Material de `/mejorar`. Se consume al usarla, salga bien o mal.",
+      "detalhe": "También sale de `/desmontar` — desmontar rinde más que la venta rápida en todo, menos en la Maestra."
     },
     "roll_extra": {
       "nome": "Tirada extra",
       "descricao": "Un `/roll` que se salta el cooldown. Guardado hasta que quieras usarlo.",
-      "detalhe": "Cómpralo en `/loja roll-extra` y úsalo con `/roll extra:True`."
+      "detalhe": "Cómpralo en `/tienda tirada-extra` y úsalo con `/roll extra:True`."
     },
     "pergaminho": {
       "nome": "Pergamino de protección",
@@ -389,20 +389,20 @@
     "nao_vale_nada": "El entrenamiento no da monedas, ni ELO, ni trofeos",
     "mencao_transmissao": "{jogador} 🥊 entrenamiento",
     "encerrado": "Entrenamiento cerrado",
-    "encerrado_texto": "Este entrenamiento expiró o ya se resolvió. Usa `/treino` para abrir otro.",
+    "encerrado_texto": "Este entrenamiento expiró o ya se resolvió. Usa `/entrenamiento` para abrir otro.",
     "nao_e_seu": "No es tu entrenamiento",
     "nao_e_seu_texto": "Este entrenamiento es de otra persona.",
     "carta_indisponivel": "Carta no disponible",
     "nada_a_fazer": "Nada que hacer",
     "recusa": {
-      "SESSAO_EXPIRADA": "Este entrenamiento expiró. Usa `/treino` para abrir otro.",
+      "SESSAO_EXPIRADA": "Este entrenamiento expiró. Usa `/entrenamiento` para abrir otro.",
       "TIME_CHEIO": "Tu equipo ya tiene 3 cartas.",
       "JA_ESCOLHIDA": "Ya elegiste esta carta."
     },
     "nada_para_cancelar": "Nada que cancelar",
     "nada_para_cancelar_texto": "Este entrenamiento ya terminó o expiró.",
     "cancelado": "Entrenamiento cancelado",
-    "cancelado_texto": "No hubo ninguna pelea. Usa `/treino` cuando quieras intentarlo de nuevo."
+    "cancelado_texto": "No hubo ninguna pelea. Usa `/entrenamiento` cuando quieras intentarlo de nuevo."
   },
   "notificacoes": {
     "trofeu_desbloqueado": "¡Trofeo desbloqueado!",
@@ -411,12 +411,12 @@
     "ouro_titulo": "{emoji} ¡Trofeo de Oro!",
     "platina_descricao": "<@{userId}> ha conseguido **todos los trofeos de AniBattle**.\n\n**{nome}** — *{descricao}*",
     "ouro_descricao": "<@{userId}> desbloqueó **{nome}**\n\n*{descricao}*",
-    "anuncio_rodape": "Mira los tuyos en /conquistas",
+    "anuncio_rodape": "Mira los tuyos en /logros",
     "platinou": "🎉 ¡<@{userId}> PLATINÓ ANIBATTLE! 🎉",
     "missao_completa": "¡Misión completada!",
     "missao_linha": "✅ **{nome}** — {descricao}\n└ Recompensa: {recompensa}",
     "missao_para_receber": "Para recibirla",
-    "missao_resgate": "Usa `/missoes` y pulsa **Reclamar** ({total} disponibles)."
+    "missao_resgate": "Usa `/misiones` y pulsa **Reclamar** ({total} disponibles)."
   },
   "idioma": {
     "opcao_automatico": "Automático (sigue a Discord)",
@@ -430,10 +430,10 @@
     "automatico": "Automático",
     "em_dm": "No aplica en DM",
     "rodape_ajuda": "escopo:servidor lo cambia para todos (requiere Gestionar servidor)",
-    "rodape_individual": "Quien prefiera otro idioma puede usar /idioma escopo:mim",
+    "rodape_individual": "Quien prefiera otro idioma puede usar /idioma ambito:me",
     "nao_suportado": "Ese idioma no está soportado.",
     "servidor_em_dm": "No se puede configurar un servidor desde un DM.",
-    "precisa_gerenciar": "Necesitas el permiso **Gestionar servidor** para cambiar el idioma de todos. Para cambiar solo el tuyo, usa `/idioma escopo:mim`.",
+    "precisa_gerenciar": "Necesitas el permiso **Gestionar servidor** para cambiar el idioma de todos. Para cambiar solo el tuyo, usa `/idioma ambito:me`.",
     "servidor_alterado_titulo": "Idioma del servidor actualizado",
     "servidor_alterado": "A partir de ahora el bot responde en **{idioma}** en este servidor.",
     "servidor_automatico": "El servidor volvió al **automático**: cada jugador ve el bot en el idioma de su propio Discord.",
@@ -462,12 +462,12 @@
     "expirou": "Se acabó el tiempo para recoger la carta.",
     "sem_extra": "No tienes ninguna tirada extra",
     "sem_extra_texto": "Ninguna 🎟️ **tirada extra** en tu bolsa.",
-    "sem_extra_onde_comprar": "Cómprala en `/loja roll-extra` — el precio sube con cada compra del día.",
+    "sem_extra_onde_comprar": "Cómprala en `/tienda tirada-extra` — el precio sube con cada compra del día.",
     "campo_extra": "🎟️ Tirada extra",
     "tem_extra_guardado": "Tienes **{quantidade}** guardada(s). Usa `/roll extra:True` para saltarte la espera.",
     "protecao_azar": "Protección contra la mala suerte: {rolls} tiradas sin {raridade} — esta vino garantizada",
     "desejo_titulo": "💭 ¡Apareció una carta de tu lista de deseos!",
-    "desejo_texto": "{emoji} **{carta}** — *{serie}*\n\nLa tiró **{jogador}**. ¿Y si le propones un intercambio con `/trocar`?"
+    "desejo_texto": "{emoji} **{carta}** — *{serie}*\n\nLa tiró **{jogador}**. ¿Y si le propones un intercambio con `/intercambiar`?"
   },
   "daily": {
     "marcos": {
@@ -826,7 +826,7 @@
   "desejos": {
     "titulo": "💭 Lista de deseos",
     "vazia": "💭 Lista de deseos vacía",
-    "vazia_propria": "Usa `/desejar nome:Gojo` para marcar las cartas que estás cazando.\n\nTe avisamos cuando alguien saque una de ellas.",
+    "vazia_propria": "Usa `/desear nombre:Gojo` para marcar las cartas que estás cazando.\n\nTe avisamos cuando alguien saque una de ellas.",
     "vazia_outro": "**{jogador}** todavía no ha marcado ninguna carta.",
     "autor": "Deseos de {jogador}",
     "tambem_procuram": "{n} también la buscan",
@@ -834,19 +834,19 @@
   },
   "desejar": {
     "informe": "Indica qué buscar",
-    "informe_texto": "Usa `/desejar nome:Gojo` o `/desejar numero:42`.",
+    "informe_texto": "Usa `/desear nombre:Gojo` o `/desear numero:42`.",
     "sem_numero": "No existe ninguna carta con el número {numero}.",
     "sem_nome": "Ninguna carta del catálogo tiene \"{nome}\" en el nombre.",
     "varias": "Se encontraron varias cartas",
-    "varias_texto": "{lista}\n\nUsa `/desejar numero:<número>` para elegir una.",
+    "varias_texto": "{lista}\n\nUsa `/desear numero:<número>` para elegir una.",
     "removida": "Quitada de los deseos",
     "removida_texto": "{emoji} **{carta}** salió de tu lista.",
     "nao_estava": "No estaba en la lista",
     "nao_estava_texto": "{emoji} **{carta}** no estaba en tus deseos.",
     "ja_na_lista": "Ya está en la lista",
-    "ja_na_lista_texto": "{emoji} **{carta}** ya está en tus deseos.\n\nUsa `/desejar nome:{nome} remover:True` para quitarla.",
+    "ja_na_lista_texto": "{emoji} **{carta}** ya está en tus deseos.\n\nUsa `/desear nombre:{nome} quitar:True` para quitarla.",
     "lista_cheia": "Lista llena",
-    "lista_cheia_texto": "Ya tienes **{total}** cartas deseadas (límite {limite}).\n\nQuita alguna con `remover:True`, o suscríbete a un plan en `/vip` para ampliar el límite.",
+    "lista_cheia_texto": "Ya tienes **{total}** cartas deseadas (límite {limite}).\n\nQuita alguna con `quitar:True`, o suscríbete a un plan en `/vip` para ampliar el límite.",
     "adicionada": "Añadida a los deseos",
     "adicionada_texto": "{emoji} **{carta}** — *{serie}*",
     "numero": "Número",
@@ -912,7 +912,7 @@
   },
   "ficha": {
     "informe": "Indica qué buscar",
-    "informe_texto": "Usa `/ficha nome:Kirito` o `/ficha numero:42`.",
+    "informe_texto": "Usa `/ficha nombre:Kirito` o `/ficha numero:42`.",
     "sem_numero": "No existe ninguna carta con el número **{numero}** en el catálogo.",
     "sem_nome": "Ninguna carta del catálogo tiene \"{busca}\" en el nombre.",
     "procuram_texto": "{n} jugador(es)",
@@ -975,7 +975,7 @@
             "desc": "Consulta la ficha completa de una carta registrada, por nombre o número. Funciona aunque ya hayas vendido la carta."
           },
           {
-            "nome": "/colecionadores",
+            "nome": "/coleccionistas",
             "desc": "Ranking de quién ha descubierto más cartas."
           },
           {
@@ -1019,7 +1019,7 @@
             "desc": "Consulta el saldo y el patrimonio de alguien."
           },
           {
-            "nome": "/magnata",
+            "nome": "/magnate",
             "desc": "Ranking de los 10 jugadores más ricos."
           },
           {
@@ -1053,11 +1053,11 @@
         "descricao": "Trofeos, misiones y ranking — lo que da objetivos a largo plazo.",
         "comandos": [
           {
-            "nome": "/conquistas",
+            "nome": "/logros",
             "desc": "Tus trofeos. 🥉 Bronce, 🥈 Plata, 🥇 Oro y 💎 **Platino**, que solo se desbloquea con todos los demás."
           },
           {
-            "nome": "/missoes",
+            "nome": "/misiones",
             "desc": "Misiones diarias y semanales. El progreso es automático — solo vuelve para reclamarlas."
           },
           {
@@ -1079,15 +1079,15 @@
         "descricao": "Intercambia y negocia con otros jugadores.",
         "comandos": [
           {
-            "nome": "/trocar",
+            "nome": "/intercambiar",
             "desc": "Intercambia carta por carta. Los dos montan la oferta y los dos confirman — si tocas la oferta, las confirmaciones se caen."
           },
           {
-            "nome": "/desejar",
+            "nome": "/desear",
             "desc": "Marca una carta que quieres. Cuando alguien la saque, te enteras y puedes proponerle un intercambio o una compra."
           },
           {
-            "nome": "/desejos",
+            "nome": "/deseos",
             "desc": "Tu lista de deseos, con cuántos jugadores buscan también cada carta."
           },
           {
@@ -1095,7 +1095,7 @@
             "desc": "💡 *Desear **no** te disputa la carta con nadie. Quien la sacó se la queda; el aviso sirve solo para que sepas con quién negociar.*"
           },
           {
-            "nome": "/torneio",
+            "nome": "/torneo",
             "desc": "Crea un torneo eliminatorio. Se entra con un clic y el bot resuelve todo."
           }
         ]
@@ -1286,14 +1286,14 @@
     "chance_queda_zero": "🔻 Baja un nivel — **0%** *(el overall natural es el suelo: una carta de nivel 0 no tiene nada que perder)*",
     "custo": "Cuesta 💎 **{custo}** — tienes **{gemas}**.",
     "tem_pergaminho": "📜 Tienes **{quantidade}** pergamino(s): protegen contra la bajada, y solo se consumen si la bajada ocurre.",
-    "sem_pergaminho": "📜 No tienes pergamino de protección en la bolsa — mira la `/loja`.",
+    "sem_pergaminho": "📜 No tienes pergamino de protección en la bolsa — mira la `/tienda`.",
     "gema_sempre_gasta": "La gema se consume pase lo que pase. No hay tope de nivel.",
     "botao": "Mejorar ({custo} 💎)",
     "botao_protegido": "Mejorar con protección (📜)",
     "cancelado": "Mejora cancelada",
     "cancelado_texto": "No se gastó ninguna gema.",
     "sem_gemas": "Gemas insuficientes",
-    "sem_gemas_texto": "Este intento cuesta 💎 **{custo}**. Cómpralas en la `/loja` o usa `/desmanchar`.",
+    "sem_gemas_texto": "Este intento cuesta 💎 **{custo}**. Cómpralas en la `/tienda` o usa `/desmontar`.",
     "carta_sumiu": "La carta salió de tu inventario",
     "carta_sumiu_texto": "Se gastaron las **{custo}** gema(s), pero **{carta}** ya no está ahí. Contacta con el staff e informa de este error.",
     "overall_depois": "Overall **{antes}** → **{depois}**",
@@ -1338,7 +1338,7 @@
     "nenhum_aberto_texto": "Ahora mismo no hay ningún evento con inscripción abierta.",
     "nenhum_aberto_dica": "Está atento al servidor — cuando se abra uno, aparece aquí y entras con `/evento entrar`.",
     "abertos": "🎪 Eventos abiertos",
-    "como_entrar": "Entra con `/evento entrar nome:<el nombre del evento>`.",
+    "como_entrar": "Entra con `/evento entrar nombre:<el nombre del evento>`.",
     "sem_descricao": "sin descripción",
     "premio": "**Premio:** {premio}",
     "inscritos": "**Inscritos:** {n}",
@@ -1354,7 +1354,7 @@
   },
   "caixa": {
     "titulo": "🎁 Cajas",
-    "como_usar": "Cómpralas con `/caixa comprar` y ábrelas cuando quieras con `/caixa abrir`.",
+    "como_usar": "Cómpralas con `/caja comprar` y ábrelas cuando quieras con `/caja abrir`.",
     "voce_tem": "Tienes **{quantidade}** guardada(s).",
     "hoje": "Hoy: **{restam}** de {limite}",
     "nao_esta_a_venda": "no está a la venta",
@@ -1364,7 +1364,7 @@
     "limite_porque": "El límite existe para que la caja no se vuelva un grifo de cartas. Se reinicia a medianoche (UTC).",
     "limite_cortou": "Pediste {pedido}, pero el límite de hoy solo dejó comprar {comprado}.",
     "guardada": "Caja guardada",
-    "abra_quando_quiser": "Ábrela con `/caixa abrir` cuando quieras.",
+    "abra_quando_quiser": "Ábrela con `/caja abrir` cuando quieras.",
     "desconhecida": "Caja desconocida",
     "desconhecida_texto": "Esa caja no existe.",
     "escolha_serie": "Elige la serie",
@@ -1372,7 +1372,7 @@
     "nao_tem": "No tienes esa caja",
     "nao_tem_texto": "Ninguna {caixa} en tu bolsa.",
     "nao_tem_apoiador": "No está a la venta — es la recompensa de quien vota por el bot.",
-    "nao_tem_compre": "Cómprala con `/caixa comprar` por {preco}.",
+    "nao_tem_compre": "Cómprala con `/caja comprar` por {preco}.",
     "sem_carta": "No se encontró ninguna carta",
     "sem_carta_texto": "Tu caja volvió a la bolsa.",
     "autor": "{jogador} abrió una caja",
@@ -1382,14 +1382,14 @@
     "titulo": "🎒 Tus objetos",
     "autor": "Bolsa de {jogador}",
     "vazia_titulo": "🎒 Tu bolsa está vacía",
-    "vazia_texto": "Los objetos aparecen aquí cuando compras en la `/loja` o desmontas una carta.",
-    "vazia_gema": "💎 **{item}** es el material de `/aprimorar`, y sale de dos sitios:",
-    "vazia_loja": "• `/loja` — {preco} cada una",
-    "vazia_desmanchar": "• `/desmanchar` — la carta se convierte en gema en vez de monedas"
+    "vazia_texto": "Los objetos aparecen aquí cuando compras en la `/tienda` o desmontas una carta.",
+    "vazia_gema": "💎 **{item}** es el material de `/mejorar`, y sale de dos sitios:",
+    "vazia_loja": "• `/tienda` — {preco} cada una",
+    "vazia_desmanchar": "• `/desmontar` — la carta se convierte en gema en vez de monedas"
   },
   "loja": {
     "titulo": "🏪 Tienda",
-    "como_comprar": "Compra con `/loja comprar`.",
+    "como_comprar": "Compra con `/tienda comprar`.",
     "seu_saldo": "Tu saldo: **{saldo}**",
     "voce_tem": "Tienes **{quantidade}**.",
     "rodape_sink": "Las monedas gastadas aquí salen de circulación",

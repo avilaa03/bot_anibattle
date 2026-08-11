@@ -1,11 +1,12 @@
 const BaseSlashCommand = require('../utils/BaseSlashCommand.js');
+const nomes = require('../utils/nomesDeComando.js');
 const { SlashCommandBuilder } = require('discord.js');
 const { descricaoBase, localizacoes } = require('../utils/i18n');
 const conquistasRun = require('../actions/run/conquistasRun.js');
 
 module.exports = class ConquistasSlashCommand extends BaseSlashCommand {
     constructor() {
-        super('conquistas');
+        super('achievements');
     }
 
     async run(client, interaction) {
@@ -15,6 +16,7 @@ module.exports = class ConquistasSlashCommand extends BaseSlashCommand {
     getSlashCommandJSON() {
         return new SlashCommandBuilder()
             .setName(this.name)
+            .setNameLocalizations(nomes.comando(this.name))
             .setDescription(descricaoBase('comandos.conquistas.descricao'))
             .setDescriptionLocalizations(localizacoes('comandos.conquistas.descricao'))
             .addUserOption(option =>

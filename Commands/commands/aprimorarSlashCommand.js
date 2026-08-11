@@ -1,4 +1,5 @@
 const BaseSlashCommand = require('../utils/BaseSlashCommand.js');
+const nomes = require('../utils/nomesDeComando.js');
 const { SlashCommandBuilder, MessageFlags } = require('discord.js');
 const ui = require('../utils/embeds.js');
 const User = require('../utils/userSchema.js');
@@ -10,7 +11,7 @@ const { tDaInteracao } = require('../utils/idioma.js');
 
 module.exports = class AprimorarSlashCommand extends BaseSlashCommand {
     constructor() {
-        super('aprimorar');
+        super('upgrade');
     }
 
     async run(client, interaction) {
@@ -52,10 +53,12 @@ module.exports = class AprimorarSlashCommand extends BaseSlashCommand {
     getSlashCommandJSON() {
         return new SlashCommandBuilder()
             .setName(this.name)
+            .setNameLocalizations(nomes.comando(this.name))
             .setDescription(descricaoBase('comandos.aprimorar.descricao'))
             .setDescriptionLocalizations(localizacoes('comandos.aprimorar.descricao'))
             .addStringOption((option) => option
                 .setName('name')
+                .setNameLocalizations(nomes.opcao('name'))
                 .setDescription(descricaoBase('comandos.aprimorar.opcao_nome'))
                 .setDescriptionLocalizations(localizacoes('comandos.aprimorar.opcao_nome'))
                 .setRequired(true))

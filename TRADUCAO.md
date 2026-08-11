@@ -11,7 +11,7 @@ dicionário. Não há arquivo com frase escrita na mão.
 | | |
 |---|---|
 | Dicionários | `pt-BR.json`, `en-US.json`, `es-ES.json` (1.064 chaves cada) |
-| Comandos localizados | 39 de 39 (descrição, opções e escolhas) |
+| Comandos localizados | 39 de 39 (nome, descrição, opções e escolhas) |
 | Conferência | `npm test` |
 
 ## O essencial
@@ -160,11 +160,22 @@ Termos que aparecem em muitas telas e precisam ser os mesmos em todas.
 | carta vinculada | Bound card | carta vinculada |
 | moldura | frame | marco |
 
-**Nome de comando é termo literal.** `/roll`, `/loja`, `/desmanchar` são
-iguais nos três idiomas porque é o que o jogador digita. Só `/idioma` tem
-`setNameLocalizations` (`/language`); nenhum outro comando tem. Escrever
-`/shop` num texto em inglês manda a pessoa digitar um comando que não
+**Nome de comando MUDA com o idioma.** O canônico é inglês — é ele que
+aparece no código, nos logs e no `interaction.commandName` — mas cada
+idioma tem o seu apelido no Discord: quem usa o Discord em português vê
+`/loja`, em inglês vê `/shop`, em espanhol vê `/tienda`.
+
+Então **cada dicionário cita o nome do seu idioma**. Escrever `/shop` no
+texto em português manda a pessoa digitar um comando que, para ela, não
 existe.
+
+A lista completa está em `utils/nomesDeComando.js`, com teste. Comando
+que já nasceu em inglês (`/roll`, `/market`, `/daily`) não tem apelido e
+aparece igual nos três.
+
+O apelido `pt-BR` é **exatamente** o nome antigo, e isso não é
+preferência: é o que faz `/bolsa` continuar funcionando para quem já
+jogava. `tests/nomes.test.js` congela essa lista e falha se ela mudar.
 
 **Nome de idioma não se traduz.** O seletor mostra "Português", "English"
 e "Español", cada um em si mesmo. Traduzir faria a opção mudar de nome

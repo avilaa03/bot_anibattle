@@ -26,8 +26,8 @@ const MAX_RESULTADOS = 10;
 async function fichaRun(client, interaction) {
     const t = await tDaInteracao(interaction);
 
-    const nomeBuscado = (interaction.options.getString('nome') || '').trim();
-    const numeroBuscado = interaction.options.getInteger('numero');
+    const nomeBuscado = (interaction.options.getString('name') || '').trim();
+    const numeroBuscado = interaction.options.getInteger('number');
 
     if (!nomeBuscado && numeroBuscado == null) {
         return interaction.reply({

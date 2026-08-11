@@ -1,4 +1,5 @@
 const BaseSlashCommand = require('../utils/BaseSlashCommand.js');
+const nomes = require('../utils/nomesDeComando.js');
 const { SlashCommandBuilder } = require('discord.js');
 const caixaRun = require('../actions/run/caixaRun.js');
 const caixas = require('../utils/caixas.js');
@@ -23,7 +24,7 @@ function opcoesDeCaixa() {
 
 module.exports = class CaixaSlashCommand extends BaseSlashCommand {
     constructor() {
-        super('caixa');
+        super('box');
     }
 
     async run(client, interaction) {
@@ -33,24 +34,29 @@ module.exports = class CaixaSlashCommand extends BaseSlashCommand {
     getSlashCommandJSON() {
         return new SlashCommandBuilder()
             .setName(this.name)
+            .setNameLocalizations(nomes.comando(this.name))
             .setDescription(descricaoBase('comandos.caixa.descricao'))
             .setDescriptionLocalizations(localizacoes('comandos.caixa.descricao'))
             .addSubcommand((sub) =>
-                sub.setName('ver')
+                sub.setName('view')
+                .setNameLocalizations(nomes.subcomando('box', 'view'))
                     .setDescription(descricaoBase('comandos.caixa.sub_ver'))
                     .setDescriptionLocalizations(localizacoes('comandos.caixa.sub_ver'))
             )
             .addSubcommand((sub) =>
-                sub.setName('comprar')
+                sub.setName('buy')
+                .setNameLocalizations(nomes.subcomando('box', 'buy'))
                     .setDescription(descricaoBase('comandos.caixa.sub_comprar'))
                     .setDescriptionLocalizations(localizacoes('comandos.caixa.sub_comprar'))
                     .addStringOption((o) =>
-                        o.setName('caixa')
+                        o.setName('box')
+                .setNameLocalizations(nomes.opcao('box'))
                             .setDescription(descricaoBase('comandos.caixa.opcao_caixa'))
                             .setDescriptionLocalizations(localizacoes('comandos.caixa.opcao_caixa'))
                             .addChoices(...opcoesDeCaixa()).setRequired(true))
                     .addIntegerOption((o) =>
-                        o.setName('quantidade')
+                        o.setName('amount')
+                .setNameLocalizations(nomes.opcao('amount'))
                             // O teto entra por marcador: o número mora no
                             // caixaRun, e mudá-lo lá acerta os dois idiomas.
                             .setDescription(descricaoBase('comandos.caixa.opcao_quantidade', { maximo: caixaRun.MAXIMO_POR_COMPRA }))
@@ -58,16 +64,19 @@ module.exports = class CaixaSlashCommand extends BaseSlashCommand {
                             .setMinValue(1).setMaxValue(caixaRun.MAXIMO_POR_COMPRA))
             )
             .addSubcommand((sub) =>
-                sub.setName('abrir')
+                sub.setName('open')
+                .setNameLocalizations(nomes.subcomando('box', 'open'))
                     .setDescription(descricaoBase('comandos.caixa.sub_abrir'))
                     .setDescriptionLocalizations(localizacoes('comandos.caixa.sub_abrir'))
                     .addStringOption((o) =>
-                        o.setName('caixa')
+                        o.setName('box')
+                .setNameLocalizations(nomes.opcao('box'))
                             .setDescription(descricaoBase('comandos.caixa.opcao_caixa'))
                             .setDescriptionLocalizations(localizacoes('comandos.caixa.opcao_caixa'))
                             .addChoices(...opcoesDeCaixa()).setRequired(true))
                     .addStringOption((o) =>
-                        o.setName('serie')
+                        o.setName('series')
+                .setNameLocalizations(nomes.opcao('series'))
                             .setDescription(descricaoBase('comandos.caixa.opcao_serie'))
                             .setDescriptionLocalizations(localizacoes('comandos.caixa.opcao_serie')))
             )

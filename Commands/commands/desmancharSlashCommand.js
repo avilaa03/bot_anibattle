@@ -1,4 +1,5 @@
 const BaseSlashCommand = require('../utils/BaseSlashCommand.js');
+const nomes = require('../utils/nomesDeComando.js');
 const { SlashCommandBuilder, MessageFlags } = require('discord.js');
 const ui = require('../utils/embeds.js');
 const negociabilidade = require('../utils/negociabilidade.js');
@@ -11,7 +12,7 @@ const { tDaInteracao } = require('../utils/idioma.js');
 
 module.exports = class DesmancharSlashCommand extends BaseSlashCommand {
     constructor() {
-        super('desmanchar');
+        super('salvage');
     }
 
     async run(client, interaction) {
@@ -63,10 +64,12 @@ module.exports = class DesmancharSlashCommand extends BaseSlashCommand {
     getSlashCommandJSON() {
         return new SlashCommandBuilder()
             .setName(this.name)
+            .setNameLocalizations(nomes.comando(this.name))
             .setDescription(descricaoBase('comandos.desmanchar.descricao'))
             .setDescriptionLocalizations(localizacoes('comandos.desmanchar.descricao'))
             .addStringOption((option) => option
                 .setName('name')
+                .setNameLocalizations(nomes.opcao('name'))
                 .setDescription(descricaoBase('comandos.desmanchar.opcao_nome'))
                 .setDescriptionLocalizations(localizacoes('comandos.desmanchar.opcao_nome'))
                 .setRequired(true))

@@ -260,7 +260,7 @@ async function resolverTreino(client, sessao) {
 }
 
 async function treinoRun(client, interaction) {
-    const dificuldade = interaction.options?.getString?.('dificuldade') || treino.PADRAO;
+    const dificuldade = interaction.options?.getString?.('difficulty') || treino.PADRAO;
     return iniciarTreino(client, interaction, dificuldade);
 }
 

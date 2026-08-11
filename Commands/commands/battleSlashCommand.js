@@ -1,4 +1,5 @@
 const BaseSlashCommand = require("../utils/BaseSlashCommand.js");
+const nomes = require('../utils/nomesDeComando.js');
 const { SlashCommandBuilder } = require('discord.js');
 const { descricaoBase, localizacoes, traduzir } = require('../utils/i18n');
 const { battleRun } = require('../actions/run/battleRun.js');
@@ -37,7 +38,8 @@ module.exports = class BattleSlashCommand extends BaseSlashCommand {
                     .setRequired(true)
             )
             .addIntegerOption(option =>
-                option.setName('aposta')
+                option.setName('wager')
+                .setNameLocalizations(nomes.opcao('wager'))
                     // Esta descrição tem o valor mínimo dentro do texto, então
                     // não dá para usar descricaoBase() direto — cada idioma
                     // precisa da interpolação feita nele mesmo.

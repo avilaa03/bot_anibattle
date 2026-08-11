@@ -48,8 +48,8 @@ module.exports = async (client, interaction) => {
     // jogador, para ele já ver o resultado.
     let t = criarT(await idiomaUtil.resolverIdioma(interaction));
 
-    const escolhido = interaction.options.getString('idioma');
-    const escopo = interaction.options.getString('escopo') || 'mim';
+    const escolhido = interaction.options.getString('language');
+    const escopo = interaction.options.getString('scope') || 'me';
 
     // ---------- Sem argumentos: só mostra a situação atual ----------
     if (!escolhido) {
@@ -83,7 +83,7 @@ module.exports = async (client, interaction) => {
     }
 
     // ---------- Escopo: servidor ----------
-    if (escopo === 'servidor') {
+    if (escopo === 'server') {
         if (!interaction.guildId) {
             return interaction.reply({
                 embeds: [ui.error(t('comum.erro'), t('idioma.servidor_em_dm'))],

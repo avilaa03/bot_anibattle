@@ -13,7 +13,7 @@ async function battleRun(interaction) {
 
     const userX = interaction.user;
     const userY = interaction.options.getUser('user');
-    const apostaPedida = interaction.options.getInteger('aposta');
+    const apostaPedida = interaction.options.getInteger('wager');
     const wager = apostaPedida && apostaPedida > MIN_WAGER ? apostaPedida : MIN_WAGER;
 
     const recusar = (tituloChave, descricaoChave, valores) =>
