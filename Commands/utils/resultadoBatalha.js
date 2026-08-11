@@ -1,4 +1,5 @@
 const ui = require('./embeds');
+const narracao = require('./narracao');
 
 /**
  * Tela final de uma batalha 3v3.
@@ -28,26 +29,45 @@ const COR_VITORIA = 0xFFD700;
  * @param {string} dados.nomeY     lado Y (oponente ou BOT)
  * @param {object} dados.resultado retorno do runBattle
  * @param {number} dados.cor
- * @param {string} dados.titulo
+ * @param {string} [dados.titulo] título próprio; na falta, o do dicionário
+ * @param {function} dados.t      tradutor do idioma de quem vai ler
  */
-function montarEmbedResultado({ nomeX, nomeY, resultado, cor = COR_VITORIA, titulo = '⚔️ Fim da batalha' }) {
+function montarEmbedResultado({ nomeX, nomeY, resultado, cor = COR_VITORIA, titulo, t }) {
     const venceuX = resultado.winner === 'X';
     const nomeVencedor = venceuX ? nomeX : nomeY;
     const placar = `**${resultado.winsX}** — **${resultado.winsY}**`;
 
     const embed = ui.base(cor)
-        .setTitle(titulo)
-        .setDescription(`👑 **${nomeVencedor}** venceu — ${nomeX} ${placar} ${nomeY}`);
+        .setTitle(titulo ?? t('batalha_resultado.titulo'))
+        .setDescription(t('batalha_resultado.venceu', {
+            vencedor: nomeVencedor,
+            nomeX,
+            placar,
+            nomeY
+        }));
 
     const roundLines = resultado.rounds.map((r) => {
         const ganhouX = r.winner === 'A';
         const quemVenceu = ganhouX ? nomeX : nomeY;
-        const destaques = r.log.filter((l) => l.includes('CRÍTICO') || l.includes('VIRADA') || l.includes('esquivou'));
-        const extra = destaques.length > 0 ? `\n└ ${destaques[destaques.length - 1]}` : '';
+
+        // O destaque sai das FLAGS do evento, não de procurar "CRÍTICO"
+        // dentro da frase. A varredura de texto funcionava só enquanto a
+        // narração era em português: traduzida, ela não acharia nada e a
+        // linha de destaque sumiria da tela sem erro nenhum.
+        const marcantes = (r.eventos || []).filter(
+            (e) => e.tipo === 'esquiva' || (e.tipo === 'golpe' && (e.crit || e.desperate))
+        );
+        const ultimo = marcantes[marcantes.length - 1];
+        const extra = ultimo ? `\n└ ${narracao.descreverEvento(ultimo, t)}` : '';
+
         return `\`R${r.round}\` ${ganhouX ? '🟢' : '🔴'} **${ui.cardName(r.cardX, r.nivelX)}** vs **${ui.cardName(r.cardY, r.nivelY)}** → ${quemVenceu}${extra}`;
     }).join('\n');
 
-    embed.addFields({ name: 'Rodadas', value: roundLines.slice(0, 1024), inline: false });
+    embed.addFields({
+        name: t('batalha_resultado.rodadas'),
+        value: roundLines.slice(0, 1024),
+        inline: false
+    });
 
     return embed;
 }

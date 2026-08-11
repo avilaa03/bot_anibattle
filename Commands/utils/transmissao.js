@@ -37,10 +37,10 @@ const espera = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
  * @param {number} opcoes.wager
  * @returns {Promise<object|null>} a mensagem usada, ou null se não deu
  */
-async function transmitir({ canal, nomeX, nomeY, mencao, resultado, wager = 0 }) {
+async function transmitir({ canal, nomeX, nomeY, mencao, resultado, wager = 0, t }) {
     if (!canal) return null;
 
-    const roteiro = montarRoteiro({ nomeX, nomeY, resultado, wager });
+    const roteiro = montarRoteiro({ nomeX, nomeY, resultado, wager, t });
     if (roteiro.quadros.length === 0) return null;
 
     let mensagem;
@@ -61,10 +61,10 @@ async function transmitir({ canal, nomeX, nomeY, mencao, resultado, wager = 0 })
  * É o que o `/treino` usa: lá a resposta do comando já está na tela e não
  * faz sentido mandar uma segunda mensagem só para animar.
  */
-async function transmitirEmMensagem({ mensagem, nomeX, nomeY, resultado, wager = 0 }) {
+async function transmitirEmMensagem({ mensagem, nomeX, nomeY, resultado, wager = 0, t }) {
     if (!mensagem) return null;
 
-    const roteiro = montarRoteiro({ nomeX, nomeY, resultado, wager });
+    const roteiro = montarRoteiro({ nomeX, nomeY, resultado, wager, t });
     if (roteiro.quadros.length === 0) return null;
 
     // Começa do zero: a mensagem hoje mostra a tela de preparação.
@@ -99,16 +99,16 @@ async function reproduzir(mensagem, roteiro, aPartirDe) {
  * Aviso de que a luta vai começar, para dar um respiro antes do primeiro
  * golpe e deixar os dois abrirem o canal.
  */
-async function anunciarInicio(canal, nomeX, nomeY, mencao, wager = 0) {
+async function anunciarInicio(canal, nomeX, nomeY, mencao, wager = 0, t) {
     if (!canal) return null;
 
     const embed = ui.base(ui.STATUS_COLORS.warning)
-        .setTitle('⚔️ Os times estão prontos!')
-        .setDescription(`**${nomeX}** contra **${nomeY}**\n\nA luta começa em instantes...`)
+        .setTitle(t('batalha_narracao.times_prontos'))
+        .setDescription(t('batalha_narracao.times_prontos_texto', { nomeX, nomeY }))
         .setFooter({
             text: wager > 0
-                ? `${ui.BRAND} • Valendo ${wager * 2} moedas`
-                : `${ui.BRAND} • Duelo amistoso`
+                ? `${ui.BRAND} • ${t('batalha_narracao.valendo', { valor: ui.number(wager * 2, t.locale) })}`
+                : `${ui.BRAND} • ${t('batalha_narracao.amistoso')}`
         });
 
     return canal.send({ content: mencao, embeds: [embed] }).catch(() => null);

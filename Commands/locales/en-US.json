@@ -297,6 +297,32 @@
       }
     }
   },
+  "batalha_narracao": {
+    "inicio": "⚡ **{atacante}** was faster and struck first.",
+    "esquiva": "💨 **{defensor}** dodged **{atacante}**'s attack!",
+    "prefixo_virada": "🔥 **COMEBACK!** ",
+    "prefixo_critico": "💥 **CRITICAL!** ",
+    "golpe": "**{atacante}** dealt **{dano}** damage — **{defensor}** is down to **{vida}** HP.",
+    "fim": "🏆 **{vencedor}** won the clash!",
+    "tempo": "⏱️ The clash dragged on — whoever is in better shape wins.",
+    "round_de": "**Round {atual}** of {total}",
+    "o_que_acontece": "What's happening",
+    "valendo": "{valor} coins on the line",
+    "amistoso": "Friendly duel",
+    "times_prontos": "⚔️ Both teams are ready!",
+    "times_prontos_texto": "**{nomeX}** vs **{nomeY}**\n\nThe fight starts in a moment..."
+  },
+  "batalha_resultado": {
+    "titulo": "⚔️ Battle over",
+    "venceu": "👑 **{vencedor}** won — {nomeX} {placar} {nomeY}",
+    "rodadas": "Rounds"
+  },
+  "ciclo_de_vida": {
+    "NAO_PARTICIPA": "You are not part of this negotiation.",
+    "EXECUTANDO": "The cards are already changing hands — there is no going back now.",
+    "EM_COMBATE": "The fight has already started. The result stands.",
+    "FINALIZADA": "That is already over."
+  },
   "itens_catalogo": {
     "gema": {
       "nome": "Upgrade Gem",
@@ -683,6 +709,7 @@
   "trocar": {
     "usuario_necessario": "Player required",
     "usuario_necessario_texto": "Mention who you want to trade with.",
+    "alvo_invalido": "Invalid target",
     "sem_bots": "Bots don't trade cards.",
     "sem_si_mesmo": "You can't trade with yourself.",
     "em_andamento": "Trade in progress",
@@ -696,6 +723,13 @@
     "n_cartas": "🎴 {n} cards",
     "rodape_convite": "The invite expires in 60 seconds",
     "botao_aceitar": "Accept",
+    "botao_recusar": "Decline",
+    "botao_cancelar_convite": "Cancel invite",
+    "convite_alheio": "Someone else's invite",
+    "convite_alheio_texto": "Only the player who got the proposal can accept or decline it.",
+    "ja_respondido": "Invite already answered",
+    "ja_respondido_texto": "This proposal has already been accepted or declined.",
+    "nao_da_para_cancelar": "Can't cancel right now",
     "mencao_proposta": "{alvo}, you got a trade proposal!",
     "recusada": "Trade declined",
     "recusada_texto": "**{jogador}** turned down the proposal.",

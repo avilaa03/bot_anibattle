@@ -87,10 +87,18 @@ const forasteiro = ciclo.podeCancelarBatalha(duelo('choosing'), 'z');
 check('quem não é dos dois não cancela', forasteiro.ok === false && forasteiro.motivo === 'NAO_PARTICIPA');
 
 console.log('\n=== Todo motivo tem mensagem para o jogador ===');
-const motivos = ['NAO_PARTICIPA', 'EXECUTANDO', 'EM_COMBATE', 'FINALIZADA'];
-for (const m of motivos) {
-    check(`mensagem para ${m}`, typeof ciclo.MENSAGENS[m] === 'string' && ciclo.MENSAGENS[m].length > 10);
+// Chave sem texto no dicionário volta como a própria chave — por isso a
+// conferência é que a frase NÃO seja o caminho `ciclo_de_vida.<motivo>`.
+// Um simples "é string" passaria com a chave crua indo para a tela.
+for (const m of ciclo.MOTIVOS) {
+    for (const locale of ['pt-BR', 'en-US']) {
+        const texto = ciclo.mensagem(m, locale);
+        check(`mensagem para ${m} em ${locale}`,
+            typeof texto === 'string' && texto.length > 10 && !texto.startsWith('ciclo_de_vida.'));
+    }
 }
+check('as mensagens realmente mudam de idioma',
+    ciclo.mensagem('EM_COMBATE', 'pt-BR') !== ciclo.mensagem('EM_COMBATE', 'en-US'));
 
 console.log('\n=== Filtro do Mongo ===');
 const filtro = ciclo.filtroExpirados(T, 'fase', 'criadaEm');

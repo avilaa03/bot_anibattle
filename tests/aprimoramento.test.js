@@ -258,8 +258,11 @@ const luta = engine.runBattle
 if (luta) {
     check('a batalha carrega o nível nos confrontos',
         luta.rounds[0].nivelX === 3 && luta.rounds[0].nivelY === 0);
-    check('e o log do combate mostra o selo',
-        luta.rounds[0].log.some((l) => l.includes('Sasuke Uchiha (+3)')),
+    // O selo vai nos eventos, que é de onde a narração é montada em
+    // qualquer idioma — nome de carta não se traduz, o `(+3)` também não.
+    check('e os eventos do combate mostram o selo',
+        luta.rounds[0].eventos.some((e) =>
+            [e.atacante, e.defensor, e.vencedorNome].includes('Sasuke Uchiha (+3)')),
         '<- o adversário precisa saber contra o que luta');
 } else {
     check('runBattle exportado para o teste do selo', false, '<- API mudou');

@@ -297,6 +297,32 @@
       }
     }
   },
+  "batalha_narracao": {
+    "inicio": "⚡ **{atacante}** foi mais rápido e atacou primeiro.",
+    "esquiva": "💨 **{defensor}** esquivou do ataque de **{atacante}**!",
+    "prefixo_virada": "🔥 **VIRADA!** ",
+    "prefixo_critico": "💥 **CRÍTICO!** ",
+    "golpe": "**{atacante}** causou **{dano}** de dano — **{defensor}** ficou com **{vida}** de vida.",
+    "fim": "🏆 **{vencedor}** venceu o confronto!",
+    "tempo": "⏱️ O confronto se estendeu — vence quem está em melhor estado.",
+    "round_de": "**Round {atual}** de {total}",
+    "o_que_acontece": "O que está acontecendo",
+    "valendo": "Valendo {valor} moedas",
+    "amistoso": "Duelo amistoso",
+    "times_prontos": "⚔️ Os times estão prontos!",
+    "times_prontos_texto": "**{nomeX}** contra **{nomeY}**\n\nA luta começa em instantes..."
+  },
+  "batalha_resultado": {
+    "titulo": "⚔️ Fim da batalha",
+    "venceu": "👑 **{vencedor}** venceu — {nomeX} {placar} {nomeY}",
+    "rodadas": "Rodadas"
+  },
+  "ciclo_de_vida": {
+    "NAO_PARTICIPA": "Você não faz parte desta negociação.",
+    "EXECUTANDO": "As cartas já estão trocando de dono — não dá mais para voltar atrás.",
+    "EM_COMBATE": "A luta já começou. O resultado vale.",
+    "FINALIZADA": "Isso já terminou."
+  },
   "itens_catalogo": {
     "gema": {
       "nome": "Gema de aprimoramento",
@@ -683,6 +709,7 @@
   "trocar": {
     "usuario_necessario": "Usuário necessário",
     "usuario_necessario_texto": "Mencione com quem você quer trocar.",
+    "alvo_invalido": "Alvo inválido",
     "sem_bots": "Bots não trocam cartas.",
     "sem_si_mesmo": "Você não pode trocar consigo mesmo.",
     "em_andamento": "Negociação em andamento",
@@ -696,6 +723,13 @@
     "n_cartas": "🎴 {n} cartas",
     "rodape_convite": "O convite expira em 60 segundos",
     "botao_aceitar": "Aceitar",
+    "botao_recusar": "Recusar",
+    "botao_cancelar_convite": "Cancelar convite",
+    "convite_alheio": "Convite alheio",
+    "convite_alheio_texto": "Só quem recebeu a proposta pode aceitar ou recusar.",
+    "ja_respondido": "Convite já respondido",
+    "ja_respondido_texto": "Esta proposta já foi aceita ou recusada.",
+    "nao_da_para_cancelar": "Não dá para cancelar agora",
     "mencao_proposta": "{alvo}, você recebeu uma proposta de troca!",
     "recusada": "Troca recusada",
     "recusada_texto": "**{jogador}** recusou a proposta.",

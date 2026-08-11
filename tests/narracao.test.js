@@ -12,6 +12,10 @@ const ROOT = path.join(__dirname, '..', 'Commands', 'utils') + path.sep;
 
 const { runBattle } = require(ROOT + 'battleEngine.js');
 const narracao = require(ROOT + 'narracao.js');
+const { criarT } = require(ROOT + 'i18n.js');
+
+const tPt = criarT('pt-BR');
+const tEn = criarT('en-US');
 
 let falhas = 0;
 const check = (nome, cond, extra = '') => {
@@ -43,8 +47,13 @@ const resultado = runBattle(deckA, deckB, rngFixo(42));
 check('todo round tem eventos', resultado.rounds.every((r) => Array.isArray(r.eventos) && r.eventos.length > 0));
 check('todo round leva os nomes das cartas',
     resultado.rounds.every((r) => typeof r.nomeA === 'string' && typeof r.nomeB === 'string'));
-check('o log de texto continua existindo', resultado.rounds.every((r) => Array.isArray(r.log)),
-    '<- vários lugares ainda dependem dele');
+// O motor não escreve mais texto: a mesma luta é mostrada para dois
+// jogadores que podem estar em idiomas diferentes, e a frase precisa
+// nascer na hora de exibir, não na hora de calcular.
+check('o motor NÃO devolve texto pronto',
+    resultado.rounds.every((r) => r.log === undefined)
+    && resultado.rounds.every((r) => r.eventos.every((e) => e.texto === undefined)),
+    '<- texto congelado no resultado não tem como falar dois idiomas');
 
 const primeiro = resultado.rounds[0].eventos[0];
 check('o primeiro evento é a abertura', primeiro.tipo === 'inicio', `(${primeiro.tipo})`);
@@ -107,10 +116,33 @@ check('vida acima do máximo não estoura a barra',
 
 console.log('\n=== Roteiro completo ===');
 const roteiro = narracao.montarRoteiro({
-    nomeX: 'Ávila', nomeY: 'Rival', resultado, wager: 50
+    nomeX: 'Ávila', nomeY: 'Rival', resultado, wager: 50, t: tPt
 });
 
 check('gera quadros', roteiro.quadros.length > 0, `(${roteiro.quadros.length})`);
+
+console.log('\n=== A MESMA luta narra nos dois idiomas ===');
+// É o ponto de todo o desenho: dois jogadores da mesma batalha podem
+// estar em idiomas diferentes, e cada um tem que ler a luta no seu.
+const golpe = resultado.rounds
+    .flatMap((r) => r.eventos)
+    .find((e) => e.tipo === 'golpe');
+
+const emPt = narracao.descreverEvento(golpe, tPt);
+const emEn = narracao.descreverEvento(golpe, tEn);
+check('o golpe é narrado em português', emPt.includes('de dano'), `(${emPt})`);
+check('o mesmo golpe é narrado em inglês', emEn.includes('damage'), `(${emEn})`);
+check('o dano é o mesmo nos dois', emPt.includes(String(golpe.dano)) && emEn.includes(String(golpe.dano)),
+    '<- a narração não pode divergir do que foi calculado');
+check('evento de tipo desconhecido some em vez de virar lixo',
+    narracao.descreverEvento({ tipo: 'inventado' }, tPt) === '');
+
+const roteiroEn = narracao.montarRoteiro({
+    nomeX: 'Ávila', nomeY: 'Rival', resultado, wager: 50, t: tEn
+});
+check('o roteiro inteiro acompanha o idioma',
+    roteiroEn.quadros.some((q) => (q.toJSON().fields || []).some((f) => f.name === "What's happening")),
+    '<- senão a transmissão fica em português no meio do inglês');
 check('respeita o teto de quadros', roteiro.quadros.length <= narracao.MAX_QUADROS);
 check('intervalo de pelo menos 2s', roteiro.intervaloMs >= 2000, `(${roteiro.intervaloMs}ms)`,
     );
