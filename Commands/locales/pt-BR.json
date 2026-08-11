@@ -451,6 +451,12 @@
     "nova_pokedex": "📖 **Nova entrada na Pokédex!** Veja em `/pokedex`.",
     "vendida": "🪙 Você vendeu **{carta}** por {valor}. Saldo: {saldo}",
     "expirou": "O tempo para coletar a carta expirou.",
+    "sem_extra": "Você não tem roll extra",
+    "sem_extra_texto": "Nenhum 🎟️ **roll extra** na sua bolsa.",
+    "sem_extra_onde_comprar": "Compre em `/loja roll-extra` — o preço sobe a cada compra do dia.",
+    "campo_extra": "🎟️ Roll extra",
+    "tem_extra_guardado": "Você tem **{quantidade}** guardado(s). Use `/roll extra:True` para pular a espera.",
+    "protecao_azar": "Proteção contra azar: {rolls} rolls sem {raridade} — esta veio garantida",
     "desejo_titulo": "💭 Carta da sua lista de desejos apareceu!",
     "desejo_texto": "{emoji} **{carta}** — *{serie}*\n\nRolada por **{jogador}**. Que tal propor uma troca com `/trocar`?"
   },

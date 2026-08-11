@@ -451,6 +451,12 @@
     "nova_pokedex": "📖 **New Pokédex entry!** Check it with `/pokedex`.",
     "vendida": "🪙 You sold **{carta}** for {valor}. Balance: {saldo}",
     "expirou": "Time ran out to claim the card.",
+    "sem_extra": "You have no extra roll",
+    "sem_extra_texto": "No 🎟️ **extra roll** in your bag.",
+    "sem_extra_onde_comprar": "Buy one with `/loja roll-extra` — the price rises with each purchase that day.",
+    "campo_extra": "🎟️ Extra roll",
+    "tem_extra_guardado": "You have **{quantidade}** stored. Use `/roll extra:True` to skip the wait.",
+    "protecao_azar": "Bad-luck protection: {rolls} rolls without a {raridade} — this one was guaranteed",
     "desejo_titulo": "💭 A card from your wishlist showed up!",
     "desejo_texto": "{emoji} **{carta}** — *{serie}*\n\nRolled by **{jogador}**. How about proposing a trade with `/trocar`?"
   },
