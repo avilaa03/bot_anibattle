@@ -203,8 +203,14 @@ function limparExpiradas(agora = Date.now()) {
  * @param {Array}  dados.timeRival   time do BOT, já sorteado
  * @param {object} dados.dificuldade
  * @param {string} dados.canalId     onde a luta será transmitida
+ * @param {string} dados.locale      idioma do jogador no momento da abertura
+ *
+ * O locale fica gravado na sessão porque a luta é resolvida depois, num
+ * clique de botão que não passa mais pelo comando — e `resolverTreino`
+ * recebe só a sessão. Guardar aqui evita uma ida ao banco na hora de
+ * narrar, e mantém o treino inteiro num idioma só do começo ao fim.
  */
-function criarSessao({ userId, username, inventario, timeRival, dificuldade, canalId }) {
+function criarSessao({ userId, username, inventario, timeRival, dificuldade, canalId, locale = DEFAULT_LOCALE }) {
     limparExpiradas();
 
     const id = gerarId();
@@ -216,6 +222,7 @@ function criarSessao({ userId, username, inventario, timeRival, dificuldade, can
         timeRival,
         dificuldade,
         canalId,
+        locale,
         deck: [],
         selectedIds: [],
         // Trava contra clique duplo na terceira carta: sem isso, dois

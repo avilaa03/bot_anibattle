@@ -2,6 +2,7 @@ const { MessageFlags } = require('discord.js');
 const ui = require('../utils/embeds');
 const treino = require('../utils/treino');
 const treinoRun = require('../actions/run/treinoRun');
+const { tDaInteracao } = require('../utils/idioma');
 
 /**
  * Botões do modo treino.
@@ -50,19 +51,21 @@ async function escolherCarta(client, interaction, resto) {
     const sessaoId = resto.slice(0, separador);
     const cartaId = resto.slice(separador + 1);
 
+    const t = await tDaInteracao(interaction);
+
     const sessao = treino.getSessao(sessaoId);
     if (!sessao) {
-        await avisar(interaction, ui.neutral('Treino encerrado', 'Este treino expirou ou já foi resolvido. Use `/treino` para abrir outro.'));
+        await avisar(interaction, ui.neutral(t('treino.encerrado'), t('treino.encerrado_texto')));
         return true;
     }
     if (sessao.userId !== interaction.user.id) {
-        await avisar(interaction, ui.error('Não é o seu treino', 'Este treino é de outra pessoa.'));
+        await avisar(interaction, ui.error(t('treino.nao_e_seu'), t('treino.nao_e_seu_texto')));
         return true;
     }
 
     const carta = sessao.inventario.find((c) => String(c._id) === cartaId);
     if (!carta) {
-        await avisar(interaction, ui.error('Carta indisponível', 'Essa carta não está mais no seu inventário.'));
+        await avisar(interaction, ui.error(t('treino.carta_indisponivel'), t('battle.carta_fora_do_inventario')));
         return true;
     }
 
@@ -70,12 +73,13 @@ async function escolherCarta(client, interaction, resto) {
 
     const escolha = treino.escolherCarta(sessaoId, carta);
     if (!escolha.ok) {
-        const mensagens = {
-            SESSAO_EXPIRADA: 'Este treino expirou. Use `/treino` para abrir outro.',
-            TIME_CHEIO: 'Seu time já tem 3 cartas.',
-            JA_ESCOLHIDA: 'Você já escolheu esta carta.'
-        };
-        await avisar(interaction, ui.neutral('Nada a fazer', mensagens[escolha.motivo] || 'Não deu para escolher esta carta.'));
+        // O motivo é código, não frase: a chave é que decide o texto, e um
+        // motivo novo sem tradução aparece na tela como a própria chave —
+        // feio o bastante para ser achado antes de chegar ao jogador.
+        await avisar(interaction, ui.neutral(
+            t('treino.nada_a_fazer'),
+            t(`treino.recusa.${escolha.motivo}`)
+        ));
         return true;
     }
 
@@ -83,7 +87,7 @@ async function escolherCarta(client, interaction, resto) {
     // saem: as cartas não escolhidas continuariam clicáveis e o jogador
     // levaria um "treino encerrado" no rosto por clicar no que a tela
     // ainda estava oferecendo.
-    const tela = treinoRun.telaDeEscolha(sessao);
+    const tela = treinoRun.telaDeEscolha(sessao, t);
     await interaction.editReply({
         embeds: [tela.embed],
         components: escolha.completo ? [] : tela.components
@@ -101,10 +105,11 @@ async function escolherCarta(client, interaction, resto) {
 }
 
 async function cancelar(client, interaction, sessaoId) {
+    const t = await tDaInteracao(interaction);
     const sessao = treino.getSessao(sessaoId);
 
     if (!sessao || sessao.userId !== interaction.user.id) {
-        await avisar(interaction, ui.neutral('Nada para cancelar', 'Este treino já terminou ou expirou.'));
+        await avisar(interaction, ui.neutral(t('treino.nada_para_cancelar'), t('treino.nada_para_cancelar_texto')));
         return true;
     }
 
@@ -112,7 +117,7 @@ async function cancelar(client, interaction, sessaoId) {
 
     await interaction.update({
         content: null,
-        embeds: [ui.neutral('Treino cancelado', 'Nenhuma luta aconteceu. Use `/treino` quando quiser tentar de novo.')],
+        embeds: [ui.neutral(t('treino.cancelado'), t('treino.cancelado_texto'))],
         components: []
     }).catch(() => {});
 

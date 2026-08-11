@@ -6,6 +6,8 @@ const { montarEscolhaDeTime } = require('../../utils/escolhaDeTime');
 const { montarEmbedResultado, contarDestaques } = require('../../utils/resultadoBatalha');
 const treino = require('../../utils/treino');
 const transmissao = require('../../utils/transmissao');
+const { criarT } = require('../../utils/i18n');
+const { tDaInteracao } = require('../../utils/idioma');
 
 /**
  * /treino — a batalha de verdade, contra o BOT Caviar.
@@ -56,39 +58,46 @@ const COOLDOWN_MS = 20 * 1000;
 const ultimoTreino = new Map();
 
 /** O time do BOT aparece na tela de escolha, para o jogador escalar contra ele. */
-function campoTimeRival(sessao) {
+function campoTimeRival(sessao, t) {
     const linhas = sessao.timeRival.map((c, i) => {
-        const meta = ui.getRarity(c.rarity);
-        return `\`${i + 1}\` ${meta.emoji} **${ui.cardName(c)}** — OVR ${c.overall ?? 0}\n`
+        const meta = ui.getRarity(c.rarity, t.locale);
+        return `\`${i + 1}\` ${meta.emoji} **${ui.cardName(c)}** — ${t('atributos.ovr')} ${c.overall ?? 0}\n`
             + `└ ⚔️ ${c.ATA ?? 0} · ❤️ ${c.LIF ?? 0} · 💥 ${c.POW ?? 0}`;
     }).join('\n');
 
+    const dificuldade = treino.localizarDificuldade(sessao.dificuldade, t.locale);
+
     return {
-        name: `🤖 Time do ${treino.NOME_RIVAL} — ${sessao.dificuldade.emoji} ${sessao.dificuldade.nome}`,
-        value: `${linhas}\n\n*Sua 1ª carta enfrenta a 1ª dele, e assim por diante.*`,
+        name: t('treino.time_rival', {
+            rival: treino.NOME_RIVAL,
+            emoji: dificuldade.emoji,
+            dificuldade: dificuldade.nome
+        }),
+        value: `${linhas}\n\n*${t('treino.ordem_dos_confrontos')}*`,
         inline: false
     };
 }
 
 /** Tela de "monte seu time" do treino. Mesma do /battle, com o rival à vista. */
-function telaDeEscolha(sessao) {
+function telaDeEscolha(sessao, t = criarT(sessao.locale)) {
     return montarEscolhaDeTime({
         inventory: sessao.inventario,
         selectedIds: sessao.selectedIds,
         deck: sessao.deck,
         idEscolha: (cardId) => `treino_pick_${sessao.id}_${cardId}`,
         idCancelar: `treino_cancel_${sessao.id}`,
-        rotuloCancelar: 'Cancelar treino',
-        aguardando: '✅ **Time completo!** A luta vai começar...',
-        campos: [campoTimeRival(sessao)]
+        rotuloCancelar: t('treino.botao_cancelar'),
+        aguardando: t('treino.time_completo'),
+        campos: [campoTimeRival(sessao, t)],
+        t
     });
 }
 
-function botoesDoResultado(dificuldade) {
+function botoesDoResultado(dificuldade, t) {
     return [new ActionRowBuilder().addComponents(
         new ButtonBuilder()
             .setCustomId(`treino_novo_${dificuldade}`)
-            .setLabel('Treinar de novo')
+            .setLabel(t('treino.botao_de_novo'))
             .setEmoji('🔁')
             .setStyle(ButtonStyle.Secondary)
     )];
@@ -105,36 +114,36 @@ function botoesDoResultado(dificuldade) {
 async function iniciarTreino(client, interaction, dificuldade) {
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
-    const recusar = (titulo, descricao) =>
-        interaction.editReply({ embeds: [ui.error(titulo, descricao)] }).catch(() => {});
+    const t = await tDaInteracao(interaction);
+
+    const recusar = (tituloChave, descricaoChave, valores) =>
+        interaction.editReply({
+            embeds: [ui.error(t(tituloChave), t(descricaoChave, valores))]
+        }).catch(() => {});
 
     const emAndamento = treino.getSessaoDoUsuario(interaction.user.id);
     if (emAndamento) {
-        return recusar(
-            'Treino em andamento',
-            'Você já tem um treino aberto no privado. Termine ou cancele ele antes de começar outro.'
-        );
+        return recusar('treino.em_andamento', 'treino.em_andamento_texto');
     }
 
     const agora = Date.now();
     const ultimo = ultimoTreino.get(interaction.user.id) || 0;
     if (agora - ultimo < COOLDOWN_MS) {
-        return recusar('Calma lá', `Espere ${ui.duration(COOLDOWN_MS - (agora - ultimo))} para treinar de novo.`);
+        return recusar('treino.calma_la', 'treino.calma_la_texto', {
+            tempo: ui.duration(COOLDOWN_MS - (agora - ultimo), t.locale)
+        });
     }
 
     const doc = await User.findOne({ id: interaction.user.id }).select('inventory').lean();
     const inventario = doc?.inventory || [];
 
     if (inventario.length < 3) {
-        return recusar(
-            'Time incompleto',
-            `Você precisa de pelo menos **3 cartas** para treinar. Tem ${inventario.length}.\n\nUse \`/roll\` para conseguir mais.`
-        );
+        return recusar('treino.time_incompleto', 'treino.time_incompleto_texto', { n: inventario.length });
     }
 
     const montagem = await treino.montarTimeRival(inventario, dificuldade);
     if (!montagem.ok) {
-        return recusar('Catálogo vazio', `Não há cartas cadastradas para o ${treino.NOME_RIVAL} usar.`);
+        return recusar('treino.catalogo_vazio', 'treino.catalogo_vazio_texto', { rival: treino.NOME_RIVAL });
     }
 
     // Passou por tudo: agora sim o cooldown conta.
@@ -146,14 +155,15 @@ async function iniciarTreino(client, interaction, dificuldade) {
         inventario,
         timeRival: montagem.timeRival,
         dificuldade: montagem.dificuldade,
-        canalId: interaction.channelId
+        canalId: interaction.channelId,
+        locale: t.locale
     });
 
-    const tela = telaDeEscolha(sessao);
+    const tela = telaDeEscolha(sessao, t);
 
     try {
         const dm = await interaction.user.send({
-            content: `🥊 Treino contra **${treino.NOME_RIVAL}** — monte seu time!`,
+            content: t('treino.dm_monte_time', { rival: treino.NOME_RIVAL }),
             embeds: [tela.embed],
             components: tela.components
         });
@@ -163,18 +173,19 @@ async function iniciarTreino(client, interaction, dificuldade) {
         // jogador arruma a configuração e tenta de novo na hora.
         treino.encerrarSessao(sessao.id);
         ultimoTreino.delete(interaction.user.id);
-        return recusar(
-            'Não consegui te chamar no privado',
-            'Habilite as mensagens diretas deste servidor para montar seu time.'
-        );
+        return recusar('treino.sem_privado', 'treino.sem_privado_texto');
     }
+
+    const nivel = treino.localizarDificuldade(montagem.dificuldade, t.locale);
 
     return interaction.editReply({
         embeds: [ui.info(
-            '🥊 Treino aberto',
-            `Te mandei no privado a tela para montar seu time contra o **${treino.NOME_RIVAL}**`
-            + ` (${montagem.dificuldade.emoji} ${montagem.dificuldade.nome}).\n\n`
-            + 'A luta é transmitida aqui no canal quando você fechar as 3 cartas.'
+            t('treino.aberto'),
+            t('treino.aberto_texto', {
+                rival: treino.NOME_RIVAL,
+                emoji: nivel.emoji,
+                dificuldade: nivel.nome
+            })
         )]
     }).catch(() => {});
 }
@@ -187,6 +198,10 @@ async function iniciarTreino(client, interaction, dificuldade) {
  * enfeite sobre um fato consumado, e pode falhar sem consequência.
  */
 async function resolverTreino(client, sessao) {
+    // O idioma vem da sessão: aqui não existe interação nenhuma — a luta
+    // resolve sozinha quando a terceira carta é escolhida.
+    const t = criarT(sessao.locale);
+
     const resultado = runBattle(sessao.deck, sessao.timeRival);
     const nomeJogador = sessao.username;
 
@@ -202,19 +217,20 @@ async function resolverTreino(client, sessao) {
     const embed = montarEmbedResultado({
         nomeX: nomeJogador,
         nomeY: treino.NOME_RIVAL,
-        resultado
+        resultado,
+        t
     });
 
     const { criticos, viradas } = contarDestaques(resultado);
     if (criticos > 0 || viradas > 0) {
         embed.addFields({
-            name: 'Da luta',
-            value: `💥 ${criticos} crítico(s) • 🔥 ${viradas} virada(s)`,
+            name: t('treino.da_luta'),
+            value: t('treino.da_luta_texto', { criticos, viradas }),
             inline: false
         });
     }
 
-    embed.setFooter({ text: `${ui.BRAND} • Treino não vale moeda, ELO nem conquista` });
+    embed.setFooter({ text: `${ui.BRAND} • ${t('treino.nao_vale_nada')}` });
 
     if (canal) {
         try {
@@ -222,9 +238,10 @@ async function resolverTreino(client, sessao) {
                 canal,
                 nomeX: nomeJogador,
                 nomeY: treino.NOME_RIVAL,
-                mencao: `<@${sessao.userId}> 🥊 treino`,
+                mencao: t('treino.mencao_transmissao', { jogador: `<@${sessao.userId}>` }),
                 resultado,
-                wager: 0
+                wager: 0,
+                t
             });
         } catch (err) {
             // Nunca deixar a animação derrubar a entrega do resultado.
@@ -234,7 +251,7 @@ async function resolverTreino(client, sessao) {
         await canal.send({
             content: `<@${sessao.userId}>`,
             embeds: [embed],
-            components: botoesDoResultado(sessao.dificuldade.chave)
+            components: botoesDoResultado(sessao.dificuldade.chave, t)
         }).catch(() => {});
     }
 
