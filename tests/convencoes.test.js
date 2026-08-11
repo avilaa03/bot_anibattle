@@ -193,7 +193,7 @@ console.log('\n=== A animação da batalha não toca no jogo ===');
 // deixa de ser enfeite e vira parte do resultado — e aí uma queda do bot
 // no meio da luta passa a poder deixar aposta presa ou partida sem
 // vencedor. É exatamente o que o desenho evita.
-const APENAS_APRESENTACAO = ['Commands/utils/narracao.js', 'Commands/utils/transmissao.js'];
+const APENAS_APRESENTACAO = ['Commands/utils/narration.js', 'Commands/utils/broadcast.js'];
 const PROIBIDOS = ['economy', 'battleState', 'progresso', 'elo', 'userSchema', 'discovery', 'vipService'];
 
 // O treino lê o inventário do jogador (por isso `userSchema` é liberado
@@ -204,7 +204,7 @@ const PROIBIDOS = ['economy', 'battleState', 'progresso', 'elo', 'userSchema', '
 // passar pelo Mongo, o treino ganha um jeito de sujar o banco e de deixar
 // registro de algo que não deveria existir depois que a luta acaba.
 const TREINO = [
-    'Commands/utils/treino.js',
+    'Commands/utils/training.js',
     'Commands/actions/run/trainingRun.js',
     'Commands/handlers/treinoButtonHandler.js'
 ];

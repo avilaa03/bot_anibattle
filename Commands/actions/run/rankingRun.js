@@ -2,7 +2,7 @@ const User = require('../../utils/userSchema');
 const ui = require('../../utils/embeds');
 const elo = require('../../utils/elo');
 const { badge } = require('../../utils/vip');
-const { tDaInteracao } = require('../../utils/idioma');
+const { tDaInteracao } = require('../../utils/language');
 
 /** /ranking — classificação por pontuação de batalha. */
 async function rankingRun(client, interaction) {

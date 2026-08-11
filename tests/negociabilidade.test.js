@@ -23,13 +23,13 @@ const path = require('path');
 const RAIZ = path.join(__dirname, '..');
 const ROOT = path.join(RAIZ, 'Commands', 'utils') + path.sep;
 
-const negociabilidade = require(ROOT + 'negociabilidade.js');
-const sorteio = require(ROOT + 'sorteio.js');
-const caixas = require(ROOT + 'caixas.js');
-const valores = require(ROOT + 'valores.js');
+const negociabilidade = require(ROOT + 'tradability.js');
+const sorteio = require(ROOT + 'draw.js');
+const caixas = require(ROOT + 'boxes.js');
+const valores = require(ROOT + 'cardValues.js');
 const ui = require(ROOT + 'embeds.js');
-const aprimoramento = require(ROOT + 'aprimoramento.js');
-const itens = require(ROOT + 'itens.js');
+const aprimoramento = require(ROOT + 'upgrading.js');
+const itens = require(ROOT + 'items.js');
 
 let falhas = 0;
 const check = (nome, cond, extra = '') => {

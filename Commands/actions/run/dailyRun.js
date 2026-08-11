@@ -1,9 +1,9 @@
 const User = require("../../utils/userSchema");
 const ui = require('../../utils/embeds');
 const { getPerks, nomeTier } = require('../../utils/vip');
-const { tDaInteracao } = require('../../utils/idioma');
-const { registrar } = require('../../utils/progresso');
-const { chaveDoDia } = require('../../utils/missoes');
+const { tDaInteracao } = require('../../utils/language');
+const { registrar } = require('../../utils/progress');
+const { chaveDoDia } = require('../../utils/missions');
 const { MessageFlags } = require('discord.js');
 
 /**
@@ -194,7 +194,7 @@ async function dailyRun(client, interaction) {
 /** Avisa em mensagem separada quando desbloqueou troféu ou missão. */
 async function avisarProgresso(interaction, resultado) {
     if (!resultado) return;
-    const { notificarProgresso } = require('../../utils/notificacoes');
+    const { notificarProgresso } = require('../../utils/notifications');
     await notificarProgresso(interaction, resultado);
 }
 

@@ -1,9 +1,9 @@
 const { AttachmentBuilder, MessageFlags } = require('discord.js');
 const ui = require('./embeds');
 const achievements = require('./achievements');
-const progressaoDeNivel = require('./progressaoDeNivel');
+const progressaoDeNivel = require('./levelProgression');
 const { criarT, DEFAULT_LOCALE } = require('./i18n');
-const { resolverIdioma } = require('./idioma');
+const { resolverIdioma } = require('./language');
 
 /**
  * Avisos de progresso.
@@ -82,7 +82,7 @@ function embedAnuncio(conquista, userId, locale = DEFAULT_LOCALE) {
 
 function embedMissoes(missoesCompletas, locale = DEFAULT_LOCALE) {
     const t = criarT(locale);
-    const missoes = require('./missoes');
+    const missoes = require('./missions');
 
     const linhas = missoesCompletas.map((m) => {
         const def = missoes.localizar(m, locale);

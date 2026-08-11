@@ -1,5 +1,5 @@
-const valores = require('./valores');
-const sorteio = require('./sorteio');
+const valores = require('./cardValues');
+const sorteio = require('./draw');
 
 /**
  * Roll extra: adianta o próximo `/roll`.

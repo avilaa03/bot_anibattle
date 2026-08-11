@@ -1,5 +1,5 @@
 const ui = require('./embeds');
-const narracao = require('./narracao');
+const narracao = require('./narration');
 
 /**
  * Tela final de uma batalha 3v3.

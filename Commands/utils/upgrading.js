@@ -52,7 +52,7 @@
  * atributos que ninguém consegue explicar.
  */
 
-const valores = require('./valores');
+const valores = require('./cardValues');
 
 /** Chance de sucesso no nível 0. Quanto mais rara, mais difícil. */
 const BASE_SUCESSO = {

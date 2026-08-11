@@ -9,7 +9,7 @@ const UTILS = path.join(__dirname, '..', 'Commands', 'utils') + path.sep;
 
 const achievements = require(UTILS + 'achievements.js');
 const elo = require(UTILS + 'elo.js');
-const missoes = require(UTILS + 'missoes.js');
+const missoes = require(UTILS + 'missions.js');
 const { calcularRecompensa, MARCOS } = require(path.join(__dirname, '..', 'Commands', 'actions', 'run', 'dailyRun.js'));
 
 let falhas = 0;

@@ -1,8 +1,8 @@
 const { MessageFlags } = require('discord.js');
-const Evento = require('../../utils/eventoSchema');
+const Evento = require('../../utils/eventSchema');
 const ui = require('../../utils/embeds');
-const itens = require('../../utils/itens');
-const { tDaInteracao } = require('../../utils/idioma');
+const itens = require('../../utils/items');
+const { tDaInteracao } = require('../../utils/language');
 
 /**
  * /evento — ver e entrar nos eventos abertos.

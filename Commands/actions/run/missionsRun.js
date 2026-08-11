@@ -1,8 +1,8 @@
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const ui = require('../../utils/embeds');
-const missoes = require('../../utils/missoes');
-const { verificarConquistas } = require('../../utils/progresso');
-const { tDaInteracao } = require('../../utils/idioma');
+const missoes = require('../../utils/missions');
+const { verificarConquistas } = require('../../utils/progress');
+const { tDaInteracao } = require('../../utils/language');
 
 function barra(atual, alvo, tamanho = 10) {
     const proporcao = alvo > 0 ? Math.min(1, atual / alvo) : 0;
@@ -123,7 +123,7 @@ async function missoesRun(client, interaction) {
         // Resgatar pode ter cruzado o limite de alguma conquista de moeda.
         const novas = await verificarConquistas(interaction.user.id);
         if (novas.length > 0) {
-            const { notificarProgresso } = require('../../utils/notificacoes');
+            const { notificarProgresso } = require('../../utils/notifications');
             await notificarProgresso(interaction, { conquistas: novas, missoesCompletas: [] });
         }
     });

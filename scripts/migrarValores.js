@@ -45,7 +45,7 @@ mongoose.set('strictQuery', false);
 const User = require('../Commands/utils/userSchema');
 const Market = require('../Commands/utils/marketSchema');
 const Card = require('../Commands/utils/cardSchema');
-const valores = require('../Commands/utils/valores');
+const valores = require('../Commands/utils/cardValues');
 
 const brl = (n) => Number(n || 0).toLocaleString('pt-BR');
 

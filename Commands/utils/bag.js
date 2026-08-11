@@ -25,8 +25,8 @@
  */
 
 const User = require('./userSchema');
-const itens = require('./itens');
-const caixas = require('./caixas');
+const itens = require('./items');
+const caixas = require('./boxes');
 const { DEFAULT_LOCALE } = require('./i18n');
 
 /** Erro de regra de negócio, para o comando distinguir de falha técnica. */

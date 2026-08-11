@@ -2,7 +2,7 @@ const { updateEmbed, buildConfirmationRow, getValueToSell } = require('../run/qu
 const User = require('../../utils/userSchema');
 const { addBalance } = require('../../utils/economy');
 const ui = require('../../utils/embeds');
-const transacoes = require('../../utils/transacoes');
+const transacoes = require('../../utils/transactions');
 const { criarT, DEFAULT_LOCALE } = require('../../utils/i18n');
 
 async function quicksellCollect(i, indexRef, matchingCards, user, rowNavigation, t = criarT(DEFAULT_LOCALE)) {

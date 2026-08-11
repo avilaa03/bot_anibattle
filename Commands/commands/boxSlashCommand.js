@@ -1,8 +1,8 @@
 const BaseSlashCommand = require('../utils/BaseSlashCommand.js');
-const nomes = require('../utils/nomesDeComando.js');
+const nomes = require('../utils/commandNames.js');
 const { SlashCommandBuilder } = require('discord.js');
 const caixaRun = require('../actions/run/boxRun.js');
-const caixas = require('../utils/caixas.js');
+const caixas = require('../utils/boxes.js');
 const { descricaoBase, localizacoes, escolha } = require('../utils/i18n.js');
 
 /**

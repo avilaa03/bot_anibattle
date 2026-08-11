@@ -1,8 +1,8 @@
 const User = require('../../utils/userSchema');
 const ui = require('../../utils/embeds');
-const bolsa = require('../../utils/bolsa');
-const aprimoramento = require('../../utils/aprimoramento');
-const transacoes = require('../../utils/transacoes');
+const bolsa = require('../../utils/bag');
+const aprimoramento = require('../../utils/upgrading');
+const transacoes = require('../../utils/transactions');
 const { montarEmbed, montarBotoes } = require('../run/upgradeRun');
 const { criarT, DEFAULT_LOCALE } = require('../../utils/i18n');
 

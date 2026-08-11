@@ -5,7 +5,7 @@ const {
     TIERS, ORDEM_TIERS, isVipAtivo, getTier,
     nomeTier, localizarMoldura
 } = require('../../utils/vip');
-const { tDaInteracao } = require('../../utils/idioma');
+const { tDaInteracao } = require('../../utils/language');
 
 const LOJA_URL = process.env.LOJA_URL || null;
 

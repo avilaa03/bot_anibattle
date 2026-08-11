@@ -1,6 +1,6 @@
 const { Battle, BattleCooldown } = require('./battleSchema');
 const { addBalance } = require('./economy');
-const { PRAZOS_BATALHA, filtroExpirados, podeCancelarBatalha } = require('./cicloDeVida');
+const { PRAZOS_BATALHA, filtroExpirados, podeCancelarBatalha } = require('./lifecycle');
 
 /**
  * Estado das batalhas, persistido no MongoDB.

@@ -1,5 +1,5 @@
 const ui = require('./embeds');
-const { montarRoteiro } = require('./narracao');
+const { montarRoteiro } = require('./narration');
 
 /**
  * Transmite uma batalha ao vivo, editando uma mensagem no canal.

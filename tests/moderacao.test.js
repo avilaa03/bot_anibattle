@@ -47,7 +47,7 @@ const User = {
 
 require.cache[require.resolve(ROOT + 'userSchema.js')] = { exports: User };
 
-const moderacao = require(ROOT + 'moderacao.js');
+const moderacao = require(ROOT + 'moderation.js');
 
 let falhas = 0;
 const check = (nome, cond, extra = '') => {

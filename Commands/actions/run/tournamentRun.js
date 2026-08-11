@@ -3,7 +3,7 @@ const User = require('../../utils/userSchema');
 const ui = require('../../utils/embeds');
 const torneio = require('../../utils/tournament');
 const { MIN_WAGER } = require('../../utils/economy');
-const { tDaInteracao, tDoUsuario } = require('../../utils/idioma');
+const { tDaInteracao, tDoUsuario } = require('../../utils/language');
 
 /**
  * /torneio — cria um torneio eliminatório no servidor.

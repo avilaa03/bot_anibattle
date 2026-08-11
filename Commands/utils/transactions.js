@@ -1,4 +1,4 @@
-const Transacao = require('./transacaoSchema');
+const Transacao = require('./transactionSchema');
 
 /**
  * Registro do que acontece na economia.

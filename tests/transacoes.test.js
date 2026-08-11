@@ -41,9 +41,9 @@ const Transacao = {
         return [];
     }
 };
-require.cache[require.resolve(ROOT + 'transacaoSchema.js')] = { exports: Transacao };
+require.cache[require.resolve(ROOT + 'transactionSchema.js')] = { exports: Transacao };
 
-const transacoes = require(ROOT + 'transacoes.js');
+const transacoes = require(ROOT + 'transactions.js');
 
 let falhas = 0;
 const check = (nome, cond, extra = '') => {

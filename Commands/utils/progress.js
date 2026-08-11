@@ -1,9 +1,9 @@
 const User = require('./userSchema');
 const Card = require('./cardSchema');
 const achievements = require('./achievements');
-const missoes = require('./missoes');
-const nivel = require('./nivel');
-const progressaoDeNivel = require('./progressaoDeNivel');
+const missoes = require('./missions');
+const nivel = require('./level');
+const progressaoDeNivel = require('./levelProgression');
 
 /**
  * Ponto central de progressão.

@@ -27,7 +27,7 @@ const path = require('path');
 const RAIZ = path.join(__dirname, '..');
 const ROOT = path.join(RAIZ, 'Commands', 'utils') + path.sep;
 
-const valores = require(ROOT + 'valores.js');
+const valores = require(ROOT + 'cardValues.js');
 
 let falhas = 0;
 const check = (nome, cond, extra = '') => {
@@ -177,7 +177,7 @@ const PROIBIDOS = [
     /marketValue[^;\n]{0,20}\/\s*2\b/
 ];
 
-const PERMITIDO = path.join(RAIZ, 'Commands', 'utils', 'valores.js');
+const PERMITIDO = path.join(RAIZ, 'Commands', 'utils', 'cardValues.js');
 const suspeitos = [];
 
 for (const dir of ['Commands', 'scripts']) {

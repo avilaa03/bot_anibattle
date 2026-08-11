@@ -3,7 +3,7 @@ const ui = require('../../utils/embeds');
 const User = require('../../utils/userSchema');
 const Guild = require('../../utils/guildSchema');
 const { criarT, normalizar, LOCALES } = require('../../utils/i18n');
-const idiomaUtil = require('../../utils/idioma');
+const idiomaUtil = require('../../utils/language');
 
 /**
  * /idioma — escolhe em que idioma o bot responde.

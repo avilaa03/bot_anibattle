@@ -2,9 +2,9 @@ const { ActionRowBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder, M
 const User = require('../../utils/userSchema');
 const ui = require('../../utils/embeds');
 const trade = require('../../utils/trade');
-const valores = require('../../utils/valores');
-const negociabilidade = require('../../utils/negociabilidade');
-const { tDaInteracao, tDoUsuario } = require('../../utils/idioma');
+const valores = require('../../utils/cardValues');
+const negociabilidade = require('../../utils/tradability');
+const { tDaInteracao, tDoUsuario } = require('../../utils/language');
 
 /**
  * /trocar — negociação de carta por carta.

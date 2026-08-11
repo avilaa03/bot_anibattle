@@ -39,7 +39,7 @@ const Card = {
 };
 require.cache[require.resolve(ROOT + 'cardSchema.js')] = { exports: Card };
 
-const treino = require(ROOT + 'treino.js');
+const treino = require(ROOT + 'training.js');
 
 let falhas = 0;
 const check = (nome, cond, extra = '') => {
@@ -295,7 +295,7 @@ check('cada round usa a carta na posição que o jogador escolheu',
 console.log('\n=== A tela final é a mesma do /battle ===');
 // Se o treino montasse a própria tela, as duas divergiriam na primeira
 // mudança e o treino deixaria de mostrar o que a batalha real mostra.
-const { montarEmbedResultado, contarDestaques } = require(ROOT + 'resultadoBatalha.js');
+const { montarEmbedResultado, contarDestaques } = require(ROOT + 'battleResult.js');
 const { criarT } = require(ROOT + 'i18n.js');
 
 const embedTreino = montarEmbedResultado({

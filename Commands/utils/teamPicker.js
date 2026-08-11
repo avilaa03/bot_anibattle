@@ -1,6 +1,6 @@
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const ui = require('./embeds');
-const valores = require('./valores');
+const valores = require('./cardValues');
 const { criarT, DEFAULT_LOCALE } = require('./i18n');
 
 /**

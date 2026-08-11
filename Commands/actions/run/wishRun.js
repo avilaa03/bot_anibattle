@@ -5,7 +5,7 @@ const ui = require('../../utils/embeds');
 const { escapeRegex } = require('../../utils/regexUtils');
 const { formatarNumero } = require('../../utils/dexNumbers');
 const wishlist = require('../../utils/wishlist');
-const { tDaInteracao } = require('../../utils/idioma');
+const { tDaInteracao } = require('../../utils/language');
 
 /**
  * /desejar — adiciona ou remove uma carta da lista de desejos.

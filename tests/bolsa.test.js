@@ -66,9 +66,9 @@ require.cache[require.resolve(ROOT + 'userSchema.js')] = {
     }
 };
 
-const itens = require(ROOT + 'itens.js');
-const bolsa = require(ROOT + 'bolsa.js');
-const valores = require(ROOT + 'valores.js');
+const itens = require(ROOT + 'items.js');
+const bolsa = require(ROOT + 'bag.js');
+const valores = require(ROOT + 'cardValues.js');
 
 let falhas = 0;
 const check = (nome, cond, extra = '') => {

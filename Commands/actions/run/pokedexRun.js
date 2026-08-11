@@ -5,7 +5,7 @@ const { escapeRegex } = require('../../utils/regexUtils');
 const { getDiscoveredSet } = require('../../utils/discovery');
 const discovery = require('../../utils/discovery');
 const { formatarNumero } = require('../../utils/dexNumbers');
-const { tDaInteracao } = require('../../utils/idioma');
+const { tDaInteracao } = require('../../utils/language');
 
 const POR_PAGINA = 10;
 

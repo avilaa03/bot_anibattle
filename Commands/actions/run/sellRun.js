@@ -1,7 +1,7 @@
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags } = require('discord.js');
 const ui = require('../../utils/embeds');
-const valores = require('../../utils/valores');
-const negociabilidade = require('../../utils/negociabilidade');
+const valores = require('../../utils/cardValues');
+const negociabilidade = require('../../utils/tradability');
 const { applyMarketTax, MARKET_TAX_RATE } = require('../../utils/economy');
 const User = require('../../utils/userSchema');
 const { sellCollect } = require('../collect/sellCollect.js');
@@ -9,7 +9,7 @@ const { sellEnd } = require('../end/sellEnd.js');
 const { renderCard } = require('../../utils/cardRenderer.js');
 const { molduraEfetiva } = require('../../utils/vip');
 const { criarT, DEFAULT_LOCALE } = require('../../utils/i18n');
-const { tDaInteracao } = require('../../utils/idioma');
+const { tDaInteracao } = require('../../utils/language');
 
 async function buildSellEmbed(card, listingPrice, moldura = 'nenhuma', t = criarT(DEFAULT_LOCALE)) {
     // Copiar campos explicitamente do subdocument (como no /show), sem spread que perde characterImage/baseImage

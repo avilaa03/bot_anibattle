@@ -6,10 +6,10 @@ const { escapeRegex } = require('../../utils/regexUtils');
 const { renderCard } = require('../../utils/cardRenderer');
 const { molduraEfetiva } = require('../../utils/vip');
 const { formatarNumero } = require('../../utils/dexNumbers');
-const { registrar } = require('../../utils/progresso');
+const { registrar } = require('../../utils/progress');
 const wishlist = require('../../utils/wishlist');
-const valores = require('../../utils/valores');
-const { tDaInteracao } = require('../../utils/idioma');
+const valores = require('../../utils/cardValues');
+const { tDaInteracao } = require('../../utils/language');
 
 /**
  * /ficha — mostra a ficha de uma carta que o jogador JÁ REGISTROU na Pokédex.

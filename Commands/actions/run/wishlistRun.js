@@ -3,7 +3,7 @@ const User = require('../../utils/userSchema');
 const ui = require('../../utils/embeds');
 const { formatarNumero } = require('../../utils/dexNumbers');
 const wishlist = require('../../utils/wishlist');
-const { tDaInteracao } = require('../../utils/idioma');
+const { tDaInteracao } = require('../../utils/language');
 
 /** /desejos — mostra a lista de desejos do jogador. */
 async function desejosRun(client, interaction) {

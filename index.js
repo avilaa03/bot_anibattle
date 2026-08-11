@@ -48,9 +48,9 @@ const client = new Client({
 const CLIENT_ID = process.env.CLIENT_ID;
 const rest = new REST({ version: '10' }).setToken(process.env.TOKEN);
 
-const { bloquearSeBanido } = require('./Commands/utils/moderacao');
-const presenca = require('./Commands/utils/presenca');
-const { tDaInteracao } = require('./Commands/utils/idioma');
+const { bloquearSeBanido } = require('./Commands/utils/moderation');
+const presenca = require('./Commands/utils/presence');
+const { tDaInteracao } = require('./Commands/utils/language');
 const { criarT, DEFAULT_LOCALE } = require('./Commands/utils/i18n');
 
 client.on('interactionCreate', async (interaction) => {

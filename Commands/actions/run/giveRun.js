@@ -2,7 +2,7 @@ const { ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags } = require('
 const User = require('../../utils/userSchema');
 const ui = require('../../utils/embeds');
 const { trySpend, addBalance } = require('../../utils/economy');
-const { tDaInteracao } = require('../../utils/idioma');
+const { tDaInteracao } = require('../../utils/language');
 
 async function giveRun(client, interaction) {
     const t = await tDaInteracao(interaction);

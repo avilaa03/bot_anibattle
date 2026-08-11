@@ -107,7 +107,7 @@ async function avisarUsuario(client, discordUserId, tierKey, user) {
 
     const ui = require('./embeds');
     const { nomeTier } = require('./vip');
-    const { tDoUsuario } = require('./idioma');
+    const { tDoUsuario } = require('./language');
 
     // O webhook vem do provedor de pagamento, não de uma interação: não
     // existe servidor nem clique para tirar o idioma. Sobra a preferência

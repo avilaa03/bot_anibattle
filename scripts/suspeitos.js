@@ -38,7 +38,7 @@ const mongoose = require('mongoose');
 
 mongoose.set('strictQuery', false);
 const User = require('../Commands/utils/userSchema');
-const telemetria = require('../Commands/utils/telemetria');
+const telemetria = require('../Commands/utils/telemetry');
 
 const brl = (n) => Number(n || 0).toLocaleString('pt-BR');
 

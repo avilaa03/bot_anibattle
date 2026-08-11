@@ -1,8 +1,8 @@
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const ui = require('../../utils/embeds');
-const aprimoramento = require('../../utils/aprimoramento');
-const itens = require('../../utils/itens');
-const bolsa = require('../../utils/bolsa');
+const aprimoramento = require('../../utils/upgrading');
+const itens = require('../../utils/items');
+const bolsa = require('../../utils/bag');
 const { criarT, DEFAULT_LOCALE } = require('../../utils/i18n');
 
 /**

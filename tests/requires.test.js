@@ -83,21 +83,30 @@ console.log('\n=== Nome de arquivo citado em string também existe ===');
 // arquivos foram renomeados, quebrando a suíte só na hora de rodar.
 const arquivosConhecidos = new Set();
 for (const pasta of ['Commands/commands', 'Commands/actions/run', 'Commands/actions/collect',
-    'Commands/actions/end', 'Commands/handlers']) {
+    'Commands/actions/end', 'Commands/handlers', 'Commands/utils']) {
     const dir = path.join(RAIZ, pasta);
     if (!fs.existsSync(dir)) continue;
     for (const arquivo of fs.readdirSync(dir)) arquivosConhecidos.add(arquivo);
 }
 
+// Os testes montam o caminho por concatenação — `require(ROOT + 'bag.js')`.
+// Nenhuma análise de require enxerga isso, então a conferência é pelo
+// nome do arquivo: qualquer `'algo.js'` citado tem que existir numa das
+// pastas acima.
 const citadosInexistentes = [];
 for (const arquivo of arquivos) {
     const codigo = fs.readFileSync(arquivo, 'utf8')
         .replace(/\/\*[\s\S]*?\*\//g, '')
         .replace(/(^|[^:])\/\/.*$/gm, '$1');
 
-    for (const m of codigo.matchAll(/['"]([a-zA-Z]+(?:Run|Collect|End|SlashCommand|Handler)\.js)['"]/g)) {
-        if (!arquivosConhecidos.has(m[1])) {
-            citadosInexistentes.push(`${path.relative(RAIZ, arquivo)} cita ${m[1]}`);
+    for (const m of codigo.matchAll(/['"]([a-zA-Z][a-zA-Z0-9]*\.js)['"]/g)) {
+        const nome = m[1];
+        // `discord.js` e `index.js` não são arquivos deste projeto — o
+        // primeiro é a biblioteca, o segundo mora na raiz. Sem esta
+        // ressalva a conferência acusaria os dois em todo arquivo.
+        if (nome === 'discord.js' || nome === 'index.js') continue;
+        if (!arquivosConhecidos.has(nome)) {
+            citadosInexistentes.push(`${path.relative(RAIZ, arquivo)} cita ${nome}`);
         }
     }
 }

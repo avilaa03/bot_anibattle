@@ -2,7 +2,7 @@ const { ActionRowBuilder, StringSelectMenuBuilder, MessageFlags } = require('dis
 const User = require('../../utils/userSchema');
 const ui = require('../../utils/embeds');
 const { MOLDURAS, getPerks, isVipAtivo, nomeTier, localizarMoldura } = require('../../utils/vip');
-const { tDaInteracao } = require('../../utils/idioma');
+const { tDaInteracao } = require('../../utils/language');
 
 // O nome de cada cor sai do dicionário (`cosmeticos.cores.<chave>`).
 const CORES = [

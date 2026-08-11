@@ -23,8 +23,8 @@
 const path = require('path');
 const ROOT = path.join(__dirname, '..', 'Commands', 'utils') + path.sep;
 
-const caixas = require(ROOT + 'caixas.js');
-const valores = require(ROOT + 'valores.js');
+const caixas = require(ROOT + 'boxes.js');
+const valores = require(ROOT + 'cardValues.js');
 
 let falhas = 0;
 const check = (nome, cond, extra = '') => {
@@ -66,9 +66,9 @@ const multiplicadorOriginal = process.env.VALOR_MULTIPLICADOR;
 
 for (const multiplicador of ['0.5', '3', '10']) {
     process.env.VALOR_MULTIPLICADOR = multiplicador;
-    delete require.cache[require.resolve(ROOT + 'valores.js')];
-    delete require.cache[require.resolve(ROOT + 'caixas.js')];
-    const recarregado = require(ROOT + 'caixas.js');
+    delete require.cache[require.resolve(ROOT + 'cardValues.js')];
+    delete require.cache[require.resolve(ROOT + 'boxes.js')];
+    const recarregado = require(ROOT + 'boxes.js');
 
     const ruins = recarregado.aVenda().filter((c) => c.preco <= recarregado.valorEsperado(c));
     check(`multiplicador ${multiplicador}x: nenhuma caixa vira lucro`,
@@ -80,9 +80,9 @@ for (const multiplicador of ['0.5', '3', '10']) {
 // tabela de valores errada.
 if (multiplicadorOriginal === undefined) delete process.env.VALOR_MULTIPLICADOR;
 else process.env.VALOR_MULTIPLICADOR = multiplicadorOriginal;
-delete require.cache[require.resolve(ROOT + 'valores.js')];
-delete require.cache[require.resolve(ROOT + 'caixas.js')];
-const caixasLimpo = require(ROOT + 'caixas.js');
+delete require.cache[require.resolve(ROOT + 'cardValues.js')];
+delete require.cache[require.resolve(ROOT + 'boxes.js')];
+const caixasLimpo = require(ROOT + 'boxes.js');
 
 console.log('\n=== As distribuições somam 100 ===');
 // Tabela somando 99 não quebra nada visivelmente: só faz a última faixa

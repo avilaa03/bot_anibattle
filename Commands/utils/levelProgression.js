@@ -1,7 +1,7 @@
 const User = require('./userSchema');
-const nivel = require('./nivel');
-const bolsa = require('./bolsa');
-const caixas = require('./caixas');
+const nivel = require('./level');
+const bolsa = require('./bag');
+const caixas = require('./boxes');
 const { addBalance } = require('./economy');
 
 /**

@@ -2,8 +2,8 @@ const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const User = require('../../utils/userSchema');
 const ui = require('../../utils/embeds');
 const achievements = require('../../utils/achievements');
-const { montarContexto, verificarConquistas } = require('../../utils/progresso');
-const { tDaInteracao } = require('../../utils/idioma');
+const { montarContexto, verificarConquistas } = require('../../utils/progress');
+const { tDaInteracao } = require('../../utils/language');
 
 const POR_PAGINA = 8;
 

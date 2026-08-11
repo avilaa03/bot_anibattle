@@ -1,5 +1,5 @@
 const BaseSlashCommand = require('../utils/BaseSlashCommand.js');
-const nomes = require('../utils/nomesDeComando.js');
+const nomes = require('../utils/commandNames.js');
 const { SlashCommandBuilder, MessageFlags } = require('discord.js');
 const ui = require('../utils/embeds.js');
 const User = require('../utils/userSchema.js');
@@ -7,7 +7,7 @@ const { aprimorarRun } = require('../actions/run/upgradeRun.js');
 const aprimorarCollect = require('../actions/collect/upgradeCollect.js');
 const aprimorarEnd = require('../actions/end/upgradeEnd.js');
 const { descricaoBase, localizacoes } = require('../utils/i18n.js');
-const { tDaInteracao } = require('../utils/idioma.js');
+const { tDaInteracao } = require('../utils/language.js');
 
 module.exports = class UpgradeSlashCommand extends BaseSlashCommand {
     constructor() {

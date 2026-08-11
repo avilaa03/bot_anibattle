@@ -3,11 +3,11 @@ const ui = require('../../utils/embeds');
 const { getProgress } = require('../../utils/discovery');
 const vip = require('../../utils/vip');
 const { getTier, corPerfilEfetiva, isVipAtivo, getPerks } = vip;
-const { tDaInteracao } = require('../../utils/idioma');
+const { tDaInteracao } = require('../../utils/language');
 const achievements = require('../../utils/achievements');
 const elo = require('../../utils/elo');
-const valores = require('../../utils/valores');
-const nivel = require('../../utils/nivel');
+const valores = require('../../utils/cardValues');
+const nivel = require('../../utils/level');
 const { MessageFlags } = require('discord.js');
 
 const getCardOvr = valores.overallDaCarta;

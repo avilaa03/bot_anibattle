@@ -2,12 +2,12 @@ const { ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags } = require('
 const User = require('../../utils/userSchema');
 const ui = require('../../utils/embeds');
 const { runBattle } = require('../../utils/battleEngine');
-const { montarEscolhaDeTime } = require('../../utils/escolhaDeTime');
-const { montarEmbedResultado, contarDestaques } = require('../../utils/resultadoBatalha');
-const treino = require('../../utils/treino');
-const transmissao = require('../../utils/transmissao');
+const { montarEscolhaDeTime } = require('../../utils/teamPicker');
+const { montarEmbedResultado, contarDestaques } = require('../../utils/battleResult');
+const treino = require('../../utils/training');
+const transmissao = require('../../utils/broadcast');
 const { criarT } = require('../../utils/i18n');
-const { tDaInteracao } = require('../../utils/idioma');
+const { tDaInteracao } = require('../../utils/language');
 
 /**
  * /treino — a batalha de verdade, contra o BOT Caviar.

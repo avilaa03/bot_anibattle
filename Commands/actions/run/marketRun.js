@@ -2,9 +2,9 @@ const { ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags } = require('
 const Market = require('../../utils/marketSchema.js');
 const { escapeRegex } = require('../../utils/regexUtils.js');
 const ui = require('../../utils/embeds.js');
-const valores = require('../../utils/valores.js');
+const valores = require('../../utils/cardValues.js');
 const { buildSelectMenu } = require('../collect/marketCollect.js');
-const { tDaInteracao } = require('../../utils/idioma');
+const { tDaInteracao } = require('../../utils/language');
 
 module.exports = async (client, interaction, marketCollect, marketEnd) => {
     const t = await tDaInteracao(interaction);

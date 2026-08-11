@@ -15,7 +15,7 @@
 
 const path = require('path');
 const ROOT = path.join(__dirname, '..', 'Commands', 'utils') + path.sep;
-const sorteio = require(ROOT + 'sorteio.js');
+const sorteio = require(ROOT + 'draw.js');
 
 let falhas = 0;
 const check = (nome, cond, extra = '') => {

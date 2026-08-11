@@ -23,7 +23,7 @@ require.cache[require.resolve(ROOT + 'userSchema.js')] = {
     exports: { updateOne: async () => ({ acknowledged: true }) }
 };
 
-const telemetria = require(ROOT + 'telemetria.js');
+const telemetria = require(ROOT + 'telemetry.js');
 
 let falhas = 0;
 const check = (nome, cond, extra = '') => {

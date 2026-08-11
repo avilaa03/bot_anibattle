@@ -16,8 +16,8 @@
 
 const path = require('path');
 const ROOT = path.join(__dirname, '..', 'Commands', 'utils') + path.sep;
-const ap = require(ROOT + 'aprimoramento.js');
-const valores = require(ROOT + 'valores.js');
+const ap = require(ROOT + 'upgrading.js');
+const valores = require(ROOT + 'cardValues.js');
 
 let falhas = 0;
 const check = (nome, cond, extra = '') => {

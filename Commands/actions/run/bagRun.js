@@ -1,9 +1,9 @@
 const { MessageFlags } = require('discord.js');
 const User = require('../../utils/userSchema');
 const ui = require('../../utils/embeds');
-const bolsa = require('../../utils/bolsa');
-const itens = require('../../utils/itens');
-const { tDaInteracao } = require('../../utils/idioma');
+const bolsa = require('../../utils/bag');
+const itens = require('../../utils/items');
+const { tDaInteracao } = require('../../utils/language');
 
 /**
  * /bolsa — o que o jogador tem de item.

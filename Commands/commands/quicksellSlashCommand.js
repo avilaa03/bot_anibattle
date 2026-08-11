@@ -1,14 +1,14 @@
 const BaseSlashCommand = require('../utils/BaseSlashCommand.js');
-const nomes = require('../utils/nomesDeComando.js');
+const nomes = require('../utils/commandNames.js');
 const { SlashCommandBuilder, MessageFlags } = require('discord.js');
 const ui = require('../utils/embeds.js');
-const negociabilidade = require('../utils/negociabilidade.js');
+const negociabilidade = require('../utils/tradability.js');
 const User = require('../utils/userSchema.js');
 const { quicksellRun } = require('../actions/run/quicksellRun.js');
 const quicksellCollect = require('../actions/collect/quicksellCollect.js');
 const quicksellEnd = require('../actions/end/quicksellEnd.js');
 const { descricaoBase, localizacoes } = require('../utils/i18n.js');
-const { tDaInteracao } = require('../utils/idioma.js');
+const { tDaInteracao } = require('../utils/language.js');
 
 module.exports = class QuickSellSlashCommand extends BaseSlashCommand {
     constructor() {

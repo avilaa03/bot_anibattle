@@ -1,14 +1,14 @@
 const { MessageFlags } = require('discord.js');
 const User = require('../../utils/userSchema');
 const ui = require('../../utils/embeds');
-const itens = require('../../utils/itens');
-const bolsa = require('../../utils/bolsa');
+const itens = require('../../utils/items');
+const bolsa = require('../../utils/bag');
 const { trySpend, addBalance } = require('../../utils/economy');
-const transacoes = require('../../utils/transacoes');
-const rollExtra = require('../../utils/rollExtra');
-const limiteDiario = require('../../utils/limiteDiario');
+const transacoes = require('../../utils/transactions');
+const rollExtra = require('../../utils/extraRoll');
+const limiteDiario = require('../../utils/dailyLimit');
 const { getPerks } = require('../../utils/vip');
-const { tDaInteracao } = require('../../utils/idioma');
+const { tDaInteracao } = require('../../utils/language');
 
 // O cooldown do /roll mora no rollRun. Repetir a leitura do .env aqui
 // manteria os dois em sincronia por disciplina; ler de lá garante.

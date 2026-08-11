@@ -22,7 +22,7 @@
 const path = require('path');
 const ROOT = path.join(__dirname, '..', 'Commands', 'utils') + path.sep;
 
-const rollExtra = require(ROOT + 'rollExtra.js');
+const rollExtra = require(ROOT + 'extraRoll.js');
 
 let falhas = 0;
 const check = (nome, cond, extra = '') => {
@@ -81,10 +81,10 @@ const original = process.env.VALOR_MULTIPLICADOR;
 
 for (const multiplicador of ['0.5', '3', '10']) {
     process.env.VALOR_MULTIPLICADOR = multiplicador;
-    delete require.cache[require.resolve(ROOT + 'valores.js')];
-    delete require.cache[require.resolve(ROOT + 'sorteio.js')];
-    delete require.cache[require.resolve(ROOT + 'rollExtra.js')];
-    const recarregado = require(ROOT + 'rollExtra.js');
+    delete require.cache[require.resolve(ROOT + 'cardValues.js')];
+    delete require.cache[require.resolve(ROOT + 'draw.js')];
+    delete require.cache[require.resolve(ROOT + 'extraRoll.js')];
+    const recarregado = require(ROOT + 'extraRoll.js');
 
     const evAtual = recarregado.valorEsperadoDoRoll();
     const baratos = recarregado.precos().filter((p) => p <= evAtual);
@@ -96,9 +96,9 @@ for (const multiplicador of ['0.5', '3', '10']) {
 
 if (original === undefined) delete process.env.VALOR_MULTIPLICADOR;
 else process.env.VALOR_MULTIPLICADOR = original;
-delete require.cache[require.resolve(ROOT + 'valores.js')];
-delete require.cache[require.resolve(ROOT + 'sorteio.js')];
-delete require.cache[require.resolve(ROOT + 'rollExtra.js')];
+delete require.cache[require.resolve(ROOT + 'cardValues.js')];
+delete require.cache[require.resolve(ROOT + 'draw.js')];
+delete require.cache[require.resolve(ROOT + 'extraRoll.js')];
 
 console.log('\n=== O teto diário é real ===');
 // Com 3 por dia e o cooldown de 15 min, o teto de rolls de um jogador sai

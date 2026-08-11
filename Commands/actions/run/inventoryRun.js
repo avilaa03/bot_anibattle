@@ -1,8 +1,8 @@
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags } = require('discord.js');
 const User = require('../../utils/userSchema');
 const ui = require('../../utils/embeds');
-const valores = require('../../utils/valores');
-const { tDaInteracao } = require('../../utils/idioma');
+const valores = require('../../utils/cardValues');
+const { tDaInteracao } = require('../../utils/language');
 
 // Coletores ativos por usuário (ver rollRun.js para o motivo de não usar
 // mais uma única variável de módulo compartilhada entre todos os usuários).

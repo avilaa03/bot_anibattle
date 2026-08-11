@@ -1,7 +1,7 @@
 const User = require('../../utils/userSchema');
 const Card = require('../../utils/cardSchema');
 const ui = require('../../utils/embeds');
-const { tDaInteracao } = require('../../utils/idioma');
+const { tDaInteracao } = require('../../utils/language');
 
 async function infoRun(client, interaction) {
     const t = await tDaInteracao(interaction);

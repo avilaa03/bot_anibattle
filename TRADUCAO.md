@@ -61,7 +61,7 @@ Use `battleRun.js` e `lojaRun.js` como modelo.
 
 Função que só desenha (não tem `interaction`) recebe o `t` como
 parâmetro, com `criarT(DEFAULT_LOCALE)` de padrão — ver
-`escolhaDeTime.js`.
+`teamPicker.js`.
 
 ## Qual idioma cada mensagem usa
 
@@ -102,7 +102,7 @@ dado, nunca da frase.
 **Texto de tela nunca é calculado antes de existir leitor.** O motor de
 combate escrevia a narração dentro do resultado, e a mesma luta é lida
 por dois jogadores que podem estar em idiomas diferentes. Hoje o evento
-carrega só o que aconteceu e `narracao.descreverEvento(evento, t)` monta
+carrega só o que aconteceu e `narration.descreverEvento(evento, t)` monta
 a frase na hora de mostrar. Mesma regra para o que é gravado no banco: o
 placar de bye do torneio guarda o código `'BYE'`, não `'passou direto'`.
 
@@ -169,7 +169,7 @@ Então **cada dicionário cita o nome do seu idioma**. Escrever `/shop` no
 texto em português manda a pessoa digitar um comando que, para ela, não
 existe.
 
-A lista completa está em `utils/nomesDeComando.js`, com teste. Comando
+A lista completa está em `utils/commandNames.js`, com teste. Comando
 que já nasceu em inglês (`/roll`, `/market`, `/daily`) não tem apelido e
 aparece igual nos três.
 

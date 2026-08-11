@@ -1,9 +1,9 @@
 const User = require('../../utils/userSchema');
 const ui = require('../../utils/embeds');
-const bolsa = require('../../utils/bolsa');
-const itens = require('../../utils/itens');
+const bolsa = require('../../utils/bag');
+const itens = require('../../utils/items');
 const { updateEmbed, buildConfirmationRow, gemasDe, contarCopias, contarGemas } = require('../run/salvageRun');
-const transacoes = require('../../utils/transacoes');
+const transacoes = require('../../utils/transactions');
 const { criarT, DEFAULT_LOCALE } = require('../../utils/i18n');
 
 async function desmancharCollect(i, indexRef, matchingCards, user, rowNavigation, t = criarT(DEFAULT_LOCALE)) {

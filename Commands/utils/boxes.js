@@ -1,4 +1,4 @@
-const valores = require('./valores');
+const valores = require('./cardValues');
 const { traduzir, DEFAULT_LOCALE } = require('./i18n');
 
 /**

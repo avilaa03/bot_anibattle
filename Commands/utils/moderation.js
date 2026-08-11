@@ -2,7 +2,7 @@ const User = require('./userSchema');
 const ui = require('./embeds');
 const { MessageFlags } = require('discord.js');
 const { criarT, DEFAULT_LOCALE } = require('./i18n');
-const { resolverIdioma } = require('./idioma');
+const { resolverIdioma } = require('./language');
 
 /**
  * Banimento de jogadores.

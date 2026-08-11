@@ -93,7 +93,7 @@ const User = {
 };
 require.cache[require.resolve(ROOT + 'userSchema.js')] = { exports: User };
 
-const limite = require(ROOT + 'limiteDiario.js');
+const limite = require(ROOT + 'dailyLimit.js');
 
 let falhas = 0;
 const check = (nome, cond, extra = '') => {

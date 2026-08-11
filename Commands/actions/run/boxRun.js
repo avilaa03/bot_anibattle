@@ -2,18 +2,18 @@ const { MessageFlags } = require('discord.js');
 const User = require('../../utils/userSchema');
 const Card = require('../../utils/cardSchema');
 const ui = require('../../utils/embeds');
-const caixas = require('../../utils/caixas');
-const bolsa = require('../../utils/bolsa');
-const valores = require('../../utils/valores');
-const limiteDiario = require('../../utils/limiteDiario');
-const transacoes = require('../../utils/transacoes');
+const caixas = require('../../utils/boxes');
+const bolsa = require('../../utils/bag');
+const valores = require('../../utils/cardValues');
+const limiteDiario = require('../../utils/dailyLimit');
+const transacoes = require('../../utils/transactions');
 const { trySpend, addBalance } = require('../../utils/economy');
 const { renderCard } = require('../../utils/cardRenderer');
 const { molduraEfetiva } = require('../../utils/vip');
 const { registerDiscovery } = require('../../utils/discovery');
-const { registrar } = require('../../utils/progresso');
+const { registrar } = require('../../utils/progress');
 const mongoose = require('mongoose');
-const { tDaInteracao } = require('../../utils/idioma');
+const { tDaInteracao } = require('../../utils/language');
 
 /**
  * /caixa — comprar e abrir caixas.
