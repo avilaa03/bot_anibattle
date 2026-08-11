@@ -27,6 +27,7 @@
 const User = require('./userSchema');
 const itens = require('./itens');
 const caixas = require('./caixas');
+const { DEFAULT_LOCALE } = require('./i18n');
 
 /** Erro de regra de negócio, para o comando distinguir de falha técnica. */
 class ErroDeBolsa extends Error {}
@@ -108,14 +109,21 @@ function quantidadeDe(user, chave) {
  *
  * @returns {Array<{ item: object, quantidade: number }>}
  */
-function listar(user) {
+function listar(user, locale = DEFAULT_LOCALE) {
     const linhas = Object.values(itens.ITENS)
-        .map((item) => ({ item, quantidade: quantidadeDe(user, item.chave), tipo: 'item' }));
+        .map((item) => ({
+            item: itens.localizar(item, locale),
+            quantidade: quantidadeDe(user, item.chave),
+            tipo: 'item'
+        }));
 
     // As caixas aparecem na mesma lista, depois dos itens: para o jogador
     // é tudo "o que eu tenho guardado", e separar em duas telas só faria
     // ele procurar a caixa comprada em dois lugares.
-    const dasCaixas = caixas.todas().map((caixa) => ({
+    //
+    // A tela recebe as duas já traduzidas porque ela não distingue item de
+    // caixa — traduzir aqui é o que a deixa continuar não distinguindo.
+    const dasCaixas = caixas.todas(locale).map((caixa) => ({
         item: caixa,
         quantidade: quantidadeDe(user, caixas.chaveNaBolsa(caixa.chave)),
         tipo: 'caixa'

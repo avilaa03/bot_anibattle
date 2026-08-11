@@ -296,8 +296,11 @@ console.log('\n=== A tela final é a mesma do /battle ===');
 // Se o treino montasse a própria tela, as duas divergiriam na primeira
 // mudança e o treino deixaria de mostrar o que a batalha real mostra.
 const { montarEmbedResultado, contarDestaques } = require(ROOT + 'resultadoBatalha.js');
+const { criarT } = require(ROOT + 'i18n.js');
 
-const embedTreino = montarEmbedResultado({ nomeX: 'Jogador', nomeY: treino.NOME_RIVAL, resultado: luta });
+const embedTreino = montarEmbedResultado({
+    nomeX: 'Jogador', nomeY: treino.NOME_RIVAL, resultado: luta, t: criarT('pt-BR')
+});
 const dadosTreino = embedTreino.data;
 
 check('tem título de fim de batalha', dadosTreino.title === '⚔️ Fim da batalha', `(${dadosTreino.title})`);
@@ -305,6 +308,17 @@ check('mostra o placar', /\d+\*\* — \*\*\d+/.test(dadosTreino.description), `(
 check('tem o resumo das rodadas', (dadosTreino.fields || []).some((f) => f.name === 'Rodadas'));
 check('cabe no limite do Discord',
     (dadosTreino.fields || []).every((f) => f.value.length <= 1024));
+
+const embedEn = montarEmbedResultado({
+    nomeX: 'Jogador', nomeY: treino.NOME_RIVAL, resultado: luta, t: criarT('en-US')
+});
+check('a tela final acompanha o idioma',
+    embedEn.data.title === '⚔️ Battle over'
+    && (embedEn.data.fields || []).some((f) => f.name === 'Rounds'),
+    `(${embedEn.data.title})`);
+check('o nome do rival NÃO se traduz',
+    embedEn.data.description.includes(treino.NOME_RIVAL),
+    '<- é nome próprio: traduzir faria os dois idiomas falarem de rivais diferentes');
 
 const destaques = contarDestaques(luta);
 check('conta críticos e viradas',

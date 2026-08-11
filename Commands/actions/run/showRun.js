@@ -7,21 +7,24 @@ const ui = require('../../utils/embeds.js');
 const valores = require('../../utils/valores.js');
 const { molduraEfetiva } = require('../../utils/vip.js');
 const { registrar } = require('../../utils/progresso.js');
+const { tDaInteracao } = require('../../utils/idioma.js');
 
 async function showRun(client, interaction) {
+    const t = await tDaInteracao(interaction);
+
     const name = interaction.options.getString('name').toLowerCase();
 
     const user = await User.findOne({ id: interaction.user.id });
 
     if (!user || user.inventory.length === 0) {
-        const embed = ui.neutral('📋 Inventário vazio', 'Você ainda não tem cartas. Use `/roll` para ganhar a primeira!');
+        const embed = ui.neutral(t('inventory.vazio_titulo'), t('comum.inventario_vazio_texto'));
         return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
     }
 
     const matchingCards = user.inventory.filter(c => c.name.toLowerCase().includes(name));
 
     if (matchingCards.length === 0) {
-        const embed = ui.error('Carta não encontrada', `Nenhuma carta no seu inventário tem "${name}" no nome.`);
+        const embed = ui.error(t('comum.carta_nao_encontrada'), t('comum.nenhuma_com_nome', { busca: name }));
         return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
     }
 
@@ -37,23 +40,33 @@ async function showRun(client, interaction) {
 
     const updateEmbed = async (index, cards, includeImage = false) => {
         const card = cards[index];
-        const meta = ui.getRarity(card.rarity);
+        const meta = ui.getRarity(card.rarity, t.locale);
 
         const embed = ui.base(meta.color)
-            .setAuthor({ name: `Coleção de ${interaction.user.username}`, iconURL: interaction.user.displayAvatarURL() })
+            .setAuthor({
+                name: t('inventory.autor', { jogador: interaction.user.username }),
+                iconURL: interaction.user.displayAvatarURL()
+            })
             .setTitle(`${meta.emoji} ${ui.cardName(card)}`)
             .setDescription([
-                `*${card.series || '—'}*`,
+                `*${card.series || t('comum.traco')}*`,
                 '',
-                ui.statLines(card),
+                ui.statLines(card, t.locale),
                 '',
-                `Raridade ${ui.rarityTag(card.rarity)} • Overall **${card.overall ?? 0}**`
+                t('roll.linha_raridade', {
+                    raridade: ui.rarityTag(card.rarity, t.locale),
+                    overall: card.overall ?? 0
+                })
             ].join('\n'))
             .addFields(
-                { name: 'Valor de mercado', value: ui.coins(card.marketValue || 0), inline: true },
-                { name: 'Venda rápida', value: ui.coins(card.valueToSell ?? valores.valoresDaCarta(card).valueToSell), inline: true }
+                { name: t('roll.valor_mercado'), value: ui.coins(card.marketValue || 0, t.locale), inline: true },
+                {
+                    name: t('roll.venda_rapida'),
+                    value: ui.coins(card.valueToSell ?? valores.valoresDaCarta(card).valueToSell, t.locale),
+                    inline: true
+                }
             )
-            .setFooter({ text: `${ui.BRAND} • Carta ${index + 1} de ${cards.length}` });
+            .setFooter({ text: `${ui.BRAND} • ${t('show.contador', { atual: index + 1, total: cards.length })}` });
 
         if (includeImage) {
             const render = await renderCard(card, { moldura });

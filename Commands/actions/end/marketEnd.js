@@ -5,8 +5,9 @@ const { registerDiscovery } = require('../../utils/discovery');
 const { registrar } = require('../../utils/progresso');
 const ui = require('../../utils/embeds');
 const valores = require('../../utils/valores');
+const { criarT, DEFAULT_LOCALE } = require('../../utils/i18n');
 
-module.exports = async (message, selectedCard, interaction) => {
+module.exports = async (message, selectedCard, interaction, t = criarT(DEFAULT_LOCALE)) => {
     if (selectedCard) {
         const confirmFilter = (i) => ['confirm_buy', 'cancel_buy'].includes(i.customId) && i.user.id === interaction.user.id;
         const confirmCollector = message.createMessageComponentCollector({ filter: confirmFilter, time: 60000, max: 1 });
@@ -22,14 +23,23 @@ module.exports = async (message, selectedCard, interaction) => {
                     { new: true }
                 );
                 if (!reserved) {
-                    return i.update({ embeds: [ui.error('Carta indisponível', 'Esta carta já foi vendida para outro jogador.')], components: [] });
+                    return i.update({
+                        embeds: [ui.error(t('market.indisponivel'), t('market.ja_vendida'))],
+                        components: []
+                    });
                 }
 
                 const buyer = await trySpend(interaction.user.id, reserved.listingPrice);
                 if (!buyer) {
                     // Desfaz a reserva se o comprador não tiver saldo suficiente.
                     await Market.findOneAndUpdate({ _id: reserved._id }, { status: 'available' });
-                    return i.update({ embeds: [ui.error('Saldo insuficiente', `Esta carta custa ${ui.coins(reserved.listingPrice)} e você não tem esse valor.`)], components: [] });
+                    return i.update({
+                        embeds: [ui.error(
+                            t('comum.saldo_insuficiente'),
+                            t('market.sem_saldo', { valor: ui.coins(reserved.listingPrice, t.locale) })
+                        )],
+                        components: []
+                    });
                 }
 
                 // O vendedor recebe o preço menos a taxa. A taxa não vai
@@ -82,15 +92,22 @@ module.exports = async (message, selectedCard, interaction) => {
 
                 const inedita = catalogoId ? await registerDiscovery(interaction.user.id, catalogoId) : false;
 
-                const embed = ui.success('Compra realizada', `${ui.getRarity(reserved.rarity).emoji} **${ui.cardName(reserved)}** agora é sua!`)
+                const embed = ui.success(t('market.compra_titulo'), t('market.compra_texto', {
+                    emoji: ui.getRarity(reserved.rarity, t.locale).emoji,
+                    carta: ui.cardName(reserved)
+                }))
                     .addFields(
-                        { name: 'Você pagou', value: ui.coins(reserved.listingPrice), inline: true },
-                        { name: 'Vendedor recebeu', value: ui.coins(sellerReceives), inline: true },
-                        { name: `Taxa (${Math.round(MARKET_TAX_RATE * 100)}%)`, value: ui.coins(tax), inline: true },
-                        { name: 'Seu saldo', value: ui.coins(buyer.balance), inline: true }
+                        { name: t('market.voce_pagou'), value: ui.coins(reserved.listingPrice, t.locale), inline: true },
+                        { name: t('market.vendedor_recebeu'), value: ui.coins(sellerReceives, t.locale), inline: true },
+                        {
+                            name: t('market.taxa', { porcento: Math.round(MARKET_TAX_RATE * 100) }),
+                            value: ui.coins(tax, t.locale),
+                            inline: true
+                        },
+                        { name: t('market.seu_saldo'), value: ui.coins(buyer.balance, t.locale), inline: true }
                     );
                 if (inedita) {
-                    embed.setDescription(`${embed.data.description}\n\n📖 **Nova entrada na Pokédex!**`);
+                    embed.setDescription(`${embed.data.description}\n\n${t('market.nova_pokedex')}`);
                 }
 
                 registrar(interaction.user.id, { comprasMercado: 1 }, {
@@ -99,7 +116,10 @@ module.exports = async (message, selectedCard, interaction) => {
 
                 return i.update({ embeds: [embed], components: [] });
             } else if (i.customId === 'cancel_buy') {
-                return i.update({ embeds: [ui.neutral('Compra cancelada', 'Nenhuma moeda foi gasta.')], components: [] });
+                return i.update({
+                    embeds: [ui.neutral(t('market.cancelada'), t('market.cancelada_texto'))],
+                    components: []
+                });
             }
         });
 

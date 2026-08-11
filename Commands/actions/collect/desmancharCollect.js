@@ -2,10 +2,11 @@ const User = require('../../utils/userSchema');
 const ui = require('../../utils/embeds');
 const bolsa = require('../../utils/bolsa');
 const itens = require('../../utils/itens');
-const { updateEmbed, buildConfirmationRow, gemasDe, contarCopias } = require('../run/desmancharRun');
+const { updateEmbed, buildConfirmationRow, gemasDe, contarCopias, contarGemas } = require('../run/desmancharRun');
 const transacoes = require('../../utils/transacoes');
+const { criarT, DEFAULT_LOCALE } = require('../../utils/i18n');
 
-async function desmancharCollect(i, indexRef, matchingCards, user, rowNavigation) {
+async function desmancharCollect(i, indexRef, matchingCards, user, rowNavigation, t = criarT(DEFAULT_LOCALE)) {
     if (i.customId === 'prev' || i.customId === 'next') {
         indexRef.currentIndex = i.customId === 'next'
             ? (indexRef.currentIndex + 1) % matchingCards.length
@@ -13,8 +14,8 @@ async function desmancharCollect(i, indexRef, matchingCards, user, rowNavigation
 
         const card = matchingCards[indexRef.currentIndex];
         await i.update({
-            embeds: [updateEmbed(card, contarCopias(user, card))],
-            components: [rowNavigation, buildConfirmationRow(card)]
+            embeds: [updateEmbed(card, contarCopias(user, card), t)],
+            components: [rowNavigation, buildConfirmationRow(card, t)]
         });
         return;
     }
@@ -32,7 +33,7 @@ async function desmancharCollect(i, indexRef, matchingCards, user, rowNavigation
             { $pull: { inventory: { _id: card._id } } }
         );
         if (!updatedUser) {
-            const embed = ui.error('Carta indisponível', 'Essa carta não está mais no seu inventário.');
+            const embed = ui.error(t('market.indisponivel'), t('sell.sumiu_do_inventario'));
             await i.update({ embeds: [embed], components: [] });
             return 'collected';
         }
@@ -45,8 +46,11 @@ async function desmancharCollect(i, indexRef, matchingCards, user, rowNavigation
             total = await bolsa.adicionar(user.id, 'gema', gemas);
         } catch (err) {
             const embed = ui.error(
-                'A carta foi desmanchada, mas a gema não entrou',
-                `**${ui.cardName(card)}** valia **${ui.number(gemas)}** gema(s). Fale com a staff informando este erro.`
+                t('desmanchar.gema_nao_entrou'),
+                t('desmanchar.gema_nao_entrou_texto', {
+                    carta: ui.cardName(card),
+                    gemas: contarGemas(gemas, t)
+                })
             );
             await i.update({ embeds: [embed], components: [] });
             throw err;
@@ -67,13 +71,21 @@ async function desmancharCollect(i, indexRef, matchingCards, user, rowNavigation
             }
         });
 
-        const item = itens.getItem('gema');
-        const embed = ui.success('Carta desmanchada', [
-            `**${ui.cardName(card)}** virou ${item.emoji} **${ui.number(gemas)} ${gemas === 1 ? 'gema' : 'gemas'}**.`,
+        const item = itens.localizarPorChave('gema', t.locale);
+        const embed = ui.success(t('desmanchar.concluido'), [
+            t('desmanchar.concluido_texto', {
+                carta: ui.cardName(card),
+                emoji: item.emoji,
+                gemas: contarGemas(gemas, t)
+            }),
             '',
-            'A descoberta continua registrada na sua Pokédex.'
+            t('desmanchar.pokedex_continua')
         ].join('\n'))
-            .addFields({ name: 'Gemas na bolsa', value: `${item.emoji} ${ui.number(total)}`, inline: true });
+            .addFields({
+                name: t('desmanchar.gemas_na_bolsa'),
+                value: `${item.emoji} ${ui.number(total, t.locale)}`,
+                inline: true
+            });
 
         await i.update({ embeds: [embed], components: [] });
         return 'collected';
@@ -81,7 +93,7 @@ async function desmancharCollect(i, indexRef, matchingCards, user, rowNavigation
 
     if (i.customId === 'cancel_desmanchar') {
         await i.update({
-            embeds: [ui.neutral('Desmanche cancelado', 'Sua carta continua no inventário.')],
+            embeds: [ui.neutral(t('desmanchar.cancelado'), t('sell.cancelado_texto'))],
             components: []
         });
         return 'collected';

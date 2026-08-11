@@ -8,6 +8,7 @@ const transacoes = require('../../utils/transacoes');
 const rollExtra = require('../../utils/rollExtra');
 const limiteDiario = require('../../utils/limiteDiario');
 const { getPerks } = require('../../utils/vip');
+const { tDaInteracao } = require('../../utils/idioma');
 
 // O cooldown do /roll mora no rollRun. Repetir a leitura do .env aqui
 // manteria os dois em sincronia por disciplina; ler de lá garante.
@@ -32,48 +33,51 @@ const { ROLL_COOLDOWN_MS } = require('./rollRun');
 // num zero a mais e contra número absurdo virar total absurdo.
 const MAXIMO_POR_COMPRA = 1000;
 
-function embedDaLoja(user) {
+function embedDaLoja(user, t) {
     const saldo = Number(user?.balance) || 0;
 
     const embed = ui.base()
-        .setTitle('🏪 Loja')
+        .setTitle(t('loja.titulo'))
         .setDescription([
-            'Compre com `/loja comprar`.',
+            t('loja.como_comprar'),
             '',
-            `Seu saldo: **${ui.coins(saldo)}**`
+            t('loja.seu_saldo', { saldo: ui.coins(saldo, t.locale) })
         ].join('\n'));
 
-    for (const item of itens.itensDaLoja()) {
+    for (const item of itens.itensDaLoja(t.locale)) {
         const tem = bolsa.quantidadeDe(user, item.chave);
         embed.addFields({
-            name: `${item.emoji} ${item.nome} — ${ui.coins(item.preco)}`,
+            name: `${item.emoji} ${item.nome} — ${ui.coins(item.preco, t.locale)}`,
             value: [
                 item.descricao,
                 item.detalhe ? `> *${item.detalhe}*` : null,
-                tem > 0 ? `> Você tem **${ui.number(tem)}**.` : null
+                tem > 0 ? `> ${t('loja.voce_tem', { quantidade: ui.number(tem, t.locale) })}` : null
             ].filter(Boolean).join('\n')
         });
     }
 
-    embed.setFooter({ text: `${ui.BRAND} • A moeda gasta aqui sai de circulação` });
+    embed.setFooter({ text: `${ui.BRAND} • ${t('loja.rodape_sink')}` });
     return embed;
 }
 
-async function comprar(interaction) {
+async function comprar(interaction, t) {
     const chave = interaction.options.getString('item');
     const quantidade = interaction.options.getInteger('quantidade') ?? 1;
 
-    const item = itens.getItem(chave);
+    const item = itens.localizarPorChave(chave, t.locale);
     if (!item || item.preco == null) {
         return interaction.reply({
-            embeds: [ui.error('Item indisponível', 'Esse item não está à venda.')],
+            embeds: [ui.error(t('loja.item_indisponivel'), t('loja.item_indisponivel_texto'))],
             flags: MessageFlags.Ephemeral
         });
     }
 
     if (quantidade < 1 || quantidade > MAXIMO_POR_COMPRA) {
         return interaction.reply({
-            embeds: [ui.error('Quantidade inválida', `Compre de 1 a ${ui.number(MAXIMO_POR_COMPRA)} por vez.`)],
+            embeds: [ui.error(
+                t('loja.quantidade_invalida'),
+                t('loja.quantidade_invalida_texto', { maximo: ui.number(MAXIMO_POR_COMPRA, t.locale) })
+            )],
             flags: MessageFlags.Ephemeral
         });
     }
@@ -90,9 +94,16 @@ async function comprar(interaction) {
         const user = await User.findOne({ id: interaction.user.id }).lean();
         const saldo = Number(user?.balance) || 0;
         return interaction.reply({
-            embeds: [ui.warning('Saldo insuficiente', [
-                `${item.emoji} **${item.nome}** x${ui.number(quantidade)} custa ${ui.coins(total)}.`,
-                `Você tem ${ui.coins(saldo)} — faltam **${ui.coins(total - saldo)}**.`
+            embeds: [ui.warning(t('comum.saldo_insuficiente'), [
+                t('loja.custo_da_compra', {
+                    item: `${item.emoji} **${item.nome}**`,
+                    quantidade: ui.number(quantidade, t.locale),
+                    total: ui.coins(total, t.locale)
+                }),
+                t('loja.faltam', {
+                    saldo: ui.coins(saldo, t.locale),
+                    falta: ui.coins(total - saldo, t.locale)
+                })
             ].join('\n'))],
             flags: MessageFlags.Ephemeral
         });
@@ -123,11 +134,14 @@ async function comprar(interaction) {
         saldoDepois: debitado.balance
     });
 
-    const embed = ui.success('Compra concluída', [
-        `${item.emoji} **${item.nome}** x${ui.number(quantidade)}`,
+    const embed = ui.success(t('loja.compra_concluida'), [
+        `${item.emoji} **${item.nome}** x${ui.number(quantidade, t.locale)}`,
         '',
-        `Pagou ${ui.coins(total)} • Saldo: ${ui.coins(debitado.balance)}`,
-        `Na bolsa agora: **${ui.number(quantidadeFinal)}**`
+        t('loja.pagou', {
+            total: ui.coins(total, t.locale),
+            saldo: ui.coins(debitado.balance, t.locale)
+        }),
+        t('loja.na_bolsa_agora', { quantidade: ui.number(quantidadeFinal, t.locale) })
     ].join('\n'));
 
     return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
@@ -153,12 +167,12 @@ async function comprar(interaction) {
  * usar na hora — só muda quando. O que limita a entrada de cartas
  * continua sendo quantos entram por dia.
  */
-async function comprarRollExtra(interaction) {
+async function comprarRollExtra(interaction, t) {
     const user = await User.findOne({ id: interaction.user.id });
 
     if (!user) {
         return interaction.reply({
-            embeds: [ui.error('Sem perfil', 'Use `/roll` ou `/daily` uma vez antes.')],
+            embeds: [ui.error(t('loja.sem_perfil'), t('loja.sem_perfil_texto'))],
             flags: MessageFlags.Ephemeral
         });
     }
@@ -168,11 +182,11 @@ async function comprarRollExtra(interaction) {
 
     if (preco === null) {
         return interaction.reply({
-            embeds: [ui.warning('Limite diário atingido', [
-                `Você já comprou **${rollExtra.LIMITE_DIARIO}** rolls extras hoje.`,
+            embeds: [ui.warning(t('loja.limite_diario'), [
+                t('loja.limite_diario_texto', { limite: rollExtra.LIMITE_DIARIO }),
                 '',
-                'O limite existe para o jogo continuar dependendo de tempo, não de saldo.',
-                'Ele zera à meia-noite (UTC).'
+                t('loja.limite_diario_porque'),
+                t('loja.limite_diario_zera')
             ].join('\n'))],
             flags: MessageFlags.Ephemeral
         });
@@ -184,7 +198,7 @@ async function comprarRollExtra(interaction) {
     );
     if (!reserva.ok) {
         return interaction.reply({
-            embeds: [ui.warning('Limite diário atingido', 'Você já usou todos os rolls extras de hoje.')],
+            embeds: [ui.warning(t('loja.limite_diario'), t('loja.limite_diario_esgotado'))],
             flags: MessageFlags.Ephemeral
         });
     }
@@ -193,9 +207,9 @@ async function comprarRollExtra(interaction) {
     if (!debitado) {
         await limiteDiario.devolver(interaction.user.id, rollExtra.GRUPO, rollExtra.CHAVE);
         return interaction.reply({
-            embeds: [ui.warning('Saldo insuficiente', [
-                `O ${usados + 1}º roll extra de hoje custa ${ui.coins(preco)}.`,
-                `Você tem ${ui.coins(Number(user.balance) || 0)}.`
+            embeds: [ui.warning(t('comum.saldo_insuficiente'), [
+                t('loja.roll_extra_custo', { n: usados + 1, preco: ui.coins(preco, t.locale) }),
+                t('loja.voce_tem_saldo', { saldo: ui.coins(Number(user.balance) || 0, t.locale) })
             ].join('\n'))],
             flags: MessageFlags.Ephemeral
         });
@@ -221,29 +235,31 @@ async function comprarRollExtra(interaction) {
     });
 
     const proximo = rollExtra.precoDoProximo(usados + 1);
+    const item = itens.localizarPorChave('roll_extra', t.locale);
 
     return interaction.reply({
-        embeds: [ui.success('Roll extra guardado', [
-            `🎟️ **Roll extra** — pagou ${ui.coins(preco)}`,
-            `Saldo: ${ui.coins(debitado.balance)}`,
-            `Na bolsa agora: **${ui.number(guardados)}**`,
+        embeds: [ui.success(t('loja.roll_extra_guardado'), [
+            t('loja.roll_extra_pagou', { item: `${item.emoji} **${item.nome}**`, preco: ui.coins(preco, t.locale) }),
+            t('loja.saldo_atual', { saldo: ui.coins(debitado.balance, t.locale) }),
+            t('loja.na_bolsa_agora', { quantidade: ui.number(guardados, t.locale) }),
             '',
-            'Use com `/roll extra:True` quando quiser — ele ignora o cooldown.',
+            t('loja.roll_extra_como_usar'),
             '',
             proximo === null
-                ? '*Foi o último de hoje. O limite zera à meia-noite (UTC).*'
-                : `*O próximo de hoje custa ${ui.coins(proximo)} — o preço sobe a cada compra.*`
+                ? `*${t('loja.roll_extra_ultimo')}*`
+                : `*${t('loja.roll_extra_proximo', { preco: ui.coins(proximo, t.locale) })}*`
         ].join('\n'))],
         flags: MessageFlags.Ephemeral
     });
 }
 
 module.exports = async (client, interaction) => {
+    const t = await tDaInteracao(interaction);
     const sub = interaction.options.getSubcommand(false);
 
-    if (sub === 'comprar') return comprar(interaction);
-    if (sub === 'roll-extra') return comprarRollExtra(interaction);
+    if (sub === 'comprar') return comprar(interaction, t);
+    if (sub === 'roll-extra') return comprarRollExtra(interaction, t);
 
     const user = await User.findOne({ id: interaction.user.id }).lean();
-    return interaction.reply({ embeds: [embedDaLoja(user)], flags: MessageFlags.Ephemeral });
+    return interaction.reply({ embeds: [embedDaLoja(user, t)], flags: MessageFlags.Ephemeral });
 };

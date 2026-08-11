@@ -3,7 +3,9 @@ const Card = require('../../utils/cardSchema');
 const User = require('../../utils/userSchema');
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags } = require('discord.js');
 const ui = require('../../utils/embeds');
-const { getPerks, molduraEfetiva } = require('../../utils/vip');
+const vip = require('../../utils/vip');
+const { getPerks, molduraEfetiva } = vip;
+const { tDaInteracao, tDoUsuario } = require('../../utils/idioma');
 const wishlist = require('../../utils/wishlist');
 const { registrar } = require('../../utils/progresso');
 const { notificarProgresso } = require('../../utils/notificacoes');
@@ -19,17 +21,21 @@ const nivel = require('../../utils/nivel');
  * Falhar aqui nunca pode atrapalhar o /roll — por isso a chamada é
  * disparada sem await e com catch.
  */
-async function avisarDesejantes(interaction, card, rarityMeta) {
+async function avisarDesejantes(interaction, card, rarityMeta, t) {
     const desejantes = await wishlist.quemDeseja(card._id, interaction.user.id);
     if (desejantes.length === 0) return;
 
     const mencoes = desejantes.map((id) => `<@${id}>`).join(' ');
     const embed = ui.base(rarityMeta.color)
-        .setTitle('💭 Carta da sua lista de desejos apareceu!')
-        .setDescription(
-            `${rarityMeta.emoji} **${ui.cardName(card.name)}** — *${card.series}*\n\n`
-            + `Rolada por **${interaction.user.username}**. Que tal propor uma troca com \`/trocar\`?`
-        );
+        .setTitle(t('roll.desejo_titulo'))
+        .setDescription(t('roll.desejo_texto', {
+            emoji: rarityMeta.emoji,
+            // A carta inteira, não `card.name`: só assim o `(+3)` da carta
+            // aprimorada aparece. Passar o nome funciona e perde o selo.
+            carta: ui.cardName(card),
+            serie: card.series,
+            jogador: interaction.user.username
+        }));
 
     await interaction.followUp({ content: mencoes, embeds: [embed] }).catch(() => {});
 }
@@ -45,8 +51,8 @@ const ROLL_COOLDOWN_MS = Number(process.env.ROLL_COOLDOWN_MS) > 0
     ? Number(process.env.ROLL_COOLDOWN_MS)
     : DEFAULT_ROLL_COOLDOWN_MS;
 
-function errorEmbed(description) {
-    return ui.error('Erro', description);
+function errorEmbed(t, chave) {
+    return ui.error(t('comum.erro'), t(chave));
 }
 
 /** Sorteia uma carta aleatória de uma raridade usando amostragem no banco,
@@ -65,12 +71,14 @@ async function sampleCardByRarity(rarity) {
 }
 
 module.exports = async (client, interaction, rollCollect, rollEnd) => {
+    const t = await tDaInteracao(interaction);
+
     let user;
     try {
         user = await User.findOne({ id: interaction.user.id });
     } catch (err) {
         console.error('Erro ao buscar as informações do usuário:', err);
-        return interaction.reply({ embeds: [errorEmbed('Houve um erro ao buscar suas informações. Tente novamente.')], flags: MessageFlags.Ephemeral });
+        return interaction.reply({ embeds: [errorEmbed(t, 'roll.erro_busca')], flags: MessageFlags.Ephemeral });
     }
 
     const now = Date.now();
@@ -110,10 +118,10 @@ module.exports = async (client, interaction, rollCollect, rollEnd) => {
             const apos = await bolsa.consumir(interaction.user.id, rollExtra.CHAVE_BOLSA, 1);
             if (!apos) {
                 return interaction.reply({
-                    embeds: [ui.warning('Você não tem roll extra', [
-                        'Nenhum 🎟️ **roll extra** na sua bolsa.',
+                    embeds: [ui.warning(t('roll.sem_extra'), [
+                        t('roll.sem_extra_texto'),
                         '',
-                        'Compre em `/loja roll-extra` — o preço sobe a cada compra do dia.'
+                        t('roll.sem_extra_onde_comprar')
                     ].join('\n'))],
                     flags: MessageFlags.Ephemeral
                 });
@@ -122,26 +130,31 @@ module.exports = async (client, interaction, rollCollect, rollEnd) => {
         } else {
             const timeRemaining = cooldownEfetivo - (now - user.lastRoll);
             const readyAt = Math.floor((now + timeRemaining) / 1000);
-            const embed = ui.warning('Ainda no cooldown', `Você poderá rolar de novo <t:${readyAt}:R>.`)
+            const embed = ui.warning(t('roll.cooldown_titulo'), t('roll.cooldown_texto', { quando: readyAt }))
                 .addFields(
-                    { name: 'Tempo restante', value: ui.duration(timeRemaining), inline: true },
-                    { name: 'Seu intervalo', value: ui.duration(cooldownEfetivo), inline: true }
+                    { name: t('roll.tempo_restante'), value: ui.duration(timeRemaining, t.locale), inline: true },
+                    { name: t('roll.seu_intervalo'), value: ui.duration(cooldownEfetivo, t.locale), inline: true }
                 );
 
             // Só oferece o atalho para quem já tem. Anunciar a loja aqui
             // seria empurrar compra na hora da frustração.
             if (guardados > 0) {
                 embed.addFields({
-                    name: '🎟️ Roll extra',
-                    value: `Você tem **${ui.number(guardados)}** guardado(s). Use \`/roll extra:True\` para pular a espera.`,
+                    name: t('roll.campo_extra'),
+                    value: t('roll.tem_extra_guardado', { quantidade: ui.number(guardados, t.locale) }),
                     inline: false
                 });
             }
 
             if (perks.vip) {
-                embed.setFooter({ text: `${ui.BRAND} • ${perks.tier.emoji} ${perks.tier.nome}: cooldown reduzido em ${Math.round((1 - perks.rollCooldownMultiplier) * 100)}%` });
+                embed.setFooter({
+                    text: `${ui.BRAND} • ${perks.tier.emoji} ${t('roll.rodape_vip', {
+                        plano: vip.nomeTier(perks.tier.key, t.locale),
+                        porcento: Math.round((1 - perks.rollCooldownMultiplier) * 100)
+                    })}`
+                });
             } else {
-                embed.setFooter({ text: `${ui.BRAND} • Assinantes rolam com até 40% menos espera — veja /vip` });
+                embed.setFooter({ text: `${ui.BRAND} • ${t('roll.rodape_sem_vip')}` });
             }
             return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
         }
@@ -184,7 +197,7 @@ module.exports = async (client, interaction, rollCollect, rollEnd) => {
         card = await sampleCardByRarity('common');
     }
     if (!card) {
-        return interaction.editReply({ embeds: [errorEmbed('Nenhuma carta encontrada no banco de dados.')] });
+        return interaction.editReply({ embeds: [errorEmbed(t, 'roll.sem_cartas')] });
     }
 
     // A raridade define a ordem de grandeza do preço; o overall só move
@@ -193,37 +206,43 @@ module.exports = async (client, interaction, rollCollect, rollEnd) => {
 
     const render = await renderCard(card, { moldura: molduraEfetiva(user) });
 
-    const rarityMeta = ui.getRarity(card.rarity);
+    const rarityMeta = ui.getRarity(card.rarity, t.locale);
 
     const row = new ActionRowBuilder()
         .addComponents(
             new ButtonBuilder()
                 .setCustomId(`enviarInventario_${card._id}_${interaction.user.id}`)
-                .setLabel('Guardar no inventário')
+                .setLabel(t('roll.botao_guardar'))
                 .setEmoji('🎴')
                 .setStyle(ButtonStyle.Success)
         )
         .addComponents(
             new ButtonBuilder()
                 .setCustomId(`vender_${card._id}_${interaction.user.id}`)
-                .setLabel(`Vender por ${ui.number(valueToSell)}`)
+                .setLabel(t('roll.botao_vender', { valor: ui.number(valueToSell, t.locale) }))
                 .setEmoji('🪙')
                 .setStyle(ButtonStyle.Secondary)
         );
 
     const embed = ui.base(rarityMeta.color)
-        .setAuthor({ name: `${interaction.user.username} rolou uma carta`, iconURL: interaction.user.displayAvatarURL() })
-        .setTitle(`${rarityMeta.emoji} ${ui.cardName(card.name)}`)
+        .setAuthor({
+            name: t('roll.autor', { jogador: interaction.user.username }),
+            iconURL: interaction.user.displayAvatarURL()
+        })
+        .setTitle(`${rarityMeta.emoji} ${ui.cardName(card)}`)
         .setDescription([
             `*${card.series}*`,
             '',
-            ui.statLines(card),
+            ui.statLines(card, t.locale),
             '',
-            `Raridade ${ui.rarityTag(card.rarity)} • Overall **${card.overall}**`
+            t('roll.linha_raridade', {
+                raridade: ui.rarityTag(card.rarity, t.locale),
+                overall: card.overall
+            })
         ].join('\n'))
         .addFields(
-            { name: 'Valor de mercado', value: ui.coins(marketValue), inline: true },
-            { name: 'Venda rápida', value: ui.coins(valueToSell), inline: true }
+            { name: t('roll.valor_mercado'), value: ui.coins(marketValue, t.locale), inline: true },
+            { name: t('roll.venda_rapida'), value: ui.coins(valueToSell, t.locale), inline: true }
         )
         .setImage(render.url);
 
@@ -232,9 +251,11 @@ module.exports = async (client, interaction, rollCollect, rollEnd) => {
     // está a 3 rolls da garantia pararia de rolar até chegar lá.
     if (garantida) {
         const rede = sorteio.PROTECOES.find((p) => p.raridade === garantida);
-        const label = ui.getRarity(garantida).label;
         embed.setFooter({
-            text: `${ui.BRAND} • Proteção contra azar: ${contadores[rede.campo]} rolls sem ${label} — esta veio garantida`
+            text: `${ui.BRAND} • ${t('roll.protecao_azar', {
+                rolls: contadores[rede.campo],
+                raridade: ui.getRarity(garantida, t.locale).label
+            })}`
         });
     }
 
@@ -271,7 +292,11 @@ module.exports = async (client, interaction, rollCollect, rollEnd) => {
     // Avisa quem tem essa carta na lista de desejos. É só um aviso: quem
     // rolou continua com prioridade total sobre a carta. A ideia é gerar
     // conversa e movimentar o mercado, não criar disputa por clique.
-    avisarDesejantes(interaction, card, rarityMeta).catch(() => {});
+    // O aviso é público e menciona quem deseja a carta — vai no idioma do
+    // servidor, não no de quem rolou: quem lê são os outros.
+    tDoUsuario(null, interaction.guildId)
+        .then((tCanal) => avisarDesejantes(interaction, card, rarityMeta, tCanal))
+        .catch(() => {});
 
     // Contadores, missões e conquistas.
     registrar(interaction.user.id, { rolls: 1 }, { eventosMissao: ['roll'] })
@@ -283,7 +308,7 @@ module.exports = async (client, interaction, rollCollect, rollEnd) => {
         previousCollector.stop();
     }
 
-    const collector = rollCollect(interaction, card, user, marketValue, valueToSell, rollEnd, mostradoEm);
+    const collector = rollCollect(interaction, card, user, marketValue, valueToSell, rollEnd, mostradoEm, t);
     activeCollectors.set(interaction.user.id, collector);
     collector.on('end', () => {
         if (activeCollectors.get(interaction.user.id) === collector) {

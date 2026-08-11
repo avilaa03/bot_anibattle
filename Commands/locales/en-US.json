@@ -28,6 +28,8 @@
     "perfil_nao_encontrado": "Profile not found",
     "perfil_nao_encontrado_texto": "Use `/roll` or `/daily` to create your profile first.",
     "carta_nao_encontrada": "Card not found",
+    "nenhuma_com_nome": "No card in your inventory has \"{busca}\" in its name.",
+    "carta_vinculada": "Bound card",
     "usuario_nao_encontrado": "User not found",
     "saldo_insuficiente": "Not enough coins",
     "pagina": "Page {atual}/{total}",
@@ -297,6 +299,111 @@
       }
     }
   },
+  "transmissao": {
+    "round_de": "**Round {atual}** of {total}",
+    "o_que_acontece": "What's happening",
+    "valendo": "{valor} coins on the line",
+    "amistoso": "Friendly duel",
+    "times_prontos": "⚔️ Both teams are ready!",
+    "times_prontos_texto": "**{nomeX}** vs **{nomeY}**\n\nThe fight starts in a moment..."
+  },
+  "negociabilidade": {
+    "vinculada": "This card is **bound**: it is yours and cannot be sold, traded or transferred.",
+    "evento_nao_desmancha": "Event cards cannot be salvaged: they never go back into circulation, and salvaging cannot be undone."
+  },
+  "ciclo_de_vida": {
+    "NAO_PARTICIPA": "You are not part of this negotiation.",
+    "EXECUTANDO": "The cards are already changing hands — there is no going back now.",
+    "EM_COMBATE": "The fight has already started. The result stands.",
+    "FINALIZADA": "That is already over."
+  },
+  "itens_catalogo": {
+    "gema": {
+      "nome": "Upgrade Gem",
+      "descricao": "Material for `/aprimorar`. It is consumed on use, whether the upgrade works or not.",
+      "detalhe": "It also comes from `/desmanchar` — salvaging pays better than quick-selling for everything except Master cards."
+    },
+    "roll_extra": {
+      "nome": "Extra Roll",
+      "descricao": "A `/roll` that skips the cooldown. Stored until you want to use it.",
+      "detalhe": "Buy it with `/loja roll-extra` and use it with `/roll extra:True`."
+    },
+    "pergaminho": {
+      "nome": "Protection Scroll",
+      "descricao": "Prevents the level loss when a risky upgrade fails.",
+      "detalhe": "Expensive on purpose: it is insurance, not a shortcut. It does not raise your success chance."
+    }
+  },
+  "caixas_catalogo": {
+    "comum": {
+      "nome": "Common Box",
+      "descricao": "The cheapest one. For trying your luck without it hurting."
+    },
+    "tematica": {
+      "nome": "Themed Box",
+      "descricao": "You pick the series. Rare or better guaranteed.",
+      "detalhe": "The only one that aims: it is how you close a series in the Pokédex."
+    },
+    "elite": {
+      "nome": "Elite Box",
+      "descricao": "Ultra Rare guaranteed, with a solid shot at a Legendary."
+    },
+    "lendaria": {
+      "nome": "Legendary Box",
+      "descricao": "The priciest in the game. 10% chance of a Master card.",
+      "detalhe": "Still a loss on average — you are paying for the chance, not the return."
+    },
+    "apoiador": {
+      "nome": "Supporter Box",
+      "descricao": "Not for sale: it is the reward for voting for the bot."
+    }
+  },
+  "treino_catalogo": {
+    "dificuldades": {
+      "facil": "Easy",
+      "parelho": "Even",
+      "dificil": "Hard"
+    }
+  },
+  "treino": {
+    "em_andamento": "Training in progress",
+    "em_andamento_texto": "You already have a training session open in your DMs. Finish or cancel it before starting another.",
+    "calma_la": "Hold on",
+    "calma_la_texto": "Wait {tempo} before training again.",
+    "time_incompleto": "Not enough cards",
+    "time_incompleto_texto": "You need at least **3 cards** to train. You have {n}.\n\nUse `/roll` to get more.",
+    "catalogo_vazio": "Empty catalog",
+    "catalogo_vazio_texto": "There are no cards registered for {rival} to use.",
+    "sem_privado": "Couldn't reach you in DMs",
+    "sem_privado_texto": "Enable direct messages from this server so you can build your team.",
+    "dm_monte_time": "🥊 Training against **{rival}** — build your team!",
+    "aberto": "🥊 Training started",
+    "aberto_texto": "I sent you the team-building screen in DMs, for your match against **{rival}** ({emoji} {dificuldade}).\n\nThe fight is broadcast here in the channel once you lock in your 3 cards.",
+    "time_rival": "🤖 {rival}'s team — {emoji} {dificuldade}",
+    "ordem_dos_confrontos": "Your 1st card faces their 1st, and so on.",
+    "botao_cancelar": "Cancel training",
+    "time_completo": "✅ **Team complete!** The fight is about to start...",
+    "botao_de_novo": "Train again",
+    "da_luta": "From the fight",
+    "da_luta_texto": "💥 {criticos} critical hit(s) • 🔥 {viradas} comeback(s)",
+    "nao_vale_nada": "Training gives no coins, no ELO and no trophies",
+    "mencao_transmissao": "{jogador} 🥊 training",
+    "encerrado": "Training over",
+    "encerrado_texto": "This session expired or has already been resolved. Use `/treino` to open another.",
+    "nao_e_seu": "Not your training",
+    "nao_e_seu_texto": "This training session belongs to someone else.",
+    "carta_indisponivel": "Card unavailable",
+    "nada_a_fazer": "Nothing to do",
+    "recusa": {
+      "SESSAO_EXPIRADA": "This session expired. Use `/treino` to open another.",
+      "TIME_CHEIO": "Your team already has 3 cards.",
+      "JA_ESCOLHIDA": "You already picked this card."
+    },
+    "nada_para_cancelar": "Nothing to cancel",
+    "nada_para_cancelar_texto": "This training session has already ended or expired.",
+    "cancelado": "Training cancelled",
+    "cancelado_texto": "No fight happened. Use `/treino` whenever you want to try again."
+  },
   "notificacoes": {
     "trofeu_desbloqueado": "Trophy unlocked!",
     "trofeu_rodape": "{tipo} trophy • +{pontos} points",
@@ -312,7 +419,10 @@
     "missao_resgate": "Use `/missoes` and click **Claim** ({total} available)."
   },
   "idioma": {
-    "titulo_status": "🌐 AniBattle language",
+    "opcao_automatico": "Automatic (follow Discord)",
+    "escopo_mim": "Just me",
+    "escopo_servidor": "Whole server",
+    "titulo_status":"🌐 AniBattle language",
     "descricao_status": "The bot replies in Portuguese or English. Use `/language language:` to change it.",
     "campo_voce": "Your preference",
     "campo_servidor": "Server default",
@@ -350,6 +460,12 @@
     "nova_pokedex": "📖 **New Pokédex entry!** Check it with `/pokedex`.",
     "vendida": "🪙 You sold **{carta}** for {valor}. Balance: {saldo}",
     "expirou": "Time ran out to claim the card.",
+    "sem_extra": "You have no extra roll",
+    "sem_extra_texto": "No 🎟️ **extra roll** in your bag.",
+    "sem_extra_onde_comprar": "Buy one with `/loja roll-extra` — the price rises with each purchase that day.",
+    "campo_extra": "🎟️ Extra roll",
+    "tem_extra_guardado": "You have **{quantidade}** stored. Use `/roll extra:True` to skip the wait.",
+    "protecao_azar": "Bad-luck protection: {rolls} rolls without a {raridade} — this one was guaranteed",
     "desejo_titulo": "💭 A card from your wishlist showed up!",
     "desejo_texto": "{emoji} **{carta}** — *{serie}*\n\nRolled by **{jogador}**. How about proposing a trade with `/trocar`?"
   },
@@ -384,6 +500,7 @@
   },
   "quicksell": {
     "nenhuma_com_nome": "No card in your inventory has \"{nome}\" in its name.",
+    "vinculada_consolo": "It is still yours, and it still battles normally.",
     "expirou": "Time ran out to sell the card.",
     "titulo": "🪙 Sell {carta}?",
     "recebera": "You'll get {valor} for this card.",
@@ -394,6 +511,7 @@
     "cancelada": "Sale cancelled"
   },
   "inventory": {
+    "vazio_titulo": "📋 Empty inventory",
     "autor": "{jogador}'s collection",
     "total_cartas": "Total cards",
     "valor_colecao": "Collection value"
@@ -583,6 +701,7 @@
     "rodape_expira": "The challenge expires in 60 seconds",
     "botao_aceitar": "Accept and wager {valor}",
     "botao_recusar": "Decline",
+    "botao_desistir": "Give up",
     "mencao_desafio": "{desafiado}, you've been challenged by {desafiante}!",
     "expirado": "Challenge expired",
     "expirado_texto": "**{jogador}** didn't answer in time. No coins were charged.",
@@ -612,6 +731,14 @@
     "jogador_2": "Player 2",
     "cancelada": "Battle cancelled",
     "cancelada_texto": "Picked cards are no longer in the inventory of {culpados}.",
+    "nada_para_cancelar": "Nothing to cancel",
+    "nada_para_cancelar_texto": "This battle has already ended or expired.",
+    "ja_encerrada": "This battle has already been closed.",
+    "nao_da_para_desistir": "Can't back out now",
+    "duelo_cancelado": "Duel cancelled",
+    "duelo_cancelado_texto": "**{jogador}** backed out before the fight started.",
+    "aposta_devolvida": "The {valor} wager went back to both players.",
+    "carta_fora_do_inventario": "That card is no longer in your inventory.",
     "apostas_devolvidas": "The wagers were refunded.",
     "e": " and ",
     "fim_titulo": "⚔️ Battle over",
@@ -635,6 +762,7 @@
   "trocar": {
     "usuario_necessario": "Player required",
     "usuario_necessario_texto": "Mention who you want to trade with.",
+    "alvo_invalido": "Invalid target",
     "sem_bots": "Bots don't trade cards.",
     "sem_si_mesmo": "You can't trade with yourself.",
     "em_andamento": "Trade in progress",
@@ -648,6 +776,13 @@
     "n_cartas": "🎴 {n} cards",
     "rodape_convite": "The invite expires in 60 seconds",
     "botao_aceitar": "Accept",
+    "botao_recusar": "Decline",
+    "botao_cancelar_convite": "Cancel invite",
+    "convite_alheio": "Someone else's invite",
+    "convite_alheio_texto": "Only the player who got the proposal can accept or decline it.",
+    "ja_respondido": "Invite already answered",
+    "ja_respondido_texto": "This proposal has already been accepted or declined.",
+    "nao_da_para_cancelar": "Can't cancel right now",
     "mencao_proposta": "{alvo}, you got a trade proposal!",
     "recusada": "Trade declined",
     "recusada_texto": "**{jogador}** turned down the proposal.",
@@ -732,6 +867,14 @@
   },
   "profile": {
     "autor": "{jogador}'s profile",
+    "voce_sem_perfil": "You don't have a profile yet. It is created when you use `/roll` or `/daily`.",
+    "outro_sem_perfil": "**{jogador}** doesn't have a profile yet. It is created when they use `/roll` or `/daily`.",
+    "selo_staff": "🛡️ Staff",
+    "selo_beta": "🧪 Beta",
+    "nivel": "⭐ Level",
+    "nivel_texto": "**{nivel}** — {atual}/{proximo} XP",
+    "acumula_rolls": "🎴 Stores up to **{cargas}** roll(s)",
+    "ranking_texto": "{emoji} **{divisao}** — {pontos} pts",
     "saldo": "🪙 Balance",
     "cartas": "🎴 Cards",
     "patrimonio": "💎 Net worth",
@@ -757,6 +900,8 @@
   },
   "pokedex": {
     "titulo": "📖 Pokédex",
+    "titulo_eventos": "🎗️ Event Pokédex",
+    "sem_eventos": "No event card exists yet. They show up here once they are handed out.",
     "titulo_filtrado": "📖 Pokédex — {filtro}",
     "autor": "{jogador}'s Pokédex",
     "sem_resultado": "No cards match those filters.",
@@ -769,6 +914,8 @@
     "informe": "Tell me what to look for",
     "informe_texto": "Use `/ficha nome:Kirito` or `/ficha numero:42`.",
     "sem_numero": "There's no card numbered **{numero}** in the catalog.",
+    "sem_nome": "No card in the catalog has \"{busca}\" in its name.",
+    "procuram_texto": "{n} player(s)",
     "nao_registrada": "Card not registered",
     "nao_registrada_uma": "You haven't registered **{numero}** in your Pokédex yet.\n\nYou need to have owned that card at least once to look it up here.",
     "nao_registrada_varias": "None of the {n} cards with that name are registered in your Pokédex.\n\nYou need to have owned the card at least once to look it up here.",
@@ -1129,7 +1276,204 @@
     "rodada_oitavas": "Round of 16",
     "rodada_de": "Round of {n}"
   },
+  "aprimorar": {
+    "titulo": "✨ Upgrade {carta}?",
+    "overall_linha": "Overall **{atual}** → **{proximo}** *(natural {natural})*",
+    "chances_titulo": "**Odds for this attempt**",
+    "chance_sucesso": "✅ Gains a level — **{pct}**",
+    "chance_nada": "➖ Nothing happens — **{pct}**",
+    "chance_queda": "🔻 Loses a level — **{pct}**",
+    "chance_queda_zero": "🔻 Loses a level — **0%** *(the natural overall is the floor: a level 0 card has nothing to lose)*",
+    "custo": "Costs 💎 **{custo}** — you have **{gemas}**.",
+    "tem_pergaminho": "📜 You have **{quantidade}** scroll(s): they block the level loss, and are only consumed if the loss happens.",
+    "sem_pergaminho": "📜 No protection scroll in your bag — check the `/loja`.",
+    "gema_sempre_gasta": "The gem is consumed on any outcome. There is no level cap.",
+    "botao": "Upgrade ({custo} 💎)",
+    "botao_protegido": "Upgrade with protection (📜)",
+    "cancelado": "Upgrade cancelled",
+    "cancelado_texto": "No gem was spent.",
+    "sem_gemas": "Not enough gems",
+    "sem_gemas_texto": "This attempt costs 💎 **{custo}**. Buy them in the `/loja` or use `/desmanchar`.",
+    "carta_sumiu": "The card left your inventory",
+    "carta_sumiu_texto": "The **{custo}** gem(s) were spent, but **{carta}** is no longer there. Contact the staff and report this error.",
+    "overall_depois": "Overall **{antes}** → **{depois}**",
+    "stats_depois": "⚔️ {ata} {ataAntes} → **{ataDepois}** • ❤️ {lif} {lifAntes} → **{lifDepois}** • 💥 {pow} {powAntes} → **{powDepois}**",
+    "gemas_restantes": "💎 Gems left: **{quantidade}**",
+    "sucesso": "Upgrade ✨ {carta} +{nivel}",
+    "protegido_titulo": "🛡️ The scroll held",
+    "protegido_texto": "**{carta}** was about to drop to +{nivel}, and the scroll stopped it.",
+    "protegido_continua": "The card stays at **+{nivel}**.",
+    "queda": "🔻 {carta} dropped to +{nivel}",
+    "nada_titulo": "➖ Nothing happened",
+    "nada_texto": "**{carta}** is still at {nivel}.",
+    "nivel_natural": "its natural level",
+    "gema_gasta": "The gem was spent.",
+    "expirou": "Time ran out to upgrade. No gem was spent."
+  },
+  "desmanchar": {
+    "titulo": "🔨 Salvage {carta}?",
+    "nao_da": "Can't salvage this",
+    "uma_gema": "**{n} gem**",
+    "varias_gemas": "**{n} gems**",
+    "vira_gemas": "Becomes {emoji} {gemas}.",
+    "quicksell_pagaria": "Selling it with `/quicksell` would pay {valor}.",
+    "compensa": "> 💡 *In gems you get the equivalent of {valor} in the shop — salvaging pays more.*",
+    "nao_compensa": "> ⚠️ *In gems the equivalent is {valor} in the shop — **selling pays better** for this card.*",
+    "unica_copia": "⚠️ **This is your only copy of this card.**",
+    "irreversivel": "The card is destroyed and cannot be recovered.",
+    "pokedex_guarda": "The Pokédex keeps the discovery — it stays registered.",
+    "botao": "Salvage for {gemas}",
+    "gema_nao_entrou": "The card was salvaged, but the gems never arrived",
+    "gema_nao_entrou_texto": "**{carta}** was worth {gemas}. Contact the staff and report this error.",
+    "concluido": "Card salvaged",
+    "concluido_texto": "**{carta}** became {emoji} {gemas}.",
+    "pokedex_continua": "The discovery stays registered in your Pokédex.",
+    "gemas_na_bolsa": "Gems in your bag",
+    "cancelado": "Salvage cancelled",
+    "expirou": "Time ran out to salvage the card. Nothing was destroyed."
+  },
+  "evento": {
+    "sem_premio": "no prize set",
+    "nenhum_aberto": "🎪 No open events",
+    "nenhum_aberto_texto": "There is no event with open sign-ups right now.",
+    "nenhum_aberto_dica": "Keep an eye on the server — when one opens, it shows up here and you join with `/evento entrar`.",
+    "abertos": "🎪 Open events",
+    "como_entrar": "Join with `/evento entrar nome:<the event name>`.",
+    "sem_descricao": "no description",
+    "premio": "**Prize:** {premio}",
+    "inscritos": "**Signed up:** {n}",
+    "ja_inscrito_linha": "You are already signed up.",
+    "nao_encontrado": "Event not found",
+    "nao_encontrado_texto": "I couldn't find any open event called **{nome}**.\n\nUse `/evento lista` to see the open ones.",
+    "ja_inscrito": "You are already signed up",
+    "ja_inscrito_texto": "Your sign-up for **{evento}** was already confirmed.",
+    "entrega_depois": "The prize is handed out once the event is settled — there is nothing else to do.",
+    "confirmada": "🎪 Sign-up confirmed!",
+    "confirmada_texto": "You joined **{evento}**.",
+    "entrega_quando_apurar": "Delivery happens once the event is settled. Keep an eye on the server."
+  },
+  "caixa": {
+    "titulo": "🎁 Boxes",
+    "como_usar": "Buy with `/caixa comprar` and open whenever you want with `/caixa abrir`.",
+    "voce_tem": "You have **{quantidade}** stored.",
+    "hoje": "Today: **{restam}** of {limite}",
+    "nao_esta_a_venda": "not for sale",
+    "indisponivel": "Box unavailable",
+    "indisponivel_texto": "That box is not for sale.",
+    "limite_texto": "You have already bought **{limite}** {caixa} today.",
+    "limite_porque": "The limit keeps boxes from becoming a card faucet. It resets at midnight (UTC).",
+    "limite_cortou": "You asked for {pedido}, but today's limit only allowed {comprado}.",
+    "guardada": "Box stored",
+    "abra_quando_quiser": "Open it with `/caixa abrir` whenever you want.",
+    "desconhecida": "Unknown box",
+    "desconhecida_texto": "That box does not exist.",
+    "escolha_serie": "Pick a series",
+    "escolha_serie_texto": "The {caixa} needs a series — that is exactly what it aims at.",
+    "nao_tem": "You don't have that box",
+    "nao_tem_texto": "No {caixa} in your bag.",
+    "nao_tem_apoiador": "It is not for sale — it is the reward for voting for the bot.",
+    "nao_tem_compre": "Buy one with `/caixa comprar` for {preco}.",
+    "sem_carta": "No card found",
+    "sem_carta_texto": "Your box was returned to your bag.",
+    "autor": "{jogador} opened a box",
+    "ja_no_inventario": "The card is already in your inventory"
+  },
+  "bolsa": {
+    "titulo": "🎒 Your items",
+    "autor": "{jogador}'s bag",
+    "vazia_titulo": "🎒 Your bag is empty",
+    "vazia_texto": "Items show up here when you buy from `/loja` or salvage a card.",
+    "vazia_gema": "💎 **{item}** is the material for `/aprimorar`, and it comes from two places:",
+    "vazia_loja": "• `/loja` — {preco} each",
+    "vazia_desmanchar": "• `/desmanchar` — the card becomes a gem instead of coins"
+  },
+  "loja": {
+    "titulo": "🏪 Shop",
+    "como_comprar": "Buy with `/loja comprar`.",
+    "seu_saldo": "Your balance: **{saldo}**",
+    "voce_tem": "You have **{quantidade}**.",
+    "rodape_sink": "Coins spent here leave circulation",
+    "item_indisponivel": "Item unavailable",
+    "item_indisponivel_texto": "That item is not for sale.",
+    "quantidade_invalida": "Invalid amount",
+    "quantidade_invalida_texto": "Buy between 1 and {maximo} at a time.",
+    "custo_da_compra": "{item} x{quantidade} costs {total}.",
+    "faltam": "You have {saldo} — you are **{falta}** short.",
+    "compra_concluida": "Purchase complete",
+    "pagou": "Paid {total} • Balance: {saldo}",
+    "saldo_atual": "Balance: {saldo}",
+    "na_bolsa_agora": "In your bag now: **{quantidade}**",
+    "sem_perfil": "No profile yet",
+    "sem_perfil_texto": "Use `/roll` or `/daily` once first.",
+    "limite_diario": "Daily limit reached",
+    "limite_diario_texto": "You have already bought **{limite}** extra rolls today.",
+    "limite_diario_porque": "The limit is what keeps the game about time rather than balance.",
+    "limite_diario_zera": "It resets at midnight (UTC).",
+    "limite_diario_esgotado": "You have used every extra roll for today.",
+    "roll_extra_custo": "Extra roll number {n} today costs {preco}.",
+    "voce_tem_saldo": "You have {saldo}.",
+    "roll_extra_guardado": "Extra roll stored",
+    "roll_extra_pagou": "{item} — paid {preco}",
+    "roll_extra_como_usar": "Use it with `/roll extra:True` whenever you want — it skips the cooldown.",
+    "roll_extra_ultimo": "That was the last one today. The limit resets at midnight (UTC).",
+    "roll_extra_proximo": "The next one today costs {preco} — the price rises with each purchase."
+  },
   "comandos": {
+    "roll": {
+      "descricao": "Roll a random card based on rarity",
+      "opcao_extra": "Spend a 🎟️ extra roll from your bag to skip the cooldown"
+    },
+    "quicksell": {
+      "descricao": "Quickly sell a card from your inventory",
+      "opcao_nome": "The name of the card you want to quick-sell"
+    },
+    "aprimorar": {
+      "descricao": "Spend gems to try to raise a card's level",
+      "opcao_nome": "The name of the card you want to upgrade"
+    },
+    "desmanchar": {
+      "descricao": "Turn a card from your inventory into upgrade gems",
+      "opcao_nome": "The name of the card you want to salvage"
+    },
+    "bolsa": {
+      "descricao": "Show the items you have — gems, scrolls and whatever else"
+    },
+    "caixa": {
+      "descricao": "Card boxes — buy them, store them and open them whenever",
+      "sub_ver": "Show the boxes, their odds and how many you have",
+      "sub_comprar": "Buy a box and store it in your bag",
+      "sub_abrir": "Open a box from your bag",
+      "opcao_caixa": "Which box",
+      "opcao_quantidade": "How many (1 to {maximo})",
+      "opcao_serie": "Themed Box only: the series you want"
+    },
+    "evento": {
+      "descricao": "See the open events and join them",
+      "sub_lista": "Show the events with open sign-ups",
+      "sub_entrar": "Join an open event",
+      "opcao_nome": "The exact event name, as it appears in /evento lista"
+    },
+    "treino": {
+      "descricao": "Simulated battle against BOT Caviar — no coins, no ELO, no trophies",
+      "opcao_dificuldade": "How strong the opponent is (default: even)"
+    },
+    "pokedex": {
+      "descricao": "Show which cards you have discovered and which are still missing",
+      "opcao_serie": "Filter by anime/series",
+      "opcao_dex": "Which Pokédex (default: the normal one)",
+      "opcao_raridade": "Filter by rarity",
+      "opcao_faltantes": "Show only the cards you don't have yet",
+      "dex_normal": "📖 Normal",
+      "dex_evento": "🎗️ Event cards"
+    },
+    "loja": {
+      "descricao": "Trade coins for items",
+      "sub_ver": "Show what is for sale",
+      "sub_comprar": "Buy an item from the shop",
+      "opcao_item": "What you want to buy",
+      "opcao_quantidade": "How many (default: 1)",
+      "sub_roll_extra": "Bring your next /roll forward (up to {limite} a day, price rises each time)"
+    },
     "idioma": {
       "descricao": "Choose the language the bot replies in (Portuguese or English)",
       "opcao_idioma": "Language you want, or automatic to follow Discord",

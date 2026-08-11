@@ -1,6 +1,7 @@
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const ui = require('./embeds');
 const valores = require('./valores');
+const { criarT, DEFAULT_LOCALE } = require('./i18n');
 
 /**
  * Tela de "monte seu time": o embed e a grade de botões das cartas.
@@ -50,10 +51,15 @@ function ordenarParaBatalha(inventory) {
     });
 }
 
-/** Linha de uma carta já escolhida, com posição e atributos. */
-function linhaDoTime(card, i) {
-    const meta = ui.getRarity(card.rarity);
-    return `\`${i + 1}\` ${meta.emoji} **${ui.cardName(card)}** — OVR ${getOvr(card)}\n`
+/**
+ * Linha de uma carta já escolhida, com posição e atributos.
+ *
+ * O `t` é opcional porque a função é exportada e usada solta em teste; sem
+ * ele, sai em português — que é o padrão do bot, não um idioma errado.
+ */
+function linhaDoTime(card, i, t = criarT(DEFAULT_LOCALE)) {
+    const meta = ui.getRarity(card.rarity, t.locale);
+    return `\`${i + 1}\` ${meta.emoji} **${ui.cardName(card)}** — ${t('atributos.ovr')} ${getOvr(card)}\n`
         + `└ ⚔️ ${card.ATA ?? 0} · ❤️ ${card.LIF ?? 0} · 💥 ${card.POW ?? 0}`;
 }
 
@@ -77,37 +83,43 @@ function montarEscolhaDeTime({
     deck = [],
     idEscolha,
     idCancelar,
-    rotuloCancelar = 'Desistir',
-    aguardando = '✅ **Time completo!** Aguardando seu oponente escolher...',
-    campos = []
+    rotuloCancelar,
+    aguardando,
+    campos = [],
+    t = criarT(DEFAULT_LOCALE)
 }) {
     const selecionadas = new Set((selectedIds || []).map(String));
     const completo = deck.length === 3;
 
     const embed = ui.base(completo ? ui.STATUS_COLORS.success : ui.STATUS_COLORS.warning)
-        .setTitle('⚔️ Monte seu time')
+        .setTitle(t('battle.monte_time'))
         .setDescription(
             completo
-                ? aguardando
+                ? (aguardando ?? t('battle.time_completo'))
                 : [
-                    'Escolha **3 cartas** para batalhar.',
+                    t('battle.escolha_3'),
                     '',
                     `${'🔵'.repeat(deck.length)}${'⚪'.repeat(3 - deck.length)}  **${deck.length}/3**`,
                     '',
-                    '💡 *A ordem importa: sua 1ª carta enfrenta a 1ª do oponente, a 2ª contra a 2ª, e assim por diante.*'
+                    t('battle.ordem_importa')
                 ].join('\n')
         );
 
     for (const campo of campos) embed.addFields(campo);
 
     if (deck.length > 0) {
-        embed.addFields({ name: 'Seu time', value: deck.map(linhaDoTime).join('\n') });
+        embed.addFields({
+            name: t('battle.seu_time'),
+            value: deck.map((card, i) => linhaDoTime(card, i, t)).join('\n')
+        });
     }
 
     const cardsToShow = ordenarParaBatalha(inventory).slice(0, MAX_CARDS_SHOWN);
 
     if (inventory.length > MAX_CARDS_SHOWN) {
-        embed.setFooter({ text: `${ui.BRAND} • Mostrando suas ${MAX_CARDS_SHOWN} melhores cartas de ${inventory.length}` });
+        embed.setFooter({
+            text: `${ui.BRAND} • ${t('battle.mostrando_melhores', { mostradas: MAX_CARDS_SHOWN, total: inventory.length })}`
+        });
     }
 
     const rows = [];
@@ -119,7 +131,7 @@ function montarEscolhaDeTime({
             const card = cardsToShow[index];
             const cardId = String(card._id);
             const isSelected = selecionadas.has(cardId);
-            const meta = ui.getRarity(card.rarity);
+            const meta = ui.getRarity(card.rarity, t.locale);
             const nomeCurto = card.name.length > 60 ? card.name.slice(0, 57) + '…' : card.name;
             const label = `${nomeCurto} · ${getOvr(card)}`;
             actionRow.addComponents(
@@ -147,7 +159,7 @@ function montarEscolhaDeTime({
     // para o botão não sumir em silêncio se alguém mexer nas constantes.
     const botaoDesistir = new ButtonBuilder()
         .setCustomId(idCancelar)
-        .setLabel(rotuloCancelar)
+        .setLabel(rotuloCancelar ?? t('battle.botao_desistir'))
         .setEmoji('🚫')
         .setStyle(ButtonStyle.Danger);
 

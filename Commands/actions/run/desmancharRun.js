@@ -2,6 +2,7 @@ const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const ui = require('../../utils/embeds');
 const itens = require('../../utils/itens');
 const valores = require('../../utils/valores');
+const { criarT, DEFAULT_LOCALE } = require('../../utils/i18n');
 
 /**
  * /desmanchar — a carta vira gema em vez de moeda.
@@ -37,39 +38,52 @@ function valorDeVendaDe(card) {
  * @param {object} card
  * @param {number} copias quantas cópias desta MESMA carta o jogador tem
  */
-function updateEmbed(card, copias = 1) {
+/**
+ * "1 gema" / "3 gemas", no idioma certo.
+ *
+ * A escolha de singular e plural fica no código porque a REGRA é do
+ * idioma, não da frase: escrever "gema(s)" no dicionário resolveria o
+ * português e ficaria estranho em inglês, e um dicionário com a forma já
+ * flexionada não teria como saber o número.
+ */
+function contarGemas(n, t) {
+    return t(n === 1 ? 'desmanchar.uma_gema' : 'desmanchar.varias_gemas', {
+        n: ui.number(n, t.locale)
+    });
+}
+
+function updateEmbed(card, copias = 1, t = criarT(DEFAULT_LOCALE)) {
     const gemas = gemasDe(card);
-    const meta = ui.getRarity(card.rarity);
-    const item = itens.getItem('gema');
+    const meta = ui.getRarity(card.rarity, t.locale);
+    const item = itens.localizarPorChave('gema', t.locale);
     const vendaRapida = valorDeVendaDe(card);
 
     const linhas = [
-        `${meta.emoji} ${ui.rarityTag(card.rarity)} • *${card.series || '—'}*`,
+        `${meta.emoji} ${ui.rarityTag(card.rarity, t.locale)} • *${card.series || t('comum.traco')}*`,
         '',
-        ui.statLines(card),
+        ui.statLines(card, t.locale),
         '',
-        `Vira ${item.emoji} **${ui.number(gemas)} ${gemas === 1 ? 'gema' : 'gemas'}**.`,
-        `Vendida no \`/quicksell\` pagaria ${ui.coins(vendaRapida)}.`
+        t('desmanchar.vira_gemas', { emoji: item.emoji, gemas: contarGemas(gemas, t) }),
+        t('desmanchar.quicksell_pagaria', { valor: ui.coins(vendaRapida, t.locale) })
     ];
 
     // A comparação fica à vista porque a resposta muda com a raridade: na
     // Mestra, vender é o melhor negócio, e o jogador precisa saber disso
     // ANTES de destruir a carta, não depois.
     const valendo = gemas * itens.PRECO_GEMA;
-    if (valendo > vendaRapida) {
-        linhas.push(`> 💡 *Em gema você leva o equivalente a ${ui.coins(valendo)} na loja — desmanchar rende mais.*`);
-    } else {
-        linhas.push(`> ⚠️ *Em gema o equivalente é ${ui.coins(valendo)} na loja — **vender paga melhor** nesta carta.*`);
-    }
+    linhas.push(t(
+        valendo > vendaRapida ? 'desmanchar.compensa' : 'desmanchar.nao_compensa',
+        { valor: ui.coins(valendo, t.locale) }
+    ));
 
     if (copias <= 1) {
-        linhas.push('', '⚠️ **É a sua única cópia desta carta.**');
+        linhas.push('', t('desmanchar.unica_copia'));
     }
-    linhas.push('*A carta é destruída e não pode ser recuperada.*');
-    linhas.push('*A Pokédex guarda a descoberta — ela continua registrada.*');
+    linhas.push(`*${t('desmanchar.irreversivel')}*`);
+    linhas.push(`*${t('desmanchar.pokedex_guarda')}*`);
 
     const embed = ui.base(meta.color)
-        .setTitle(`🔨 Desmanchar ${ui.cardName(card)}?`)
+        .setTitle(t('desmanchar.titulo', { carta: ui.cardName(card) }))
         .setDescription(linhas.join('\n'));
 
     if (card.characterImage) embed.setThumbnail(card.characterImage);
@@ -77,17 +91,17 @@ function updateEmbed(card, copias = 1) {
     return embed;
 }
 
-function buildConfirmationRow(card) {
+function buildConfirmationRow(card, t = criarT(DEFAULT_LOCALE)) {
     const gemas = gemasDe(card);
     return new ActionRowBuilder().addComponents(
         new ButtonBuilder()
             .setCustomId('confirm_desmanchar')
-            .setLabel(`Desmanchar por ${ui.number(gemas)} ${gemas === 1 ? 'gema' : 'gemas'}`)
+            .setLabel(t('desmanchar.botao', { gemas: contarGemas(gemas, t) }))
             .setEmoji('💎')
             .setStyle(ButtonStyle.Danger),
         new ButtonBuilder()
             .setCustomId('cancel_desmanchar')
-            .setLabel('Cancelar')
+            .setLabel(t('comum.cancelar'))
             .setStyle(ButtonStyle.Secondary)
     );
 }
@@ -98,7 +112,7 @@ function contarCopias(user, card) {
     return user.inventory.filter((c) => String(c.originalCardId ?? c.cardId ?? '') === alvo).length;
 }
 
-async function desmancharRun(client, interaction, user, matchingCards) {
+async function desmancharRun(client, interaction, user, matchingCards, t = criarT(DEFAULT_LOCALE)) {
     await interaction.deferReply();
 
     const indexRef = { currentIndex: 0 };
@@ -109,11 +123,11 @@ async function desmancharRun(client, interaction, user, matchingCards) {
     );
 
     const message = await interaction.editReply({
-        embeds: [updateEmbed(matchingCards[0], contarCopias(user, matchingCards[0]))],
-        components: [rowNavigation, buildConfirmationRow(matchingCards[0])]
+        embeds: [updateEmbed(matchingCards[0], contarCopias(user, matchingCards[0]), t)],
+        components: [rowNavigation, buildConfirmationRow(matchingCards[0], t)]
     });
 
     return { message, indexRef, rowNavigation };
 }
 
-module.exports = { desmancharRun, updateEmbed, buildConfirmationRow, gemasDe, contarCopias };
+module.exports = { desmancharRun, updateEmbed, buildConfirmationRow, gemasDe, contarCopias, contarGemas };

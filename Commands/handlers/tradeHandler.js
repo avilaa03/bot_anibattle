@@ -5,7 +5,8 @@ const { registrar } = require('../utils/progresso');
 const { anunciarConquistas } = require('../utils/notificacoes');
 const { montarEmbed, montarComponentes } = require('../actions/run/trocarRun');
 const { MessageFlags } = require('discord.js');
-const { podeCancelarTroca, MENSAGENS } = require('../utils/cicloDeVida');
+const { podeCancelarTroca, mensagem } = require('../utils/cicloDeVida');
+const { tDaInteracao, tDoUsuario } = require('../utils/idioma');
 
 /**
  * Botões e menus da mesa de troca.
@@ -18,12 +19,22 @@ const { podeCancelarTroca, MENSAGENS } = require('../utils/cicloDeVida');
  *   trade_pick_<id>_<lado>
  *   trade_confirm_<id>
  *   trade_cancel_<id>
+ *
+ * ## Duas vozes, e por quê
+ *
+ * `t` é o idioma de quem clicou, e vale para tudo que é resposta privada:
+ * "essa troca não é sua", "oferta vazia". Só aquela pessoa lê.
+ *
+ * `tMesa` é o idioma do servidor, e vale para a mensagem da mesa e para o
+ * desfecho dela. A mesa é editada por dois jogadores em turnos; no idioma
+ * de quem clicou, ela viraria de português para inglês e de volta a cada
+ * carta escolhida. Mesmo critério do quadro do torneio.
  */
 
-async function carregarInventarios(t) {
+async function carregarInventarios(troca) {
     const [docP, docA] = await Promise.all([
-        User.findOne({ id: t.proponente.id }).select('inventory').lean(),
-        User.findOne({ id: t.alvo.id }).select('inventory').lean()
+        User.findOne({ id: troca.proponente.id }).select('inventory').lean(),
+        User.findOne({ id: troca.alvo.id }).select('inventory').lean()
     ]);
     return {
         proponente: docP?.inventory || [],
@@ -39,19 +50,22 @@ async function handleTrade(client, interaction) {
     const acao = partes[1];
     const tradeId = partes[2];
 
-    const t = await trade.buscar(tradeId);
-    if (!t) {
+    const t = await tDaInteracao(interaction);
+    const tMesa = await tDoUsuario(null, interaction.guildId);
+
+    const troca = await trade.buscar(tradeId);
+    if (!troca) {
         await interaction.reply({
-            embeds: [ui.error('Troca expirada', 'Essa negociação não existe mais.')],
+            embeds: [ui.error(t('trocar.expirada'), t('trocar.expirada_texto'))],
             flags: MessageFlags.Ephemeral
         }).catch(() => {});
         return true;
     }
 
-    const lado = trade.ladoDe(t, interaction.user.id);
+    const lado = trade.ladoDe(troca, interaction.user.id);
     if (!lado) {
         await interaction.reply({
-            embeds: [ui.error('Negociação alheia', 'Você não faz parte desta troca.')],
+            embeds: [ui.error(t('trocar.alheia'), t('trocar.alheia_texto'))],
             flags: MessageFlags.Ephemeral
         }).catch(() => {});
         return true;
@@ -78,9 +92,9 @@ async function handleTrade(client, interaction) {
     // compra os 15 minutos de janela. É o mesmo desenho que o botão de
     // cancelar já usava.
     if (acao === 'accept' || acao === 'decline') {
-        if (t.alvo.id !== interaction.user.id) {
+        if (troca.alvo.id !== interaction.user.id) {
             await interaction.reply({
-                embeds: [ui.error('Convite alheio', 'Só quem recebeu a proposta pode aceitar ou recusar.')],
+                embeds: [ui.error(t('trocar.convite_alheio'), t('trocar.convite_alheio_texto'))],
                 flags: MessageFlags.Ephemeral
             }).catch(() => {});
             return true;
@@ -93,29 +107,32 @@ async function handleTrade(client, interaction) {
             await trade.apagar(tradeId);
             await interaction.editReply({
                 content: null,
-                embeds: [ui.neutral('Troca recusada', `**${interaction.user.username}** recusou a proposta.`)],
+                embeds: [ui.neutral(
+                    tMesa('trocar.recusada'),
+                    tMesa('trocar.recusada_texto', { jogador: interaction.user.username })
+                )],
                 components: []
             }).catch(() => {});
             return true;
         }
 
-        if (t.fase !== 'aguardando') {
+        if (troca.fase !== 'aguardando') {
             await interaction.editReply({
                 content: null,
-                embeds: [ui.neutral('Convite já respondido', 'Esta proposta já foi aceita ou recusada.')],
+                embeds: [ui.neutral(tMesa('trocar.ja_respondido'), tMesa('trocar.ja_respondido_texto'))],
                 components: []
             }).catch(() => {});
             return true;
         }
 
-        t.fase = 'montando';
-        await t.save();
+        troca.fase = 'montando';
+        await troca.save();
 
-        const inventarios = await carregarInventarios(t);
+        const inventarios = await carregarInventarios(troca);
         await interaction.editReply({
-            content: `<@${t.proponente.id}> ⇄ <@${t.alvo.id}>`,
-            embeds: [montarEmbed(t)],
-            components: montarComponentes(t, inventarios)
+            content: `<@${troca.proponente.id}> ⇄ <@${troca.alvo.id}>`,
+            embeds: [montarEmbed(troca, tMesa)],
+            components: montarComponentes(troca, inventarios, tMesa)
         }).catch(() => {});
         return true;
     }
@@ -126,10 +143,10 @@ async function handleTrade(client, interaction) {
         // O ponto sensível é a fase 'executando': ali as cartas já estão
         // mudando de dono, e cancelar no meio deixaria o inventário dos
         // dois inconsistente.
-        const permissao = podeCancelarTroca(t, interaction.user.id);
+        const permissao = podeCancelarTroca(troca, interaction.user.id);
         if (!permissao.ok) {
             await interaction.reply({
-                embeds: [ui.error('Não dá para cancelar agora', MENSAGENS[permissao.motivo])],
+                embeds: [ui.error(t('trocar.nao_da_para_cancelar'), mensagem(permissao.motivo, t.locale))],
                 flags: MessageFlags.Ephemeral
             }).catch(() => {});
             return true;
@@ -138,7 +155,10 @@ async function handleTrade(client, interaction) {
         await trade.apagar(tradeId);
         await interaction.update({
             content: null,
-            embeds: [ui.neutral('Troca cancelada', `**${interaction.user.username}** cancelou a negociação. Nenhuma carta mudou de dono.`)],
+            embeds: [ui.neutral(
+                tMesa('trocar.cancelada'),
+                tMesa('trocar.cancelada_texto', { jogador: interaction.user.username })
+            )],
             components: []
         }).catch(() => {});
         return true;
@@ -149,13 +169,13 @@ async function handleTrade(client, interaction) {
         const ladoDoMenu = partes[3];
         if (ladoDoMenu !== lado) {
             await interaction.reply({
-                embeds: [ui.error('Menu do oponente', 'Use o menu com o seu nome.')],
+                embeds: [ui.error(t('trocar.menu_do_oponente'), t('trocar.menu_do_oponente_texto'))],
                 flags: MessageFlags.Ephemeral
             }).catch(() => {});
             return true;
         }
 
-        const inventarios = await carregarInventarios(t);
+        const inventarios = await carregarInventarios(troca);
         const meuInventario = inventarios[lado];
         const escolhidos = new Set(interaction.values || []);
 
@@ -174,25 +194,25 @@ async function handleTrade(client, interaction) {
                 marketValue: c.marketValue
             }));
 
-        t[lado].cartas = novasCartas;
+        troca[lado].cartas = novasCartas;
         // Mexeu na oferta, as duas confirmações caem.
-        t.proponente.confirmou = false;
-        t.alvo.confirmou = false;
-        t.fase = 'montando';
-        await t.save();
+        troca.proponente.confirmou = false;
+        troca.alvo.confirmou = false;
+        troca.fase = 'montando';
+        await troca.save();
 
         await interaction.update({
-            embeds: [montarEmbed(t)],
-            components: montarComponentes(t, inventarios)
+            embeds: [montarEmbed(troca, tMesa)],
+            components: montarComponentes(troca, inventarios, tMesa)
         }).catch(() => {});
         return true;
     }
 
     // ---- Confirmar ----
     if (acao === 'confirm') {
-        if (t.proponente.cartas.length === 0 && t.alvo.cartas.length === 0) {
+        if (troca.proponente.cartas.length === 0 && troca.alvo.cartas.length === 0) {
             await interaction.reply({
-                embeds: [ui.warning('Oferta vazia', 'Pelo menos um dos lados precisa oferecer alguma carta.')],
+                embeds: [ui.warning(t('trocar.oferta_vazia'), t('trocar.oferta_vazia_texto'))],
                 flags: MessageFlags.Ephemeral
             }).catch(() => {});
             return true;
@@ -204,8 +224,8 @@ async function handleTrade(client, interaction) {
         if (!trade.ambosConfirmaram(atualizada)) {
             const inventarios = await carregarInventarios(atualizada);
             await interaction.update({
-                embeds: [montarEmbed(atualizada)],
-                components: montarComponentes(atualizada, inventarios)
+                embeds: [montarEmbed(atualizada, tMesa)],
+                components: montarComponentes(atualizada, inventarios, tMesa)
             }).catch(() => {});
             return true;
         }
@@ -218,39 +238,47 @@ async function handleTrade(client, interaction) {
             if (resultado.motivo === 'JA_EXECUTANDO') return true;
 
             const embed = ui.error(
-                'Troca cancelada',
+                tMesa('trocar.cancelada'),
                 resultado.motivo === 'POSSE'
-                    ? `Cartas que não estão mais no inventário: ${resultado.faltando.join(', ')}.\n\nNinguém perdeu nada.`
-                    : 'Não foi possível concluir a troca. Nenhuma carta mudou de dono.'
+                    ? tMesa('trocar.falta_posse', { cartas: resultado.faltando.join(', ') })
+                    : tMesa('trocar.falhou')
             );
             await interaction.editReply({ content: null, embeds: [embed], components: [] }).catch(() => {});
             await trade.apagar(tradeId);
             return true;
         }
 
-        const t2 = resultado.trade;
+        const finalizada = resultado.trade;
         const resumo = (cartas) => cartas.length > 0
-            ? cartas.map((c) => `${ui.getRarity(c.rarity).emoji} **${ui.cardName(c)}**`).join('\n')
-            : '*(nada)*';
+            ? cartas.map((c) => `${ui.getRarity(c.rarity, tMesa.locale).emoji} **${ui.cardName(c)}**`).join('\n')
+            : tMesa('trocar.nada');
 
-        const sucesso = ui.success('Troca concluída!', 'As cartas trocaram de dono.')
+        const sucesso = ui.success(tMesa('trocar.concluida'), tMesa('trocar.concluida_texto'))
             .addFields(
-                { name: `${t2.alvo.username} recebeu`, value: resumo(t2.proponente.cartas), inline: true },
-                { name: `${t2.proponente.username} recebeu`, value: resumo(t2.alvo.cartas), inline: true }
+                {
+                    name: tMesa('trocar.recebeu', { jogador: finalizada.alvo.username }),
+                    value: resumo(finalizada.proponente.cartas),
+                    inline: true
+                },
+                {
+                    name: tMesa('trocar.recebeu', { jogador: finalizada.proponente.username }),
+                    value: resumo(finalizada.alvo.cartas),
+                    inline: true
+                }
             );
 
         await interaction.editReply({ content: null, embeds: [sucesso], components: [] }).catch(() => {});
 
         // Contadores, missões e conquistas dos dois lados.
         const resultados = await Promise.all([
-            registrar(t2.proponente.id, { trocasFeitas: 1 }, { eventosMissao: ['troca'] }),
-            registrar(t2.alvo.id, { trocasFeitas: 1 }, { eventosMissao: ['troca'] })
+            registrar(finalizada.proponente.id, { trocasFeitas: 1 }, { eventosMissao: ['troca'] }),
+            registrar(finalizada.alvo.id, { trocasFeitas: 1 }, { eventosMissao: ['troca'] })
         ]).catch(() => []);
 
         for (let i = 0; i < resultados.length; i++) {
             const conquistas = resultados[i]?.conquistas || [];
             if (conquistas.length === 0) continue;
-            const userId = i === 0 ? t2.proponente.id : t2.alvo.id;
+            const userId = i === 0 ? finalizada.proponente.id : finalizada.alvo.id;
             await anunciarConquistas(client, userId, conquistas, interaction.channel);
         }
 

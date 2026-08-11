@@ -28,6 +28,8 @@
     "perfil_nao_encontrado": "Perfil não encontrado",
     "perfil_nao_encontrado_texto": "Use `/roll` ou `/daily` para criar seu perfil primeiro.",
     "carta_nao_encontrada": "Carta não encontrada",
+    "nenhuma_com_nome": "Nenhuma carta no seu inventário tem \"{busca}\" no nome.",
+    "carta_vinculada": "Carta vinculada",
     "usuario_nao_encontrado": "Usuário não encontrado",
     "saldo_insuficiente": "Saldo insuficiente",
     "pagina": "Página {atual}/{total}",
@@ -297,6 +299,111 @@
       }
     }
   },
+  "transmissao": {
+    "round_de": "**Round {atual}** de {total}",
+    "o_que_acontece": "O que está acontecendo",
+    "valendo": "Valendo {valor} moedas",
+    "amistoso": "Duelo amistoso",
+    "times_prontos": "⚔️ Os times estão prontos!",
+    "times_prontos_texto": "**{nomeX}** contra **{nomeY}**\n\nA luta começa em instantes..."
+  },
+  "negociabilidade": {
+    "vinculada": "Esta carta é **vinculada**: ela é sua e não pode ser vendida, trocada nem transferida.",
+    "evento_nao_desmancha": "Cartas de evento não podem ser desmanchadas: elas não voltam a ser distribuídas, e desmanchar não tem como ser desfeito."
+  },
+  "ciclo_de_vida": {
+    "NAO_PARTICIPA": "Você não faz parte desta negociação.",
+    "EXECUTANDO": "As cartas já estão trocando de dono — não dá mais para voltar atrás.",
+    "EM_COMBATE": "A luta já começou. O resultado vale.",
+    "FINALIZADA": "Isso já terminou."
+  },
+  "itens_catalogo": {
+    "gema": {
+      "nome": "Gema de aprimoramento",
+      "descricao": "Material do `/aprimorar`. Some ao ser usada, dando certo ou não.",
+      "detalhe": "Também sai do `/desmanchar` — desmanchar rende mais que a venda rápida em tudo, menos na Mestra."
+    },
+    "roll_extra": {
+      "nome": "Roll extra",
+      "descricao": "Um `/roll` que ignora o cooldown. Guardado até você querer usar.",
+      "detalhe": "Compre em `/loja roll-extra` e use com `/roll extra:True`."
+    },
+    "pergaminho": {
+      "nome": "Pergaminho de proteção",
+      "descricao": "Segura a perda de nível quando um aprimoramento de risco falha.",
+      "detalhe": "Caro de propósito: ele é seguro, não atalho. Não aumenta a chance de sucesso."
+    }
+  },
+  "caixas_catalogo": {
+    "comum": {
+      "nome": "Caixa Comum",
+      "descricao": "A mais barata. Serve para tentar a sorte sem doer."
+    },
+    "tematica": {
+      "nome": "Caixa Temática",
+      "descricao": "Você escolhe a série. Rara ou melhor garantida.",
+      "detalhe": "A única que mira: serve para fechar uma série na Pokédex."
+    },
+    "elite": {
+      "nome": "Caixa de Elite",
+      "descricao": "Ultra Rara garantida, com boa chance de Lendária."
+    },
+    "lendaria": {
+      "nome": "Caixa Lendária",
+      "descricao": "A mais cara do jogo. 10% de chance de sair uma Mestra.",
+      "detalhe": "Ainda é prejuízo na média — você paga pela chance, não pelo retorno."
+    },
+    "apoiador": {
+      "nome": "Caixa do Apoiador",
+      "descricao": "Não está à venda: é a recompensa de quem vota no bot."
+    }
+  },
+  "treino_catalogo": {
+    "dificuldades": {
+      "facil": "Fácil",
+      "parelho": "Parelho",
+      "dificil": "Difícil"
+    }
+  },
+  "treino": {
+    "em_andamento": "Treino em andamento",
+    "em_andamento_texto": "Você já tem um treino aberto no privado. Termine ou cancele ele antes de começar outro.",
+    "calma_la": "Calma lá",
+    "calma_la_texto": "Espere {tempo} para treinar de novo.",
+    "time_incompleto": "Time incompleto",
+    "time_incompleto_texto": "Você precisa de pelo menos **3 cartas** para treinar. Tem {n}.\n\nUse `/roll` para conseguir mais.",
+    "catalogo_vazio": "Catálogo vazio",
+    "catalogo_vazio_texto": "Não há cartas cadastradas para o {rival} usar.",
+    "sem_privado": "Não consegui te chamar no privado",
+    "sem_privado_texto": "Habilite as mensagens diretas deste servidor para montar seu time.",
+    "dm_monte_time": "🥊 Treino contra **{rival}** — monte seu time!",
+    "aberto": "🥊 Treino aberto",
+    "aberto_texto": "Te mandei no privado a tela para montar seu time contra o **{rival}** ({emoji} {dificuldade}).\n\nA luta é transmitida aqui no canal quando você fechar as 3 cartas.",
+    "time_rival": "🤖 Time do {rival} — {emoji} {dificuldade}",
+    "ordem_dos_confrontos": "Sua 1ª carta enfrenta a 1ª dele, e assim por diante.",
+    "botao_cancelar": "Cancelar treino",
+    "time_completo": "✅ **Time completo!** A luta vai começar...",
+    "botao_de_novo": "Treinar de novo",
+    "da_luta": "Da luta",
+    "da_luta_texto": "💥 {criticos} crítico(s) • 🔥 {viradas} virada(s)",
+    "nao_vale_nada": "Treino não vale moeda, ELO nem conquista",
+    "mencao_transmissao": "{jogador} 🥊 treino",
+    "encerrado": "Treino encerrado",
+    "encerrado_texto": "Este treino expirou ou já foi resolvido. Use `/treino` para abrir outro.",
+    "nao_e_seu": "Não é o seu treino",
+    "nao_e_seu_texto": "Este treino é de outra pessoa.",
+    "carta_indisponivel": "Carta indisponível",
+    "nada_a_fazer": "Nada a fazer",
+    "recusa": {
+      "SESSAO_EXPIRADA": "Este treino expirou. Use `/treino` para abrir outro.",
+      "TIME_CHEIO": "Seu time já tem 3 cartas.",
+      "JA_ESCOLHIDA": "Você já escolheu esta carta."
+    },
+    "nada_para_cancelar": "Nada para cancelar",
+    "nada_para_cancelar_texto": "Este treino já terminou ou expirou.",
+    "cancelado": "Treino cancelado",
+    "cancelado_texto": "Nenhuma luta aconteceu. Use `/treino` quando quiser tentar de novo."
+  },
   "notificacoes": {
     "trofeu_desbloqueado": "Troféu desbloqueado!",
     "trofeu_rodape": "Troféu de {tipo} • +{pontos} pontos",
@@ -312,7 +419,10 @@
     "missao_resgate": "Use `/missoes` e clique em **Resgatar** ({total} disponíveis)."
   },
   "idioma": {
-    "titulo_status": "🌐 Idioma do AniBattle",
+    "opcao_automatico": "Automático (segue o Discord)",
+    "escopo_mim": "Só para mim",
+    "escopo_servidor": "Servidor inteiro",
+    "titulo_status":"🌐 Idioma do AniBattle",
     "descricao_status": "O bot responde em português ou inglês. Use `/idioma idioma:` para mudar.",
     "campo_voce": "Sua preferência",
     "campo_servidor": "Padrão do servidor",
@@ -350,6 +460,12 @@
     "nova_pokedex": "📖 **Nova entrada na Pokédex!** Veja em `/pokedex`.",
     "vendida": "🪙 Você vendeu **{carta}** por {valor}. Saldo: {saldo}",
     "expirou": "O tempo para coletar a carta expirou.",
+    "sem_extra": "Você não tem roll extra",
+    "sem_extra_texto": "Nenhum 🎟️ **roll extra** na sua bolsa.",
+    "sem_extra_onde_comprar": "Compre em `/loja roll-extra` — o preço sobe a cada compra do dia.",
+    "campo_extra": "🎟️ Roll extra",
+    "tem_extra_guardado": "Você tem **{quantidade}** guardado(s). Use `/roll extra:True` para pular a espera.",
+    "protecao_azar": "Proteção contra azar: {rolls} rolls sem {raridade} — esta veio garantida",
     "desejo_titulo": "💭 Carta da sua lista de desejos apareceu!",
     "desejo_texto": "{emoji} **{carta}** — *{serie}*\n\nRolada por **{jogador}**. Que tal propor uma troca com `/trocar`?"
   },
@@ -384,6 +500,7 @@
   },
   "quicksell": {
     "nenhuma_com_nome": "Nenhuma carta no seu inventário tem \"{nome}\" no nome.",
+    "vinculada_consolo": "Ela continua sua, e continua batalhando normalmente.",
     "expirou": "O tempo para vender a carta expirou.",
     "titulo": "🪙 Vender {carta}?",
     "recebera": "Você receberá {valor} por esta carta.",
@@ -394,6 +511,7 @@
     "cancelada": "Venda cancelada"
   },
   "inventory": {
+    "vazio_titulo": "📋 Inventário vazio",
     "autor": "Coleção de {jogador}",
     "total_cartas": "Total de cartas",
     "valor_colecao": "Valor da coleção"
@@ -583,6 +701,7 @@
     "rodape_expira": "O desafio expira em 60 segundos",
     "botao_aceitar": "Aceitar e apostar {valor}",
     "botao_recusar": "Recusar",
+    "botao_desistir": "Desistir",
     "mencao_desafio": "{desafiado}, você foi desafiado por {desafiante}!",
     "expirado": "Desafio expirado",
     "expirado_texto": "**{jogador}** não respondeu a tempo. Nenhuma moeda foi cobrada.",
@@ -612,6 +731,14 @@
     "jogador_2": "Jogador 2",
     "cancelada": "Batalha cancelada",
     "cancelada_texto": "Cartas escolhidas não estão mais no inventário de {culpados}.",
+    "nada_para_cancelar": "Nada para cancelar",
+    "nada_para_cancelar_texto": "Esta batalha já terminou ou expirou.",
+    "ja_encerrada": "Esta batalha já foi encerrada.",
+    "nao_da_para_desistir": "Não dá para desistir agora",
+    "duelo_cancelado": "Duelo cancelado",
+    "duelo_cancelado_texto": "**{jogador}** desistiu antes da luta começar.",
+    "aposta_devolvida": "A aposta de {valor} voltou para os dois.",
+    "carta_fora_do_inventario": "Essa carta não está mais no seu inventário.",
     "apostas_devolvidas": "As apostas foram devolvidas.",
     "e": " e ",
     "fim_titulo": "⚔️ Fim da batalha",
@@ -635,6 +762,7 @@
   "trocar": {
     "usuario_necessario": "Usuário necessário",
     "usuario_necessario_texto": "Mencione com quem você quer trocar.",
+    "alvo_invalido": "Alvo inválido",
     "sem_bots": "Bots não trocam cartas.",
     "sem_si_mesmo": "Você não pode trocar consigo mesmo.",
     "em_andamento": "Negociação em andamento",
@@ -648,6 +776,13 @@
     "n_cartas": "🎴 {n} cartas",
     "rodape_convite": "O convite expira em 60 segundos",
     "botao_aceitar": "Aceitar",
+    "botao_recusar": "Recusar",
+    "botao_cancelar_convite": "Cancelar convite",
+    "convite_alheio": "Convite alheio",
+    "convite_alheio_texto": "Só quem recebeu a proposta pode aceitar ou recusar.",
+    "ja_respondido": "Convite já respondido",
+    "ja_respondido_texto": "Esta proposta já foi aceita ou recusada.",
+    "nao_da_para_cancelar": "Não dá para cancelar agora",
     "mencao_proposta": "{alvo}, você recebeu uma proposta de troca!",
     "recusada": "Troca recusada",
     "recusada_texto": "**{jogador}** recusou a proposta.",
@@ -732,6 +867,14 @@
   },
   "profile": {
     "autor": "Perfil de {jogador}",
+    "voce_sem_perfil": "Você ainda não tem um perfil. Ele é criado ao usar `/roll` ou `/daily`.",
+    "outro_sem_perfil": "**{jogador}** ainda não tem um perfil. Ele é criado ao usar `/roll` ou `/daily`.",
+    "selo_staff": "🛡️ Staff",
+    "selo_beta": "🧪 Beta",
+    "nivel": "⭐ Nível",
+    "nivel_texto": "**{nivel}** — {atual}/{proximo} XP",
+    "acumula_rolls": "🎴 Acumula até **{cargas}** roll(s)",
+    "ranking_texto": "{emoji} **{divisao}** — {pontos} pts",
     "saldo": "🪙 Saldo",
     "cartas": "🎴 Cartas",
     "patrimonio": "💎 Patrimônio",
@@ -757,6 +900,8 @@
   },
   "pokedex": {
     "titulo": "📖 Pokédex",
+    "titulo_eventos": "🎗️ Pokédex de eventos",
+    "sem_eventos": "Nenhuma carta de evento existe ainda. Elas aparecem aqui quando forem distribuídas.",
     "titulo_filtrado": "📖 Pokédex — {filtro}",
     "autor": "Pokédex de {jogador}",
     "sem_resultado": "Nenhuma carta encontrada com esses filtros.",
@@ -769,6 +914,8 @@
     "informe": "Informe o que procurar",
     "informe_texto": "Use `/ficha nome:Kirito` ou `/ficha numero:42`.",
     "sem_numero": "Não existe nenhuma carta com o número **{numero}** no catálogo.",
+    "sem_nome": "Nenhuma carta no catálogo tem \"{busca}\" no nome.",
+    "procuram_texto": "{n} jogador(es)",
     "nao_registrada": "Carta não registrada",
     "nao_registrada_uma": "Você ainda não registrou **{numero}** na sua Pokédex.\n\nVocê precisa ter tido essa carta pelo menos uma vez para consultá-la aqui.",
     "nao_registrada_varias": "Nenhuma das {n} cartas com esse nome está registrada na sua Pokédex.\n\nVocê precisa ter tido a carta pelo menos uma vez para consultá-la aqui.",
@@ -1129,7 +1276,204 @@
     "rodada_oitavas": "Oitavas de final",
     "rodada_de": "Rodada de {n}"
   },
+  "aprimorar": {
+    "titulo": "✨ Aprimorar {carta}?",
+    "overall_linha": "Overall **{atual}** → **{proximo}** *(natural {natural})*",
+    "chances_titulo": "**Chances desta tentativa**",
+    "chance_sucesso": "✅ Sobe um nível — **{pct}**",
+    "chance_nada": "➖ Não acontece nada — **{pct}**",
+    "chance_queda": "🔻 Cai um nível — **{pct}**",
+    "chance_queda_zero": "🔻 Cai um nível — **0%** *(o overall natural é o chão: carta em nível 0 não tem o que perder)*",
+    "custo": "Custa 💎 **{custo}** — você tem **{gemas}**.",
+    "tem_pergaminho": "📜 Você tem **{quantidade}** pergaminho(s): protegem contra a queda, e só somem se a queda acontecer.",
+    "sem_pergaminho": "📜 Sem pergaminho de proteção na bolsa — veja a `/loja`.",
+    "gema_sempre_gasta": "A gema é gasta em qualquer desfecho. Não há teto de nível.",
+    "botao": "Aprimorar ({custo} 💎)",
+    "botao_protegido": "Aprimorar com proteção (📜)",
+    "cancelado": "Aprimoramento cancelado",
+    "cancelado_texto": "Nenhuma gema foi gasta.",
+    "sem_gemas": "Gemas insuficientes",
+    "sem_gemas_texto": "Esta tentativa custa 💎 **{custo}**. Compre na `/loja` ou use o `/desmanchar`.",
+    "carta_sumiu": "A carta saiu do seu inventário",
+    "carta_sumiu_texto": "As **{custo}** gema(s) foram gastas, mas **{carta}** não está mais lá. Fale com a staff informando este erro.",
+    "overall_depois": "Overall **{antes}** → **{depois}**",
+    "stats_depois": "⚔️ {ata} {ataAntes} → **{ataDepois}** • ❤️ {lif} {lifAntes} → **{lifDepois}** • 💥 {pow} {powAntes} → **{powDepois}**",
+    "gemas_restantes": "💎 Gemas restantes: **{quantidade}**",
+    "sucesso": "Aprimoramento ✨ {carta} +{nivel}",
+    "protegido_titulo": "🛡️ O pergaminho segurou",
+    "protegido_texto": "**{carta}** ia cair para +{nivel}, e o pergaminho impediu.",
+    "protegido_continua": "A carta continua em **+{nivel}**.",
+    "queda": "🔻 {carta} caiu para +{nivel}",
+    "nada_titulo": "➖ Não aconteceu nada",
+    "nada_texto": "**{carta}** continua em {nivel}.",
+    "nivel_natural": "nível natural",
+    "gema_gasta": "A gema foi gasta.",
+    "expirou": "O tempo para aprimorar expirou. Nenhuma gema foi gasta."
+  },
+  "desmanchar": {
+    "titulo": "🔨 Desmanchar {carta}?",
+    "nao_da": "Não dá para desmanchar",
+    "uma_gema": "**{n} gema**",
+    "varias_gemas": "**{n} gemas**",
+    "vira_gemas": "Vira {emoji} {gemas}.",
+    "quicksell_pagaria": "Vendida no `/quicksell` pagaria {valor}.",
+    "compensa": "> 💡 *Em gema você leva o equivalente a {valor} na loja — desmanchar rende mais.*",
+    "nao_compensa": "> ⚠️ *Em gema o equivalente é {valor} na loja — **vender paga melhor** nesta carta.*",
+    "unica_copia": "⚠️ **É a sua única cópia desta carta.**",
+    "irreversivel": "A carta é destruída e não pode ser recuperada.",
+    "pokedex_guarda": "A Pokédex guarda a descoberta — ela continua registrada.",
+    "botao": "Desmanchar por {gemas}",
+    "gema_nao_entrou": "A carta foi desmanchada, mas a gema não entrou",
+    "gema_nao_entrou_texto": "**{carta}** valia {gemas}. Fale com a staff informando este erro.",
+    "concluido": "Carta desmanchada",
+    "concluido_texto": "**{carta}** virou {emoji} {gemas}.",
+    "pokedex_continua": "A descoberta continua registrada na sua Pokédex.",
+    "gemas_na_bolsa": "Gemas na bolsa",
+    "cancelado": "Desmanche cancelado",
+    "expirou": "O tempo para desmanchar a carta expirou. Nada foi destruído."
+  },
+  "evento": {
+    "sem_premio": "sem prêmio definido",
+    "nenhum_aberto": "🎪 Nenhum evento aberto",
+    "nenhum_aberto_texto": "Não há evento com inscrição aberta agora.",
+    "nenhum_aberto_dica": "Fique de olho no servidor — quando abrir um, ele aparece aqui e você entra com `/evento entrar`.",
+    "abertos": "🎪 Eventos abertos",
+    "como_entrar": "Entre com `/evento entrar nome:<o nome do evento>`.",
+    "sem_descricao": "sem descrição",
+    "premio": "**Prêmio:** {premio}",
+    "inscritos": "**Inscritos:** {n}",
+    "ja_inscrito_linha": "Você já está inscrito.",
+    "nao_encontrado": "Evento não encontrado",
+    "nao_encontrado_texto": "Não achei nenhum evento aberto chamado **{nome}**.\n\nUse `/evento lista` para ver os que estão abertos.",
+    "ja_inscrito": "Você já está inscrito",
+    "ja_inscrito_texto": "Sua inscrição em **{evento}** já estava confirmada.",
+    "entrega_depois": "O prêmio é entregue quando o evento for apurado — não precisa fazer mais nada.",
+    "confirmada": "🎪 Inscrição confirmada!",
+    "confirmada_texto": "Você entrou em **{evento}**.",
+    "entrega_quando_apurar": "A entrega acontece quando o evento for apurado. Fique de olho no servidor."
+  },
+  "caixa": {
+    "titulo": "🎁 Caixas",
+    "como_usar": "Compre com `/caixa comprar` e abra quando quiser com `/caixa abrir`.",
+    "voce_tem": "Você tem **{quantidade}** guardada(s).",
+    "hoje": "Hoje: **{restam}** de {limite}",
+    "nao_esta_a_venda": "não está à venda",
+    "indisponivel": "Caixa indisponível",
+    "indisponivel_texto": "Essa caixa não está à venda.",
+    "limite_texto": "Você já comprou **{limite}** {caixa} hoje.",
+    "limite_porque": "O limite existe para a caixa não virar torneira de cartas. Ele zera à meia-noite (UTC).",
+    "limite_cortou": "Você pediu {pedido}, mas o limite de hoje deixou comprar {comprado}.",
+    "guardada": "Caixa guardada",
+    "abra_quando_quiser": "Abra com `/caixa abrir` quando quiser.",
+    "desconhecida": "Caixa desconhecida",
+    "desconhecida_texto": "Essa caixa não existe.",
+    "escolha_serie": "Escolha a série",
+    "escolha_serie_texto": "A {caixa} precisa de uma série — é justamente o que ela mira.",
+    "nao_tem": "Você não tem essa caixa",
+    "nao_tem_texto": "Nenhuma {caixa} na sua bolsa.",
+    "nao_tem_apoiador": "Ela não está à venda — é a recompensa de quem vota no bot.",
+    "nao_tem_compre": "Compre com `/caixa comprar` por {preco}.",
+    "sem_carta": "Nenhuma carta encontrada",
+    "sem_carta_texto": "Sua caixa foi devolvida à bolsa.",
+    "autor": "{jogador} abriu uma caixa",
+    "ja_no_inventario": "A carta já está no seu inventário"
+  },
+  "bolsa": {
+    "titulo": "🎒 Seus itens",
+    "autor": "Bolsa de {jogador}",
+    "vazia_titulo": "🎒 Sua bolsa está vazia",
+    "vazia_texto": "Itens aparecem aqui quando você compra na `/loja` ou desmancha uma carta.",
+    "vazia_gema": "💎 **{item}** é o material do `/aprimorar`, e sai dos dois caminhos:",
+    "vazia_loja": "• `/loja` — {preco} cada",
+    "vazia_desmanchar": "• `/desmanchar` — a carta vira gema em vez de moeda"
+  },
+  "loja": {
+    "titulo": "🏪 Loja",
+    "como_comprar": "Compre com `/loja comprar`.",
+    "seu_saldo": "Seu saldo: **{saldo}**",
+    "voce_tem": "Você tem **{quantidade}**.",
+    "rodape_sink": "A moeda gasta aqui sai de circulação",
+    "item_indisponivel": "Item indisponível",
+    "item_indisponivel_texto": "Esse item não está à venda.",
+    "quantidade_invalida": "Quantidade inválida",
+    "quantidade_invalida_texto": "Compre de 1 a {maximo} por vez.",
+    "custo_da_compra": "{item} x{quantidade} custa {total}.",
+    "faltam": "Você tem {saldo} — faltam **{falta}**.",
+    "compra_concluida": "Compra concluída",
+    "pagou": "Pagou {total} • Saldo: {saldo}",
+    "saldo_atual": "Saldo: {saldo}",
+    "na_bolsa_agora": "Na bolsa agora: **{quantidade}**",
+    "sem_perfil": "Sem perfil",
+    "sem_perfil_texto": "Use `/roll` ou `/daily` uma vez antes.",
+    "limite_diario": "Limite diário atingido",
+    "limite_diario_texto": "Você já comprou **{limite}** rolls extras hoje.",
+    "limite_diario_porque": "O limite existe para o jogo continuar dependendo de tempo, não de saldo.",
+    "limite_diario_zera": "Ele zera à meia-noite (UTC).",
+    "limite_diario_esgotado": "Você já usou todos os rolls extras de hoje.",
+    "roll_extra_custo": "O {n}º roll extra de hoje custa {preco}.",
+    "voce_tem_saldo": "Você tem {saldo}.",
+    "roll_extra_guardado": "Roll extra guardado",
+    "roll_extra_pagou": "{item} — pagou {preco}",
+    "roll_extra_como_usar": "Use com `/roll extra:True` quando quiser — ele ignora o cooldown.",
+    "roll_extra_ultimo": "Foi o último de hoje. O limite zera à meia-noite (UTC).",
+    "roll_extra_proximo": "O próximo de hoje custa {preco} — o preço sobe a cada compra."
+  },
   "comandos": {
+    "roll": {
+      "descricao": "Rola uma carta aleatória baseada em raridade",
+      "opcao_extra": "Gasta um 🎟️ roll extra da bolsa para ignorar o cooldown"
+    },
+    "quicksell": {
+      "descricao": "Vende rapidamente uma carta do seu inventário",
+      "opcao_nome": "O nome da carta que você quer vender rápido"
+    },
+    "aprimorar": {
+      "descricao": "Gasta gemas para tentar subir o nível de uma carta",
+      "opcao_nome": "O nome da carta que você quer aprimorar"
+    },
+    "desmanchar": {
+      "descricao": "Transforma uma carta do inventário em gemas de aprimoramento",
+      "opcao_nome": "O nome da carta que você quer desmanchar"
+    },
+    "bolsa": {
+      "descricao": "Mostra os itens que você tem — gemas, pergaminhos e o que vier"
+    },
+    "caixa": {
+      "descricao": "Caixas de cartas — compre, guarde e abra quando quiser",
+      "sub_ver": "Mostra as caixas, as chances e quantas você tem",
+      "sub_comprar": "Compra uma caixa e guarda na sua bolsa",
+      "sub_abrir": "Abre uma caixa da sua bolsa",
+      "opcao_caixa": "Qual caixa",
+      "opcao_quantidade": "Quantas (1 a {maximo})",
+      "opcao_serie": "Só para a Caixa Temática: a série que você quer"
+    },
+    "evento": {
+      "descricao": "Vê os eventos abertos e entra neles",
+      "sub_lista": "Mostra os eventos com inscrição aberta",
+      "sub_entrar": "Entra num evento aberto",
+      "opcao_nome": "O nome exato do evento, como aparece em /evento lista"
+    },
+    "treino": {
+      "descricao": "Batalha simulada contra o BOT Caviar — não vale moeda, ELO nem conquista",
+      "opcao_dificuldade": "Quão forte é o adversário (padrão: parelho)"
+    },
+    "pokedex": {
+      "descricao": "Mostra quais cartas você já descobriu e quais ainda faltam",
+      "opcao_serie": "Filtrar por anime/série",
+      "opcao_dex": "Qual Pokédex (padrão: a normal)",
+      "opcao_raridade": "Filtrar por raridade",
+      "opcao_faltantes": "Mostrar apenas as cartas que você ainda não tem",
+      "dex_normal": "📖 Normal",
+      "dex_evento": "🎗️ Cartas de evento"
+    },
+    "loja": {
+      "descricao": "Troca moedas por itens",
+      "sub_ver": "Mostra o que está à venda",
+      "sub_comprar": "Compra um item da loja",
+      "opcao_item": "O que você quer comprar",
+      "opcao_quantidade": "Quantos (padrão: 1)",
+      "sub_roll_extra": "Adianta seu próximo /roll (até {limite} por dia, e o preço sobe a cada um)"
+    },
     "idioma": {
       "descricao": "Escolhe o idioma das respostas do bot (português ou inglês)",
       "opcao_idioma": "Idioma desejado, ou automático para seguir o Discord",

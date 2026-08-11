@@ -1,22 +1,20 @@
 # Como o bot fala dois idiomas
 
-Português e inglês. Este documento é a referência de quem for mexer nisso
-— e o mapa para terminar a tradução, que está pela metade.
+Português e inglês. Este documento é a referência de quem for mexer nisso.
 
 ## Estado atual
 
-A branch `trad` tem a **base pronta** sobre a `main` atual: infraestrutura,
-dicionários completos e os utilitários compartilhados. Faltam os arquivos
-de comando.
+O inglês está **completo**: todo texto que chega ao jogador sai do
+dicionário. Não há mais arquivo com frase escrita na mão.
 
-| Pronto | Falta |
+| | |
 |---|---|
-| `utils/i18n.js`, `utils/idioma.js`, `utils/guildSchema.js` | 26 arquivos de comando (lista abaixo) |
-| `locales/pt-BR.json` e `en-US.json` (789 chaves) | 7 comandos novos |
-| `/idioma` (`/language` em inglês) | |
-| `embeds.js`, catálogos, `tournament`, `notificacoes` | |
+| Dicionários | `Commands/locales/pt-BR.json` e `en-US.json` |
+| Comandos localizados | 39 de 39 (descrição, opções e escolhas) |
+| Conferência | `npm test` |
 
-`npm test` passa (27 arquivos).
+O espanhol **não existe** e é o próximo passo — ver o final deste
+documento.
 
 ## O essencial
 
@@ -39,7 +37,11 @@ module.exports = async (client, interaction) => {
 };
 ```
 
-Use `rollRun.js` e `battleRun.js` como modelo — estão completos.
+Use `battleRun.js` e `lojaRun.js` como modelo.
+
+Função que só desenha (não tem `interaction`) recebe o `t` como
+parâmetro, com `criarT(DEFAULT_LOCALE)` de padrão — ver
+`escolhaDeTime.js`.
 
 ## Qual idioma cada mensagem usa
 
@@ -49,35 +51,59 @@ Não é uma escolha só, porque as mensagens têm donos diferentes:
 |---|---|---|
 | Resposta a um clique | de quem clicou | `tDaInteracao(interaction)` |
 | DM para um jogador | dele | `tDoUsuario(userId, guildId)` |
-| Quadro público duradouro (torneio) | do servidor | `tDoUsuario(null, guildId)` |
+| Quadro público duradouro | do servidor | `tDoUsuario(null, guildId)` |
 | Troféu anunciado no canal | de quem conquistou | `tDoUsuario(vencedorId, guildId)` |
 
-O quadro do torneio segue o servidor porque fica horas no canal: se
-seguisse o clique, trocaria de idioma a cada inscrição.
+**Quadro duradouro** é a mesa de troca, o quadro do torneio e a
+transmissão da batalha: mensagens que ficam no canal por minutos ou horas
+e são editadas por mais de uma pessoa. Se seguissem o clique, trocariam
+de idioma na frente de quem está lendo, por causa de uma ação do outro.
 
-## Quatro armadilhas
+Quando a MESMA informação vai para vários destinos, ela é montada uma vez
+por destino. O resultado da batalha, por exemplo, sai três vezes: canal
+(servidor), privado de X (dele) e privado de Y (dele). As três recebem o
+mesmo `result`, então placar, ELO e aposta são obrigatoriamente iguais —
+só a língua muda.
+
+## Cinco armadilhas
 
 **`ui.cardName()` recebe a CARTA, não `carta.name`.** A assinatura é
 `(carta, nivel, locale)`. Passar só o nome funciona — e **some com o
 `(+3)` da carta aprimorada, em silêncio**. Sempre `ui.cardName(carta)`.
 
-**Nunca conte evento varrendo texto.** Havia
-`log.match(/CRÍTICO/g)` contando críticos para missões e conquistas.
-Traduzir a palavra zeraria o troféu "Golpe certeiro" sem erro nenhum.
-Hoje `contarDestaques` lê os eventos estruturados. Se precisar contar algo
-novo, conte do dado, nunca da frase.
+**Nunca conte nem procure evento varrendo texto.** Havia
+`log.match(/CRÍTICO/g)` contando críticos para missões, e um
+`log.filter((l) => l.includes('CRÍTICO'))` escolhendo o destaque da tela
+final. Traduzir a palavra zeraria o troféu "Golpe certeiro" e faria o
+destaque sumir — nos dois casos sem erro nenhum. Hoje tudo lê as flags do
+evento (`crit`, `desperate`, `tipo`). Se precisar de algo novo, leia do
+dado, nunca da frase.
 
-**Nada de texto de tela gravado no banco.** O placar de bye do torneio era
-gravado como `'passou direto'`, congelando o português no histórico. Hoje
-grava o código `'BYE'` e traduz na exibição. Mesma regra para qualquer
-coisa persistida.
+**Texto de tela nunca é calculado antes de existir leitor.** O motor de
+combate escrevia a narração dentro do resultado, e a mesma luta é lida
+por dois jogadores que podem estar em idiomas diferentes. Hoje o evento
+carrega só o que aconteceu e `narracao.descreverEvento(evento, t)` monta
+a frase na hora de mostrar. Mesma regra para o que é gravado no banco: o
+placar de bye do torneio guarda o código `'BYE'`, não `'passou direto'`.
 
 **Catálogo guarda mecânica, não texto.** Troféus, missões, planos VIP,
-molduras e divisões de ELO têm só `chave`, condição e valores; nome e
-descrição vêm do dicionário. Como a chave é o que fica no documento do
-jogador, trocar um texto nunca mexe no que já foi conquistado. Use
-`achievements.localizar()`, `missoes.localizar()`, `vip.nomeTier()`,
-`elo.divisao(elo, locale)`.
+molduras, divisões de ELO, **itens, caixas e dificuldades de treino** têm
+só `chave`, condição e valores; nome e descrição vêm do dicionário. Como
+a chave é o que fica no documento do jogador, trocar um texto nunca mexe
+no que ele já tem. Use `achievements.localizar()`, `missoes.localizar()`,
+`vip.nomeTier()`, `elo.divisao(elo, locale)`, `itens.localizar()`,
+`caixas.localizar()`, `treino.localizarDificuldade()`.
+
+Ler `.label` ou `.nome` do catálogo cru devolve `undefined` — e
+`undefined` aparece na tela sem levantar exceção. Foi assim que a
+Coleção do `/profile` passou um tempo mostrando "⚪ undefined: **5**".
+
+**Número do jogo não vai escrito no dicionário.** A descrição do
+`/loja roll-extra` cita o limite diário e a do `/caixa comprar` cita o
+teto por compra; os dois entram por `{marcador}`, com o número vindo do
+código. `descricaoBase()` e `localizacoes()` aceitam valores para isso.
+Escrever o número na frase faria ela sobreviver à mudança da regra e
+virar mentira em silêncio, nos dois idiomas de uma vez.
 
 ## Conferir antes de abrir PR
 
@@ -85,71 +111,37 @@ jogador, trocar um texto nunca mexe no que já foi conquistado. Use
 npm test
 ```
 
-O `tests/i18n.test.js` trava os erros silenciosos: chave faltando num
-idioma, marcador `{valor}` presente só num lado, dicionário inglês
-copiado do português, e descrição de comando passando dos 100 caracteres
-que o Discord recusa.
+O `tests/i18n.test.js` trava os erros silenciosos:
 
-## Terminar: os 26 arquivos
+- chave que existe num idioma e falta no outro;
+- **chave que o código pede e não existe em lugar nenhum** — este é o mais
+  comum, e o que não levanta exceção: `traduzir()` devolve a própria
+  chave, e o jogador lê `loja.compra_concluida` no meio da tela;
+- marcador `{valor}` presente só de um lado;
+- dicionário inglês copiado do português;
+- descrição de comando passando dos 100 caracteres que o Discord recusa.
 
-Cada um precisa da versão da `main` **com a tradução reaplicada por
-cima**. Ficar só com a versão traduzida antiga descarta lógica nova de
-verdade — foi verificado.
+## O que falta: o espanhol
 
-O caminho que funciona:
+A infraestrutura aguenta; o volume está na tradução.
 
-```bash
-git show "feat/idioma-ingles:<arquivo>" > /tmp/meu
-git show "eb53e6e:<arquivo>"            > /tmp/base
-git show "origin/main:<arquivo>"        > /tmp/main
-git merge-file -p --diff3 /tmp/meu /tmp/base /tmp/main > <arquivo>
-```
+- `Commands/locales/es-ES.json` — cerca de 800 chaves
+- `utils/i18n.js`: acrescentar ao `DICIONARIOS` e ao `MAPA_DISCORD`
+  (`es-ES` **e `es-419`**, o código LATAM do Discord — sem ele o cliente
+  mexicano cai em inglês)
+- `normalizar()`: o `if (base === 'pt'/'en')` precisa de um ramo `es`
+- `/idioma`: uma escolha nova
+- `tests/i18n.test.js`: hoje é fixo em `pt` e `en` (`const pt = require(...)`).
+  Tem que iterar `LOCALES`, senão o espanhol entra sem rede
 
-Depois resolver os blocos: fica o texto traduzido, entra a linha nova da
-`main`. O que a `main` adicionou em cada um:
-
-| Arquivo | Trazer da main |
-|---|---|
-| `collect/marketCollect.js` | `valores.overallDaCarta()` |
-| `collect/quicksellCollect.js` | `transacoes.registrar()` (livro-razão) |
-| `collect/rollCollect.js` | parâmetro `mostradoEm` |
-| `collect/battleCollect.js` | `montarEscolhaDeTime()` |
-| `run/fichaRun.js` | `valores.valoresDaCarta().marketValue` |
-| `run/sellRun.js` | `negociabilidade.podeNegociar()` |
-| `run/inventoryRun.js` | `valores.overallDaCarta` |
-| `run/showRun.js` | `valores.valoresDaCarta().valueToSell` |
-| `run/pokedexRun.js` | dex de eventos (`dex:evento`) |
-| `run/helpRun.js` | 8 entradas novas no manual |
-| `end/marketEnd.js` | `valores.valoresDaCarta()`, campo `nivel` |
-
-Os demais são só troca de string.
-
-## Terminar: os 7 comandos novos
-
-`/aprimorar` · `/bolsa` · `/caixa` · `/desmanchar` · `/evento` · `/loja` ·
-`/treino`, mais os utilitários que vieram com eles (`valores`, `itens`,
-`nivel`, `aprimoramento`, `sorteio`, `negociabilidade`, `transacoes`).
-
-Vocabulário aprovado para o inglês:
-
-| PT | EN |
-|---|---|
-| gema | Gem |
-| pergaminho | Scroll |
-| caixa | Box |
-| aprimorar | Upgrade |
-| desmanchar | Salvage |
-| bolsa | Bag |
-| loja | Shop |
-| roll extra | Extra Roll |
-| carta vinculada | Bound card |
-
-A raridade `event` já está nos dois dicionários (Evento / Event).
+`escolhasRaridade()`, `localizacoes()` e `escolha()` já são dirigidos por
+`LOCALES` — saem de graça. Os schemas não precisam de migração: `idioma`
+é `String` livre, sem `enum`.
 
 ## Uma decisão de jogo em aberto
 
 `contarDestaques` reproduz de propósito uma peculiaridade da contagem
-antiga: `descreverGolpe` usa `if/else if`, então uma **virada nunca era
+antiga: `descreverEvento` usa `if/else if`, então uma **virada nunca é
 contada como crítico**, apesar de mecanicamente ser um. Corrigir
 aceleraria o troféu "Golpe certeiro" e a missão "Precisão" para todo
 mundo — mudança de taxa de desbloqueio é decisão de jogo, não faxina de

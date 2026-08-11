@@ -9,6 +9,7 @@ const { formatarNumero } = require('../../utils/dexNumbers');
 const { registrar } = require('../../utils/progresso');
 const wishlist = require('../../utils/wishlist');
 const valores = require('../../utils/valores');
+const { tDaInteracao } = require('../../utils/idioma');
 
 /**
  * /ficha — mostra a ficha de uma carta que o jogador JÁ REGISTROU na Pokédex.
@@ -23,12 +24,14 @@ const valores = require('../../utils/valores');
 const MAX_RESULTADOS = 10;
 
 async function fichaRun(client, interaction) {
+    const t = await tDaInteracao(interaction);
+
     const nomeBuscado = (interaction.options.getString('nome') || '').trim();
     const numeroBuscado = interaction.options.getInteger('numero');
 
     if (!nomeBuscado && numeroBuscado == null) {
         return interaction.reply({
-            embeds: [ui.error('Informe o que procurar', 'Use `/ficha nome:Kirito` ou `/ficha numero:42`.')],
+            embeds: [ui.error(t('ficha.informe'), t('ficha.informe_texto'))],
             flags: MessageFlags.Ephemeral
         });
     }
@@ -49,9 +52,9 @@ async function fichaRun(client, interaction) {
 
     if (encontradas.length === 0) {
         const descricao = numeroBuscado != null
-            ? `Não existe nenhuma carta com o número **${formatarNumero(numeroBuscado, totalCatalogo)}** no catálogo.`
-            : `Nenhuma carta no catálogo tem "${nomeBuscado}" no nome.`;
-        return interaction.editReply({ embeds: [ui.error('Carta não encontrada', descricao)] });
+            ? t('ficha.sem_numero', { numero: formatarNumero(numeroBuscado, totalCatalogo) })
+            : t('ficha.sem_nome', { busca: nomeBuscado });
+        return interaction.editReply({ embeds: [ui.error(t('comum.carta_nao_encontrada'), descricao)] });
     }
 
     // ---- Filtra pelas que o jogador registrou ----
@@ -70,13 +73,17 @@ async function fichaRun(client, interaction) {
         // atributos dela, senão a Pokédex perderia a graça de descobrir.
         const alvo = encontradas[0];
         const embed = ui.warning(
-            'Carta não registrada',
+            t('ficha.nao_registrada'),
             encontradas.length === 1
-                ? `Você ainda não registrou **${formatarNumero(alvo.numero, totalCatalogo)}** na sua Pokédex.\n\nVocê precisa ter tido essa carta pelo menos uma vez para consultá-la aqui.`
-                : `Nenhuma das ${encontradas.length} cartas com esse nome está registrada na sua Pokédex.\n\nVocê precisa ter tido a carta pelo menos uma vez para consultá-la aqui.`
+                ? t('ficha.nao_registrada_uma', { numero: formatarNumero(alvo.numero, totalCatalogo) })
+                : t('ficha.nao_registrada_varias', { n: encontradas.length })
         ).addFields(
-            { name: 'Como conseguir', value: 'Use `/roll` para sortear ou procure no `/market`.', inline: false },
-            { name: 'Seu progresso', value: `${registradas.size} de ${totalCatalogo} cartas descobertas`, inline: false }
+            { name: t('ficha.como_conseguir'), value: t('ficha.como_conseguir_texto'), inline: false },
+            {
+                name: t('ficha.seu_progresso'),
+                value: t('ficha.progresso_texto', { descobertas: registradas.size, total: totalCatalogo }),
+                inline: false
+            }
         );
         return interaction.editReply({ embeds: [embed] });
     }
@@ -88,7 +95,7 @@ async function fichaRun(client, interaction) {
 
     const montarFicha = async (i) => {
         const carta = disponiveis[i];
-        const meta = ui.getRarity(carta.rarity);
+        const meta = ui.getRarity(carta.rarity, t.locale);
         const descobertaEm = registradas.get(String(carta._id));
 
         // Quantas cópias dessa carta o jogador tem AGORA no inventário.
@@ -99,45 +106,53 @@ async function fichaRun(client, interaction) {
         const render = await renderCard(carta, { moldura });
 
         const embed = ui.base(meta.color)
-            .setAuthor({ name: `Pokédex de ${interaction.user.username}`, iconURL: interaction.user.displayAvatarURL() })
-            .setTitle(`${formatarNumero(carta.numero, totalCatalogo)} • ${meta.emoji} ${ui.cardName(carta.name)}`)
+            .setAuthor({
+                name: t('pokedex.autor', { jogador: interaction.user.username }),
+                iconURL: interaction.user.displayAvatarURL()
+            })
+            .setTitle(`${formatarNumero(carta.numero, totalCatalogo)} • ${meta.emoji} ${ui.cardName(carta)}`)
             .setDescription([
-                `*${carta.series || '—'}*`,
+                `*${carta.series || t('comum.traco')}*`,
                 '',
-                ui.statLines(carta),
+                ui.statLines(carta, t.locale),
                 '',
-                `Raridade ${ui.rarityTag(carta.rarity)} • Overall **${carta.overall ?? 0}**`
+                t('roll.linha_raridade', {
+                    raridade: ui.rarityTag(carta.rarity, t.locale),
+                    overall: carta.overall ?? 0
+                })
             ].join('\n'))
             .addFields(
                 {
-                    name: '📖 Registrada em',
-                    value: descobertaEm ? `<t:${Math.floor(new Date(descobertaEm).getTime() / 1000)}:D>` : '—',
+                    name: t('ficha.registrada_em'),
+                    value: descobertaEm
+                        ? `<t:${Math.floor(new Date(descobertaEm).getTime() / 1000)}:D>`
+                        : t('comum.traco'),
                     inline: true
                 },
                 {
-                    name: '🎴 No seu inventário',
-                    value: copias > 0 ? `**${copias}** cópia(s)` : 'Nenhuma no momento',
+                    name: t('ficha.no_inventario'),
+                    value: copias > 0 ? t('ficha.copias', { n: copias }) : t('ficha.nenhuma_copia'),
                     inline: true
                 },
                 {
-                    name: '💰 Valor de mercado',
-                    value: ui.coins(valores.valoresDaCarta(carta).marketValue),
+                    name: t('ficha.valor_mercado'),
+                    value: ui.coins(valores.valoresDaCarta(carta).marketValue, t.locale),
                     inline: true
                 },
                 {
                     // "Procuram" e não "disputam": a carta rolada é única
                     // e fica com quem rolou. O número mede demanda no
                     // mercado, não briga pela cópia.
-                    name: '💭 Procuram',
-                    value: `${await wishlist.contarDesejos(carta._id)} jogador(es)`,
+                    name: t('ficha.procuram'),
+                    value: t('ficha.procuram_texto', { n: await wishlist.contarDesejos(carta._id) }),
                     inline: true
                 }
             )
             .setImage(render.url)
             .setFooter({
                 text: disponiveis.length > 1
-                    ? `${ui.BRAND} • Resultado ${i + 1} de ${disponiveis.length}`
-                    : `${ui.BRAND} • ${registradas.size} de ${totalCatalogo} cartas descobertas`
+                    ? `${ui.BRAND} • ${t('ficha.resultado', { atual: i + 1, total: disponiveis.length })}`
+                    : `${ui.BRAND} • ${t('ficha.progresso_texto', { descobertas: registradas.size, total: totalCatalogo })}`
             });
 
         return { embed, attachment: render.attachment };
@@ -164,8 +179,8 @@ async function fichaRun(client, interaction) {
     if (disponiveis.length < encontradas.length) {
         await interaction.followUp({
             embeds: [ui.neutral(
-                'Alguns resultados ficaram de fora',
-                `${encontradas.length - disponiveis.length} carta(s) com esse nome ainda não estão na sua Pokédex.`
+                t('ficha.de_fora'),
+                t('ficha.de_fora_texto', { n: encontradas.length - disponiveis.length })
             )],
             flags: MessageFlags.Ephemeral
         }).catch(() => {});

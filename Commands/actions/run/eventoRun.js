@@ -2,6 +2,7 @@ const { MessageFlags } = require('discord.js');
 const Evento = require('../../utils/eventoSchema');
 const ui = require('../../utils/embeds');
 const itens = require('../../utils/itens');
+const { tDaInteracao } = require('../../utils/idioma');
 
 /**
  * /evento — ver e entrar nos eventos abertos.
@@ -11,11 +12,13 @@ const itens = require('../../utils/itens');
  */
 
 /** Descreve o prêmio numa linha só, para caber na lista. */
-function resumirPremio(premios) {
+function resumirPremio(premios, t) {
     const partes = [];
 
-    if (premios?.moedas > 0) partes.push(ui.coins(premios.moedas));
+    if (premios?.moedas > 0) partes.push(ui.coins(premios.moedas, t.locale));
 
+    // O nome da carta vem do próprio prêmio, não do dicionário: é nome
+    // próprio, e o admin cadastrou exatamente aquele.
     for (const carta of premios?.cartas || []) {
         partes.push(`🃏 ${carta.nome}${carta.quantidade > 1 ? ` ×${carta.quantidade}` : ''}`);
     }
@@ -29,25 +32,24 @@ function resumirPremio(premios) {
 
     for (const [chave, quantidade] of Object.entries(mapa)) {
         if (!quantidade) continue;
-        const item = itens.getItem(chave);
+        const item = itens.localizarPorChave(chave, t.locale);
         partes.push(`${item?.emoji || '📦'} ${item?.nome || chave} ×${quantidade}`);
     }
 
-    return partes.length > 0 ? partes.join(' · ') : 'sem prêmio definido';
+    return partes.length > 0 ? partes.join(' · ') : t('evento.sem_premio');
 }
 
-async function listar(interaction) {
+async function listar(interaction, t) {
     const abertos = await Evento.find({ tipo: 'inscricao', status: 'aberto' })
         .sort({ criadoEm: -1 })
         .limit(10)
         .lean();
 
     if (abertos.length === 0) {
-        const embed = ui.info('🎪 Nenhum evento aberto', [
-            'Não há evento com inscrição aberta agora.',
+        const embed = ui.info(t('evento.nenhum_aberto'), [
+            t('evento.nenhum_aberto_texto'),
             '',
-            'Fique de olho no servidor — quando abrir um, ele aparece aqui e você entra com',
-            '`/evento entrar`.'
+            t('evento.nenhum_aberto_dica')
         ].join('\n'));
         return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
     }
@@ -55,22 +57,22 @@ async function listar(interaction) {
     const jaEstou = (evento) => (evento.participantes || []).some((p) => p.userId === interaction.user.id);
 
     const embed = ui.base()
-        .setTitle('🎪 Eventos abertos')
-        .setDescription('Entre com `/evento entrar nome:<o nome do evento>`.')
+        .setTitle(t('evento.abertos'))
+        .setDescription(t('evento.como_entrar'))
         .addFields(abertos.map((evento) => ({
             name: `${jaEstou(evento) ? '✅' : '▫️'} ${evento.nome}`,
             value: [
-                evento.descricao || '_sem descrição_',
-                `**Prêmio:** ${resumirPremio(evento.premios)}`,
-                `**Inscritos:** ${ui.number((evento.participantes || []).length)}`,
-                jaEstou(evento) ? '_Você já está inscrito._' : ''
+                evento.descricao || `_${t('evento.sem_descricao')}_`,
+                t('evento.premio', { premio: resumirPremio(evento.premios, t) }),
+                t('evento.inscritos', { n: ui.number((evento.participantes || []).length, t.locale) }),
+                jaEstou(evento) ? `_${t('evento.ja_inscrito_linha')}_` : ''
             ].filter(Boolean).join('\n').slice(0, 1024)
         })));
 
     return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
 }
 
-async function entrar(interaction) {
+async function entrar(interaction, t) {
     const nome = interaction.options.getString('nome', true);
 
     const evento = await Evento.findOne({
@@ -83,8 +85,8 @@ async function entrar(interaction) {
 
     if (!evento) {
         const embed = ui.error(
-            'Evento não encontrado',
-            `Não achei nenhum evento aberto chamado **${nome}**.\n\nUse \`/evento lista\` para ver os que estão abertos.`
+            t('evento.nao_encontrado'),
+            t('evento.nao_encontrado_texto', { nome })
         );
         return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
     }
@@ -112,27 +114,28 @@ async function entrar(interaction) {
     );
 
     if (r.modifiedCount === 0) {
-        const embed = ui.info('Você já está inscrito', [
-            `Sua inscrição em **${evento.nome}** já estava confirmada.`,
+        const embed = ui.info(t('evento.ja_inscrito'), [
+            t('evento.ja_inscrito_texto', { evento: evento.nome }),
             '',
-            'O prêmio é entregue quando o evento for apurado — não precisa fazer mais nada.'
+            t('evento.entrega_depois')
         ].join('\n'));
         return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
     }
 
-    const embed = ui.success('🎪 Inscrição confirmada!', [
-        `Você entrou em **${evento.nome}**.`,
+    const embed = ui.success(t('evento.confirmada'), [
+        t('evento.confirmada_texto', { evento: evento.nome }),
         '',
-        `**Prêmio:** ${resumirPremio(evento.premios)}`,
+        t('evento.premio', { premio: resumirPremio(evento.premios, t) }),
         '',
-        'A entrega acontece quando o evento for apurado. Fique de olho no servidor.'
+        t('evento.entrega_quando_apurar')
     ].join('\n'));
 
     return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
 }
 
 module.exports = async (client, interaction) => {
+    const t = await tDaInteracao(interaction);
     const sub = interaction.options.getSubcommand();
-    if (sub === 'entrar') return entrar(interaction);
-    return listar(interaction);
+    if (sub === 'entrar') return entrar(interaction, t);
+    return listar(interaction, t);
 };

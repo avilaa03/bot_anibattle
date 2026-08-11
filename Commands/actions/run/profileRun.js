@@ -1,7 +1,9 @@
 const User = require('../../utils/userSchema');
 const ui = require('../../utils/embeds');
 const { getProgress } = require('../../utils/discovery');
-const { getTier, corPerfilEfetiva, isVipAtivo, getPerks } = require('../../utils/vip');
+const vip = require('../../utils/vip');
+const { getTier, corPerfilEfetiva, isVipAtivo, getPerks } = vip;
+const { tDaInteracao } = require('../../utils/idioma');
 const achievements = require('../../utils/achievements');
 const elo = require('../../utils/elo');
 const valores = require('../../utils/valores');
@@ -11,11 +13,18 @@ const { MessageFlags } = require('discord.js');
 const getCardOvr = valores.overallDaCarta;
 
 async function profileRun(client, interaction) {
+    const t = await tDaInteracao(interaction);
+
     const alvo = interaction.options.getUser('user') || interaction.user;
     const user = await User.findOne({ id: alvo.id });
 
     if (!user) {
-        const embed = ui.error('Perfil não encontrado', `${alvo.id === interaction.user.id ? 'Você ainda não tem' : `**${alvo.username}** ainda não tem`} um perfil. Ele é criado ao usar \`/roll\` ou \`/daily\`.`);
+        const embed = ui.error(
+            t('comum.perfil_nao_encontrado'),
+            alvo.id === interaction.user.id
+                ? t('profile.voce_sem_perfil')
+                : t('profile.outro_sem_perfil', { jogador: alvo.username })
+        );
         return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
     }
 
@@ -42,8 +51,13 @@ async function profileRun(client, interaction) {
         acc[key] = (acc[key] || 0) + 1;
         return acc;
     }, {});
+    // `ui.RARITIES` guarda só mecânica; o rótulo sai de `getRarity`, que
+    // consulta o dicionário. Ler `.label` daqui devolveria `undefined`.
     const colecao = Object.keys(ui.RARITIES)
-        .map((key) => `${ui.RARITIES[key].emoji} ${ui.RARITIES[key].label}: **${byRarity[key] || 0}**`)
+        .map((key) => {
+            const meta = ui.getRarity(key, t.locale);
+            return `${meta.emoji} ${meta.label}: **${byRarity[key] || 0}**`;
+        })
         .join('\n');
 
     const pokedex = await getProgress(alvo.id);
@@ -61,50 +75,73 @@ async function profileRun(client, interaction) {
     // Só aparecem para quem tem — perfil de jogador novo não fica com uma
     // fileira de espaços vazios. O de beta é permanente e não pode ser
     // conquistado depois: é isso que dá valor a ele.
+    const nomeVip = tierVip ? vip.nomeTier(tierVip.key, t.locale) : null;
+
     const selos = [];
-    if (user.staff) selos.push('🛡️ Staff');
-    if (user.beta?.participou) selos.push('🧪 Beta');
-    if (tierVip) selos.push(`${tierVip.emoji} ${tierVip.nome}`);
+    if (user.staff) selos.push(t('profile.selo_staff'));
+    if (user.beta?.participou) selos.push(t('profile.selo_beta'));
+    if (tierVip) selos.push(`${tierVip.emoji} ${nomeVip}`);
 
     const embed = ui.base(cor)
-        .setAuthor({ name: `${emblema}Perfil de ${alvo.username}`, iconURL: alvo.displayAvatarURL() })
+        .setAuthor({
+            name: `${emblema}${t('profile.autor', { jogador: alvo.username })}`,
+            iconURL: alvo.displayAvatarURL()
+        })
         .addFields(
             ...(selos.length > 0 ? [{ name: '​', value: selos.join('  •  '), inline: false }] : []),
             {
-                name: '⭐ Nível',
+                name: t('profile.nivel'),
                 value: (() => {
                     const p = nivel.progresso(user.xp);
                     const cargas = nivel.maxCargas(p.nivel) + (getPerks(user).cargasExtras || 0);
-                    return `**${p.nivel}** — ${ui.number(p.noNivel)}/${ui.number(p.paraOProximo)} XP\n`
+                    return `${t('profile.nivel_texto', {
+                        nivel: p.nivel,
+                        atual: ui.number(p.noNivel, t.locale),
+                        proximo: ui.number(p.paraOProximo, t.locale)
+                    })}\n`
                         + `${ui.progressBar(p.percentual, 100, 12)}\n`
-                        + `🎴 Acumula até **${cargas}** roll(s)`;
+                        + t('profile.acumula_rolls', { cargas });
                 })(),
                 inline: false
             },
-            { name: '🪙 Saldo', value: ui.coins(user.balance || 0), inline: true },
-            { name: '🎴 Cartas', value: `**${ui.number(totalCards)}**`, inline: true },
-            { name: '💎 Patrimônio', value: ui.coins(totalValue + (user.balance || 0)), inline: true },
-            { name: '⚔️ Batalhas', value: totalBattles > 0 ? `**${wins}**V — **${losses}**D  (${winRate}% de vitórias)\n${ui.progressBar(winRate, 100)}` : 'Nenhuma batalha ainda', inline: false },
+            { name: t('profile.saldo'), value: ui.coins(user.balance || 0, t.locale), inline: true },
+            { name: t('profile.cartas'), value: `**${ui.number(totalCards, t.locale)}**`, inline: true },
             {
-                name: '⚔️ Ranking',
+                name: t('profile.patrimonio'),
+                value: ui.coins(totalValue + (user.balance || 0), t.locale),
+                inline: true
+            },
+            {
+                name: t('profile.batalhas'),
+                value: totalBattles > 0
+                    ? `${t('profile.batalhas_texto', { vitorias: wins, derrotas: losses, pct: winRate })}\n${ui.progressBar(winRate, 100)}`
+                    : t('profile.sem_batalhas'),
+                inline: false
+            },
+            {
+                name: t('profile.ranking'),
                 value: (() => {
                     const pontos = user.elo ?? elo.ELO_INICIAL;
-                    const div = elo.divisao(pontos);
+                    const div = elo.divisao(pontos, t.locale);
                     return totalBattles > 0
-                        ? `${div.emoji} **${div.nome}** — ${ui.number(pontos)} pts`
-                        : 'Sem partidas ainda';
+                        ? t('profile.ranking_texto', {
+                            emoji: div.emoji,
+                            divisao: div.nome,
+                            pontos: ui.number(pontos, t.locale)
+                        })
+                        : t('profile.sem_partidas');
                 })(),
                 inline: true
             },
             {
-                name: '🔥 Sequência',
+                name: t('profile.sequencia'),
                 value: user.streak?.atual > 0
-                    ? `**${user.streak.atual}** dia(s) (recorde: ${user.streak.maior})`
-                    : 'Nenhuma — use \`/daily\`',
+                    ? t('profile.sequencia_texto', { atual: user.streak.atual, recorde: user.streak.maior })
+                    : t('profile.sem_sequencia'),
                 inline: true
             },
             {
-                name: '🏆 Troféus',
+                name: t('profile.trofeus'),
                 value: (() => {
                     const chaves = (user.conquistas || []).map((c) => c.chave);
                     const totais = achievements.contagemPorTipo();
@@ -115,23 +152,32 @@ async function profileRun(client, interaction) {
                     }
                     const totalTodos = Object.values(totais).reduce((a, b) => a + b, 0);
                     const linha = Object.keys(totais)
-                        .map((t) => `${achievements.TIPOS[t].emoji}${obtidos[t]}`)
+                        .map((tipo) => `${achievements.TIPOS[tipo].emoji}${obtidos[tipo]}`)
                         .join(' ');
-                    return `${linha}\n**${chaves.length}**/${totalTodos} • Nível ${achievements.nivel(achievements.pontos(chaves))}`;
+                    return `${linha}\n${t('profile.trofeus_texto', {
+                        obtidos: chaves.length,
+                        total: totalTodos,
+                        nivel: achievements.nivel(achievements.pontos(chaves))
+                    })}`;
                 })(),
                 inline: true
             },
             {
-                name: '📖 Pokédex',
-                value: `**${ui.number(pokedex.descobertas)}** / ${ui.number(pokedex.total)} cartas descobertas (${pokedex.percentual.toFixed(1)}%)\n${ui.progressBar(pokedex.percentual, 100, 12)}`,
+                name: t('profile.pokedex'),
+                value: `${t('profile.pokedex_texto', {
+                    descobertas: ui.number(pokedex.descobertas, t.locale),
+                    total: ui.number(pokedex.total, t.locale),
+                    pct: pokedex.percentual.toFixed(1)
+                })}\n${ui.progressBar(pokedex.percentual, 100, 12)}`,
                 inline: false
             },
-            { name: '📚 Coleção', value: colecao, inline: true },
+            { name: t('profile.colecao'), value: colecao, inline: true },
             {
-                name: '🏆 Melhor carta',
+                name: t('profile.melhor_carta'),
                 value: highestOvrCard
-                    ? `${ui.getRarity(highestOvrCard.rarity).emoji} **${ui.cardName(highestOvrCard)}**\nOVR **${getCardOvr(highestOvrCard)}**`
-                    : '—',
+                    ? `${ui.getRarity(highestOvrCard.rarity, t.locale).emoji} **${ui.cardName(highestOvrCard)}**\n`
+                        + `${t('atributos.ovr')} **${getCardOvr(highestOvrCard)}**`
+                    : t('comum.traco'),
                 inline: true
             }
         );
@@ -139,17 +185,25 @@ async function profileRun(client, interaction) {
     if (tierVip) {
         const expira = user.vip.expiresAt
             ? `<t:${Math.floor(new Date(user.vip.expiresAt).getTime() / 1000)}:R>`
-            : 'vitalício';
-        embed.addFields({ name: '✨ Assinatura', value: `${tierVip.emoji} **${tierVip.nome}** — renova ${expira}`, inline: false });
+            : t('profile.vitalicio');
+        embed.addFields({
+            name: t('profile.assinatura'),
+            value: `${tierVip.emoji} ${t('profile.assinatura_texto', { plano: nomeVip, quando: expira })}`,
+            inline: false
+        });
     }
 
     if (favCard) {
-        embed.setDescription(`⭐ Carta favorita: ${ui.getRarity(favCard.rarity).emoji} **${ui.cardName(favCard)}** — *${favCard.series || '—'}*`);
+        embed.setDescription(t('profile.favorita', {
+            emoji: ui.getRarity(favCard.rarity, t.locale).emoji,
+            carta: ui.cardName(favCard),
+            serie: favCard.series || t('comum.traco')
+        }));
         if (favCard.characterImage || favCard.baseImage) {
             embed.setThumbnail(favCard.characterImage || favCard.baseImage);
         }
     } else {
-        embed.setDescription('⭐ Nenhuma carta favorita definida. Use `/favcard` para escolher uma.');
+        embed.setDescription(t('profile.sem_favorita'));
     }
 
     return interaction.reply({ embeds: [embed] });

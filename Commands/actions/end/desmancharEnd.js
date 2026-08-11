@@ -1,6 +1,6 @@
-async function desmancharEnd(interaction, reason) {
+async function desmancharEnd(interaction, reason, t) {
     if (reason === 'time') {
-        await interaction.followUp({ content: 'O tempo para desmanchar a carta expirou. Nada foi destruído.', components: [] });
+        await interaction.followUp({ content: t('desmanchar.expirou'), components: [] });
     }
 }
 

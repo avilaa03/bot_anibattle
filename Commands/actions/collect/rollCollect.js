@@ -6,8 +6,9 @@ const { registerDiscovery } = require('../../utils/discovery');
 const { registrar } = require('../../utils/progresso');
 const { notificarProgresso } = require('../../utils/notificacoes');
 const telemetria = require('../../utils/telemetria');
+const { criarT, DEFAULT_LOCALE } = require('../../utils/i18n');
 
-module.exports = (interaction, card, user, marketValue, valueToSell, rollEnd, mostradoEm = null) => {
+module.exports = (interaction, card, user, marketValue, valueToSell, rollEnd, mostradoEm = null, t = criarT(DEFAULT_LOCALE)) => {
     const filter = (i) => (i.customId.startsWith(`enviarInventario_${card._id}`) || i.customId.startsWith(`vender_${card._id}`)) && i.user.id === interaction.user.id;
     // max: 1 garante que "enviar ao inventário"/"vender" só podem ser
     // processados uma vez, mesmo com clique duplo quase simultâneo.
@@ -66,16 +67,19 @@ module.exports = (interaction, card, user, marketValue, valueToSell, rollEnd, mo
                     .catch(() => {});
             }
 
+            const guardada = t('roll.guardada', { carta: ui.cardName(card) });
             await i.update({
-                content: inedita
-                    ? `🎴 **${ui.cardName(card.name)}** foi guardada no seu inventário.\n📖 **Nova entrada na Pokédex!** Veja em \`/pokedex\`.`
-                    : `🎴 **${ui.cardName(card.name)}** foi guardada no seu inventário.`,
+                content: inedita ? `${guardada}\n${t('roll.nova_pokedex')}` : guardada,
                 components: []
             });
         } else if (i.customId.startsWith('vender_')) {
             const updated = await addBalance(interaction.user.id, valueToSell);
             await i.update({
-                content: `🪙 Você vendeu **${ui.cardName(card.name)}** por ${ui.coins(valueToSell)}. Saldo: ${ui.coins(updated?.balance ?? 0)}`,
+                content: t('roll.vendida', {
+                    carta: ui.cardName(card),
+                    valor: ui.coins(valueToSell, t.locale),
+                    saldo: ui.coins(updated?.balance ?? 0, t.locale)
+                }),
                 components: []
             });
         }
@@ -83,7 +87,7 @@ module.exports = (interaction, card, user, marketValue, valueToSell, rollEnd, mo
     });
 
     collector.on('end', (collected, reason) => {
-        rollEnd(interaction, reason);
+        rollEnd(interaction, reason, t);
     });
 
     return collector;

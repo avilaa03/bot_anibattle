@@ -27,6 +27,8 @@
  * contra abuso é o cooldown entre o mesmo par de jogadores, que já existe.
  */
 
+const { traduzir, DEFAULT_LOCALE } = require('./i18n');
+
 const MINUTO = 60 * 1000;
 
 /**
@@ -113,13 +115,19 @@ function podeCancelarBatalha(battle, userId) {
     return { ok: true };
 }
 
-/** Texto para o jogador, por motivo de recusa. */
-const MENSAGENS = {
-    NAO_PARTICIPA: 'Você não faz parte desta negociação.',
-    EXECUTANDO: 'As cartas já estão trocando de dono — não dá mais para voltar atrás.',
-    EM_COMBATE: 'A luta já começou. O resultado vale.',
-    FINALIZADA: 'Isso já terminou.'
-};
+/**
+ * Motivos de recusa que têm texto no dicionário.
+ *
+ * A lista existe para o teste conseguir conferir que todo motivo devolvido
+ * por `podeCancelar*` tem frase nos dois idiomas — sem ela, um motivo novo
+ * apareceria na tela como a própria chave.
+ */
+const MOTIVOS = ['NAO_PARTICIPA', 'EXECUTANDO', 'EM_COMBATE', 'FINALIZADA'];
+
+/** Texto para o jogador, por motivo de recusa, no idioma pedido. */
+function mensagem(motivo, locale = DEFAULT_LOCALE) {
+    return traduzir(locale, `ciclo_de_vida.${motivo}`);
+}
 
 /**
  * Monta o filtro do Mongo que encontra registros vencidos.
@@ -155,5 +163,6 @@ module.exports = {
     podeCancelarTroca,
     podeCancelarBatalha,
     filtroExpirados,
-    MENSAGENS
+    MOTIVOS,
+    mensagem
 };

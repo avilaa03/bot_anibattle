@@ -110,31 +110,43 @@ function nomeDaCarta(card) {
     return nivel > 0 ? `${card.name} (+${nivel})` : card.name;
 }
 
-function descreverGolpe(atacante, defensor, resultado, vidaRestante) {
-    if (resultado.dodged) {
-        return `💨 **${nomeDaCarta(defensor)}** esquivou do ataque de **${nomeDaCarta(atacante)}**!`;
-    }
-    let prefixo = '';
-    if (resultado.desperate) prefixo = '🔥 **VIRADA!** ';
-    else if (resultado.crit) prefixo = '💥 **CRÍTICO!** ';
-    return `${prefixo}**${nomeDaCarta(atacante)}** causou **${resultado.damage}** de dano — **${nomeDaCarta(defensor)}** ficou com **${Math.max(0, vidaRestante)}** de vida.`;
-}
-
-/** Duelo 1v1 entre duas cartas. Retorna vencedor ('A' ou 'B') e o log. */
+/**
+ * Duelo 1v1 entre duas cartas. Retorna o vencedor ('A' ou 'B') e os
+ * eventos.
+ *
+ * ## Por que o motor não escreve mais a narração
+ *
+ * Ele escrevia: cada golpe virava uma frase em português, guardada no
+ * `log` do round e dentro do próprio evento. Isso quebra por um motivo
+ * simples — a MESMA luta é mostrada para dois jogadores que podem estar
+ * em idiomas diferentes, e a frase era decidida no instante do cálculo,
+ * antes de existir leitor.
+ *
+ * Além disso, texto congelado no resultado repete o erro que
+ * `contarDestaques` já teve que desfazer: quem quisesse saber se houve um
+ * crítico ia procurar a palavra "CRÍTICO" na frase, e a tradução zeraria
+ * a conta em silêncio.
+ *
+ * Agora o evento carrega só o que aconteceu — quem golpeou, quanto de
+ * dano, se foi crítico, quanta vida sobrou — e a frase é montada na hora
+ * de mostrar, no idioma de quem está lendo, por
+ * `narracao.descreverEvento()`.
+ *
+ * O nome da carta continua vindo daqui porque nome próprio não se traduz,
+ * e o selo `(+3)` faz parte da identidade dela em qualquer idioma.
+ */
 function runRound(cardA, cardB, roundIndex, rng = Math.random) {
     const maxA = Math.max(1, cardA.LIF ?? 1);
     const maxB = Math.max(1, cardB.LIF ?? 1);
     let lifeA = cardA.LIF ?? 0;
     let lifeB = cardB.LIF ?? 0;
-    const log = [];
 
-    // Eventos estruturados, para a transmissão ao vivo.
+    // Eventos estruturados: a única saída narrativa do motor.
     //
-    // O `log` continua sendo texto puro (vários lugares dependem dele),
-    // mas texto não dá para desenhar barra de vida nem cronometrar. Cada
-    // evento carrega a vida dos dois LADOS no instante em que aconteceu —
-    // é isso que permite reproduzir a luta golpe a golpe depois, sem
-    // recalcular nada e sem risco de a animação divergir do resultado.
+    // Cada evento carrega a vida dos dois LADOS no instante em que
+    // aconteceu — é isso que permite reproduzir a luta golpe a golpe
+    // depois, sem recalcular nada e sem risco de a animação divergir do
+    // resultado.
     const eventos = [];
     const registrar = (tipo, extra = {}) => {
         eventos.push({
@@ -149,9 +161,10 @@ function runRound(cardA, cardB, roundIndex, rng = Math.random) {
     };
 
     let vezDeA = rng() < firstStrikeChance(cardA.ATA ?? 0, cardB.ATA ?? 0);
-    const abertura = `⚡ **${nomeDaCarta(vezDeA ? cardA : cardB)}** foi mais rápido e atacou primeiro.`;
-    log.push(abertura);
-    registrar('inicio', { texto: abertura, primeiro: vezDeA ? 'A' : 'B' });
+    registrar('inicio', {
+        primeiro: vezDeA ? 'A' : 'B',
+        atacante: nomeDaCarta(vezDeA ? cardA : cardB)
+    });
 
     for (let turno = 0; turno < MAX_TURNS; turno++) {
         const atacante = vezDeA ? cardA : cardB;
@@ -163,29 +176,25 @@ function runRound(cardA, cardB, roundIndex, rng = Math.random) {
         if (vezDeA) lifeB -= resultado.damage;
         else lifeA -= resultado.damage;
 
-        const texto = descreverGolpe(atacante, defensor, resultado, vezDeA ? lifeB : lifeA);
-        log.push(texto);
         registrar(resultado.dodged ? 'esquiva' : 'golpe', {
-            texto,
             lado: vezDeA ? 'A' : 'B',
+            atacante: nomeDaCarta(atacante),
+            defensor: nomeDaCarta(defensor),
             dano: resultado.damage,
+            vidaRestante: Math.max(0, vezDeA ? lifeB : lifeA),
             crit: resultado.crit,
             desperate: resultado.desperate
         });
 
         if (lifeB <= 0) {
-            const fim = `🏆 **${nomeDaCarta(cardA)}** venceu o confronto!`;
-            log.push(fim);
             lifeB = 0;
-            registrar('fim', { texto: fim, vencedor: 'A' });
-            return { winner: 'A', loser: 'B', log, eventos, lifeA, lifeB: 0 };
+            registrar('fim', { vencedor: 'A', vencedorNome: nomeDaCarta(cardA) });
+            return { winner: 'A', loser: 'B', eventos, lifeA, lifeB: 0 };
         }
         if (lifeA <= 0) {
-            const fim = `🏆 **${nomeDaCarta(cardB)}** venceu o confronto!`;
-            log.push(fim);
             lifeA = 0;
-            registrar('fim', { texto: fim, vencedor: 'B' });
-            return { winner: 'B', loser: 'A', log, eventos, lifeA: 0, lifeB };
+            registrar('fim', { vencedor: 'B', vencedorNome: nomeDaCarta(cardB) });
+            return { winner: 'B', loser: 'A', eventos, lifeA: 0, lifeB };
         }
 
         vezDeA = !vezDeA;
@@ -194,16 +203,14 @@ function runRound(cardA, cardB, roundIndex, rng = Math.random) {
     // Estourou o limite de turnos: decide por percentual de vida restante.
     const percentA = lifeA / maxA;
     const percentB = lifeB / maxB;
-    const porTempo = '⏱️ O confronto se estendeu — vence quem está em melhor estado.';
-    log.push(porTempo);
 
     const vencedor = percentA === percentB
         ? ((cardA.POW ?? 0) >= (cardB.POW ?? 0) ? 'A' : 'B')
         : (percentA > percentB ? 'A' : 'B');
 
-    registrar('tempo', { texto: porTempo, vencedor });
+    registrar('tempo', { vencedor });
 
-    return { winner: vencedor, loser: vencedor === 'A' ? 'B' : 'A', log, eventos, lifeA, lifeB };
+    return { winner: vencedor, loser: vencedor === 'A' ? 'B' : 'A', eventos, lifeA, lifeB };
 }
 
 /**
@@ -229,9 +236,8 @@ function runBattle(deckX, deckY, rng = Math.random) {
             nivelX: deckX[i].nivel ?? 0,
             nivelY: deckY[i].nivel ?? 0,
             winner: result.winner,
-            log: result.log,
-            // A transmissão ao vivo lê daqui. Os nomes vão junto porque o
-            // evento sozinho só sabe dizer 'A' ou 'B'.
+            // A transmissão ao vivo e a tela final leem daqui. Os nomes vão
+            // junto porque o evento sozinho só sabe dizer 'A' ou 'B'.
             eventos: result.eventos,
             nomeA: deckX[i].name,
             nomeB: deckY[i].name,

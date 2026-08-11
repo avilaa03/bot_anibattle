@@ -1,6 +1,7 @@
 const BaseSlashCommand = require('../utils/BaseSlashCommand.js');
 const { SlashCommandBuilder } = require('discord.js');
 const eventoRun = require('../actions/run/eventoRun.js');
+const { descricaoBase, localizacoes } = require('../utils/i18n.js');
 
 module.exports = class EventoSlashCommand extends BaseSlashCommand {
     constructor() {
@@ -14,16 +15,20 @@ module.exports = class EventoSlashCommand extends BaseSlashCommand {
     getSlashCommandJSON() {
         return new SlashCommandBuilder()
             .setName(this.name)
-            .setDescription('Vê os eventos abertos e entra neles')
+            .setDescription(descricaoBase('comandos.evento.descricao'))
+            .setDescriptionLocalizations(localizacoes('comandos.evento.descricao'))
             .addSubcommand((sub) => sub
                 .setName('lista')
-                .setDescription('Mostra os eventos com inscrição aberta'))
+                .setDescription(descricaoBase('comandos.evento.sub_lista'))
+                .setDescriptionLocalizations(localizacoes('comandos.evento.sub_lista')))
             .addSubcommand((sub) => sub
                 .setName('entrar')
-                .setDescription('Entra num evento aberto')
+                .setDescription(descricaoBase('comandos.evento.sub_entrar'))
+                .setDescriptionLocalizations(localizacoes('comandos.evento.sub_entrar'))
                 .addStringOption((opt) => opt
                     .setName('nome')
-                    .setDescription('O nome exato do evento, como aparece em /evento lista')
+                    .setDescription(descricaoBase('comandos.evento.opcao_nome'))
+                    .setDescriptionLocalizations(localizacoes('comandos.evento.opcao_nome'))
                     .setRequired(true)))
             .toJSON();
     }

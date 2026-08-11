@@ -1,4 +1,5 @@
 const valores = require('./valores');
+const { traduzir, DEFAULT_LOCALE } = require('./i18n');
 
 /**
  * Caixas: sorteio pago, com distribuição própria.
@@ -63,23 +64,23 @@ const ARREDONDAMENTO = 500;
  * troca raridade por MIRA — ela vale pela série, não pelo prêmio.
  *
  * `serie: true` faz a caixa pedir uma série na hora de abrir.
+ *
+ * Como no catálogo de itens, aqui só entra mecânica: nome, descrição e
+ * detalhe saem do dicionário em `caixas_catalogo.<chave>`, por
+ * `localizar()`. A chave é o que vai para a bolsa do jogador.
  */
 const CAIXAS = {
     comum: {
         chave: 'comum',
-        nome: 'Caixa Comum',
         emoji: '📦',
-        descricao: 'A mais barata. Serve para tentar a sorte sem doer.',
         distribuicao: { common: 40, rare: 45, 'ultra rare': 14, legendary: 1 },
         limiteDia: 5,
         ordem: 1
     },
     tematica: {
         chave: 'tematica',
-        nome: 'Caixa Temática',
         emoji: '🎯',
-        descricao: 'Você escolhe a série. Rara ou melhor garantida.',
-        detalhe: 'A única que mira: serve para fechar uma série na Pokédex.',
+        temDetalhe: true,
         distribuicao: { rare: 70, 'ultra rare': 25, legendary: 4.5, master: 0.5 },
         serie: true,
         limiteDia: 3,
@@ -87,19 +88,15 @@ const CAIXAS = {
     },
     elite: {
         chave: 'elite',
-        nome: 'Caixa de Elite',
         emoji: '💠',
-        descricao: 'Ultra Rara garantida, com boa chance de Lendária.',
         distribuicao: { 'ultra rare': 70, legendary: 27, master: 3 },
         limiteDia: 2,
         ordem: 3
     },
     lendaria: {
         chave: 'lendaria',
-        nome: 'Caixa Lendária',
         emoji: '🌟',
-        descricao: 'A mais cara do jogo. 10% de chance de sair uma Mestra.',
-        detalhe: 'Ainda é prejuízo na média — você paga pela chance, não pelo retorno.',
+        temDetalhe: true,
         distribuicao: { 'ultra rare': 50, legendary: 40, master: 10 },
         limiteDia: 1,
         ordem: 4
@@ -115,9 +112,7 @@ const CAIXAS = {
      */
     apoiador: {
         chave: 'apoiador',
-        nome: 'Caixa do Apoiador',
         emoji: '💝',
-        descricao: 'Não está à venda: é a recompensa de quem vota no bot.',
         distribuicao: { rare: 60, 'ultra rare': 34, legendary: 5.5, master: 0.5 },
         preco: null,
         limiteDia: null,
@@ -202,16 +197,34 @@ function existe(chave) {
     return CAIXAS[normalizar(chave)] !== undefined;
 }
 
-/** Todas, na ordem de exibição. */
-function todas() {
+/** A caixa com nome, descrição e detalhe no idioma pedido. */
+function localizar(caixa, locale = DEFAULT_LOCALE) {
+    if (!caixa) return null;
+    return {
+        ...caixa,
+        nome: traduzir(locale, `caixas_catalogo.${caixa.chave}.nome`),
+        descricao: traduzir(locale, `caixas_catalogo.${caixa.chave}.descricao`),
+        detalhe: caixa.temDetalhe
+            ? traduzir(locale, `caixas_catalogo.${caixa.chave}.detalhe`)
+            : null
+    };
+}
+
+/** Atalho: pega pela chave, já com preço e texto no idioma. */
+function localizarPorChave(chave, locale = DEFAULT_LOCALE) {
+    return localizar(getCaixa(chave), locale);
+}
+
+/** Todas, na ordem de exibição, já no idioma pedido. */
+function todas(locale = DEFAULT_LOCALE) {
     return Object.keys(CAIXAS)
-        .map(getCaixa)
+        .map((chave) => localizar(getCaixa(chave), locale))
         .sort((a, b) => a.ordem - b.ordem);
 }
 
 /** Só as compráveis com moeda. */
-function aVenda() {
-    return todas().filter((c) => c.preco != null);
+function aVenda(locale = DEFAULT_LOCALE) {
+    return todas(locale).filter((c) => c.preco != null);
 }
 
 /**
@@ -245,6 +258,8 @@ module.exports = {
     valorEsperado,
     precoDaCaixa,
     getCaixa,
+    localizar,
+    localizarPorChave,
     existe,
     todas,
     aVenda,
