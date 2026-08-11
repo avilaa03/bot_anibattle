@@ -38,12 +38,12 @@ function montarEmbedResultado({ nomeX, nomeY, resultado, cor = COR_VITORIA, titu
     const placar = `**${resultado.winsX}** — **${resultado.winsY}**`;
 
     const embed = ui.base(cor)
-        .setTitle(titulo ?? t('batalha_resultado.titulo'))
-        .setDescription(t('batalha_resultado.venceu', {
+        .setTitle(titulo ?? t('battle.fim_titulo'))
+        .setDescription(t('battle.fim_texto', {
             vencedor: nomeVencedor,
-            nomeX,
+            x: nomeX,
             placar,
-            nomeY
+            y: nomeY
         }));
 
     const roundLines = resultado.rounds.map((r) => {
@@ -64,7 +64,7 @@ function montarEmbedResultado({ nomeX, nomeY, resultado, cor = COR_VITORIA, titu
     }).join('\n');
 
     embed.addFields({
-        name: t('batalha_resultado.rodadas'),
+        name: t('battle.rodadas'),
         value: roundLines.slice(0, 1024),
         inline: false
     });

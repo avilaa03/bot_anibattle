@@ -17,9 +17,10 @@ const { registrar } = require('../utils/progresso');
 const { anunciarConquistas } = require('../utils/notificacoes');
 const { buildDeckChoiceMessage } = require('../actions/collect/battleCollect');
 const { MessageFlags } = require('discord.js');
-const { podeCancelarBatalha, MENSAGENS } = require('../utils/cicloDeVida');
+const { podeCancelarBatalha, mensagem } = require('../utils/cicloDeVida');
 const transmissao = require('../utils/transmissao');
 const { montarEmbedResultado, contarDestaques } = require('../utils/resultadoBatalha');
+const { tDaInteracao, tDoUsuario } = require('../utils/idioma');
 
 /** Busca o inventário atual do jogador direto do banco. */
 async function carregarInventario(userId) {
@@ -38,13 +39,14 @@ async function carregarInventario(userId) {
  */
 async function handleBattleCancel(client, interaction) {
     const battleId = interaction.customId.slice('battle_cancel_'.length);
+    const t = await tDaInteracao(interaction);
 
     let battle = await getBattle(battleId);
     if (!battle) battle = await getBattleByUserId(interaction.user.id);
 
     if (!battle) {
         await interaction.reply({
-            embeds: [ui.neutral('Nada para cancelar', 'Esta batalha já terminou ou expirou.')],
+            embeds: [ui.neutral(t('battle.nada_para_cancelar'), t('battle.nada_para_cancelar_texto'))],
             flags: MessageFlags.Ephemeral
         }).catch(() => {});
         return true;
@@ -53,7 +55,7 @@ async function handleBattleCancel(client, interaction) {
     const permissao = podeCancelarBatalha(battle, interaction.user.id);
     if (!permissao.ok) {
         await interaction.reply({
-            embeds: [ui.error('Não dá para desistir agora', MENSAGENS[permissao.motivo])],
+            embeds: [ui.error(t('battle.nao_da_para_desistir'), mensagem(permissao.motivo, t.locale))],
             flags: MessageFlags.Ephemeral
         }).catch(() => {});
         return true;
@@ -63,35 +65,42 @@ async function handleBattleCancel(client, interaction) {
     const cancelada = await cancelBattle(battle.battleId);
     if (!cancelada) {
         await interaction.reply({
-            embeds: [ui.neutral('Nada para cancelar', 'Esta batalha já foi encerrada.')],
+            embeds: [ui.neutral(t('battle.nada_para_cancelar'), t('battle.ja_encerrada'))],
             flags: MessageFlags.Ephemeral
         }).catch(() => {});
         return true;
     }
 
-    const aposta = cancelada.wager > 0 && cancelada.wagerHeld
-        ? `\n\nA aposta de ${ui.coins(cancelada.wager)} voltou para os dois.`
-        : '';
+    // O aviso vai para DUAS telas, uma por jogador, cada uma no privado
+    // dele — então ele é montado uma vez por idioma, e não uma vez só.
+    // Reaproveitar o embed de quem clicou mandaria o texto no idioma do
+    // desistente para quem só está esperando.
+    const montarAviso = (tradutor) => {
+        const aposta = cancelada.wager > 0 && cancelada.wagerHeld
+            ? `\n\n${tradutor('battle.aposta_devolvida', { valor: ui.coins(cancelada.wager, tradutor.locale) })}`
+            : '';
+        return ui.neutral(
+            tradutor('battle.duelo_cancelado'),
+            tradutor('battle.duelo_cancelado_texto', { jogador: interaction.user.username }) + aposta
+        );
+    };
 
-    const aviso = ui.neutral(
-        'Duelo cancelado',
-        `**${interaction.user.username}** desistiu antes da luta começar.${aposta}`
-    );
-
-    await interaction.update({ embeds: [aviso], components: [] }).catch(() => {});
+    await interaction.update({ embeds: [montarAviso(t)], components: [] }).catch(() => {});
 
     // O outro jogador está numa mensagem diferente (cada um escolhe o time
     // no próprio privado). Sem avisar, ele ficaria escolhendo cartas para
     // um duelo que não existe mais.
     const souX = cancelada.userX.id === interaction.user.id;
+    const outroId = souX ? cancelada.userY.id : cancelada.userX.id;
     const canalOutro = souX ? cancelada.channelYId : cancelada.channelXId;
     const mensagemOutro = souX ? cancelada.messageYId : cancelada.messageXId;
 
     if (canalOutro && mensagemOutro) {
         try {
+            const tOutro = await tDoUsuario(outroId, interaction.guildId);
             const canal = await client.channels.fetch(canalOutro);
             const msg = await canal.messages.fetch(mensagemOutro);
-            await msg.edit({ embeds: [aviso], components: [] });
+            await msg.edit({ embeds: [montarAviso(tOutro)], components: [] });
         } catch {
             // Mensagem apagada ou privado fechado: a batalha já foi
             // cancelada no banco e a aposta devolvida, que é o que importa.
@@ -112,12 +121,13 @@ async function handleBattlePick(client, interaction) {
     const battleId = String(parts[2]);
     const side = parts[3];
     const cardId = parts.slice(4).join('_');
+    const t = await tDaInteracao(interaction);
 
     let battle = await getBattle(battleId);
     if (!battle) {
         battle = await getBattleByUserId(interaction.user.id);
         if (!battle) {
-            await interaction.reply({ content: 'Esta batalha expirou ou já foi concluída.', flags: MessageFlags.Ephemeral }).catch(() => {});
+            await interaction.reply({ content: t('battle.expirou_ou_concluida'), flags: MessageFlags.Ephemeral }).catch(() => {});
             return true;
         }
     }
@@ -125,20 +135,20 @@ async function handleBattlePick(client, interaction) {
     const isX = side === 'X';
     const donoDoLado = isX ? battle.userX.id : battle.userY.id;
     if (donoDoLado !== interaction.user.id) {
-        await interaction.reply({ content: 'Você não é um dos jogadores desta batalha.', flags: MessageFlags.Ephemeral }).catch(() => {});
+        await interaction.reply({ content: t('battle.nao_e_jogador'), flags: MessageFlags.Ephemeral }).catch(() => {});
         return true;
     }
 
     const jaEscolhidas = isX ? battle.selectedIdsX : battle.selectedIdsY;
     if (jaEscolhidas.map(String).includes(cardId)) {
-        await interaction.reply({ content: 'Você já escolheu esta carta.', flags: MessageFlags.Ephemeral }).catch(() => {});
+        await interaction.reply({ content: t('battle.carta_ja_escolhida'), flags: MessageFlags.Ephemeral }).catch(() => {});
         return true;
     }
 
     const inventario = await carregarInventario(interaction.user.id);
     const card = inventario.find((c) => String(c._id) === cardId);
     if (!card) {
-        await interaction.reply({ content: 'Essa carta não está mais no seu inventário.', flags: MessageFlags.Ephemeral }).catch(() => {});
+        await interaction.reply({ content: t('battle.carta_fora_do_inventario'), flags: MessageFlags.Ephemeral }).catch(() => {});
         return true;
     }
 
@@ -148,7 +158,7 @@ async function handleBattlePick(client, interaction) {
     // banco recusa a quarta em vez de aceitarmos um deck inválido.
     const atualizada = await addCardToDeck(battle.battleId, side, card);
     if (!atualizada) {
-        await interaction.followUp({ content: 'Você já escolheu 3 cartas! Aguarde o oponente.', flags: MessageFlags.Ephemeral }).catch(() => {});
+        await interaction.followUp({ content: t('battle.ja_tem_3'), flags: MessageFlags.Ephemeral }).catch(() => {});
         return true;
     }
     battle = atualizada;
@@ -163,7 +173,8 @@ async function handleBattlePick(client, interaction) {
             inventario,
             isX ? battle.selectedIdsX : battle.selectedIdsY,
             deckAtual,
-            battle.wager
+            battle.wager,
+            t
         );
         const canalId = isX ? battle.channelXId : battle.channelYId;
         const mensagemId = isX ? battle.messageXId : battle.messageYId;
@@ -177,7 +188,7 @@ async function handleBattlePick(client, interaction) {
     }
 
     await interaction.followUp({
-        content: `**${ui.cardName(card)}** entrou no seu time! (${deckAtual.length}/3)`,
+        content: t('battle.carta_no_time', { carta: ui.cardName(card), n: deckAtual.length }),
         flags: MessageFlags.Ephemeral
     }).catch(() => {});
 
@@ -216,8 +227,28 @@ async function enviarNoPrivado(client, userId, payload) {
 async function resolverBatalha(client, battle) {
     const canal = await client.channels.fetch(battle.challengeChannelId).catch(() => null);
     const wager = battle.wager || 0;
-    const nomeX = battle.userX.username || 'Jogador 1';
-    const nomeY = battle.userY.username || 'Jogador 2';
+
+    // Três vozes, porque são três destinos com donos diferentes.
+    //
+    // A luta é transmitida no canal, e o resultado também vai para o
+    // privado de cada jogador. O canal é do servidor; o privado é de quem
+    // recebe. Montar um embed só e mandar para os três lugares faria dois
+    // dos três lerem no idioma errado — e aqui não há nem "quem clicou"
+    // para servir de desempate, porque a batalha resolve sozinha quando a
+    // sexta carta é escolhida.
+    //
+    // O guildId sai do canal em vez do banco: a batalha não guarda o
+    // servidor, e acrescentar o campo seria migração de dado em produção
+    // para uma informação que já está a um `fetch` de distância.
+    const guildId = canal?.guildId ?? null;
+    const [tCanal, tX, tY] = await Promise.all([
+        tDoUsuario(null, guildId),
+        tDoUsuario(battle.userX.id, guildId),
+        tDoUsuario(battle.userY.id, guildId)
+    ]);
+
+    const nomeX = battle.userX.username || tCanal('battle.jogador_1');
+    const nomeY = battle.userY.username || tCanal('battle.jogador_2');
 
     const [posseX, posseY] = await Promise.all([
         validarPosse(battle.userX.id, battle.deckX),
@@ -232,7 +263,11 @@ async function resolverBatalha(client, battle) {
         if (!posseX.ok) culpados.push(`**${nomeX}** (${posseX.faltando.join(', ')})`);
         if (!posseY.ok) culpados.push(`**${nomeY}** (${posseY.faltando.join(', ')})`);
 
-        const embed = ui.error('Batalha cancelada', `Cartas escolhidas não estão mais no inventário de ${culpados.join(' e ')}.${wager > 0 ? '\n\nAs apostas foram devolvidas.' : ''}`);
+        const embed = ui.error(
+            tCanal('battle.cancelada'),
+            tCanal('battle.cancelada_texto', { culpados: culpados.join(tCanal('battle.e')) })
+            + (wager > 0 ? `\n\n${tCanal('battle.apostas_devolvidas')}` : '')
+        );
         if (canal) await canal.send({ embeds: [embed] }).catch(() => {});
         return;
     }
@@ -249,17 +284,11 @@ async function resolverBatalha(client, battle) {
     // A tela final é a mesma do `/treino` — placar, vencedor e rodadas
     // saem de `utils/resultadoBatalha.js`. Aposta e ranking, que só
     // existem aqui, entram como campos extras logo abaixo.
-    const resultEmbed = montarEmbedResultado({ nomeX, nomeY, resultado: result });
-
-    if (wager > 0) {
-        const atualizado = await addBalance(vencedorId, wager * 2);
-        await releaseWager(battle.battleId);
-        resultEmbed.addFields({
-            name: '💰 Aposta',
-            value: `👑 **${nomeVencedor}** levou ${ui.coins(wager * 2)}\n💸 **${nomePerdedor}** perdeu ${ui.coins(wager)}\n\nSaldo do vencedor: ${ui.coins(atualizado?.balance ?? 0)}`,
-            inline: false
-        });
-    }
+    //
+    // Um embed por idioma: o do canal e o de cada privado. Os três contam
+    // a MESMA luta, com os mesmos números — só a língua muda.
+    const saldoVencedor = wager > 0 ? (await addBalance(vencedorId, wager * 2)) : null;
+    if (wager > 0) await releaseWager(battle.battleId);
 
     // ---- Pontuação de ranking ----
     const [docX, docY] = await Promise.all([
@@ -280,15 +309,47 @@ async function resolverBatalha(client, battle) {
     );
     await User.updateOne({ id: perdedorId }, { $inc: { losses: 1 }, $set: { elo: r.perdedor } });
 
-    const divVencedor = elo.divisao(r.vencedor);
-    const divPerdedor = elo.divisao(r.perdedor);
+    /**
+     * A tela final inteira, num idioma.
+     *
+     * Chamada uma vez por destino. É o mesmo `result` nas três, então
+     * placar, ELO e aposta são obrigatoriamente idênticos — a função não
+     * recebe nada que possa divergir entre as versões.
+     */
+    const montarTelaFinal = (tradutor) => {
+        const embed = montarEmbedResultado({ nomeX, nomeY, resultado: result, t: tradutor });
 
-    resultEmbed.addFields({
-        name: '📊 Ranking',
-        value: `👑 **${nomeVencedor}** ${divVencedor.emoji} ${ui.number(r.vencedor)} pts (**+${r.ganho}**)\n`
-            + `💤 **${nomePerdedor}** ${divPerdedor.emoji} ${ui.number(r.perdedor)} pts (**-${r.perda}**)`,
-        inline: false
-    });
+        if (wager > 0) {
+            embed.addFields({
+                name: tradutor('battle.aposta'),
+                value: tradutor('battle.aposta_vencedor', {
+                    vencedor: nomeVencedor,
+                    premio: ui.coins(wager * 2, tradutor.locale),
+                    perdedor: nomePerdedor,
+                    perda: ui.coins(wager, tradutor.locale),
+                    saldo: ui.coins(saldoVencedor?.balance ?? 0, tradutor.locale)
+                }),
+                inline: false
+            });
+        }
+
+        embed.addFields({
+            name: tradutor('battle.ranking'),
+            value: tradutor('battle.ranking_texto', {
+                vencedor: nomeVencedor,
+                emojiV: elo.divisao(r.vencedor, tradutor.locale).emoji,
+                ptsV: ui.number(r.vencedor, tradutor.locale),
+                ganho: r.ganho,
+                perdedor: nomePerdedor,
+                emojiP: elo.divisao(r.perdedor, tradutor.locale).emoji,
+                ptsP: ui.number(r.perdedor, tradutor.locale),
+                perda: r.perda
+            }),
+            inline: false
+        });
+
+        return embed;
+    };
 
     // ---- Transmissão ao vivo ----
     //
@@ -304,19 +365,20 @@ async function resolverBatalha(client, battle) {
     if (canal) {
         try {
             await transmissao.transmitir({
-                canal, nomeX, nomeY, mencao, resultado: result, wager
+                canal, nomeX, nomeY, mencao, resultado: result, wager, t: tCanal
             });
         } catch (err) {
             // Nunca deixar a animação derrubar a entrega do resultado.
             console.error('Erro na transmissão da batalha (resultado não afetado):', err.message);
         }
 
-        await canal.send({ content: mencao, embeds: [resultEmbed] }).catch(() => {});
+        await canal.send({ content: mencao, embeds: [montarTelaFinal(tCanal)] }).catch(() => {});
     }
 
-    // No privado vai só o resultado: quem quis assistir estava no canal.
-    await enviarNoPrivado(client, battle.userX.id, { embeds: [resultEmbed] });
-    await enviarNoPrivado(client, battle.userY.id, { embeds: [resultEmbed] });
+    // No privado vai só o resultado, e no idioma de cada um: quem quis
+    // assistir estava no canal.
+    await enviarNoPrivado(client, battle.userX.id, { embeds: [montarTelaFinal(tX)] });
+    await enviarNoPrivado(client, battle.userY.id, { embeds: [montarTelaFinal(tY)] });
 
     // Conta críticos e viradas da luta toda, para missões e conquistas.
     const { criticos, viradas } = contarDestaques(result);

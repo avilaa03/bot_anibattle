@@ -103,12 +103,12 @@ async function anunciarInicio(canal, nomeX, nomeY, mencao, wager = 0, t) {
     if (!canal) return null;
 
     const embed = ui.base(ui.STATUS_COLORS.warning)
-        .setTitle(t('batalha_narracao.times_prontos'))
-        .setDescription(t('batalha_narracao.times_prontos_texto', { nomeX, nomeY }))
+        .setTitle(t('transmissao.times_prontos'))
+        .setDescription(t('transmissao.times_prontos_texto', { nomeX, nomeY }))
         .setFooter({
             text: wager > 0
-                ? `${ui.BRAND} • ${t('batalha_narracao.valendo', { valor: ui.number(wager * 2, t.locale) })}`
-                : `${ui.BRAND} • ${t('batalha_narracao.amistoso')}`
+                ? `${ui.BRAND} • ${t('transmissao.valendo', { valor: ui.number(wager * 2, t.locale) })}`
+                : `${ui.BRAND} • ${t('transmissao.amistoso')}`
         });
 
     return canal.send({ content: mencao, embeds: [embed] }).catch(() => null);

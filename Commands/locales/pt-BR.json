@@ -297,25 +297,13 @@
       }
     }
   },
-  "batalha_narracao": {
-    "inicio": "⚡ **{atacante}** foi mais rápido e atacou primeiro.",
-    "esquiva": "💨 **{defensor}** esquivou do ataque de **{atacante}**!",
-    "prefixo_virada": "🔥 **VIRADA!** ",
-    "prefixo_critico": "💥 **CRÍTICO!** ",
-    "golpe": "**{atacante}** causou **{dano}** de dano — **{defensor}** ficou com **{vida}** de vida.",
-    "fim": "🏆 **{vencedor}** venceu o confronto!",
-    "tempo": "⏱️ O confronto se estendeu — vence quem está em melhor estado.",
+  "transmissao": {
     "round_de": "**Round {atual}** de {total}",
     "o_que_acontece": "O que está acontecendo",
     "valendo": "Valendo {valor} moedas",
     "amistoso": "Duelo amistoso",
     "times_prontos": "⚔️ Os times estão prontos!",
     "times_prontos_texto": "**{nomeX}** contra **{nomeY}**\n\nA luta começa em instantes..."
-  },
-  "batalha_resultado": {
-    "titulo": "⚔️ Fim da batalha",
-    "venceu": "👑 **{vencedor}** venceu — {nomeX} {placar} {nomeY}",
-    "rodadas": "Rodadas"
   },
   "ciclo_de_vida": {
     "NAO_PARTICIPA": "Você não faz parte desta negociação.",
@@ -657,6 +645,7 @@
     "rodape_expira": "O desafio expira em 60 segundos",
     "botao_aceitar": "Aceitar e apostar {valor}",
     "botao_recusar": "Recusar",
+    "botao_desistir": "Desistir",
     "mencao_desafio": "{desafiado}, você foi desafiado por {desafiante}!",
     "expirado": "Desafio expirado",
     "expirado_texto": "**{jogador}** não respondeu a tempo. Nenhuma moeda foi cobrada.",
@@ -686,6 +675,14 @@
     "jogador_2": "Jogador 2",
     "cancelada": "Batalha cancelada",
     "cancelada_texto": "Cartas escolhidas não estão mais no inventário de {culpados}.",
+    "nada_para_cancelar": "Nada para cancelar",
+    "nada_para_cancelar_texto": "Esta batalha já terminou ou expirou.",
+    "ja_encerrada": "Esta batalha já foi encerrada.",
+    "nao_da_para_desistir": "Não dá para desistir agora",
+    "duelo_cancelado": "Duelo cancelado",
+    "duelo_cancelado_texto": "**{jogador}** desistiu antes da luta começar.",
+    "aposta_devolvida": "A aposta de {valor} voltou para os dois.",
+    "carta_fora_do_inventario": "Essa carta não está mais no seu inventário.",
     "apostas_devolvidas": "As apostas foram devolvidas.",
     "e": " e ",
     "fim_titulo": "⚔️ Fim da batalha",

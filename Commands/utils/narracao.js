@@ -53,10 +53,10 @@ function descreverEvento(evento, t) {
 
     switch (evento.tipo) {
         case 'inicio':
-            return t('batalha_narracao.inicio', { atacante: evento.atacante });
+            return t('battle.log_primeiro', { carta: evento.atacante });
 
         case 'esquiva':
-            return t('batalha_narracao.esquiva', {
+            return t('battle.log_esquiva', {
                 defensor: evento.defensor,
                 atacante: evento.atacante
             });
@@ -67,10 +67,10 @@ function descreverEvento(evento, t) {
             // rótulo mais forte, e é de propósito — ver a nota em
             // `contarDestaques`, que reproduz esta mesma ordem.
             let prefixo = '';
-            if (evento.desperate) prefixo = t('batalha_narracao.prefixo_virada');
-            else if (evento.crit) prefixo = t('batalha_narracao.prefixo_critico');
+            if (evento.desperate) prefixo = t('battle.log_virada');
+            else if (evento.crit) prefixo = t('battle.log_critico');
 
-            return prefixo + t('batalha_narracao.golpe', {
+            return prefixo + t('battle.log_dano', {
                 atacante: evento.atacante,
                 dano: evento.dano,
                 defensor: evento.defensor,
@@ -79,10 +79,10 @@ function descreverEvento(evento, t) {
         }
 
         case 'fim':
-            return t('batalha_narracao.fim', { vencedor: evento.vencedorNome });
+            return t('battle.log_venceu', { carta: evento.vencedorNome });
 
         case 'tempo':
-            return t('batalha_narracao.tempo');
+            return t('battle.log_tempo');
 
         default:
             return '';
@@ -163,7 +163,7 @@ function montarQuadro({ nomeX, nomeY, rounds, eventos, ate, wager = 0, t }) {
     const embed = ui.base(ui.STATUS_COLORS.warning)
         .setTitle(`⚔️ ${nomeX}  ${vitoriasX} — ${vitoriasY}  ${nomeY}`)
         .setDescription(
-            `${t('batalha_narracao.round_de', { atual: atual.round, total: rounds.length })}   ${placarDosRounds(rounds, atual.round)}\n\n`
+            `${t('transmissao.round_de', { atual: atual.round, total: rounds.length })}   ${placarDosRounds(rounds, atual.round)}\n\n`
             + `${ui.getRarity(round.raridadeA, t.locale).emoji} **${ui.cardName(round.nomeA, round.nivelA)}**\n`
             + `${barra(atual.vidaA, atual.maxA)}  \`${atual.vidaA}/${atual.maxA}\`\n\n`
             + `${ui.getRarity(round.raridadeB, t.locale).emoji} **${ui.cardName(round.nomeB, round.nivelB)}**\n`
@@ -178,15 +178,15 @@ function montarQuadro({ nomeX, nomeY, rounds, eventos, ate, wager = 0, t }) {
         .join('\n');
 
     embed.addFields({
-        name: t('batalha_narracao.o_que_acontece'),
+        name: t('transmissao.o_que_acontece'),
         value: narracao.slice(0, 1024),
         inline: false
     });
 
     if (wager > 0) {
-        embed.setFooter({ text: `${ui.BRAND} • ${t('batalha_narracao.valendo', { valor: ui.number(wager * 2, t.locale) })}` });
+        embed.setFooter({ text: `${ui.BRAND} • ${t('transmissao.valendo', { valor: ui.number(wager * 2, t.locale) })}` });
     } else {
-        embed.setFooter({ text: `${ui.BRAND} • ${t('batalha_narracao.amistoso')}` });
+        embed.setFooter({ text: `${ui.BRAND} • ${t('transmissao.amistoso')}` });
     }
 
     return embed;

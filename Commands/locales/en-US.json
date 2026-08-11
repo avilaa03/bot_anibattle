@@ -297,25 +297,13 @@
       }
     }
   },
-  "batalha_narracao": {
-    "inicio": "⚡ **{atacante}** was faster and struck first.",
-    "esquiva": "💨 **{defensor}** dodged **{atacante}**'s attack!",
-    "prefixo_virada": "🔥 **COMEBACK!** ",
-    "prefixo_critico": "💥 **CRITICAL!** ",
-    "golpe": "**{atacante}** dealt **{dano}** damage — **{defensor}** is down to **{vida}** HP.",
-    "fim": "🏆 **{vencedor}** won the clash!",
-    "tempo": "⏱️ The clash dragged on — whoever is in better shape wins.",
+  "transmissao": {
     "round_de": "**Round {atual}** of {total}",
     "o_que_acontece": "What's happening",
     "valendo": "{valor} coins on the line",
     "amistoso": "Friendly duel",
     "times_prontos": "⚔️ Both teams are ready!",
     "times_prontos_texto": "**{nomeX}** vs **{nomeY}**\n\nThe fight starts in a moment..."
-  },
-  "batalha_resultado": {
-    "titulo": "⚔️ Battle over",
-    "venceu": "👑 **{vencedor}** won — {nomeX} {placar} {nomeY}",
-    "rodadas": "Rounds"
   },
   "ciclo_de_vida": {
     "NAO_PARTICIPA": "You are not part of this negotiation.",
@@ -657,6 +645,7 @@
     "rodape_expira": "The challenge expires in 60 seconds",
     "botao_aceitar": "Accept and wager {valor}",
     "botao_recusar": "Decline",
+    "botao_desistir": "Give up",
     "mencao_desafio": "{desafiado}, you've been challenged by {desafiante}!",
     "expirado": "Challenge expired",
     "expirado_texto": "**{jogador}** didn't answer in time. No coins were charged.",
@@ -686,6 +675,14 @@
     "jogador_2": "Player 2",
     "cancelada": "Battle cancelled",
     "cancelada_texto": "Picked cards are no longer in the inventory of {culpados}.",
+    "nada_para_cancelar": "Nothing to cancel",
+    "nada_para_cancelar_texto": "This battle has already ended or expired.",
+    "ja_encerrada": "This battle has already been closed.",
+    "nao_da_para_desistir": "Can't back out now",
+    "duelo_cancelado": "Duel cancelled",
+    "duelo_cancelado_texto": "**{jogador}** backed out before the fight started.",
+    "aposta_devolvida": "The {valor} wager went back to both players.",
+    "carta_fora_do_inventario": "That card is no longer in your inventory.",
     "apostas_devolvidas": "The wagers were refunded.",
     "e": " and ",
     "fim_titulo": "⚔️ Battle over",
