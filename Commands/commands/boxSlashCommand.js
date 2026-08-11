@@ -1,7 +1,7 @@
 const BaseSlashCommand = require('../utils/BaseSlashCommand.js');
 const nomes = require('../utils/nomesDeComando.js');
 const { SlashCommandBuilder } = require('discord.js');
-const caixaRun = require('../actions/run/caixaRun.js');
+const caixaRun = require('../actions/run/boxRun.js');
 const caixas = require('../utils/caixas.js');
 const { descricaoBase, localizacoes, escolha } = require('../utils/i18n.js');
 
@@ -22,7 +22,7 @@ function opcoesDeCaixa() {
     });
 }
 
-module.exports = class CaixaSlashCommand extends BaseSlashCommand {
+module.exports = class BoxSlashCommand extends BaseSlashCommand {
     constructor() {
         super('box');
     }

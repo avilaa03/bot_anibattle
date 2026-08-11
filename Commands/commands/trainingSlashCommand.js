@@ -1,11 +1,11 @@
 const BaseSlashCommand = require('../utils/BaseSlashCommand.js');
 const nomes = require('../utils/nomesDeComando.js');
 const { SlashCommandBuilder } = require('discord.js');
-const treinoRun = require('../actions/run/treinoRun.js');
+const treinoRun = require('../actions/run/trainingRun.js');
 const { DIFICULDADES } = require('../utils/treino.js');
 const { descricaoBase, localizacoes, escolha } = require('../utils/i18n.js');
 
-module.exports = class TreinoSlashCommand extends BaseSlashCommand {
+module.exports = class TrainingSlashCommand extends BaseSlashCommand {
     constructor() {
         super('training');
     }

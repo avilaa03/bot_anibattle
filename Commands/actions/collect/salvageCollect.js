@@ -2,7 +2,7 @@ const User = require('../../utils/userSchema');
 const ui = require('../../utils/embeds');
 const bolsa = require('../../utils/bolsa');
 const itens = require('../../utils/itens');
-const { updateEmbed, buildConfirmationRow, gemasDe, contarCopias, contarGemas } = require('../run/desmancharRun');
+const { updateEmbed, buildConfirmationRow, gemasDe, contarCopias, contarGemas } = require('../run/salvageRun');
 const transacoes = require('../../utils/transacoes');
 const { criarT, DEFAULT_LOCALE } = require('../../utils/i18n');
 

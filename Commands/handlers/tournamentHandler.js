@@ -3,7 +3,7 @@ const ui = require('../utils/embeds');
 const tournament = require('../utils/tournament');
 const { verificarConquistas } = require('../utils/progresso');
 const { anunciarConquistas } = require('../utils/notificacoes');
-const { montarEmbedInscricoes, montarBotoes, podeAdministrar } = require('../actions/run/torneioRun');
+const { montarEmbedInscricoes, montarBotoes, podeAdministrar } = require('../actions/run/tournamentRun');
 const { MessageFlags } = require('discord.js');
 const { tDaInteracao, tDoUsuario } = require('../utils/idioma');
 

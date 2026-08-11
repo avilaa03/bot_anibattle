@@ -2,9 +2,9 @@ const BaseSlashCommand = require('../utils/BaseSlashCommand');
 const nomes = require('../utils/nomesDeComando.js');
 const { SlashCommandBuilder } = require('discord.js');
 const { descricaoBase, localizacoes } = require('../utils/i18n');
-const magnataRun = require('../actions/run/magnataRun');
+const magnataRun = require('../actions/run/tycoonRun');
 
-module.exports = class MagnataSlashCommand extends BaseSlashCommand {
+module.exports = class TycoonSlashCommand extends BaseSlashCommand {
     constructor() {
         super('tycoon');
     }

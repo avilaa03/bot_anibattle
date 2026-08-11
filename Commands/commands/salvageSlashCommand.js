@@ -4,13 +4,13 @@ const { SlashCommandBuilder, MessageFlags } = require('discord.js');
 const ui = require('../utils/embeds.js');
 const negociabilidade = require('../utils/negociabilidade.js');
 const User = require('../utils/userSchema.js');
-const { desmancharRun } = require('../actions/run/desmancharRun.js');
-const desmancharCollect = require('../actions/collect/desmancharCollect.js');
-const desmancharEnd = require('../actions/end/desmancharEnd.js');
+const { desmancharRun } = require('../actions/run/salvageRun.js');
+const desmancharCollect = require('../actions/collect/salvageCollect.js');
+const desmancharEnd = require('../actions/end/salvageEnd.js');
 const { descricaoBase, localizacoes } = require('../utils/i18n.js');
 const { tDaInteracao } = require('../utils/idioma.js');
 
-module.exports = class DesmancharSlashCommand extends BaseSlashCommand {
+module.exports = class SalvageSlashCommand extends BaseSlashCommand {
     constructor() {
         super('salvage');
     }

@@ -1,12 +1,12 @@
 const BaseSlashCommand = require('../utils/BaseSlashCommand.js');
 const nomes = require('../utils/nomesDeComando.js');
 const { SlashCommandBuilder } = require('discord.js');
-const lojaRun = require('../actions/run/lojaRun.js');
+const lojaRun = require('../actions/run/shopRun.js');
 const itens = require('../utils/itens.js');
 const rollExtra = require('../utils/rollExtra.js');
 const { descricaoBase, localizacoes, escolha } = require('../utils/i18n.js');
 
-module.exports = class LojaSlashCommand extends BaseSlashCommand {
+module.exports = class ShopSlashCommand extends BaseSlashCommand {
     constructor() {
         super('shop');
     }

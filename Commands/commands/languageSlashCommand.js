@@ -1,7 +1,7 @@
 const BaseSlashCommand = require('../utils/BaseSlashCommand.js');
 const nomes = require('../utils/nomesDeComando.js');
 const { SlashCommandBuilder } = require('discord.js');
-const idiomaRun = require('../actions/run/idiomaRun.js');
+const idiomaRun = require('../actions/run/languageRun.js');
 const { descricaoBase, localizacoes, escolha } = require('../utils/i18n');
 
 /**
@@ -12,7 +12,7 @@ const { descricaoBase, localizacoes, escolha } = require('../utils/i18n');
  * O canônico virou `language`; quem usa o Discord em português continua
  * digitando `/idioma`, e o Discord resolve os dois para o mesmo comando.
  */
-module.exports = class IdiomaSlashCommand extends BaseSlashCommand {
+module.exports = class LanguageSlashCommand extends BaseSlashCommand {
     constructor() {
         super('language');
     }

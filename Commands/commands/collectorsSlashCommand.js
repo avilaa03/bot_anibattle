@@ -2,23 +2,23 @@ const BaseSlashCommand = require('../utils/BaseSlashCommand.js');
 const nomes = require('../utils/nomesDeComando.js');
 const { SlashCommandBuilder } = require('discord.js');
 const { descricaoBase, localizacoes } = require('../utils/i18n');
-const cosmeticosRun = require('../actions/run/cosmeticosRun.js');
+const colecionadoresRun = require('../actions/run/collectorsRun.js');
 
-module.exports = class CosmeticosSlashCommand extends BaseSlashCommand {
+module.exports = class CollectorsSlashCommand extends BaseSlashCommand {
     constructor() {
-        super('cosmetics');
+        super('collectors');
     }
 
     async run(client, interaction) {
-        await cosmeticosRun(client, interaction);
+        await colecionadoresRun(client, interaction);
     }
 
     getSlashCommandJSON() {
         return new SlashCommandBuilder()
             .setName(this.name)
             .setNameLocalizations(nomes.comando(this.name))
-            .setDescription(descricaoBase('comandos.cosmeticos.descricao'))
-            .setDescriptionLocalizations(localizacoes('comandos.cosmeticos.descricao'))
+            .setDescription(descricaoBase('comandos.colecionadores.descricao'))
+            .setDescriptionLocalizations(localizacoes('comandos.colecionadores.descricao'))
             .toJSON();
     }
 };

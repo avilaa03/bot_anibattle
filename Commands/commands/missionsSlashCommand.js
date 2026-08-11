@@ -1,24 +1,24 @@
 const BaseSlashCommand = require('../utils/BaseSlashCommand.js');
 const nomes = require('../utils/nomesDeComando.js');
 const { SlashCommandBuilder } = require('discord.js');
-const bolsaRun = require('../actions/run/bolsaRun.js');
-const { descricaoBase, localizacoes } = require('../utils/i18n.js');
+const { descricaoBase, localizacoes } = require('../utils/i18n');
+const missoesRun = require('../actions/run/missionsRun.js');
 
-module.exports = class BolsaSlashCommand extends BaseSlashCommand {
+module.exports = class MissionsSlashCommand extends BaseSlashCommand {
     constructor() {
-        super('bag');
+        super('missions');
     }
 
     async run(client, interaction) {
-        await bolsaRun(client, interaction);
+        await missoesRun(client, interaction);
     }
 
     getSlashCommandJSON() {
         return new SlashCommandBuilder()
             .setName(this.name)
             .setNameLocalizations(nomes.comando(this.name))
-            .setDescription(descricaoBase('comandos.bolsa.descricao'))
-            .setDescriptionLocalizations(localizacoes('comandos.bolsa.descricao'))
+            .setDescription(descricaoBase('comandos.missoes.descricao'))
+            .setDescriptionLocalizations(localizacoes('comandos.missoes.descricao'))
             .toJSON();
     }
 };

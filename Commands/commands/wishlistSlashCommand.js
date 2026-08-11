@@ -2,27 +2,27 @@ const BaseSlashCommand = require('../utils/BaseSlashCommand.js');
 const nomes = require('../utils/nomesDeComando.js');
 const { SlashCommandBuilder } = require('discord.js');
 const { descricaoBase, localizacoes } = require('../utils/i18n');
-const conquistasRun = require('../actions/run/conquistasRun.js');
+const desejosRun = require('../actions/run/wishlistRun.js');
 
-module.exports = class ConquistasSlashCommand extends BaseSlashCommand {
+module.exports = class WishlistSlashCommand extends BaseSlashCommand {
     constructor() {
-        super('achievements');
+        super('wishlist');
     }
 
     async run(client, interaction) {
-        await conquistasRun(client, interaction);
+        await desejosRun(client, interaction);
     }
 
     getSlashCommandJSON() {
         return new SlashCommandBuilder()
             .setName(this.name)
             .setNameLocalizations(nomes.comando(this.name))
-            .setDescription(descricaoBase('comandos.conquistas.descricao'))
-            .setDescriptionLocalizations(localizacoes('comandos.conquistas.descricao'))
+            .setDescription(descricaoBase('comandos.desejos.descricao'))
+            .setDescriptionLocalizations(localizacoes('comandos.desejos.descricao'))
             .addUserOption(option =>
                 option.setName('user')
-                    .setDescription(descricaoBase('comandos.conquistas.opcao_user'))
-                    .setDescriptionLocalizations(localizacoes('comandos.conquistas.opcao_user'))
+                    .setDescription(descricaoBase('comandos.desejos.opcao_user'))
+                    .setDescriptionLocalizations(localizacoes('comandos.desejos.opcao_user'))
                     .setRequired(false)
             )
             .toJSON();

@@ -1,10 +1,10 @@
 const BaseSlashCommand = require('../utils/BaseSlashCommand.js');
 const nomes = require('../utils/nomesDeComando.js');
 const { SlashCommandBuilder } = require('discord.js');
-const eventoRun = require('../actions/run/eventoRun.js');
+const eventoRun = require('../actions/run/eventRun.js');
 const { descricaoBase, localizacoes } = require('../utils/i18n.js');
 
-module.exports = class EventoSlashCommand extends BaseSlashCommand {
+module.exports = class EventSlashCommand extends BaseSlashCommand {
     constructor() {
         super('event');
     }

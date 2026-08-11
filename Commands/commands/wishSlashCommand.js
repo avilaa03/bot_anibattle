@@ -2,9 +2,9 @@ const BaseSlashCommand = require('../utils/BaseSlashCommand.js');
 const nomes = require('../utils/nomesDeComando.js');
 const { SlashCommandBuilder } = require('discord.js');
 const { descricaoBase, localizacoes } = require('../utils/i18n');
-const desejarRun = require('../actions/run/desejarRun.js');
+const desejarRun = require('../actions/run/wishRun.js');
 
-module.exports = class DesejarSlashCommand extends BaseSlashCommand {
+module.exports = class WishSlashCommand extends BaseSlashCommand {
     constructor() {
         super('wish');
     }

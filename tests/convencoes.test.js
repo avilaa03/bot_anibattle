@@ -205,7 +205,7 @@ const PROIBIDOS = ['economy', 'battleState', 'progresso', 'elo', 'userSchema', '
 // registro de algo que não deveria existir depois que a luta acaba.
 const TREINO = [
     'Commands/utils/treino.js',
-    'Commands/actions/run/treinoRun.js',
+    'Commands/actions/run/trainingRun.js',
     'Commands/handlers/treinoButtonHandler.js'
 ];
 const PROIBIDOS_TREINO = ['economy', 'battleState', 'progresso', 'elo', 'discovery', 'vipService'];

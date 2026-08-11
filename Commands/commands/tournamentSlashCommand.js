@@ -2,9 +2,9 @@ const BaseSlashCommand = require('../utils/BaseSlashCommand.js');
 const nomes = require('../utils/nomesDeComando.js');
 const { SlashCommandBuilder } = require('discord.js');
 const { descricaoBase, localizacoes, traduzir } = require('../utils/i18n');
-const torneioRun = require('../actions/run/torneioRun.js');
+const torneioRun = require('../actions/run/tournamentRun.js');
 
-module.exports = class TorneioSlashCommand extends BaseSlashCommand {
+module.exports = class TournamentSlashCommand extends BaseSlashCommand {
     constructor() {
         super('tournament');
     }

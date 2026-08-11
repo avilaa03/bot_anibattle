@@ -239,7 +239,7 @@ check('e não fica presa na memória', treino.getSessaoDoUsuario('u1') === null)
 
 // -------------------------------------------------------------------
 console.log('\n=== A tela de escolha do treino ===');
-const treinoRun = require(CMD + 'actions/run/treinoRun.js');
+const treinoRun = require(CMD + 'actions/run/trainingRun.js');
 
 sessao = abrir();
 treino.escolherCarta(sessao.id, inv[1]);
