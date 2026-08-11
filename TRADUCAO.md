@@ -1,27 +1,47 @@
-# Como o bot fala dois idiomas
+# Como o bot fala três idiomas
 
-Português e inglês. Este documento é a referência de quem for mexer nisso.
+Português, inglês e espanhol. Este documento é a referência de quem for
+mexer nisso.
 
 ## Estado atual
 
-O inglês está **completo**: todo texto que chega ao jogador sai do
-dicionário. Não há mais arquivo com frase escrita na mão.
+Os três estão **completos**: todo texto que chega ao jogador sai do
+dicionário. Não há arquivo com frase escrita na mão.
 
 | | |
 |---|---|
-| Dicionários | `Commands/locales/pt-BR.json` e `en-US.json` |
+| Dicionários | `pt-BR.json`, `en-US.json`, `es-ES.json` (1.064 chaves cada) |
 | Comandos localizados | 39 de 39 (descrição, opções e escolhas) |
 | Conferência | `npm test` |
 
-O espanhol **não existe** e é o próximo passo — ver o final deste
-documento.
-
 ## O essencial
 
-- Os códigos são `pt-BR` e `en-US` porque **a API do Discord exige** esses
-  exatos. O site usa `pt`/`en`/`es` — a divergência é proposital.
+- Os códigos são `pt-BR`, `en-US` e `es-ES` porque **a API do Discord
+  exige** esses exatos. O site usa `pt`/`en`/`es` — a divergência é
+  proposital.
 - Nenhum comando escreve texto na mão: tudo sai de
   `Commands/locales/<idioma>.json` por `t('chave.pontilhada')`.
+
+## Acrescentar um idioma
+
+O caminho inteiro são cinco pontos, e o teste cobre todos:
+
+1. `Commands/locales/<locale>.json` — copie a estrutura do `pt-BR.json`
+2. `utils/i18n.js`: acrescente ao `DICIONARIOS` e ao `MAPA_DISCORD`
+3. `utils/i18n.js`: um ramo no `normalizar()` para o idioma base
+4. `utils/embeds.js`: uma entrada no `LOCALE_NUMERO` — sem ela,
+   `toLocaleString(undefined)` cai no locale do CONTAINER, não do jogador
+5. `/idioma`: uma escolha nova em `idiomaSlashCommand.js` e o nome em
+   `idiomaRun.js`
+
+`escolhasRaridade()`, `localizacoes()`, `escolha()` e a suíte de testes
+são dirigidos por `LOCALES` — saem de graça. Os schemas não precisam de
+migração: `idioma` é `String` livre, sem `enum`.
+
+**Cuidado com os códigos regionais do Discord.** Ele manda `es-419` para
+o espanhol da América Latina como código à parte de `es-ES`. Sem a linha
+no `MAPA_DISCORD`, o cliente mexicano — o maior mercado de língua
+espanhola — cairia em português com o dicionário pronto ao lado. Há teste.
 
 ## Traduzir um comando
 
@@ -103,7 +123,7 @@ Coleção do `/profile` passou um tempo mostrando "⚪ undefined: **5**".
 teto por compra; os dois entram por `{marcador}`, com o número vindo do
 código. `descricaoBase()` e `localizacoes()` aceitam valores para isso.
 Escrever o número na frase faria ela sobreviver à mudança da regra e
-virar mentira em silêncio, nos dois idiomas de uma vez.
+virar mentira em silêncio, nos três idiomas de uma vez.
 
 ## Conferir antes de abrir PR
 
@@ -111,32 +131,45 @@ virar mentira em silêncio, nos dois idiomas de uma vez.
 npm test
 ```
 
-O `tests/i18n.test.js` trava os erros silenciosos:
+O `tests/i18n.test.js` trava os erros silenciosos, nos três idiomas:
 
 - chave que existe num idioma e falta no outro;
 - **chave que o código pede e não existe em lugar nenhum** — este é o mais
   comum, e o que não levanta exceção: `traduzir()` devolve a própria
   chave, e o jogador lê `loja.compra_concluida` no meio da tela;
 - marcador `{valor}` presente só de um lado;
-- dicionário inglês copiado do português;
+- dicionário copiado do português (o único teste que olha o CONTEÚDO);
 - descrição de comando passando dos 100 caracteres que o Discord recusa.
 
-## O que falta: o espanhol
+## Vocabulário
 
-A infraestrutura aguenta; o volume está na tradução.
+Termos que aparecem em muitas telas e precisam ser os mesmos em todas.
 
-- `Commands/locales/es-ES.json` — cerca de 800 chaves
-- `utils/i18n.js`: acrescentar ao `DICIONARIOS` e ao `MAPA_DISCORD`
-  (`es-ES` **e `es-419`**, o código LATAM do Discord — sem ele o cliente
-  mexicano cai em inglês)
-- `normalizar()`: o `if (base === 'pt'/'en')` precisa de um ramo `es`
-- `/idioma`: uma escolha nova
-- `tests/i18n.test.js`: hoje é fixo em `pt` e `en` (`const pt = require(...)`).
-  Tem que iterar `LOCALES`, senão o espanhol entra sem rede
+| PT | EN | ES |
+|---|---|---|
+| roll (tirar carta) | roll | tirada |
+| gema | Gem | gema |
+| pergaminho | Scroll | pergamino |
+| caixa | Box | caja |
+| aprimorar | Upgrade | mejorar |
+| desmanchar | Salvage | desmontar |
+| bolsa | Bag | bolsa |
+| loja | Shop | tienda |
+| troca | trade | intercambio |
+| sequência (daily) | streak | racha |
+| carta vinculada | Bound card | carta vinculada |
+| moldura | frame | marco |
 
-`escolhasRaridade()`, `localizacoes()` e `escolha()` já são dirigidos por
-`LOCALES` — saem de graça. Os schemas não precisam de migração: `idioma`
-é `String` livre, sem `enum`.
+**Nome de comando é termo literal.** `/roll`, `/loja`, `/desmanchar` são
+iguais nos três idiomas porque é o que o jogador digita. Só `/idioma` tem
+`setNameLocalizations` (`/language`); nenhum outro comando tem. Escrever
+`/shop` num texto em inglês manda a pessoa digitar um comando que não
+existe.
+
+**Nome de idioma não se traduz.** O seletor mostra "Português", "English"
+e "Español", cada um em si mesmo. Traduzir faria a opção mudar de nome
+conforme o idioma atual — exatamente o que atrapalha quem está tentando
+sair de um idioma que não entende.
 
 ## Uma decisão de jogo em aberto
 

@@ -422,8 +422,8 @@
     "opcao_automatico": "Automático (segue o Discord)",
     "escopo_mim": "Só para mim",
     "escopo_servidor": "Servidor inteiro",
-    "titulo_status":"🌐 Idioma do AniBattle",
-    "descricao_status": "O bot responde em português ou inglês. Use `/idioma idioma:` para mudar.",
+    "titulo_status": "🌐 Idioma do AniBattle",
+    "descricao_status": "O bot responde em português, inglês ou espanhol. Use `/idioma idioma:` para mudar.",
     "campo_voce": "Sua preferência",
     "campo_servidor": "Padrão do servidor",
     "campo_efetivo": "Você está vendo",
@@ -1425,7 +1425,7 @@
     },
     "quicksell": {
       "descricao": "Vende rapidamente uma carta do seu inventário",
-      "opcao_nome": "O nome da carta que você quer vender rápido"
+      "opcao_name": "O nome da carta que você quer vender rápido"
     },
     "aprimorar": {
       "descricao": "Gasta gemas para tentar subir o nível de uma carta",
@@ -1475,7 +1475,7 @@
       "sub_roll_extra": "Adianta seu próximo /roll (até {limite} por dia, e o preço sobe a cada um)"
     },
     "idioma": {
-      "descricao": "Escolhe o idioma das respostas do bot (português ou inglês)",
+      "descricao": "Escolhe o idioma das respostas do bot (português, inglês ou espanhol)",
       "opcao_idioma": "Idioma desejado, ou automático para seguir o Discord",
       "opcao_escopo": "Só para você (padrão) ou para o servidor inteiro"
     },
@@ -1557,25 +1557,12 @@
     "ping": {
       "descricao": "Mostra o tempo de resposta do bot"
     },
-    "pokedex": {
-      "descricao": "Mostra quais cartas você já descobriu e quais ainda faltam",
-      "opcao_serie": "Filtrar por anime/série",
-      "opcao_raridade": "Filtrar por raridade",
-      "opcao_faltantes": "Mostrar apenas as cartas que você ainda não tem"
-    },
     "profile": {
       "descricao": "Mostra o perfil de um jogador (o seu, se não mencionar ninguém)",
       "opcao_user": "Jogador que você quer ver o perfil"
     },
-    "quicksell": {
-      "descricao": "Vende rapidamente uma carta do seu inventário",
-      "opcao_name": "O nome da carta que você quer vender rápido"
-    },
     "ranking": {
       "descricao": "Classificação dos melhores duelistas por pontuação"
-    },
-    "roll": {
-      "descricao": "Rola uma carta aleatória baseada em raridade"
     },
     "sell": {
       "descricao": "Lista uma carta do seu inventário no mercado",

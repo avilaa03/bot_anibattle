@@ -67,8 +67,8 @@ module.exports = class QuickSellSlashCommand extends BaseSlashCommand {
             .setDescriptionLocalizations(localizacoes('comandos.quicksell.descricao'))
             .addStringOption(option =>
                 option.setName('name')
-                .setDescription(descricaoBase('comandos.quicksell.opcao_nome'))
-                .setDescriptionLocalizations(localizacoes('comandos.quicksell.opcao_nome'))
+                .setDescription(descricaoBase('comandos.quicksell.opcao_name'))
+                .setDescriptionLocalizations(localizacoes('comandos.quicksell.opcao_name'))
                 .setRequired(true)
             )
             .toJSON();

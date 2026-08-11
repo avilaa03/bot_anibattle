@@ -422,8 +422,8 @@
     "opcao_automatico": "Automatic (follow Discord)",
     "escopo_mim": "Just me",
     "escopo_servidor": "Whole server",
-    "titulo_status":"🌐 AniBattle language",
-    "descricao_status": "The bot replies in Portuguese or English. Use `/language language:` to change it.",
+    "titulo_status": "🌐 AniBattle language",
+    "descricao_status": "The bot replies in Portuguese, English or Spanish. Use `/language language:` to change it.",
     "campo_voce": "Your preference",
     "campo_servidor": "Server default",
     "campo_efetivo": "You're seeing",
@@ -1420,12 +1420,12 @@
   },
   "comandos": {
     "roll": {
-      "descricao": "Roll a random card based on rarity",
+      "descricao": "Rolls a random card based on rarity",
       "opcao_extra": "Spend a 🎟️ extra roll from your bag to skip the cooldown"
     },
     "quicksell": {
       "descricao": "Quickly sell a card from your inventory",
-      "opcao_nome": "The name of the card you want to quick-sell"
+      "opcao_name": "The name of the card you want to quick-sell"
     },
     "aprimorar": {
       "descricao": "Spend gems to try to raise a card's level",
@@ -1458,7 +1458,7 @@
       "opcao_dificuldade": "How strong the opponent is (default: even)"
     },
     "pokedex": {
-      "descricao": "Show which cards you have discovered and which are still missing",
+      "descricao": "Shows which cards you've discovered and which are still missing",
       "opcao_serie": "Filter by anime/series",
       "opcao_dex": "Which Pokédex (default: the normal one)",
       "opcao_raridade": "Filter by rarity",
@@ -1475,7 +1475,7 @@
       "sub_roll_extra": "Bring your next /roll forward (up to {limite} a day, price rises each time)"
     },
     "idioma": {
-      "descricao": "Choose the language the bot replies in (Portuguese or English)",
+      "descricao": "Choose the language the bot replies in (Portuguese, English or Spanish)",
       "opcao_idioma": "Language you want, or automatic to follow Discord",
       "opcao_escopo": "Just you (default) or the whole server"
     },
@@ -1557,25 +1557,12 @@
     "ping": {
       "descricao": "Shows the bot's response time"
     },
-    "pokedex": {
-      "descricao": "Shows which cards you've discovered and which are still missing",
-      "opcao_serie": "Filter by anime/series",
-      "opcao_raridade": "Filter by rarity",
-      "opcao_faltantes": "Show only the cards you don't have yet"
-    },
     "profile": {
       "descricao": "Shows a player's profile (yours, if you don't mention anyone)",
       "opcao_user": "Player whose profile you want to see"
     },
-    "quicksell": {
-      "descricao": "Quickly sell a card from your inventory",
-      "opcao_name": "The name of the card you want to quick-sell"
-    },
     "ranking": {
       "descricao": "Leaderboard of the best duelists by rating"
-    },
-    "roll": {
-      "descricao": "Rolls a random card based on rarity"
     },
     "sell": {
       "descricao": "List a card from your inventory on the market",
