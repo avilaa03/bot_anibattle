@@ -13,6 +13,7 @@ const { molduraEfetiva } = require('../../utils/vip');
 const { registerDiscovery } = require('../../utils/discovery');
 const { registrar } = require('../../utils/progresso');
 const mongoose = require('mongoose');
+const { tDaInteracao } = require('../../utils/idioma');
 
 /**
  * /caixa — comprar e abrir caixas.
@@ -39,18 +40,18 @@ const mongoose = require('mongoose');
 
 const MAXIMO_POR_COMPRA = 10;
 
-function embedDaLoja(user) {
+function embedDaLoja(user, t) {
     const saldo = Number(user?.balance) || 0;
 
     const embed = ui.base()
-        .setTitle('🎁 Caixas')
+        .setTitle(t('caixa.titulo'))
         .setDescription([
-            'Compre com `/caixa comprar` e abra quando quiser com `/caixa abrir`.',
+            t('caixa.como_usar'),
             '',
-            `Seu saldo: **${ui.coins(saldo)}**`
+            t('loja.seu_saldo', { saldo: ui.coins(saldo, t.locale) })
         ].join('\n'));
 
-    for (const caixa of caixas.todas()) {
+    for (const caixa of caixas.todas(t.locale)) {
         const tem = bolsa.quantidadeDe(user, caixas.chaveNaBolsa(caixa.chave));
         const restam = limiteDiario.restante(user, 'caixa', caixa.chave, caixa.limiteDia);
 
@@ -58,42 +59,47 @@ function embedDaLoja(user) {
         // chance é o que dá má fama a lootbox — e aqui não há o que
         // esconder, porque a caixa é paga com moeda do jogo.
         const chances = Object.entries(caixa.distribuicao)
-            .map(([r, c]) => `${ui.getRarity(r).emoji} ${c}%`)
+            .map(([r, c]) => `${ui.getRarity(r, t.locale).emoji} ${c}%`)
             .join(' · ');
 
         const linhas = [
             caixa.descricao,
             `> ${chances}`,
             caixa.detalhe ? `> *${caixa.detalhe}*` : null,
-            tem > 0 ? `> Você tem **${ui.number(tem)}** guardada(s).` : null,
-            caixa.preco != null && restam !== null ? `> Hoje: **${restam}** de ${caixa.limiteDia}` : null
+            tem > 0 ? `> ${t('caixa.voce_tem', { quantidade: ui.number(tem, t.locale) })}` : null,
+            caixa.preco != null && restam !== null
+                ? `> ${t('caixa.hoje', { restam, limite: caixa.limiteDia })}`
+                : null
         ].filter(Boolean);
 
         embed.addFields({
-            name: `${caixa.emoji} ${caixa.nome} — ${caixa.preco == null ? 'não está à venda' : ui.coins(caixa.preco)}`,
+            name: `${caixa.emoji} ${caixa.nome} — ${caixa.preco == null ? t('caixa.nao_esta_a_venda') : ui.coins(caixa.preco, t.locale)}`,
             value: linhas.join('\n')
         });
     }
 
-    embed.setFooter({ text: `${ui.BRAND} • A moeda gasta aqui sai de circulação` });
+    embed.setFooter({ text: `${ui.BRAND} • ${t('loja.rodape_sink')}` });
     return embed;
 }
 
-async function comprar(interaction) {
+async function comprar(interaction, t) {
     const chave = interaction.options.getString('caixa');
     const quantidade = interaction.options.getInteger('quantidade') ?? 1;
 
-    const caixa = caixas.getCaixa(chave);
+    const caixa = caixas.localizarPorChave(chave, t.locale);
     if (!caixa || caixa.preco == null) {
         return interaction.reply({
-            embeds: [ui.error('Caixa indisponível', 'Essa caixa não está à venda.')],
+            embeds: [ui.error(t('caixa.indisponivel'), t('caixa.indisponivel_texto'))],
             flags: MessageFlags.Ephemeral
         });
     }
 
     if (quantidade < 1 || quantidade > MAXIMO_POR_COMPRA) {
         return interaction.reply({
-            embeds: [ui.error('Quantidade inválida', `Compre de 1 a ${MAXIMO_POR_COMPRA} por vez.`)],
+            embeds: [ui.error(
+                t('loja.quantidade_invalida'),
+                t('loja.quantidade_invalida_texto', { maximo: MAXIMO_POR_COMPRA })
+            )],
             flags: MessageFlags.Ephemeral
         });
     }
@@ -109,10 +115,13 @@ async function comprar(interaction) {
 
     if (usos.length === 0) {
         return interaction.reply({
-            embeds: [ui.warning('Limite diário atingido', [
-                `Você já comprou **${caixa.limiteDia}** ${caixa.emoji} **${caixa.nome}** hoje.`,
+            embeds: [ui.warning(t('loja.limite_diario'), [
+                t('caixa.limite_texto', {
+                    limite: caixa.limiteDia,
+                    caixa: `${caixa.emoji} **${caixa.nome}**`
+                }),
                 '',
-                'O limite existe para a caixa não virar torneira de cartas. Ele zera à meia-noite (UTC).'
+                t('caixa.limite_porque')
             ].join('\n'))],
             flags: MessageFlags.Ephemeral
         });
@@ -133,9 +142,16 @@ async function comprar(interaction) {
         const user = await User.findOne({ id: interaction.user.id }).lean();
         const saldo = Number(user?.balance) || 0;
         return interaction.reply({
-            embeds: [ui.warning('Saldo insuficiente', [
-                `${caixa.emoji} **${caixa.nome}** x${comprada} custa ${ui.coins(total)}.`,
-                `Você tem ${ui.coins(saldo)} — faltam **${ui.coins(total - saldo)}**.`
+            embeds: [ui.warning(t('comum.saldo_insuficiente'), [
+                t('loja.custo_da_compra', {
+                    item: `${caixa.emoji} **${caixa.nome}**`,
+                    quantidade: comprada,
+                    total: ui.coins(total, t.locale)
+                }),
+                t('loja.faltam', {
+                    saldo: ui.coins(saldo, t.locale),
+                    falta: ui.coins(total - saldo, t.locale)
+                })
             ].join('\n'))],
             flags: MessageFlags.Ephemeral
         });
@@ -161,17 +177,20 @@ async function comprar(interaction) {
     });
 
     const aviso = comprada < quantidade
-        ? `\n\n⚠️ *Você pediu ${quantidade}, mas o limite de hoje deixou comprar ${comprada}.*`
+        ? `\n\n⚠️ *${t('caixa.limite_cortou', { pedido: quantidade, comprado: comprada })}*`
         : '';
 
     return interaction.reply({
-        embeds: [ui.success('Caixa guardada', [
-            `${caixa.emoji} **${caixa.nome}** x${ui.number(comprada)}`,
+        embeds: [ui.success(t('caixa.guardada'), [
+            `${caixa.emoji} **${caixa.nome}** x${ui.number(comprada, t.locale)}`,
             '',
-            `Pagou ${ui.coins(total)} • Saldo: ${ui.coins(debitado.balance)}`,
-            `Na bolsa agora: **${ui.number(guardadas)}**`,
+            t('loja.pagou', {
+                total: ui.coins(total, t.locale),
+                saldo: ui.coins(debitado.balance, t.locale)
+            }),
+            t('loja.na_bolsa_agora', { quantidade: ui.number(guardadas, t.locale) }),
             '',
-            `Abra com \`/caixa abrir\` quando quiser.${aviso}`
+            `${t('caixa.abra_quando_quiser')}${aviso}`
         ].join('\n'))],
         flags: MessageFlags.Ephemeral
     });
@@ -206,21 +225,21 @@ async function sortearCarta(caixa, serie) {
     return resultado[0] || null;
 }
 
-async function abrir(interaction) {
+async function abrir(interaction, t) {
     const chave = interaction.options.getString('caixa');
     const serie = interaction.options.getString('serie') || null;
 
-    const caixa = caixas.getCaixa(chave);
+    const caixa = caixas.localizarPorChave(chave, t.locale);
     if (!caixa) {
         return interaction.reply({
-            embeds: [ui.error('Caixa desconhecida', 'Essa caixa não existe.')],
+            embeds: [ui.error(t('caixa.desconhecida'), t('caixa.desconhecida_texto'))],
             flags: MessageFlags.Ephemeral
         });
     }
 
     if (caixa.serie && !serie) {
         return interaction.reply({
-            embeds: [ui.error('Escolha a série', `A ${caixa.nome} precisa de uma série — é justamente o que ela mira.`)],
+            embeds: [ui.error(t('caixa.escolha_serie'), t('caixa.escolha_serie_texto', { caixa: caixa.nome }))],
             flags: MessageFlags.Ephemeral
         });
     }
@@ -233,11 +252,11 @@ async function abrir(interaction) {
     const apos = await bolsa.consumir(interaction.user.id, chaveBolsa, 1);
     if (!apos) {
         return interaction.editReply({
-            embeds: [ui.warning('Você não tem essa caixa', [
-                `Nenhuma ${caixa.emoji} **${caixa.nome}** na sua bolsa.`,
+            embeds: [ui.warning(t('caixa.nao_tem'), [
+                t('caixa.nao_tem_texto', { caixa: `${caixa.emoji} **${caixa.nome}**` }),
                 caixa.preco == null
-                    ? 'Ela não está à venda — é a recompensa de quem vota no bot.'
-                    : `Compre com \`/caixa comprar\` por ${ui.coins(caixa.preco)}.`
+                    ? t('caixa.nao_tem_apoiador')
+                    : t('caixa.nao_tem_compre', { preco: ui.coins(caixa.preco, t.locale) })
             ].join('\n'))]
         });
     }
@@ -248,7 +267,7 @@ async function abrir(interaction) {
         // pagou por um catálogo vazio.
         await bolsa.adicionar(interaction.user.id, chaveBolsa, 1).catch(() => {});
         return interaction.editReply({
-            embeds: [ui.error('Nenhuma carta encontrada', 'Sua caixa foi devolvida à bolsa.')]
+            embeds: [ui.error(t('caixa.sem_carta'), t('caixa.sem_carta_texto'))]
         });
     }
 
@@ -282,21 +301,27 @@ async function abrir(interaction) {
     await User.updateOne({ id: interaction.user.id }, { $push: { inventory: copia } });
 
     const render = await renderCard(card, { moldura: molduraEfetiva(user) });
-    const meta = ui.getRarity(card.rarity);
+    const meta = ui.getRarity(card.rarity, t.locale);
 
     const embed = ui.base(meta.color)
-        .setAuthor({ name: `${interaction.user.username} abriu uma caixa`, iconURL: interaction.user.displayAvatarURL() })
+        .setAuthor({
+            name: t('caixa.autor', { jogador: interaction.user.username }),
+            iconURL: interaction.user.displayAvatarURL()
+        })
         .setTitle(`${caixa.emoji} ${caixa.nome} → ${meta.emoji} ${ui.cardName(card)}`)
         .setDescription([
             `*${card.series}*`,
             '',
-            ui.statLines(card),
+            ui.statLines(card, t.locale),
             '',
-            `Raridade ${ui.rarityTag(card.rarity)} • Overall **${card.overall}**`
+            t('roll.linha_raridade', {
+                raridade: ui.rarityTag(card.rarity, t.locale),
+                overall: card.overall
+            })
         ].join('\n'))
-        .addFields({ name: 'Valor de mercado', value: ui.coins(marketValue), inline: true })
+        .addFields({ name: t('roll.valor_mercado'), value: ui.coins(marketValue, t.locale), inline: true })
         .setImage(render.url)
-        .setFooter({ text: `${ui.BRAND} • A carta já está no seu inventário` });
+        .setFooter({ text: `${ui.BRAND} • ${t('caixa.ja_no_inventario')}` });
 
     await interaction.editReply({ embeds: [embed], files: [render.attachment] });
 
@@ -323,13 +348,14 @@ async function abrir(interaction) {
 }
 
 module.exports = async (client, interaction) => {
+    const t = await tDaInteracao(interaction);
     const sub = interaction.options.getSubcommand(false);
 
-    if (sub === 'comprar') return comprar(interaction);
-    if (sub === 'abrir') return abrir(interaction);
+    if (sub === 'comprar') return comprar(interaction, t);
+    if (sub === 'abrir') return abrir(interaction, t);
 
     const user = await User.findOne({ id: interaction.user.id }).lean();
-    return interaction.reply({ embeds: [embedDaLoja(user)], flags: MessageFlags.Ephemeral });
+    return interaction.reply({ embeds: [embedDaLoja(user, t)], flags: MessageFlags.Ephemeral });
 };
 
 module.exports.embedDaLoja = embedDaLoja;

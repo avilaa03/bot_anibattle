@@ -1,7 +1,7 @@
 const BaseSlashCommand = require('../utils/BaseSlashCommand.js');
 const { SlashCommandBuilder } = require('discord.js');
 const idiomaRun = require('../actions/run/idiomaRun.js');
-const { descricaoBase, localizacoes } = require('../utils/i18n');
+const { descricaoBase, localizacoes, escolha } = require('../utils/i18n');
 
 /**
  * O nome do comando é o mesmo nos dois idiomas ("idioma"), mas com
@@ -30,13 +30,14 @@ module.exports = class IdiomaSlashCommand extends BaseSlashCommand {
                     .setDescription(descricaoBase('comandos.idioma.opcao_idioma'))
                     .setDescriptionLocalizations(localizacoes('comandos.idioma.opcao_idioma'))
                     .setRequired(false)
+                    // Os nomes dos idiomas ficam em si mesmos, não
+                    // traduzidos: quem procura inglês procura "English",
+                    // esteja o bot em que idioma estiver. É o mesmo motivo
+                    // pelo qual todo seletor de idioma do mundo faz assim.
                     .addChoices(
                         { name: '🇧🇷 Português (Brasil)', value: 'pt-BR' },
                         { name: '🇺🇸 English (US)', value: 'en-US' },
-                        {
-                            name: 'Automático / Automatic',
-                            value: 'auto'
-                        }
+                        escolha('idioma.opcao_automatico', 'auto')
                     )
             )
             .addStringOption(option =>
@@ -46,8 +47,8 @@ module.exports = class IdiomaSlashCommand extends BaseSlashCommand {
                     .setDescriptionLocalizations(localizacoes('comandos.idioma.opcao_escopo'))
                     .setRequired(false)
                     .addChoices(
-                        { name: 'Só para mim / Just me', value: 'mim' },
-                        { name: 'Servidor inteiro / Whole server', value: 'servidor' }
+                        escolha('idioma.escopo_mim', 'mim'),
+                        escolha('idioma.escopo_servidor', 'servidor')
                     )
             )
             .toJSON();
