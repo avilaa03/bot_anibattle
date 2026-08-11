@@ -28,6 +28,8 @@
     "perfil_nao_encontrado": "Profile not found",
     "perfil_nao_encontrado_texto": "Use `/roll` or `/daily` to create your profile first.",
     "carta_nao_encontrada": "Card not found",
+    "nenhuma_com_nome": "No card in your inventory has \"{busca}\" in its name.",
+    "carta_vinculada": "Bound card",
     "usuario_nao_encontrado": "User not found",
     "saldo_insuficiente": "Not enough coins",
     "pagina": "Page {atual}/{total}",
@@ -304,6 +306,10 @@
     "amistoso": "Friendly duel",
     "times_prontos": "⚔️ Both teams are ready!",
     "times_prontos_texto": "**{nomeX}** vs **{nomeY}**\n\nThe fight starts in a moment..."
+  },
+  "negociabilidade": {
+    "vinculada": "This card is **bound**: it is yours and cannot be sold, traded or transferred.",
+    "evento_nao_desmancha": "Event cards cannot be salvaged: they never go back into circulation, and salvaging cannot be undone."
   },
   "ciclo_de_vida": {
     "NAO_PARTICIPA": "You are not part of this negotiation.",

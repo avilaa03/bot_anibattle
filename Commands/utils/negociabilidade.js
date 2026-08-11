@@ -25,6 +25,8 @@
  */
 
 /** A raridade das cartas de evento. */
+const { traduzir, DEFAULT_LOCALE } = require('./i18n');
+
 const RARIDADE_EVENTO = 'event';
 
 function raridadeDe(carta) {
@@ -59,13 +61,12 @@ function podeDesmanchar(carta) {
 }
 
 /** Explicação para o jogador, quando a ação é recusada. */
-function motivoDeRecusa(carta, acao = 'negociar') {
+function motivoDeRecusa(carta, acao = 'negociar', locale = DEFAULT_LOCALE) {
     if (ehDeEvento(carta) && acao === 'desmanchar') {
-        return 'Cartas de evento não podem ser desmanchadas: elas não voltam a ser distribuídas, '
-            + 'e desmanchar não tem como ser desfeito.';
+        return traduzir(locale, 'negociabilidade.evento_nao_desmancha');
     }
     if (!podeNegociar(carta)) {
-        return 'Esta carta é **vinculada**: ela é sua e não pode ser vendida, trocada nem transferida.';
+        return traduzir(locale, 'negociabilidade.vinculada');
     }
     return null;
 }

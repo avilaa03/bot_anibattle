@@ -5,8 +5,9 @@ const valores = require('../../utils/valores');
 const aprimoramento = require('../../utils/aprimoramento');
 const { applyMarketTax, MARKET_TAX_RATE } = require('../../utils/economy');
 const { registrar } = require('../../utils/progresso');
+const { criarT, DEFAULT_LOCALE } = require('../../utils/i18n');
 
-async function sellCollect(interaction, collector, matchingCards, indexRef, listingPrice, user, rowNavigation, rowConfirmation, buildSellEmbed) {
+async function sellCollect(interaction, collector, matchingCards, indexRef, listingPrice, user, rowNavigation, rowConfirmation, buildSellEmbed, t = criarT(DEFAULT_LOCALE)) {
     collector.on('collect', async (i) => {
         if (i.customId === 'prev') {
             indexRef.currentIndex = (indexRef.currentIndex - 1 + matchingCards.length) % matchingCards.length;
@@ -33,7 +34,7 @@ async function sellCollect(interaction, collector, matchingCards, indexRef, list
                 { $pull: { inventory: { _id: card._id } } }
             );
             if (!updatedUser) {
-                const missingEmbed = ui.error('Carta indisponível', 'Essa carta não está mais no seu inventário.');
+                const missingEmbed = ui.error(t('market.indisponivel'), t('sell.sumiu_do_inventario'));
                 await i.update({ embeds: [missingEmbed], components: [] });
                 collector.stop('collected');
                 return;
@@ -69,17 +70,25 @@ async function sellCollect(interaction, collector, matchingCards, indexRef, list
             await listing.save();
 
             const { tax, sellerReceives } = applyMarketTax(listingPrice);
-            const successEmbed = ui.success('Carta anunciada', `${ui.getRarity(card.rarity).emoji} **${ui.cardName(card)}** está à venda por ${ui.coins(listingPrice)}.`)
+            const successEmbed = ui.success(t('sell.anunciada'), t('sell.anunciada_texto', {
+                emoji: ui.getRarity(card.rarity, t.locale).emoji,
+                carta: ui.cardName(card),
+                valor: ui.coins(listingPrice, t.locale)
+            }))
                 .addFields(
-                    { name: 'Você recebe na venda', value: ui.coins(sellerReceives), inline: true },
-                    { name: `Taxa do mercado (${Math.round(MARKET_TAX_RATE * 100)}%)`, value: ui.coins(tax), inline: true }
+                    { name: t('sell.recebe_na_venda'), value: ui.coins(sellerReceives, t.locale), inline: true },
+                    {
+                        name: t('sell.taxa_mercado', { porcento: Math.round(MARKET_TAX_RATE * 100) }),
+                        value: ui.coins(tax, t.locale),
+                        inline: true
+                    }
                 )
-                .setFooter({ text: `${ui.BRAND} • Use /undosell para retirar o anúncio` });
+                .setFooter({ text: `${ui.BRAND} • ${t('sell.rodape_undosell')}` });
             await i.update({ embeds: [successEmbed], components: [], files: [] });
             registrar(interaction.user.id, { vendasMercado: 1 }, { eventosMissao: ['venda', 'mercado'] }).catch(() => {});
             collector.stop('collected');
         } else if (i.customId === 'cancel_sell') {
-            const cancelEmbed = ui.neutral('Anúncio cancelado', 'Sua carta continua no inventário.');
+            const cancelEmbed = ui.neutral(t('sell.cancelado'), t('sell.cancelado_texto'));
             await i.update({ embeds: [cancelEmbed], components: [], files: [] });
             collector.stop('collected');
         }

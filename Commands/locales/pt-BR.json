@@ -28,6 +28,8 @@
     "perfil_nao_encontrado": "Perfil não encontrado",
     "perfil_nao_encontrado_texto": "Use `/roll` ou `/daily` para criar seu perfil primeiro.",
     "carta_nao_encontrada": "Carta não encontrada",
+    "nenhuma_com_nome": "Nenhuma carta no seu inventário tem \"{busca}\" no nome.",
+    "carta_vinculada": "Carta vinculada",
     "usuario_nao_encontrado": "Usuário não encontrado",
     "saldo_insuficiente": "Saldo insuficiente",
     "pagina": "Página {atual}/{total}",
@@ -304,6 +306,10 @@
     "amistoso": "Duelo amistoso",
     "times_prontos": "⚔️ Os times estão prontos!",
     "times_prontos_texto": "**{nomeX}** contra **{nomeY}**\n\nA luta começa em instantes..."
+  },
+  "negociabilidade": {
+    "vinculada": "Esta carta é **vinculada**: ela é sua e não pode ser vendida, trocada nem transferida.",
+    "evento_nao_desmancha": "Cartas de evento não podem ser desmanchadas: elas não voltam a ser distribuídas, e desmanchar não tem como ser desfeito."
   },
   "ciclo_de_vida": {
     "NAO_PARTICIPA": "Você não faz parte desta negociação.",
