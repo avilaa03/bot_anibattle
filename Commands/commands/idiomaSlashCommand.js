@@ -1,17 +1,20 @@
 const BaseSlashCommand = require('../utils/BaseSlashCommand.js');
+const nomes = require('../utils/nomesDeComando.js');
 const { SlashCommandBuilder } = require('discord.js');
 const idiomaRun = require('../actions/run/idiomaRun.js');
 const { descricaoBase, localizacoes, escolha } = require('../utils/i18n');
 
 /**
- * O nome do comando é o mesmo nos dois idiomas ("idioma"), mas com
- * `setNameLocalizations` quem usa o Discord em inglês digita `/language`.
- * O Discord resolve o nome localizado para o mesmo comando — é o único
- * jeito de ter um nome por idioma sem registrar dois comandos.
+ * Este comando já nascia com nome por idioma, e foi o modelo do resto:
+ * hoje TODOS os comandos têm o canônico em inglês e um apelido por
+ * idioma, num mapa só (`utils/nomesDeComando.js`).
+ *
+ * O canônico virou `language`; quem usa o Discord em português continua
+ * digitando `/idioma`, e o Discord resolve os dois para o mesmo comando.
  */
 module.exports = class IdiomaSlashCommand extends BaseSlashCommand {
     constructor() {
-        super('idioma');
+        super('language');
     }
 
     async run(client, interaction) {
@@ -21,12 +24,12 @@ module.exports = class IdiomaSlashCommand extends BaseSlashCommand {
     getSlashCommandJSON() {
         return new SlashCommandBuilder()
             .setName(this.name)
-            .setNameLocalizations({ 'en-US': 'language' })
+            .setNameLocalizations(nomes.comando(this.name))
             .setDescription(descricaoBase('comandos.idioma.descricao'))
             .setDescriptionLocalizations(localizacoes('comandos.idioma.descricao'))
             .addStringOption(option =>
-                option.setName('idioma')
-                    .setNameLocalizations({ 'en-US': 'language' })
+                option.setName('language')
+                    .setNameLocalizations(nomes.opcao('language'))
                     .setDescription(descricaoBase('comandos.idioma.opcao_idioma'))
                     .setDescriptionLocalizations(localizacoes('comandos.idioma.opcao_idioma'))
                     .setRequired(false)
@@ -42,14 +45,14 @@ module.exports = class IdiomaSlashCommand extends BaseSlashCommand {
                     )
             )
             .addStringOption(option =>
-                option.setName('escopo')
-                    .setNameLocalizations({ 'en-US': 'scope' })
+                option.setName('scope')
+                    .setNameLocalizations(nomes.opcao('scope'))
                     .setDescription(descricaoBase('comandos.idioma.opcao_escopo'))
                     .setDescriptionLocalizations(localizacoes('comandos.idioma.opcao_escopo'))
                     .setRequired(false)
                     .addChoices(
-                        escolha('idioma.escopo_mim', 'mim'),
-                        escolha('idioma.escopo_servidor', 'servidor')
+                        escolha('idioma.escopo_mim', 'me'),
+                        escolha('idioma.escopo_servidor', 'server')
                     )
             )
             .toJSON();

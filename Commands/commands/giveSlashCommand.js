@@ -1,4 +1,5 @@
 const BaseSlashCommand = require('../utils/BaseSlashCommand');
+const nomes = require('../utils/nomesDeComando.js');
 const { SlashCommandBuilder } = require('discord.js');
 const { descricaoBase, localizacoes } = require('../utils/i18n');
 const { giveRun } = require('../actions/run/giveRun.js');
@@ -26,6 +27,7 @@ module.exports = class GiveSlashCommand extends BaseSlashCommand {
             .addNumberOption(option =>
                 option
                     .setName('amount')
+                    .setNameLocalizations(nomes.opcao('amount'))
                     .setDescription(descricaoBase('comandos.give.opcao_amount'))
                     .setDescriptionLocalizations(localizacoes('comandos.give.opcao_amount'))
                     .setMinValue(0)

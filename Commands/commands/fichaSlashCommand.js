@@ -1,11 +1,12 @@
 const BaseSlashCommand = require('../utils/BaseSlashCommand.js');
+const nomes = require('../utils/nomesDeComando.js');
 const { SlashCommandBuilder } = require('discord.js');
 const { descricaoBase, localizacoes } = require('../utils/i18n');
 const fichaRun = require('../actions/run/fichaRun.js');
 
 module.exports = class FichaSlashCommand extends BaseSlashCommand {
     constructor() {
-        super('ficha');
+        super('cardinfo');
     }
 
     async run(client, interaction) {
@@ -15,16 +16,19 @@ module.exports = class FichaSlashCommand extends BaseSlashCommand {
     getSlashCommandJSON() {
         return new SlashCommandBuilder()
             .setName(this.name)
+            .setNameLocalizations(nomes.comando(this.name))
             .setDescription(descricaoBase('comandos.ficha.descricao'))
             .setDescriptionLocalizations(localizacoes('comandos.ficha.descricao'))
             .addStringOption(option =>
-                option.setName('nome')
+                option.setName('name')
+                .setNameLocalizations(nomes.opcao('name'))
                     .setDescription(descricaoBase('comandos.ficha.opcao_nome'))
                     .setDescriptionLocalizations(localizacoes('comandos.ficha.opcao_nome'))
                     .setRequired(false)
             )
             .addIntegerOption(option =>
-                option.setName('numero')
+                option.setName('number')
+                .setNameLocalizations(nomes.opcao('number'))
                     .setDescription(descricaoBase('comandos.ficha.opcao_numero'))
                     .setDescriptionLocalizations(localizacoes('comandos.ficha.opcao_numero'))
                     .setMinValue(1)

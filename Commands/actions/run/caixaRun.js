@@ -83,8 +83,8 @@ function embedDaLoja(user, t) {
 }
 
 async function comprar(interaction, t) {
-    const chave = interaction.options.getString('caixa');
-    const quantidade = interaction.options.getInteger('quantidade') ?? 1;
+    const chave = interaction.options.getString('box');
+    const quantidade = interaction.options.getInteger('amount') ?? 1;
 
     const caixa = caixas.localizarPorChave(chave, t.locale);
     if (!caixa || caixa.preco == null) {
@@ -226,8 +226,8 @@ async function sortearCarta(caixa, serie) {
 }
 
 async function abrir(interaction, t) {
-    const chave = interaction.options.getString('caixa');
-    const serie = interaction.options.getString('serie') || null;
+    const chave = interaction.options.getString('box');
+    const serie = interaction.options.getString('series') || null;
 
     const caixa = caixas.localizarPorChave(chave, t.locale);
     if (!caixa) {
@@ -351,8 +351,8 @@ module.exports = async (client, interaction) => {
     const t = await tDaInteracao(interaction);
     const sub = interaction.options.getSubcommand(false);
 
-    if (sub === 'comprar') return comprar(interaction, t);
-    if (sub === 'abrir') return abrir(interaction, t);
+    if (sub === 'buy') return comprar(interaction, t);
+    if (sub === 'open') return abrir(interaction, t);
 
     const user = await User.findOne({ id: interaction.user.id }).lean();
     return interaction.reply({ embeds: [embedDaLoja(user, t)], flags: MessageFlags.Ephemeral });

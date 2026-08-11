@@ -230,7 +230,7 @@
     },
     "mostrar_1": {
       "nome": "Show-off",
-      "descricao": "Use /show or /ficha once"
+      "descricao": "Use /show or /cardinfo once"
     },
     "critico_5": {
       "nome": "Precision",
@@ -320,13 +320,13 @@
   "itens_catalogo": {
     "gema": {
       "nome": "Upgrade Gem",
-      "descricao": "Material for `/aprimorar`. It is consumed on use, whether the upgrade works or not.",
-      "detalhe": "It also comes from `/desmanchar` — salvaging pays better than quick-selling for everything except Master cards."
+      "descricao": "Material for `/upgrade`. It is consumed on use, whether the upgrade works or not.",
+      "detalhe": "It also comes from `/salvage` — salvaging pays better than quick-selling for everything except Master cards."
     },
     "roll_extra": {
       "nome": "Extra Roll",
       "descricao": "A `/roll` that skips the cooldown. Stored until you want to use it.",
-      "detalhe": "Buy it with `/loja roll-extra` and use it with `/roll extra:True`."
+      "detalhe": "Buy it with `/shop extra-roll` and use it with `/roll extra:True`."
     },
     "pergaminho": {
       "nome": "Protection Scroll",
@@ -389,20 +389,20 @@
     "nao_vale_nada": "Training gives no coins, no ELO and no trophies",
     "mencao_transmissao": "{jogador} 🥊 training",
     "encerrado": "Training over",
-    "encerrado_texto": "This session expired or has already been resolved. Use `/treino` to open another.",
+    "encerrado_texto": "This session expired or has already been resolved. Use `/training` to open another.",
     "nao_e_seu": "Not your training",
     "nao_e_seu_texto": "This training session belongs to someone else.",
     "carta_indisponivel": "Card unavailable",
     "nada_a_fazer": "Nothing to do",
     "recusa": {
-      "SESSAO_EXPIRADA": "This session expired. Use `/treino` to open another.",
+      "SESSAO_EXPIRADA": "This session expired. Use `/training` to open another.",
       "TIME_CHEIO": "Your team already has 3 cards.",
       "JA_ESCOLHIDA": "You already picked this card."
     },
     "nada_para_cancelar": "Nothing to cancel",
     "nada_para_cancelar_texto": "This training session has already ended or expired.",
     "cancelado": "Training cancelled",
-    "cancelado_texto": "No fight happened. Use `/treino` whenever you want to try again."
+    "cancelado_texto": "No fight happened. Use `/training` whenever you want to try again."
   },
   "notificacoes": {
     "trofeu_desbloqueado": "Trophy unlocked!",
@@ -411,12 +411,12 @@
     "ouro_titulo": "{emoji} Gold trophy!",
     "platina_descricao": "<@{userId}> has unlocked **every AniBattle trophy**.\n\n**{nome}** — *{descricao}*",
     "ouro_descricao": "<@{userId}> unlocked **{nome}**\n\n*{descricao}*",
-    "anuncio_rodape": "See yours with /conquistas",
+    "anuncio_rodape": "See yours with /achievements",
     "platinou": "🎉 <@{userId}> PLATINUMED ANIBATTLE! 🎉",
     "missao_completa": "Quest complete!",
     "missao_linha": "✅ **{nome}** — {descricao}\n└ Reward: {recompensa}",
     "missao_para_receber": "To claim",
-    "missao_resgate": "Use `/missoes` and click **Claim** ({total} available)."
+    "missao_resgate": "Use `/missions` and click **Claim** ({total} available)."
   },
   "idioma": {
     "opcao_automatico": "Automatic (follow Discord)",
@@ -462,12 +462,12 @@
     "expirou": "Time ran out to claim the card.",
     "sem_extra": "You have no extra roll",
     "sem_extra_texto": "No 🎟️ **extra roll** in your bag.",
-    "sem_extra_onde_comprar": "Buy one with `/loja roll-extra` — the price rises with each purchase that day.",
+    "sem_extra_onde_comprar": "Buy one with `/shop extra-roll` — the price rises with each purchase that day.",
     "campo_extra": "🎟️ Extra roll",
     "tem_extra_guardado": "You have **{quantidade}** stored. Use `/roll extra:True` to skip the wait.",
     "protecao_azar": "Bad-luck protection: {rolls} rolls without a {raridade} — this one was guaranteed",
     "desejo_titulo": "💭 A card from your wishlist showed up!",
-    "desejo_texto": "{emoji} **{carta}** — *{serie}*\n\nRolled by **{jogador}**. How about proposing a trade with `/trocar`?"
+    "desejo_texto": "{emoji} **{carta}** — *{serie}*\n\nRolled by **{jogador}**. How about proposing a trade with `/trade`?"
   },
   "daily": {
     "marcos": {
@@ -826,7 +826,7 @@
   "desejos": {
     "titulo": "💭 Wishlist",
     "vazia": "💭 Empty wishlist",
-    "vazia_propria": "Use `/desejar nome:Gojo` to mark the cards you're hunting.\n\nYou get pinged when someone rolls one of them.",
+    "vazia_propria": "Use `/wish name:Gojo` to mark the cards you're hunting.\n\nYou get pinged when someone rolls one of them.",
     "vazia_outro": "**{jogador}** hasn't marked any cards yet.",
     "autor": "{jogador}'s wishlist",
     "tambem_procuram": "{n} others want it too",
@@ -834,19 +834,19 @@
   },
   "desejar": {
     "informe": "Tell me what to look for",
-    "informe_texto": "Use `/desejar nome:Gojo` or `/desejar numero:42`.",
+    "informe_texto": "Use `/wish name:Gojo` or `/wish number:42`.",
     "sem_numero": "There's no card numbered {numero}.",
     "sem_nome": "No card in the catalog has \"{nome}\" in its name.",
     "varias": "Several cards found",
-    "varias_texto": "{lista}\n\nUse `/desejar numero:<number>` to pick one.",
+    "varias_texto": "{lista}\n\nUse `/wish number:<number>` to pick one.",
     "removida": "Removed from wishlist",
     "removida_texto": "{emoji} **{carta}** left your list.",
     "nao_estava": "Wasn't on the list",
     "nao_estava_texto": "{emoji} **{carta}** wasn't on your wishlist.",
     "ja_na_lista": "Already on the list",
-    "ja_na_lista_texto": "{emoji} **{carta}** is already on your wishlist.\n\nUse `/desejar nome:{nome} remover:True` to take it off.",
+    "ja_na_lista_texto": "{emoji} **{carta}** is already on your wishlist.\n\nUse `/wish name:{nome} remove:True` to take it off.",
     "lista_cheia": "List is full",
-    "lista_cheia_texto": "You already have **{total}** cards on your wishlist (limit {limite}).\n\nRemove one with `remover:True`, or subscribe via `/vip` to raise the limit.",
+    "lista_cheia_texto": "You already have **{total}** cards on your wishlist (limit {limite}).\n\nRemove one with `remove:True`, or subscribe via `/vip` to raise the limit.",
     "adicionada": "Added to wishlist",
     "adicionada_texto": "{emoji} **{carta}** — *{serie}*",
     "numero": "Number",
@@ -912,7 +912,7 @@
   },
   "ficha": {
     "informe": "Tell me what to look for",
-    "informe_texto": "Use `/ficha nome:Kirito` or `/ficha numero:42`.",
+    "informe_texto": "Use `/cardinfo name:Kirito` or `/cardinfo number:42`.",
     "sem_numero": "There's no card numbered **{numero}** in the catalog.",
     "sem_nome": "No card in the catalog has \"{busca}\" in its name.",
     "procuram_texto": "{n} player(s)",
@@ -971,11 +971,11 @@
             "desc": "Shows what you've discovered and what's still missing. Filter by series, rarity, or only what's missing."
           },
           {
-            "nome": "/ficha",
+            "nome": "/cardinfo",
             "desc": "Looks up the full sheet of a registered card, by name or number. Works even if you already sold it."
           },
           {
-            "nome": "/colecionadores",
+            "nome": "/collectors",
             "desc": "Leaderboard of who has discovered the most cards."
           },
           {
@@ -1019,7 +1019,7 @@
             "desc": "Checks someone's balance and net worth."
           },
           {
-            "nome": "/magnata",
+            "nome": "/tycoon",
             "desc": "Leaderboard of the 10 richest players."
           },
           {
@@ -1053,11 +1053,11 @@
         "descricao": "Trophies, quests and ranking — what gives you long-term goals.",
         "comandos": [
           {
-            "nome": "/conquistas",
+            "nome": "/achievements",
             "desc": "Your trophies. 🥉 Bronze, 🥈 Silver, 🥇 Gold and 💎 **Platinum**, which only unlocks with all the others."
           },
           {
-            "nome": "/missoes",
+            "nome": "/missions",
             "desc": "Daily and weekly quests. Progress is automatic — just come back to claim."
           },
           {
@@ -1079,15 +1079,15 @@
         "descricao": "Trade and deal with other players.",
         "comandos": [
           {
-            "nome": "/trocar",
+            "nome": "/trade",
             "desc": "Card-for-card trading. Both sides build the offer and both confirm — change the offer and the confirmations reset."
           },
           {
-            "nome": "/desejar",
+            "nome": "/wish",
             "desc": "Marks a card you want. When someone rolls it, you find out and can offer a trade or a purchase."
           },
           {
-            "nome": "/desejos",
+            "nome": "/wishlist",
             "desc": "Your wishlist, with how many players are also after each card."
           },
           {
@@ -1095,7 +1095,7 @@
             "desc": "💡 *Wishing does **not** compete for the card. Whoever rolled it keeps it; the ping just tells you who to negotiate with.*"
           },
           {
-            "nome": "/torneio",
+            "nome": "/tournament",
             "desc": "Creates a knockout tournament. Join with one click and the bot resolves everything."
           }
         ]
@@ -1109,7 +1109,7 @@
             "desc": "See the plans and your subscription status."
           },
           {
-            "nome": "/cosmeticos",
+            "nome": "/cosmetics",
             "desc": "Equip your card frames and profile color."
           },
           {
@@ -1148,7 +1148,7 @@
   },
   "vip_ui": {
     "titulo": "✨ AniBattle VIP plans",
-    "ativo": "You're **{emoji} {plano}**!\nYour subscription expires {quando}.\n\nUse `/cosmeticos` to equip your frames.",
+    "ativo": "You're **{emoji} {plano}**!\nYour subscription expires {quando}.\n\nUse `/cosmetics` to equip your frames.",
     "vitalicio": "never (lifetime)",
     "inativo": "Support the bot and get perks for looks and convenience.\n\n🛡️ **No plan grants a combat advantage.** Card stats, rarity odds and battle outcomes are exactly the same for everyone — paying gets you style and comfort, not power.",
     "seu_plano": " ← your plan",
@@ -1208,7 +1208,7 @@
     "valido_ate": "Valid until",
     "nunca": "never",
     "proximo_passo": "Next step",
-    "proximo_passo_texto": "Use `/cosmeticos` to equip your frames."
+    "proximo_passo_texto": "Use `/cosmetics` to equip your frames."
   },
   "torneio": {
     "vagas_escolha": "{n} slots",
@@ -1286,14 +1286,14 @@
     "chance_queda_zero": "🔻 Loses a level — **0%** *(the natural overall is the floor: a level 0 card has nothing to lose)*",
     "custo": "Costs 💎 **{custo}** — you have **{gemas}**.",
     "tem_pergaminho": "📜 You have **{quantidade}** scroll(s): they block the level loss, and are only consumed if the loss happens.",
-    "sem_pergaminho": "📜 No protection scroll in your bag — check the `/loja`.",
+    "sem_pergaminho": "📜 No protection scroll in your bag — check the `/shop`.",
     "gema_sempre_gasta": "The gem is consumed on any outcome. There is no level cap.",
     "botao": "Upgrade ({custo} 💎)",
     "botao_protegido": "Upgrade with protection (📜)",
     "cancelado": "Upgrade cancelled",
     "cancelado_texto": "No gem was spent.",
     "sem_gemas": "Not enough gems",
-    "sem_gemas_texto": "This attempt costs 💎 **{custo}**. Buy them in the `/loja` or use `/desmanchar`.",
+    "sem_gemas_texto": "This attempt costs 💎 **{custo}**. Buy them in the `/shop` or use `/salvage`.",
     "carta_sumiu": "The card left your inventory",
     "carta_sumiu_texto": "The **{custo}** gem(s) were spent, but **{carta}** is no longer there. Contact the staff and report this error.",
     "overall_depois": "Overall **{antes}** → **{depois}**",
@@ -1336,15 +1336,15 @@
     "sem_premio": "no prize set",
     "nenhum_aberto": "🎪 No open events",
     "nenhum_aberto_texto": "There is no event with open sign-ups right now.",
-    "nenhum_aberto_dica": "Keep an eye on the server — when one opens, it shows up here and you join with `/evento entrar`.",
+    "nenhum_aberto_dica": "Keep an eye on the server — when one opens, it shows up here and you join with `/event join`.",
     "abertos": "🎪 Open events",
-    "como_entrar": "Join with `/evento entrar nome:<the event name>`.",
+    "como_entrar": "Join with `/event join name:<the event name>`.",
     "sem_descricao": "no description",
     "premio": "**Prize:** {premio}",
     "inscritos": "**Signed up:** {n}",
     "ja_inscrito_linha": "You are already signed up.",
     "nao_encontrado": "Event not found",
-    "nao_encontrado_texto": "I couldn't find any open event called **{nome}**.\n\nUse `/evento lista` to see the open ones.",
+    "nao_encontrado_texto": "I couldn't find any open event called **{nome}**.\n\nUse `/event list` to see the open ones.",
     "ja_inscrito": "You are already signed up",
     "ja_inscrito_texto": "Your sign-up for **{evento}** was already confirmed.",
     "entrega_depois": "The prize is handed out once the event is settled — there is nothing else to do.",
@@ -1354,7 +1354,7 @@
   },
   "caixa": {
     "titulo": "🎁 Boxes",
-    "como_usar": "Buy with `/caixa comprar` and open whenever you want with `/caixa abrir`.",
+    "como_usar": "Buy with `/box buy` and open whenever you want with `/box open`.",
     "voce_tem": "You have **{quantidade}** stored.",
     "hoje": "Today: **{restam}** of {limite}",
     "nao_esta_a_venda": "not for sale",
@@ -1364,7 +1364,7 @@
     "limite_porque": "The limit keeps boxes from becoming a card faucet. It resets at midnight (UTC).",
     "limite_cortou": "You asked for {pedido}, but today's limit only allowed {comprado}.",
     "guardada": "Box stored",
-    "abra_quando_quiser": "Open it with `/caixa abrir` whenever you want.",
+    "abra_quando_quiser": "Open it with `/box open` whenever you want.",
     "desconhecida": "Unknown box",
     "desconhecida_texto": "That box does not exist.",
     "escolha_serie": "Pick a series",
@@ -1372,7 +1372,7 @@
     "nao_tem": "You don't have that box",
     "nao_tem_texto": "No {caixa} in your bag.",
     "nao_tem_apoiador": "It is not for sale — it is the reward for voting for the bot.",
-    "nao_tem_compre": "Buy one with `/caixa comprar` for {preco}.",
+    "nao_tem_compre": "Buy one with `/box buy` for {preco}.",
     "sem_carta": "No card found",
     "sem_carta_texto": "Your box was returned to your bag.",
     "autor": "{jogador} opened a box",
@@ -1382,14 +1382,14 @@
     "titulo": "🎒 Your items",
     "autor": "{jogador}'s bag",
     "vazia_titulo": "🎒 Your bag is empty",
-    "vazia_texto": "Items show up here when you buy from `/loja` or salvage a card.",
-    "vazia_gema": "💎 **{item}** is the material for `/aprimorar`, and it comes from two places:",
-    "vazia_loja": "• `/loja` — {preco} each",
-    "vazia_desmanchar": "• `/desmanchar` — the card becomes a gem instead of coins"
+    "vazia_texto": "Items show up here when you buy from `/shop` or salvage a card.",
+    "vazia_gema": "💎 **{item}** is the material for `/upgrade`, and it comes from two places:",
+    "vazia_loja": "• `/shop` — {preco} each",
+    "vazia_desmanchar": "• `/salvage` — the card becomes a gem instead of coins"
   },
   "loja": {
     "titulo": "🏪 Shop",
-    "como_comprar": "Buy with `/loja comprar`.",
+    "como_comprar": "Buy with `/shop buy`.",
     "seu_saldo": "Your balance: **{saldo}**",
     "voce_tem": "You have **{quantidade}**.",
     "rodape_sink": "Coins spent here leave circulation",
@@ -1451,7 +1451,7 @@
       "descricao": "See the open events and join them",
       "sub_lista": "Show the events with open sign-ups",
       "sub_entrar": "Join an open event",
-      "opcao_nome": "The exact event name, as it appears in /evento lista"
+      "opcao_nome": "The exact event name, as it appears in /event list"
     },
     "treino": {
       "descricao": "Simulated battle against BOT Caviar — no coins, no ELO, no trophies",

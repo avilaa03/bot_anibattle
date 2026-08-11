@@ -1,11 +1,12 @@
 const BaseSlashCommand = require('../utils/BaseSlashCommand.js');
+const nomes = require('../utils/nomesDeComando.js');
 const { SlashCommandBuilder } = require('discord.js');
 const { descricaoBase, localizacoes } = require('../utils/i18n');
 const cosmeticosRun = require('../actions/run/cosmeticosRun.js');
 
 module.exports = class CosmeticosSlashCommand extends BaseSlashCommand {
     constructor() {
-        super('cosmeticos');
+        super('cosmetics');
     }
 
     async run(client, interaction) {
@@ -15,6 +16,7 @@ module.exports = class CosmeticosSlashCommand extends BaseSlashCommand {
     getSlashCommandJSON() {
         return new SlashCommandBuilder()
             .setName(this.name)
+            .setNameLocalizations(nomes.comando(this.name))
             .setDescription(descricaoBase('comandos.cosmeticos.descricao'))
             .setDescriptionLocalizations(localizacoes('comandos.cosmeticos.descricao'))
             .toJSON();

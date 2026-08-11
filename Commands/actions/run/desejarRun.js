@@ -15,9 +15,9 @@ const { tDaInteracao } = require('../../utils/idioma');
  */
 async function desejarRun(client, interaction) {
     const t = await tDaInteracao(interaction);
-    const nome = (interaction.options.getString('nome') || '').trim();
-    const numero = interaction.options.getInteger('numero');
-    const remover = interaction.options.getBoolean('remover') || false;
+    const nome = (interaction.options.getString('name') || '').trim();
+    const numero = interaction.options.getInteger('number');
+    const remover = interaction.options.getBoolean('remove') || false;
 
     if (!nome && numero == null) {
         return interaction.reply({

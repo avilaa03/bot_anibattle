@@ -1,11 +1,12 @@
 const BaseSlashCommand = require('../utils/BaseSlashCommand.js');
+const nomes = require('../utils/nomesDeComando.js');
 const { SlashCommandBuilder } = require('discord.js');
 const { descricaoBase, localizacoes } = require('../utils/i18n');
 const trocarRun = require('../actions/run/trocarRun.js');
 
 module.exports = class TrocarSlashCommand extends BaseSlashCommand {
     constructor() {
-        super('trocar');
+        super('trade');
     }
 
     async run(client, interaction) {
@@ -15,6 +16,7 @@ module.exports = class TrocarSlashCommand extends BaseSlashCommand {
     getSlashCommandJSON() {
         return new SlashCommandBuilder()
             .setName(this.name)
+            .setNameLocalizations(nomes.comando(this.name))
             .setDescription(descricaoBase('comandos.trocar.descricao'))
             .setDescriptionLocalizations(localizacoes('comandos.trocar.descricao'))
             .addUserOption(option =>

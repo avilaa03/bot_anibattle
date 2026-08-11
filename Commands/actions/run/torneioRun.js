@@ -160,9 +160,9 @@ async function torneioRun(client, interaction) {
         return avisarTorneioExistente(interaction, existente, t);
     }
 
-    const nome = interaction.options.getString('nome');
-    const vagas = interaction.options.getInteger('vagas') || 8;
-    const taxa = interaction.options.getInteger('inscricao') || 0;
+    const nome = interaction.options.getString('name');
+    const vagas = interaction.options.getInteger('slots') || 8;
+    const taxa = interaction.options.getInteger('fee') || 0;
 
     if (!torneio.VAGAS_VALIDAS.includes(vagas)) {
         return recusar('torneio.vagas_invalidas', 'torneio.vagas_invalidas_texto', {

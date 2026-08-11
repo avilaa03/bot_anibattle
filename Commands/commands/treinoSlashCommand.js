@@ -1,4 +1,5 @@
 const BaseSlashCommand = require('../utils/BaseSlashCommand.js');
+const nomes = require('../utils/nomesDeComando.js');
 const { SlashCommandBuilder } = require('discord.js');
 const treinoRun = require('../actions/run/treinoRun.js');
 const { DIFICULDADES } = require('../utils/treino.js');
@@ -6,7 +7,7 @@ const { descricaoBase, localizacoes, escolha } = require('../utils/i18n.js');
 
 module.exports = class TreinoSlashCommand extends BaseSlashCommand {
     constructor() {
-        super('treino');
+        super('training');
     }
 
     async run(client, interaction) {
@@ -16,10 +17,12 @@ module.exports = class TreinoSlashCommand extends BaseSlashCommand {
     getSlashCommandJSON() {
         return new SlashCommandBuilder()
             .setName(this.name)
+            .setNameLocalizations(nomes.comando(this.name))
             .setDescription(descricaoBase('comandos.treino.descricao'))
             .setDescriptionLocalizations(localizacoes('comandos.treino.descricao'))
             .addStringOption(option =>
-                option.setName('dificuldade')
+                option.setName('difficulty')
+                .setNameLocalizations(nomes.opcao('difficulty'))
                     .setDescription(descricaoBase('comandos.treino.opcao_dificuldade'))
                     .setDescriptionLocalizations(localizacoes('comandos.treino.opcao_dificuldade'))
                     .addChoices(

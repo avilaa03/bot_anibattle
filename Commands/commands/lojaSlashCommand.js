@@ -1,4 +1,5 @@
 const BaseSlashCommand = require('../utils/BaseSlashCommand.js');
+const nomes = require('../utils/nomesDeComando.js');
 const { SlashCommandBuilder } = require('discord.js');
 const lojaRun = require('../actions/run/lojaRun.js');
 const itens = require('../utils/itens.js');
@@ -7,7 +8,7 @@ const { descricaoBase, localizacoes, escolha } = require('../utils/i18n.js');
 
 module.exports = class LojaSlashCommand extends BaseSlashCommand {
     constructor() {
-        super('loja');
+        super('shop');
     }
 
     async run(client, interaction) {
@@ -17,14 +18,17 @@ module.exports = class LojaSlashCommand extends BaseSlashCommand {
     getSlashCommandJSON() {
         return new SlashCommandBuilder()
             .setName(this.name)
+            .setNameLocalizations(nomes.comando(this.name))
             .setDescription(descricaoBase('comandos.loja.descricao'))
             .setDescriptionLocalizations(localizacoes('comandos.loja.descricao'))
             .addSubcommand((sub) => sub
-                .setName('ver')
+                .setName('view')
+                .setNameLocalizations(nomes.subcomando('shop', 'view'))
                 .setDescription(descricaoBase('comandos.loja.sub_ver'))
                 .setDescriptionLocalizations(localizacoes('comandos.loja.sub_ver')))
             .addSubcommand((sub) => sub
-                .setName('comprar')
+                .setName('buy')
+                .setNameLocalizations(nomes.subcomando('shop', 'buy'))
                 .setDescription(descricaoBase('comandos.loja.sub_comprar'))
                 .setDescriptionLocalizations(localizacoes('comandos.loja.sub_comprar'))
                 .addStringOption((opt) => opt
@@ -42,7 +46,8 @@ module.exports = class LojaSlashCommand extends BaseSlashCommand {
                         .sort((a, b) => a.ordem - b.ordem)
                         .map((i) => escolha(`itens_catalogo.${i.chave}.nome`, i.chave, `${i.emoji} `))))
                 .addIntegerOption((opt) => opt
-                    .setName('quantidade')
+                    .setName('amount')
+                    .setNameLocalizations(nomes.opcao('amount'))
                     .setDescription(descricaoBase('comandos.loja.opcao_quantidade'))
                     .setDescriptionLocalizations(localizacoes('comandos.loja.opcao_quantidade'))
                     .setMinValue(1)
@@ -50,7 +55,8 @@ module.exports = class LojaSlashCommand extends BaseSlashCommand {
             // O limite entra por marcador: o número mora em `rollExtra.js`, e
             // uma mudança lá acompanha a descrição nos dois idiomas sozinha.
             .addSubcommand((sub) => sub
-                .setName('roll-extra')
+                .setName('extra-roll')
+                .setNameLocalizations(nomes.subcomando('shop', 'extra-roll'))
                 .setDescription(descricaoBase('comandos.loja.sub_roll_extra', { limite: rollExtra.LIMITE_DIARIO }))
                 .setDescriptionLocalizations(
                     localizacoes('comandos.loja.sub_roll_extra', { limite: rollExtra.LIMITE_DIARIO })

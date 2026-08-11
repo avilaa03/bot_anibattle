@@ -19,9 +19,9 @@ async function pokedexRun(client, interaction) {
 
     const t = await tDaInteracao(interaction);
 
-    const filtroSerie = (interaction.options.getString('serie') || '').trim();
-    const filtroRaridade = (interaction.options.getString('raridade') || '').trim().toLowerCase();
-    const apenasFaltantes = interaction.options.getBoolean('faltantes') || false;
+    const filtroSerie = (interaction.options.getString('series') || '').trim();
+    const filtroRaridade = (interaction.options.getString('rarity') || '').trim().toLowerCase();
+    const apenasFaltantes = interaction.options.getBoolean('missing') || false;
 
     // Duas Pokédex separadas.
     //

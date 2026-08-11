@@ -1,4 +1,5 @@
 const BaseSlashCommand = require('../utils/BaseSlashCommand.js');
+const nomes = require('../utils/nomesDeComando.js');
 const { SlashCommandBuilder, MessageFlags } = require('discord.js');
 const ui = require('../utils/embeds.js');
 const negociabilidade = require('../utils/negociabilidade.js');
@@ -67,6 +68,7 @@ module.exports = class QuickSellSlashCommand extends BaseSlashCommand {
             .setDescriptionLocalizations(localizacoes('comandos.quicksell.descricao'))
             .addStringOption(option =>
                 option.setName('name')
+                .setNameLocalizations(nomes.opcao('name'))
                 .setDescription(descricaoBase('comandos.quicksell.opcao_name'))
                 .setDescriptionLocalizations(localizacoes('comandos.quicksell.opcao_name'))
                 .setRequired(true)

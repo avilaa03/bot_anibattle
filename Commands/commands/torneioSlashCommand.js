@@ -1,11 +1,12 @@
 const BaseSlashCommand = require('../utils/BaseSlashCommand.js');
+const nomes = require('../utils/nomesDeComando.js');
 const { SlashCommandBuilder } = require('discord.js');
 const { descricaoBase, localizacoes, traduzir } = require('../utils/i18n');
 const torneioRun = require('../actions/run/torneioRun.js');
 
 module.exports = class TorneioSlashCommand extends BaseSlashCommand {
     constructor() {
-        super('torneio');
+        super('tournament');
     }
 
     async run(client, interaction) {
@@ -15,16 +16,19 @@ module.exports = class TorneioSlashCommand extends BaseSlashCommand {
     getSlashCommandJSON() {
         return new SlashCommandBuilder()
             .setName(this.name)
+            .setNameLocalizations(nomes.comando(this.name))
             .setDescription(descricaoBase('comandos.torneio.descricao'))
             .setDescriptionLocalizations(localizacoes('comandos.torneio.descricao'))
             .addStringOption(option =>
-                option.setName('nome')
+                option.setName('name')
+                .setNameLocalizations(nomes.opcao('name'))
                     .setDescription(descricaoBase('comandos.torneio.opcao_nome'))
                     .setDescriptionLocalizations(localizacoes('comandos.torneio.opcao_nome'))
                     .setRequired(false)
             )
             .addIntegerOption(option =>
-                option.setName('vagas')
+                option.setName('slots')
+                .setNameLocalizations(nomes.opcao('slots'))
                     .setDescription(descricaoBase('comandos.torneio.opcao_vagas'))
                     .setDescriptionLocalizations(localizacoes('comandos.torneio.opcao_vagas'))
                     .addChoices(
@@ -37,7 +41,8 @@ module.exports = class TorneioSlashCommand extends BaseSlashCommand {
                     .setRequired(false)
             )
             .addIntegerOption(option =>
-                option.setName('inscricao')
+                option.setName('fee')
+                .setNameLocalizations(nomes.opcao('fee'))
                     .setDescription(descricaoBase('comandos.torneio.opcao_inscricao'))
                     .setDescriptionLocalizations(localizacoes('comandos.torneio.opcao_inscricao'))
                     .setMinValue(0)
