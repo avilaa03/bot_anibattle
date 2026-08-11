@@ -153,6 +153,57 @@ for (const chave of chavesPt) {
 check('nenhuma descrição passa dos 100 caracteres do Discord', longas.length === 0,
     longas.length ? `(${longas.join(', ')})` : '');
 
+// ---------------------------------------------------------------------
+console.log('\n=== Toda chave usada no código existe no dicionário ===');
+//
+// O teste de paridade acima pega chave que existe num idioma e falta no
+// outro. Ele NÃO pega o caso mais comum de todos: a chave que o código
+// pede e que não existe em lugar nenhum.
+//
+// Esse erro não levanta exceção — `traduzir()` devolve a própria chave,
+// e o jogador lê "loja.compra_concluida" no meio da tela. Foi o que mais
+// apareceu ao terminar o inglês, sempre por um nome inventado onde já
+// existia um no dicionário.
+const fs = require('fs');
+
+function arquivosJs(dir, saida = []) {
+    for (const nome of fs.readdirSync(dir)) {
+        const cheio = path.join(dir, nome);
+        if (fs.statSync(cheio).isDirectory()) arquivosJs(cheio, saida);
+        else if (nome.endsWith('.js')) saida.push(cheio);
+    }
+    return saida;
+}
+
+// t('x'), tMesa('x'), t.dados('x')... Os nomes alternativos existem porque
+// uma tela pode ter duas vozes ao mesmo tempo — ver `tradeHandler.js`.
+const CHAMADA = /\b(?:t|tMesa|tQuadro|tCanal|tX|tY|tOutro|tradutor)(?:\.lista|\.dados)?\(\s*'([a-zA-Z0-9_.]+)'/g;
+
+const semTexto = [];
+for (const arquivo of arquivosJs(path.join(RAIZ, 'Commands'))) {
+    // Sem comentários: os cabeçalhos usam `t('roll.titulo')` como exemplo
+    // de uso, e exemplo não precisa existir no dicionário.
+    const codigo = fs.readFileSync(arquivo, 'utf8')
+        .replace(/\/\*[\s\S]*?\*\//g, '')
+        .replace(/(^|[^:])\/\/.*$/gm, '$1');
+
+    const vistas = new Set();
+    let m;
+    while ((m = CHAMADA.exec(codigo)) !== null) vistas.add(m[1]);
+
+    for (const chave of vistas) {
+        const faltaPt = pegar(pt, chave) === undefined;
+        const faltaEn = pegar(en, chave) === undefined;
+        if (faltaPt || faltaEn) {
+            const onde = faltaPt && faltaEn ? 'nos dois' : (faltaPt ? 'pt-BR' : 'en-US');
+            semTexto.push(`${chave} (falta em ${onde}, ${path.relative(RAIZ, arquivo)})`);
+        }
+    }
+}
+
+check('nenhuma chave usada no código está sem texto', semTexto.length === 0,
+    semTexto.length ? `\n       ${semTexto.join('\n       ')}` : '');
+
 if (falhas > 0) {
     console.log(`\n*** ${falhas} FALHA(S) ***`);
     process.exitCode = 1;
