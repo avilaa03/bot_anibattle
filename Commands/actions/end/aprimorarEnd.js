@@ -1,6 +1,6 @@
-async function aprimorarEnd(interaction, reason) {
+async function aprimorarEnd(interaction, reason, t) {
     if (reason === 'time') {
-        await interaction.followUp({ content: 'O tempo para aprimorar expirou. Nenhuma gema foi gasta.', components: [] });
+        await interaction.followUp({ content: t('aprimorar.expirou'), components: [] });
     }
 }
 

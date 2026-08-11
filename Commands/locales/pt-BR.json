@@ -497,6 +497,7 @@
   },
   "quicksell": {
     "nenhuma_com_nome": "Nenhuma carta no seu inventário tem \"{nome}\" no nome.",
+    "vinculada_consolo": "Ela continua sua, e continua batalhando normalmente.",
     "expirou": "O tempo para vender a carta expirou.",
     "titulo": "🪙 Vender {carta}?",
     "recebera": "Você receberá {valor} por esta carta.",
@@ -507,6 +508,7 @@
     "cancelada": "Venda cancelada"
   },
   "inventory": {
+    "vazio_titulo": "📋 Inventário vazio",
     "autor": "Coleção de {jogador}",
     "total_cartas": "Total de cartas",
     "valor_colecao": "Valor da coleção"
@@ -1259,6 +1261,62 @@
     "rodada_oitavas": "Oitavas de final",
     "rodada_de": "Rodada de {n}"
   },
+  "aprimorar": {
+    "titulo": "✨ Aprimorar {carta}?",
+    "overall_linha": "Overall **{atual}** → **{proximo}** *(natural {natural})*",
+    "chances_titulo": "**Chances desta tentativa**",
+    "chance_sucesso": "✅ Sobe um nível — **{pct}**",
+    "chance_nada": "➖ Não acontece nada — **{pct}**",
+    "chance_queda": "🔻 Cai um nível — **{pct}**",
+    "chance_queda_zero": "🔻 Cai um nível — **0%** *(o overall natural é o chão: carta em nível 0 não tem o que perder)*",
+    "custo": "Custa 💎 **{custo}** — você tem **{gemas}**.",
+    "tem_pergaminho": "📜 Você tem **{quantidade}** pergaminho(s): protegem contra a queda, e só somem se a queda acontecer.",
+    "sem_pergaminho": "📜 Sem pergaminho de proteção na bolsa — veja a `/loja`.",
+    "gema_sempre_gasta": "A gema é gasta em qualquer desfecho. Não há teto de nível.",
+    "botao": "Aprimorar ({custo} 💎)",
+    "botao_protegido": "Aprimorar com proteção (📜)",
+    "cancelado": "Aprimoramento cancelado",
+    "cancelado_texto": "Nenhuma gema foi gasta.",
+    "sem_gemas": "Gemas insuficientes",
+    "sem_gemas_texto": "Esta tentativa custa 💎 **{custo}**. Compre na `/loja` ou use o `/desmanchar`.",
+    "carta_sumiu": "A carta saiu do seu inventário",
+    "carta_sumiu_texto": "As **{custo}** gema(s) foram gastas, mas **{carta}** não está mais lá. Fale com a staff informando este erro.",
+    "overall_depois": "Overall **{antes}** → **{depois}**",
+    "stats_depois": "⚔️ {ata} {ataAntes} → **{ataDepois}** • ❤️ {lif} {lifAntes} → **{lifDepois}** • 💥 {pow} {powAntes} → **{powDepois}**",
+    "gemas_restantes": "💎 Gemas restantes: **{quantidade}**",
+    "sucesso": "Aprimoramento ✨ {carta} +{nivel}",
+    "protegido_titulo": "🛡️ O pergaminho segurou",
+    "protegido_texto": "**{carta}** ia cair para +{nivel}, e o pergaminho impediu.",
+    "protegido_continua": "A carta continua em **+{nivel}**.",
+    "queda": "🔻 {carta} caiu para +{nivel}",
+    "nada_titulo": "➖ Não aconteceu nada",
+    "nada_texto": "**{carta}** continua em {nivel}.",
+    "nivel_natural": "nível natural",
+    "gema_gasta": "A gema foi gasta.",
+    "expirou": "O tempo para aprimorar expirou. Nenhuma gema foi gasta."
+  },
+  "desmanchar": {
+    "titulo": "🔨 Desmanchar {carta}?",
+    "nao_da": "Não dá para desmanchar",
+    "uma_gema": "**{n} gema**",
+    "varias_gemas": "**{n} gemas**",
+    "vira_gemas": "Vira {emoji} {gemas}.",
+    "quicksell_pagaria": "Vendida no `/quicksell` pagaria {valor}.",
+    "compensa": "> 💡 *Em gema você leva o equivalente a {valor} na loja — desmanchar rende mais.*",
+    "nao_compensa": "> ⚠️ *Em gema o equivalente é {valor} na loja — **vender paga melhor** nesta carta.*",
+    "unica_copia": "⚠️ **É a sua única cópia desta carta.**",
+    "irreversivel": "A carta é destruída e não pode ser recuperada.",
+    "pokedex_guarda": "A Pokédex guarda a descoberta — ela continua registrada.",
+    "botao": "Desmanchar por {gemas}",
+    "gema_nao_entrou": "A carta foi desmanchada, mas a gema não entrou",
+    "gema_nao_entrou_texto": "**{carta}** valia {gemas}. Fale com a staff informando este erro.",
+    "concluido": "Carta desmanchada",
+    "concluido_texto": "**{carta}** virou {emoji} {gemas}.",
+    "pokedex_continua": "A descoberta continua registrada na sua Pokédex.",
+    "gemas_na_bolsa": "Gemas na bolsa",
+    "cancelado": "Desmanche cancelado",
+    "expirou": "O tempo para desmanchar a carta expirou. Nada foi destruído."
+  },
   "bolsa": {
     "titulo": "🎒 Seus itens",
     "autor": "Bolsa de {jogador}",
@@ -1300,6 +1358,53 @@
     "roll_extra_proximo": "O próximo de hoje custa {preco} — o preço sobe a cada compra."
   },
   "comandos": {
+    "roll": {
+      "descricao": "Rola uma carta aleatória baseada em raridade",
+      "opcao_extra": "Gasta um 🎟️ roll extra da bolsa para ignorar o cooldown"
+    },
+    "quicksell": {
+      "descricao": "Vende rapidamente uma carta do seu inventário",
+      "opcao_nome": "O nome da carta que você quer vender rápido"
+    },
+    "aprimorar": {
+      "descricao": "Gasta gemas para tentar subir o nível de uma carta",
+      "opcao_nome": "O nome da carta que você quer aprimorar"
+    },
+    "desmanchar": {
+      "descricao": "Transforma uma carta do inventário em gemas de aprimoramento",
+      "opcao_nome": "O nome da carta que você quer desmanchar"
+    },
+    "bolsa": {
+      "descricao": "Mostra os itens que você tem — gemas, pergaminhos e o que vier"
+    },
+    "caixa": {
+      "descricao": "Caixas de cartas — compre, guarde e abra quando quiser",
+      "sub_ver": "Mostra as caixas, as chances e quantas você tem",
+      "sub_comprar": "Compra uma caixa e guarda na sua bolsa",
+      "sub_abrir": "Abre uma caixa da sua bolsa",
+      "opcao_caixa": "Qual caixa",
+      "opcao_quantidade": "Quantas (1 a {maximo})",
+      "opcao_serie": "Só para a Caixa Temática: a série que você quer"
+    },
+    "evento": {
+      "descricao": "Vê os eventos abertos e entra neles",
+      "sub_lista": "Mostra os eventos com inscrição aberta",
+      "sub_entrar": "Entra num evento aberto",
+      "opcao_nome": "O nome exato do evento, como aparece em /evento lista"
+    },
+    "treino": {
+      "descricao": "Batalha simulada contra o BOT Caviar — não vale moeda, ELO nem conquista",
+      "opcao_dificuldade": "Quão forte é o adversário (padrão: parelho)"
+    },
+    "pokedex": {
+      "descricao": "Mostra quais cartas você já descobriu e quais ainda faltam",
+      "opcao_serie": "Filtrar por anime/série",
+      "opcao_dex": "Qual Pokédex (padrão: a normal)",
+      "opcao_raridade": "Filtrar por raridade",
+      "opcao_faltantes": "Mostrar apenas as cartas que você ainda não tem",
+      "dex_normal": "📖 Normal",
+      "dex_evento": "🎗️ Cartas de evento"
+    },
     "loja": {
       "descricao": "Troca moedas por itens",
       "sub_ver": "Mostra o que está à venda",

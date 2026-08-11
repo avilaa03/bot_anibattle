@@ -497,6 +497,7 @@
   },
   "quicksell": {
     "nenhuma_com_nome": "No card in your inventory has \"{nome}\" in its name.",
+    "vinculada_consolo": "It is still yours, and it still battles normally.",
     "expirou": "Time ran out to sell the card.",
     "titulo": "🪙 Sell {carta}?",
     "recebera": "You'll get {valor} for this card.",
@@ -507,6 +508,7 @@
     "cancelada": "Sale cancelled"
   },
   "inventory": {
+    "vazio_titulo": "📋 Empty inventory",
     "autor": "{jogador}'s collection",
     "total_cartas": "Total cards",
     "valor_colecao": "Collection value"
@@ -1259,6 +1261,62 @@
     "rodada_oitavas": "Round of 16",
     "rodada_de": "Round of {n}"
   },
+  "aprimorar": {
+    "titulo": "✨ Upgrade {carta}?",
+    "overall_linha": "Overall **{atual}** → **{proximo}** *(natural {natural})*",
+    "chances_titulo": "**Odds for this attempt**",
+    "chance_sucesso": "✅ Gains a level — **{pct}**",
+    "chance_nada": "➖ Nothing happens — **{pct}**",
+    "chance_queda": "🔻 Loses a level — **{pct}**",
+    "chance_queda_zero": "🔻 Loses a level — **0%** *(the natural overall is the floor: a level 0 card has nothing to lose)*",
+    "custo": "Costs 💎 **{custo}** — you have **{gemas}**.",
+    "tem_pergaminho": "📜 You have **{quantidade}** scroll(s): they block the level loss, and are only consumed if the loss happens.",
+    "sem_pergaminho": "📜 No protection scroll in your bag — check the `/loja`.",
+    "gema_sempre_gasta": "The gem is consumed on any outcome. There is no level cap.",
+    "botao": "Upgrade ({custo} 💎)",
+    "botao_protegido": "Upgrade with protection (📜)",
+    "cancelado": "Upgrade cancelled",
+    "cancelado_texto": "No gem was spent.",
+    "sem_gemas": "Not enough gems",
+    "sem_gemas_texto": "This attempt costs 💎 **{custo}**. Buy them in the `/loja` or use `/desmanchar`.",
+    "carta_sumiu": "The card left your inventory",
+    "carta_sumiu_texto": "The **{custo}** gem(s) were spent, but **{carta}** is no longer there. Contact the staff and report this error.",
+    "overall_depois": "Overall **{antes}** → **{depois}**",
+    "stats_depois": "⚔️ {ata} {ataAntes} → **{ataDepois}** • ❤️ {lif} {lifAntes} → **{lifDepois}** • 💥 {pow} {powAntes} → **{powDepois}**",
+    "gemas_restantes": "💎 Gems left: **{quantidade}**",
+    "sucesso": "Upgrade ✨ {carta} +{nivel}",
+    "protegido_titulo": "🛡️ The scroll held",
+    "protegido_texto": "**{carta}** was about to drop to +{nivel}, and the scroll stopped it.",
+    "protegido_continua": "The card stays at **+{nivel}**.",
+    "queda": "🔻 {carta} dropped to +{nivel}",
+    "nada_titulo": "➖ Nothing happened",
+    "nada_texto": "**{carta}** is still at {nivel}.",
+    "nivel_natural": "its natural level",
+    "gema_gasta": "The gem was spent.",
+    "expirou": "Time ran out to upgrade. No gem was spent."
+  },
+  "desmanchar": {
+    "titulo": "🔨 Salvage {carta}?",
+    "nao_da": "Can't salvage this",
+    "uma_gema": "**{n} gem**",
+    "varias_gemas": "**{n} gems**",
+    "vira_gemas": "Becomes {emoji} {gemas}.",
+    "quicksell_pagaria": "Selling it with `/quicksell` would pay {valor}.",
+    "compensa": "> 💡 *In gems you get the equivalent of {valor} in the shop — salvaging pays more.*",
+    "nao_compensa": "> ⚠️ *In gems the equivalent is {valor} in the shop — **selling pays better** for this card.*",
+    "unica_copia": "⚠️ **This is your only copy of this card.**",
+    "irreversivel": "The card is destroyed and cannot be recovered.",
+    "pokedex_guarda": "The Pokédex keeps the discovery — it stays registered.",
+    "botao": "Salvage for {gemas}",
+    "gema_nao_entrou": "The card was salvaged, but the gems never arrived",
+    "gema_nao_entrou_texto": "**{carta}** was worth {gemas}. Contact the staff and report this error.",
+    "concluido": "Card salvaged",
+    "concluido_texto": "**{carta}** became {emoji} {gemas}.",
+    "pokedex_continua": "The discovery stays registered in your Pokédex.",
+    "gemas_na_bolsa": "Gems in your bag",
+    "cancelado": "Salvage cancelled",
+    "expirou": "Time ran out to salvage the card. Nothing was destroyed."
+  },
   "bolsa": {
     "titulo": "🎒 Your items",
     "autor": "{jogador}'s bag",
@@ -1300,6 +1358,53 @@
     "roll_extra_proximo": "The next one today costs {preco} — the price rises with each purchase."
   },
   "comandos": {
+    "roll": {
+      "descricao": "Roll a random card based on rarity",
+      "opcao_extra": "Spend a 🎟️ extra roll from your bag to skip the cooldown"
+    },
+    "quicksell": {
+      "descricao": "Quickly sell a card from your inventory",
+      "opcao_nome": "The name of the card you want to quick-sell"
+    },
+    "aprimorar": {
+      "descricao": "Spend gems to try to raise a card's level",
+      "opcao_nome": "The name of the card you want to upgrade"
+    },
+    "desmanchar": {
+      "descricao": "Turn a card from your inventory into upgrade gems",
+      "opcao_nome": "The name of the card you want to salvage"
+    },
+    "bolsa": {
+      "descricao": "Show the items you have — gems, scrolls and whatever else"
+    },
+    "caixa": {
+      "descricao": "Card boxes — buy them, store them and open them whenever",
+      "sub_ver": "Show the boxes, their odds and how many you have",
+      "sub_comprar": "Buy a box and store it in your bag",
+      "sub_abrir": "Open a box from your bag",
+      "opcao_caixa": "Which box",
+      "opcao_quantidade": "How many (1 to {maximo})",
+      "opcao_serie": "Themed Box only: the series you want"
+    },
+    "evento": {
+      "descricao": "See the open events and join them",
+      "sub_lista": "Show the events with open sign-ups",
+      "sub_entrar": "Join an open event",
+      "opcao_nome": "The exact event name, as it appears in /evento lista"
+    },
+    "treino": {
+      "descricao": "Simulated battle against BOT Caviar — no coins, no ELO, no trophies",
+      "opcao_dificuldade": "How strong the opponent is (default: even)"
+    },
+    "pokedex": {
+      "descricao": "Show which cards you have discovered and which are still missing",
+      "opcao_serie": "Filter by anime/series",
+      "opcao_dex": "Which Pokédex (default: the normal one)",
+      "opcao_raridade": "Filter by rarity",
+      "opcao_faltantes": "Show only the cards you don't have yet",
+      "dex_normal": "📖 Normal",
+      "dex_evento": "🎗️ Event cards"
+    },
     "loja": {
       "descricao": "Trade coins for items",
       "sub_ver": "Show what is for sale",

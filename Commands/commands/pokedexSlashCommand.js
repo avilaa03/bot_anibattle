@@ -1,6 +1,7 @@
 const BaseSlashCommand = require('../utils/BaseSlashCommand.js');
 const { SlashCommandBuilder } = require('discord.js');
 const pokedexRun = require('../actions/run/pokedexRun.js');
+const { descricaoBase, localizacoes, escolha, escolhasRaridade } = require('../utils/i18n.js');
 
 module.exports = class PokedexSlashCommand extends BaseSlashCommand {
     constructor() {
@@ -14,36 +15,37 @@ module.exports = class PokedexSlashCommand extends BaseSlashCommand {
     getSlashCommandJSON() {
         return new SlashCommandBuilder()
             .setName(this.name)
-            .setDescription('Mostra quais cartas você já descobriu e quais ainda faltam')
+            .setDescription(descricaoBase('comandos.pokedex.descricao'))
+            .setDescriptionLocalizations(localizacoes('comandos.pokedex.descricao'))
             .addStringOption(option =>
                 option.setName('serie')
-                    .setDescription('Filtrar por anime/série')
+                    .setDescription(descricaoBase('comandos.pokedex.opcao_serie'))
+                    .setDescriptionLocalizations(localizacoes('comandos.pokedex.opcao_serie'))
                     .setRequired(false)
             )
             .addStringOption(option =>
                 option.setName('dex')
-                    .setDescription('Qual Pokédex (padrão: a normal)')
+                    .setDescription(descricaoBase('comandos.pokedex.opcao_dex'))
+                    .setDescriptionLocalizations(localizacoes('comandos.pokedex.opcao_dex'))
                     .setRequired(false)
                     .addChoices(
-                        { name: '📖 Normal', value: 'normal' },
-                        { name: '🎗️ Cartas de evento', value: 'evento' }
+                        escolha('comandos.pokedex.dex_normal', 'normal'),
+                        escolha('comandos.pokedex.dex_evento', 'evento')
                     )
             )
             .addStringOption(option =>
                 option.setName('raridade')
-                    .setDescription('Filtrar por raridade')
+                    .setDescription(descricaoBase('comandos.pokedex.opcao_raridade'))
+                    .setDescriptionLocalizations(localizacoes('comandos.pokedex.opcao_raridade'))
                     .setRequired(false)
-                    .addChoices(
-                        { name: '⚪ Comum', value: 'common' },
-                        { name: '🔵 Rara', value: 'rare' },
-                        { name: '🟣 Ultra Rara', value: 'ultra rare' },
-                        { name: '🟠 Lendária', value: 'legendary' },
-                        { name: '🌟 Mestra', value: 'master' }
-                    )
+                    // As cinco raridades já vêm prontas do i18n, com emoji e
+                    // os dois idiomas — a mesma lista que o /market usa.
+                    .addChoices(...escolhasRaridade())
             )
             .addBooleanOption(option =>
                 option.setName('faltantes')
-                    .setDescription('Mostrar apenas as cartas que você ainda não tem')
+                    .setDescription(descricaoBase('comandos.pokedex.opcao_faltantes'))
+                    .setDescriptionLocalizations(localizacoes('comandos.pokedex.opcao_faltantes'))
                     .setRequired(false)
             )
             .toJSON();

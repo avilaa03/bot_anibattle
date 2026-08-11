@@ -4,6 +4,7 @@ const bolsa = require('../../utils/bolsa');
 const aprimoramento = require('../../utils/aprimoramento');
 const transacoes = require('../../utils/transacoes');
 const { montarEmbed, montarBotoes } = require('../run/aprimorarRun');
+const { criarT, DEFAULT_LOCALE } = require('../../utils/i18n');
 
 /**
  * Grava o resultado da tentativa na cópia do inventário.
@@ -34,44 +35,52 @@ async function gravar(userId, card, resultado) {
     );
 }
 
-function embedDoResultado(card, desfecho, protegido, antes, resultado, gemasRestantes) {
-    const meta = ui.getRarity(card.rarity);
+function embedDoResultado(card, desfecho, protegido, antes, resultado, gemasRestantes, t) {
+    const meta = ui.getRarity(card.rarity, t.locale);
     const nome = ui.cardName(card);
+    const restantes = t('aprimorar.gemas_restantes', { quantidade: ui.number(gemasRestantes, t.locale) });
 
     const detalhes = [
-        `Overall **${antes.overall}** → **${resultado.overall}**`,
-        `⚔️ ATA ${antes.ATA} → **${resultado.ATA}** • ❤️ LIF ${antes.LIF} → **${resultado.LIF}** • 💥 POW ${antes.POW} → **${resultado.POW}**`,
+        t('aprimorar.overall_depois', { antes: antes.overall, depois: resultado.overall }),
+        t('aprimorar.stats_depois', {
+            ata: t('atributos.ata'), ataAntes: antes.ATA, ataDepois: resultado.ATA,
+            lif: t('atributos.lif'), lifAntes: antes.LIF, lifDepois: resultado.LIF,
+            pow: t('atributos.pow'), powAntes: antes.POW, powDepois: resultado.POW
+        }),
         '',
-        `💎 Gemas restantes: **${ui.number(gemasRestantes)}**`
+        restantes
     ].join('\n');
 
     if (desfecho === 'sucesso') {
-        return ui.success(`Aprimoramento ✨ ${nome} +${resultado.nivel}`, detalhes)
+        return ui.success(t('aprimorar.sucesso', { carta: nome, nivel: resultado.nivel }), detalhes)
             .setColor(meta.color);
     }
 
     if (desfecho === 'queda' && protegido) {
-        return ui.info('🛡️ O pergaminho segurou', [
-            `**${nome}** ia cair para +${Math.max(0, resultado.nivel - 1)}, e o pergaminho impediu.`,
-            `A carta continua em **+${resultado.nivel}**.`,
+        return ui.info(t('aprimorar.protegido_titulo'), [
+            t('aprimorar.protegido_texto', { carta: nome, nivel: Math.max(0, resultado.nivel - 1) }),
+            t('aprimorar.protegido_continua', { nivel: resultado.nivel }),
             '',
-            `💎 Gemas restantes: **${ui.number(gemasRestantes)}**`
+            restantes
         ].join('\n'));
     }
 
     if (desfecho === 'queda') {
-        return ui.warning(`🔻 ${nome} caiu para +${resultado.nivel}`, detalhes);
+        return ui.warning(t('aprimorar.queda', { carta: nome, nivel: resultado.nivel }), detalhes);
     }
 
-    return ui.neutral('➖ Não aconteceu nada', [
-        `**${nome}** continua em ${resultado.nivel > 0 ? `**+${resultado.nivel}**` : 'nível natural'}.`,
-        'A gema foi gasta.',
+    return ui.neutral(t('aprimorar.nada_titulo'), [
+        t('aprimorar.nada_texto', {
+            carta: nome,
+            nivel: resultado.nivel > 0 ? `**+${resultado.nivel}**` : t('aprimorar.nivel_natural')
+        }),
+        t('aprimorar.gema_gasta'),
         '',
-        `💎 Gemas restantes: **${ui.number(gemasRestantes)}**`
+        restantes
     ].join('\n'));
 }
 
-async function aprimorarCollect(i, indexRef, matchingCards, user, rowNavigation) {
+async function aprimorarCollect(i, indexRef, matchingCards, user, rowNavigation, t = criarT(DEFAULT_LOCALE)) {
     if (i.customId === 'prev' || i.customId === 'next') {
         indexRef.currentIndex = i.customId === 'next'
             ? (indexRef.currentIndex + 1) % matchingCards.length
@@ -79,15 +88,15 @@ async function aprimorarCollect(i, indexRef, matchingCards, user, rowNavigation)
 
         const card = matchingCards[indexRef.currentIndex];
         await i.update({
-            embeds: [montarEmbed(card, user)],
-            components: [rowNavigation, montarBotoes(card, user)]
+            embeds: [montarEmbed(card, user, t)],
+            components: [rowNavigation, montarBotoes(card, user, t)]
         });
         return;
     }
 
     if (i.customId === 'cancel_aprimorar') {
         await i.update({
-            embeds: [ui.neutral('Aprimoramento cancelado', 'Nenhuma gema foi gasta.')],
+            embeds: [ui.neutral(t('aprimorar.cancelado'), t('aprimorar.cancelado_texto'))],
             components: []
         });
         return 'collected';
@@ -106,7 +115,10 @@ async function aprimorarCollect(i, indexRef, matchingCards, user, rowNavigation)
     const aposGasto = await bolsa.consumir(i.user.id, 'gema', custo);
     if (!aposGasto) {
         await i.update({
-            embeds: [ui.error('Gemas insuficientes', `Esta tentativa custa 💎 **${ui.number(custo)}**. Compre na \`/loja\` ou use o \`/desmanchar\`.`)],
+            embeds: [ui.error(
+                t('aprimorar.sem_gemas'),
+                t('aprimorar.sem_gemas_texto', { custo: ui.number(custo, t.locale) })
+            )],
             components: []
         });
         return 'collected';
@@ -130,8 +142,11 @@ async function aprimorarCollect(i, indexRef, matchingCards, user, rowNavigation)
     if (!gravado) {
         await i.update({
             embeds: [ui.error(
-                'A carta saiu do seu inventário',
-                `As **${ui.number(custo)}** gema(s) foram gastas, mas **${ui.cardName(card)}** não está mais lá. Fale com a staff informando este erro.`
+                t('aprimorar.carta_sumiu'),
+                t('aprimorar.carta_sumiu_texto', {
+                    custo: ui.number(custo, t.locale),
+                    carta: ui.cardName(card)
+                })
             )],
             components: []
         });
@@ -172,7 +187,7 @@ async function aprimorarCollect(i, indexRef, matchingCards, user, rowNavigation)
 
     const gemasRestantes = bolsa.quantidadeDe(gravado, 'gema');
     await i.update({
-        embeds: [embedDoResultado(card, desfecho, protegido, antes, resultado, gemasRestantes)],
+        embeds: [embedDoResultado(card, desfecho, protegido, antes, resultado, gemasRestantes, t)],
         components: []
     });
     return 'collected';

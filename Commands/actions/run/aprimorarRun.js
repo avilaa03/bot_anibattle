@@ -3,6 +3,7 @@ const ui = require('../../utils/embeds');
 const aprimoramento = require('../../utils/aprimoramento');
 const itens = require('../../utils/itens');
 const bolsa = require('../../utils/bolsa');
+const { criarT, DEFAULT_LOCALE } = require('../../utils/i18n');
 
 /**
  * /aprimorar — gasta gema para tentar subir o nível da carta.
@@ -14,19 +15,19 @@ const bolsa = require('../../utils/bolsa');
 
 const pct = (n) => `${(n * 100).toFixed(1)}%`;
 
-function linhaDeStats(atual, proximo) {
+function linhaDeStats(atual, proximo, t = criarT(DEFAULT_LOCALE)) {
     const seta = (de, para) => (de === para ? `${de}` : `${de} → **${para}**`);
     return [
-        `⚔️ ATA ${seta(atual.ATA, proximo.ATA)}`,
-        `❤️ LIF ${seta(atual.LIF, proximo.LIF)}`,
-        `💥 POW ${seta(atual.POW, proximo.POW)}`
+        `⚔️ ${t('atributos.ata')} ${seta(atual.ATA, proximo.ATA)}`,
+        `❤️ ${t('atributos.lif')} ${seta(atual.LIF, proximo.LIF)}`,
+        `💥 ${t('atributos.pow')} ${seta(atual.POW, proximo.POW)}`
     ].join(' • ');
 }
 
-function montarEmbed(card, user) {
+function montarEmbed(card, user, t = criarT(DEFAULT_LOCALE)) {
     const nivel = Math.max(0, Number(card.nivel) || 0);
     const base = aprimoramento.baseDaCarta(card);
-    const meta = ui.getRarity(card.rarity);
+    const meta = ui.getRarity(card.rarity, t.locale);
 
     const c = aprimoramento.chances(card.rarity, nivel);
     const custo = aprimoramento.custoEmGemas(card.rarity, nivel);
@@ -36,36 +37,41 @@ function montarEmbed(card, user) {
     const atual = aprimoramento.statsDoNivel(base, nivel);
     const proximo = aprimoramento.statsDoNivel(base, nivel + 1);
 
-    const titulo = ui.cardName(card);
-
     const linhas = [
-        `${meta.emoji} ${ui.rarityTag(card.rarity)} • *${card.series || '—'}*`,
+        `${meta.emoji} ${ui.rarityTag(card.rarity, t.locale)} • *${card.series || t('comum.traco')}*`,
         '',
-        `Overall **${atual.overall}** → **${proximo.overall}** *(natural ${base.overall})*`,
-        linhaDeStats(atual, proximo),
+        t('aprimorar.overall_linha', {
+            atual: atual.overall,
+            proximo: proximo.overall,
+            natural: base.overall
+        }),
+        linhaDeStats(atual, proximo, t),
         '',
-        '**Chances desta tentativa**',
-        `✅ Sobe um nível — **${pct(c.sucesso)}**`,
-        `➖ Não acontece nada — **${pct(c.nada)}**`,
+        t('aprimorar.chances_titulo'),
+        t('aprimorar.chance_sucesso', { pct: pct(c.sucesso) }),
+        t('aprimorar.chance_nada', { pct: pct(c.nada) }),
         c.queda > 0
-            ? `🔻 Cai um nível — **${pct(c.queda)}**`
-            : '🔻 Cai um nível — **0%** *(o overall natural é o chão: carta em nível 0 não tem o que perder)*',
+            ? t('aprimorar.chance_queda', { pct: pct(c.queda) })
+            : t('aprimorar.chance_queda_zero'),
         '',
-        `Custa 💎 **${ui.number(custo)}** ${custo === 1 ? 'gema' : 'gemas'} — você tem **${ui.number(gemas)}**.`
+        t('aprimorar.custo', {
+            custo: ui.number(custo, t.locale),
+            gemas: ui.number(gemas, t.locale)
+        })
     ];
 
     if (c.queda > 0) {
         linhas.push(
             pergaminhos > 0
-                ? `📜 Você tem **${ui.number(pergaminhos)}** pergaminho(s): protegem contra a queda, e só somem se a queda acontecer.`
-                : '📜 Sem pergaminho de proteção na bolsa — veja a `/loja`.'
+                ? t('aprimorar.tem_pergaminho', { quantidade: ui.number(pergaminhos, t.locale) })
+                : t('aprimorar.sem_pergaminho')
         );
     }
 
-    linhas.push('', '*A gema é gasta em qualquer desfecho. Não há teto de nível.*');
+    linhas.push('', `*${t('aprimorar.gema_sempre_gasta')}*`);
 
     const embed = ui.base(meta.color)
-        .setTitle(`✨ Aprimorar ${titulo}?`)
+        .setTitle(t('aprimorar.titulo', { carta: ui.cardName(card) }))
         .setDescription(linhas.join('\n'));
 
     if (card.characterImage) embed.setThumbnail(card.characterImage);
@@ -73,7 +79,7 @@ function montarEmbed(card, user) {
     return embed;
 }
 
-function montarBotoes(card, user) {
+function montarBotoes(card, user, t = criarT(DEFAULT_LOCALE)) {
     const nivel = Math.max(0, Number(card.nivel) || 0);
     const custo = aprimoramento.custoEmGemas(card.rarity, nivel);
     const temGema = bolsa.quantidadeDe(user, 'gema') >= custo;
@@ -83,7 +89,7 @@ function montarBotoes(card, user) {
     const botoes = [
         new ButtonBuilder()
             .setCustomId('confirm_aprimorar')
-            .setLabel(`Aprimorar (${custo} 💎)`)
+            .setLabel(t('aprimorar.botao', { custo }))
             .setEmoji('✨')
             .setStyle(ButtonStyle.Success)
             .setDisabled(!temGema)
@@ -95,7 +101,7 @@ function montarBotoes(card, user) {
         botoes.push(
             new ButtonBuilder()
                 .setCustomId('confirm_aprimorar_protegido')
-                .setLabel('Aprimorar com proteção (📜)')
+                .setLabel(t('aprimorar.botao_protegido'))
                 .setEmoji('🛡️')
                 .setStyle(ButtonStyle.Primary)
                 .setDisabled(!temGema || !temPergaminho)
@@ -105,14 +111,14 @@ function montarBotoes(card, user) {
     botoes.push(
         new ButtonBuilder()
             .setCustomId('cancel_aprimorar')
-            .setLabel('Cancelar')
+            .setLabel(t('comum.cancelar'))
             .setStyle(ButtonStyle.Secondary)
     );
 
     return new ActionRowBuilder().addComponents(...botoes);
 }
 
-async function aprimorarRun(client, interaction, user, matchingCards) {
+async function aprimorarRun(client, interaction, user, matchingCards, t = criarT(DEFAULT_LOCALE)) {
     await interaction.deferReply();
 
     const indexRef = { currentIndex: 0 };
@@ -123,8 +129,8 @@ async function aprimorarRun(client, interaction, user, matchingCards) {
     );
 
     const message = await interaction.editReply({
-        embeds: [montarEmbed(matchingCards[0], user)],
-        components: [rowNavigation, montarBotoes(matchingCards[0], user)]
+        embeds: [montarEmbed(matchingCards[0], user, t)],
+        components: [rowNavigation, montarBotoes(matchingCards[0], user, t)]
     });
 
     return { message, indexRef, rowNavigation };
