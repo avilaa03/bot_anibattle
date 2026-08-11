@@ -1,3 +1,5 @@
+const { traduzir, DEFAULT_LOCALE } = require('./i18n');
+
 /**
  * Catálogo de itens da bolsa.
  *
@@ -83,19 +85,23 @@ const GEMAS_POR_DESMANCHE = {
 /**
  * Catálogo.
  *
+ * Guarda MECÂNICA, não texto: nome, descrição e detalhe saem do
+ * dicionário por `localizar()`, em `itens_catalogo.<chave>`. A chave é o
+ * que fica gravado na bolsa do jogador, então trocar um texto nunca mexe
+ * no que ele já tem guardado.
+ *
  * - `chave`      identificador no banco. Vira caminho de campo no Mongo,
  *                então só letras minúsculas e `_` — ver `utils/bolsa.js`.
  * - `preco`      null = não está à venda (só se obtém jogando).
  * - `limiteDia`  null = sem limite diário.
  * - `consumivel` some ao ser usado. O que não é consumível é permanente.
+ * - `temDetalhe` o item tem linha de detalhe no dicionário.
  */
 const ITENS = {
     gema: {
         chave: 'gema',
-        nome: 'Gema de aprimoramento',
         emoji: '💎',
-        descricao: 'Material do `/aprimorar`. Some ao ser usada, dando certo ou não.',
-        detalhe: 'Também sai do `/desmanchar` — desmanchar rende mais que a venda rápida em tudo, menos na Mestra.',
+        temDetalhe: true,
         preco: PRECO_GEMA,
         limiteDia: null,
         consumivel: true,
@@ -114,10 +120,8 @@ const ITENS = {
      */
     roll_extra: {
         chave: 'roll_extra',
-        nome: 'Roll extra',
         emoji: '🎟️',
-        descricao: 'Um `/roll` que ignora o cooldown. Guardado até você querer usar.',
-        detalhe: 'Compre em `/loja roll-extra` e use com `/roll extra:True`.',
+        temDetalhe: true,
         preco: null,
         limiteDia: null,
         consumivel: true,
@@ -125,10 +129,8 @@ const ITENS = {
     },
     pergaminho: {
         chave: 'pergaminho',
-        nome: 'Pergaminho de proteção',
         emoji: '📜',
-        descricao: 'Segura a perda de nível quando um aprimoramento de risco falha.',
-        detalhe: 'Caro de propósito: ele é seguro, não atalho. Não aumenta a chance de sucesso.',
+        temDetalhe: true,
         preco: 25000,
         limiteDia: null,
         consumivel: true,
@@ -136,11 +138,35 @@ const ITENS = {
     }
 };
 
-/** Itens à venda, na ordem em que aparecem na loja. */
-function itensDaLoja() {
+/**
+ * O item com nome, descrição e detalhe no idioma pedido.
+ *
+ * Nenhuma tela pode ler `item.nome` direto do catálogo — ele não existe
+ * mais lá. Mesmo contrato de `achievements.localizar()`.
+ */
+function localizar(item, locale = DEFAULT_LOCALE) {
+    if (!item) return null;
+    return {
+        ...item,
+        nome: traduzir(locale, `itens_catalogo.${item.chave}.nome`),
+        descricao: traduzir(locale, `itens_catalogo.${item.chave}.descricao`),
+        detalhe: item.temDetalhe
+            ? traduzir(locale, `itens_catalogo.${item.chave}.detalhe`)
+            : null
+    };
+}
+
+/** Atalho: pega pela chave já traduzido. */
+function localizarPorChave(chave, locale = DEFAULT_LOCALE) {
+    return localizar(getItem(chave), locale);
+}
+
+/** Itens à venda, na ordem em que aparecem na loja, já no idioma pedido. */
+function itensDaLoja(locale = DEFAULT_LOCALE) {
     return Object.values(ITENS)
         .filter((i) => i.preco != null)
-        .sort((a, b) => a.ordem - b.ordem);
+        .sort((a, b) => a.ordem - b.ordem)
+        .map((i) => localizar(i, locale));
 }
 
 function getItem(chave) {
@@ -167,6 +193,8 @@ module.exports = {
     GEMAS_POR_DESMANCHE,
     itensDaLoja,
     getItem,
+    localizar,
+    localizarPorChave,
     existe,
     gemasDoDesmanche
 };

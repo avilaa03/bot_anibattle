@@ -297,6 +297,54 @@
       }
     }
   },
+  "itens_catalogo": {
+    "gema": {
+      "nome": "Gema de aprimoramento",
+      "descricao": "Material do `/aprimorar`. Some ao ser usada, dando certo ou não.",
+      "detalhe": "Também sai do `/desmanchar` — desmanchar rende mais que a venda rápida em tudo, menos na Mestra."
+    },
+    "roll_extra": {
+      "nome": "Roll extra",
+      "descricao": "Um `/roll` que ignora o cooldown. Guardado até você querer usar.",
+      "detalhe": "Compre em `/loja roll-extra` e use com `/roll extra:True`."
+    },
+    "pergaminho": {
+      "nome": "Pergaminho de proteção",
+      "descricao": "Segura a perda de nível quando um aprimoramento de risco falha.",
+      "detalhe": "Caro de propósito: ele é seguro, não atalho. Não aumenta a chance de sucesso."
+    }
+  },
+  "caixas_catalogo": {
+    "comum": {
+      "nome": "Caixa Comum",
+      "descricao": "A mais barata. Serve para tentar a sorte sem doer."
+    },
+    "tematica": {
+      "nome": "Caixa Temática",
+      "descricao": "Você escolhe a série. Rara ou melhor garantida.",
+      "detalhe": "A única que mira: serve para fechar uma série na Pokédex."
+    },
+    "elite": {
+      "nome": "Caixa de Elite",
+      "descricao": "Ultra Rara garantida, com boa chance de Lendária."
+    },
+    "lendaria": {
+      "nome": "Caixa Lendária",
+      "descricao": "A mais cara do jogo. 10% de chance de sair uma Mestra.",
+      "detalhe": "Ainda é prejuízo na média — você paga pela chance, não pelo retorno."
+    },
+    "apoiador": {
+      "nome": "Caixa do Apoiador",
+      "descricao": "Não está à venda: é a recompensa de quem vota no bot."
+    }
+  },
+  "treino_catalogo": {
+    "dificuldades": {
+      "facil": "Fácil",
+      "parelho": "Parelho",
+      "dificil": "Difícil"
+    }
+  },
   "notificacoes": {
     "trofeu_desbloqueado": "Troféu desbloqueado!",
     "trofeu_rodape": "Troféu de {tipo} • +{pontos} pontos",
@@ -1129,7 +1177,55 @@
     "rodada_oitavas": "Oitavas de final",
     "rodada_de": "Rodada de {n}"
   },
+  "bolsa": {
+    "titulo": "🎒 Seus itens",
+    "autor": "Bolsa de {jogador}",
+    "vazia_titulo": "🎒 Sua bolsa está vazia",
+    "vazia_texto": "Itens aparecem aqui quando você compra na `/loja` ou desmancha uma carta.",
+    "vazia_gema": "💎 **{item}** é o material do `/aprimorar`, e sai dos dois caminhos:",
+    "vazia_loja": "• `/loja` — {preco} cada",
+    "vazia_desmanchar": "• `/desmanchar` — a carta vira gema em vez de moeda"
+  },
+  "loja": {
+    "titulo": "🏪 Loja",
+    "como_comprar": "Compre com `/loja comprar`.",
+    "seu_saldo": "Seu saldo: **{saldo}**",
+    "voce_tem": "Você tem **{quantidade}**.",
+    "rodape_sink": "A moeda gasta aqui sai de circulação",
+    "item_indisponivel": "Item indisponível",
+    "item_indisponivel_texto": "Esse item não está à venda.",
+    "quantidade_invalida": "Quantidade inválida",
+    "quantidade_invalida_texto": "Compre de 1 a {maximo} por vez.",
+    "custo_da_compra": "{item} x{quantidade} custa {total}.",
+    "faltam": "Você tem {saldo} — faltam **{falta}**.",
+    "compra_concluida": "Compra concluída",
+    "pagou": "Pagou {total} • Saldo: {saldo}",
+    "saldo_atual": "Saldo: {saldo}",
+    "na_bolsa_agora": "Na bolsa agora: **{quantidade}**",
+    "sem_perfil": "Sem perfil",
+    "sem_perfil_texto": "Use `/roll` ou `/daily` uma vez antes.",
+    "limite_diario": "Limite diário atingido",
+    "limite_diario_texto": "Você já comprou **{limite}** rolls extras hoje.",
+    "limite_diario_porque": "O limite existe para o jogo continuar dependendo de tempo, não de saldo.",
+    "limite_diario_zera": "Ele zera à meia-noite (UTC).",
+    "limite_diario_esgotado": "Você já usou todos os rolls extras de hoje.",
+    "roll_extra_custo": "O {n}º roll extra de hoje custa {preco}.",
+    "voce_tem_saldo": "Você tem {saldo}.",
+    "roll_extra_guardado": "Roll extra guardado",
+    "roll_extra_pagou": "{item} — pagou {preco}",
+    "roll_extra_como_usar": "Use com `/roll extra:True` quando quiser — ele ignora o cooldown.",
+    "roll_extra_ultimo": "Foi o último de hoje. O limite zera à meia-noite (UTC).",
+    "roll_extra_proximo": "O próximo de hoje custa {preco} — o preço sobe a cada compra."
+  },
   "comandos": {
+    "loja": {
+      "descricao": "Troca moedas por itens",
+      "sub_ver": "Mostra o que está à venda",
+      "sub_comprar": "Compra um item da loja",
+      "opcao_item": "O que você quer comprar",
+      "opcao_quantidade": "Quantos (padrão: 1)",
+      "sub_roll_extra": "Adianta seu próximo /roll (até {limite} por dia, e o preço sobe a cada um)"
+    },
     "idioma": {
       "descricao": "Escolhe o idioma das respostas do bot (português ou inglês)",
       "opcao_idioma": "Idioma desejado, ou automático para seguir o Discord",

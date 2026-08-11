@@ -3,6 +3,7 @@ const { SlashCommandBuilder } = require('discord.js');
 const lojaRun = require('../actions/run/lojaRun.js');
 const itens = require('../utils/itens.js');
 const rollExtra = require('../utils/rollExtra.js');
+const { descricaoBase, localizacoes, escolha } = require('../utils/i18n.js');
 
 module.exports = class LojaSlashCommand extends BaseSlashCommand {
     constructor() {
@@ -16,32 +17,43 @@ module.exports = class LojaSlashCommand extends BaseSlashCommand {
     getSlashCommandJSON() {
         return new SlashCommandBuilder()
             .setName(this.name)
-            .setDescription('Troca moedas por itens')
+            .setDescription(descricaoBase('comandos.loja.descricao'))
+            .setDescriptionLocalizations(localizacoes('comandos.loja.descricao'))
             .addSubcommand((sub) => sub
                 .setName('ver')
-                .setDescription('Mostra o que está à venda'))
+                .setDescription(descricaoBase('comandos.loja.sub_ver'))
+                .setDescriptionLocalizations(localizacoes('comandos.loja.sub_ver')))
             .addSubcommand((sub) => sub
                 .setName('comprar')
-                .setDescription('Compra um item da loja')
+                .setDescription(descricaoBase('comandos.loja.sub_comprar'))
+                .setDescriptionLocalizations(localizacoes('comandos.loja.sub_comprar'))
                 .addStringOption((opt) => opt
                     .setName('item')
-                    .setDescription('O que você quer comprar')
+                    .setDescription(descricaoBase('comandos.loja.opcao_item'))
+                    .setDescriptionLocalizations(localizacoes('comandos.loja.opcao_item'))
                     .setRequired(true)
                     // As opções saem do catálogo: item novo em `utils/itens.js`
                     // aparece aqui sozinho, sem ninguém lembrar de vir editar.
-                    .addChoices(...itens.itensDaLoja().map((i) => ({
-                        name: `${i.emoji} ${i.nome}`,
-                        value: i.chave
-                    }))))
+                    // O nome vem do dicionário pelas duas pontas — `escolha()`
+                    // monta o `name_localizations`, então quem usa o Discord em
+                    // inglês vê "Upgrade Gem" já na hora de digitar.
+                    .addChoices(...Object.values(itens.ITENS)
+                        .filter((i) => i.preco != null)
+                        .sort((a, b) => a.ordem - b.ordem)
+                        .map((i) => escolha(`itens_catalogo.${i.chave}.nome`, i.chave, `${i.emoji} `))))
                 .addIntegerOption((opt) => opt
                     .setName('quantidade')
-                    .setDescription('Quantos (padrão: 1)')
+                    .setDescription(descricaoBase('comandos.loja.opcao_quantidade'))
+                    .setDescriptionLocalizations(localizacoes('comandos.loja.opcao_quantidade'))
                     .setMinValue(1)
                     .setMaxValue(1000)))
+            // O limite entra por marcador: o número mora em `rollExtra.js`, e
+            // uma mudança lá acompanha a descrição nos dois idiomas sozinha.
             .addSubcommand((sub) => sub
                 .setName('roll-extra')
-                .setDescription(
-                    `Adianta seu próximo /roll (até ${rollExtra.LIMITE_DIARIO} por dia, e o preço sobe a cada um)`
+                .setDescription(descricaoBase('comandos.loja.sub_roll_extra', { limite: rollExtra.LIMITE_DIARIO }))
+                .setDescriptionLocalizations(
+                    localizacoes('comandos.loja.sub_roll_extra', { limite: rollExtra.LIMITE_DIARIO })
                 ))
             .toJSON();
     }

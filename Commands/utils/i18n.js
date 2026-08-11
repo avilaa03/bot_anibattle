@@ -137,20 +137,26 @@ function criarT(locale) {
  * Monta o objeto de localizações que o Discord aceita em
  * setDescriptionLocalizations(). O português fica de fora porque já é o
  * texto base passado em setDescription().
+ *
+ * `valores` existe para descrição que cita um número do jogo — o limite
+ * diário de rolls extras, por exemplo. O número fica no código e entra
+ * por `{marcador}`; escrevê-lo no dicionário faria a frase sobreviver à
+ * mudança da regra e virar mentira em silêncio, nos dois idiomas de uma
+ * vez.
  */
-function localizacoes(chave) {
+function localizacoes(chave, valores) {
     const saida = {};
     for (const locale of LOCALES) {
         if (locale === DEFAULT_LOCALE) continue;
         const valor = buscar(DICIONARIOS[locale], chave);
-        if (typeof valor === 'string') saida[locale] = valor;
+        if (typeof valor === 'string') saida[locale] = interpolar(valor, valores);
     }
     return saida;
 }
 
 /** Descrição base (pt-BR) de uma chave — o que vai em setDescription(). */
-function descricaoBase(chave) {
-    return traduzir(DEFAULT_LOCALE, chave);
+function descricaoBase(chave, valores) {
+    return traduzir(DEFAULT_LOCALE, chave, valores);
 }
 
 /**

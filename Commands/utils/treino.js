@@ -1,4 +1,5 @@
 const Card = require('./cardSchema');
+const { traduzir, DEFAULT_LOCALE } = require('./i18n');
 
 /**
  * Modo treino: a mesma batalha do `/battle`, contra um BOT.
@@ -30,6 +31,13 @@ const Card = require('./cardSchema');
  * verdade.
  */
 
+/**
+ * Nome próprio do rival — não se traduz.
+ *
+ * É o nome de um personagem, como o nome de uma carta. Traduzir faria o
+ * jogador em inglês e o jogador em português falarem de dois adversários
+ * diferentes ao comparar resultados.
+ */
 const NOME_RIVAL = 'BOT Caviar';
 
 /**
@@ -38,12 +46,26 @@ const NOME_RIVAL = 'BOT Caviar';
  * O multiplicador se aplica sobre a média de overall do SEU time, então o
  * treino acompanha a sua coleção: quem tem cartas fracas enfrenta cartas
  * fracas, e continua sendo um teste útil.
+ *
+ * Só a mecânica mora aqui; o nome sai de `treino_catalogo.dificuldades`
+ * por `localizarDificuldade()`.
  */
 const DIFICULDADES = {
-    facil: { chave: 'facil', nome: 'Fácil', emoji: '🟢', multiplicador: 0.80 },
-    parelho: { chave: 'parelho', nome: 'Parelho', emoji: '🟡', multiplicador: 1.00 },
-    dificil: { chave: 'dificil', nome: 'Difícil', emoji: '🔴', multiplicador: 1.20 }
+    facil: { chave: 'facil', emoji: '🟢', multiplicador: 0.80 },
+    parelho: { chave: 'parelho', emoji: '🟡', multiplicador: 1.00 },
+    dificil: { chave: 'dificil', emoji: '🔴', multiplicador: 1.20 }
 };
+
+/** A dificuldade com o nome no idioma pedido. */
+function localizarDificuldade(dificuldade, locale = DEFAULT_LOCALE) {
+    const base = typeof dificuldade === 'string'
+        ? (DIFICULDADES[dificuldade] || DIFICULDADES[PADRAO])
+        : (dificuldade || DIFICULDADES[PADRAO]);
+    return {
+        ...base,
+        nome: traduzir(locale, `treino_catalogo.dificuldades.${base.chave}`)
+    };
+}
 
 const PADRAO = 'parelho';
 
@@ -279,6 +301,7 @@ function encerrarSessao(id) {
 module.exports = {
     NOME_RIVAL,
     DIFICULDADES,
+    localizarDificuldade,
     PADRAO,
     TOLERANCIA,
     DURACAO_SESSAO_MS,

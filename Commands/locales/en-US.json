@@ -297,6 +297,54 @@
       }
     }
   },
+  "itens_catalogo": {
+    "gema": {
+      "nome": "Upgrade Gem",
+      "descricao": "Material for `/aprimorar`. It is consumed on use, whether the upgrade works or not.",
+      "detalhe": "It also comes from `/desmanchar` — salvaging pays better than quick-selling for everything except Master cards."
+    },
+    "roll_extra": {
+      "nome": "Extra Roll",
+      "descricao": "A `/roll` that skips the cooldown. Stored until you want to use it.",
+      "detalhe": "Buy it with `/loja roll-extra` and use it with `/roll extra:True`."
+    },
+    "pergaminho": {
+      "nome": "Protection Scroll",
+      "descricao": "Prevents the level loss when a risky upgrade fails.",
+      "detalhe": "Expensive on purpose: it is insurance, not a shortcut. It does not raise your success chance."
+    }
+  },
+  "caixas_catalogo": {
+    "comum": {
+      "nome": "Common Box",
+      "descricao": "The cheapest one. For trying your luck without it hurting."
+    },
+    "tematica": {
+      "nome": "Themed Box",
+      "descricao": "You pick the series. Rare or better guaranteed.",
+      "detalhe": "The only one that aims: it is how you close a series in the Pokédex."
+    },
+    "elite": {
+      "nome": "Elite Box",
+      "descricao": "Ultra Rare guaranteed, with a solid shot at a Legendary."
+    },
+    "lendaria": {
+      "nome": "Legendary Box",
+      "descricao": "The priciest in the game. 10% chance of a Master card.",
+      "detalhe": "Still a loss on average — you are paying for the chance, not the return."
+    },
+    "apoiador": {
+      "nome": "Supporter Box",
+      "descricao": "Not for sale: it is the reward for voting for the bot."
+    }
+  },
+  "treino_catalogo": {
+    "dificuldades": {
+      "facil": "Easy",
+      "parelho": "Even",
+      "dificil": "Hard"
+    }
+  },
   "notificacoes": {
     "trofeu_desbloqueado": "Trophy unlocked!",
     "trofeu_rodape": "{tipo} trophy • +{pontos} points",
@@ -1129,7 +1177,55 @@
     "rodada_oitavas": "Round of 16",
     "rodada_de": "Round of {n}"
   },
+  "bolsa": {
+    "titulo": "🎒 Your items",
+    "autor": "{jogador}'s bag",
+    "vazia_titulo": "🎒 Your bag is empty",
+    "vazia_texto": "Items show up here when you buy from `/loja` or salvage a card.",
+    "vazia_gema": "💎 **{item}** is the material for `/aprimorar`, and it comes from two places:",
+    "vazia_loja": "• `/loja` — {preco} each",
+    "vazia_desmanchar": "• `/desmanchar` — the card becomes a gem instead of coins"
+  },
+  "loja": {
+    "titulo": "🏪 Shop",
+    "como_comprar": "Buy with `/loja comprar`.",
+    "seu_saldo": "Your balance: **{saldo}**",
+    "voce_tem": "You have **{quantidade}**.",
+    "rodape_sink": "Coins spent here leave circulation",
+    "item_indisponivel": "Item unavailable",
+    "item_indisponivel_texto": "That item is not for sale.",
+    "quantidade_invalida": "Invalid amount",
+    "quantidade_invalida_texto": "Buy between 1 and {maximo} at a time.",
+    "custo_da_compra": "{item} x{quantidade} costs {total}.",
+    "faltam": "You have {saldo} — you are **{falta}** short.",
+    "compra_concluida": "Purchase complete",
+    "pagou": "Paid {total} • Balance: {saldo}",
+    "saldo_atual": "Balance: {saldo}",
+    "na_bolsa_agora": "In your bag now: **{quantidade}**",
+    "sem_perfil": "No profile yet",
+    "sem_perfil_texto": "Use `/roll` or `/daily` once first.",
+    "limite_diario": "Daily limit reached",
+    "limite_diario_texto": "You have already bought **{limite}** extra rolls today.",
+    "limite_diario_porque": "The limit is what keeps the game about time rather than balance.",
+    "limite_diario_zera": "It resets at midnight (UTC).",
+    "limite_diario_esgotado": "You have used every extra roll for today.",
+    "roll_extra_custo": "Extra roll number {n} today costs {preco}.",
+    "voce_tem_saldo": "You have {saldo}.",
+    "roll_extra_guardado": "Extra roll stored",
+    "roll_extra_pagou": "{item} — paid {preco}",
+    "roll_extra_como_usar": "Use it with `/roll extra:True` whenever you want — it skips the cooldown.",
+    "roll_extra_ultimo": "That was the last one today. The limit resets at midnight (UTC).",
+    "roll_extra_proximo": "The next one today costs {preco} — the price rises with each purchase."
+  },
   "comandos": {
+    "loja": {
+      "descricao": "Trade coins for items",
+      "sub_ver": "Show what is for sale",
+      "sub_comprar": "Buy an item from the shop",
+      "opcao_item": "What you want to buy",
+      "opcao_quantidade": "How many (default: 1)",
+      "sub_roll_extra": "Bring your next /roll forward (up to {limite} a day, price rises each time)"
+    },
     "idioma": {
       "descricao": "Choose the language the bot replies in (Portuguese or English)",
       "opcao_idioma": "Language you want, or automatic to follow Discord",

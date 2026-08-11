@@ -170,7 +170,15 @@ check('item zerado não aparece na listagem',
 check('bolsa só com zeros conta como vazia',
     bolsa.estaVazia({ bolsa: { gema: 0 } }) === true);
 check('lista traz o item do catálogo junto',
-    bolsa.listar({ bolsa: { gema: 3 } })[0].item.nome === itens.getItem('gema').nome);
+    bolsa.listar({ bolsa: { gema: 3 } })[0].item.nome === itens.localizarPorChave('gema').nome);
+
+// O catálogo guarda mecânica, não texto: quem lê `nome` direto dele vê
+// `undefined` na tela, e é um erro que não levanta exceção nenhuma.
+check('o catálogo cru não tem nome nem descrição',
+    itens.getItem('gema').nome === undefined && itens.getItem('gema').descricao === undefined,
+    '<- o texto sai de itens_catalogo.* por localizar()');
+check('a bolsa sai no idioma pedido',
+    bolsa.listar({ bolsa: { gema: 3 } }, 'en-US')[0].item.nome === 'Upgrade Gem');
 
 // ---------------------------------------------------------------------
 console.log('\n=== ESCRITA (com o duplo do banco) ===');
