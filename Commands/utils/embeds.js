@@ -37,8 +37,9 @@ const STATUS_COLORS = {
 };
 
 // Como cada idioma formata número. O separador de milhar muda (1.234 x
-// 1,234) e é a diferença mais visível entre as duas versões.
-const LOCALE_NUMERO = { 'pt-BR': 'pt-BR', 'en-US': 'en-US' };
+// 1,234) e é a diferença mais visível entre as versões. O espanhol
+// acompanha o português no ponto.
+const LOCALE_NUMERO = { 'pt-BR': 'pt-BR', 'en-US': 'en-US', 'es-ES': 'es-ES' };
 
 function getRarity(rarity, locale = DEFAULT_LOCALE) {
     const key = String(rarity || 'common').toLowerCase().trim();

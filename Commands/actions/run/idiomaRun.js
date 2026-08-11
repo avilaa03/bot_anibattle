@@ -20,9 +20,18 @@ const idiomaUtil = require('../../utils/idioma');
  * falta dele, o idioma do próprio cliente Discord do jogador.
  */
 
+/**
+ * O nome de cada idioma, nele mesmo — não traduzido.
+ *
+ * Quem procura espanhol procura "Español", esteja o bot no idioma que
+ * estiver. Traduzir ("Espanhol" / "Spanish" / "Español") faria a mesma
+ * opção mudar de nome conforme o idioma atual, que é exatamente o que
+ * atrapalha quem está tentando SAIR de um idioma que não entende.
+ */
 const NOMES = {
     'pt-BR': '🇧🇷 Português (Brasil)',
-    'en-US': '🇺🇸 English (US)'
+    'en-US': '🇺🇸 English (US)',
+    'es-ES': '🇪🇸 Español'
 };
 
 /** Rótulo de um valor guardado, incluindo o caso "não escolhido". */

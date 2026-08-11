@@ -11,6 +11,7 @@
 
 const ptBR = require('../locales/pt-BR.json');
 const enUS = require('../locales/en-US.json');
+const esES = require('../locales/es-ES.json');
 
 const DEFAULT_LOCALE = 'pt-BR';
 
@@ -18,18 +19,28 @@ const DEFAULT_LOCALE = 'pt-BR';
 // dar para repassar direto em setDescriptionLocalizations().
 const DICIONARIOS = {
     'pt-BR': ptBR,
-    'en-US': enUS
+    'en-US': enUS,
+    'es-ES': esES
 };
 
 const LOCALES = Object.keys(DICIONARIOS);
 
-// Códigos que o Discord manda em `interaction.locale` e para onde cada um
-// cai. O que não estiver aqui vira inglês: é o palpite menos errado para
-// quem não fala português.
+/**
+ * Códigos que o Discord manda em `interaction.locale` e para onde cada um
+ * cai. O que não estiver aqui vira inglês: é o palpite menos errado para
+ * quem não fala português.
+ *
+ * `es-419` é o espanhol da América Latina, e o Discord o manda como um
+ * código à parte de `es-ES`. Sem esta linha, o cliente mexicano — o maior
+ * mercado de língua espanhola — cairia em inglês mesmo com o dicionário
+ * espanhol pronto e carregado.
+ */
 const MAPA_DISCORD = {
     'pt-BR': 'pt-BR',
     'en-US': 'en-US',
-    'en-GB': 'en-US'
+    'en-GB': 'en-US',
+    'es-ES': 'es-ES',
+    'es-419': 'es-ES'
 };
 
 /** Normaliza qualquer coisa (código do Discord, string solta, null) num locale suportado. */
@@ -38,10 +49,11 @@ function normalizar(locale, padrao = DEFAULT_LOCALE) {
     const texto = String(locale).trim();
     if (DICIONARIOS[texto]) return texto;
     if (MAPA_DISCORD[texto]) return MAPA_DISCORD[texto];
-    // "en", "pt", "pt-PT"... — casa pelo idioma base.
+    // "en", "pt", "pt-PT", "es-MX"... — casa pelo idioma base.
     const base = texto.toLowerCase().split(/[-_]/)[0];
     if (base === 'pt') return 'pt-BR';
     if (base === 'en') return 'en-US';
+    if (base === 'es') return 'es-ES';
     return padrao;
 }
 

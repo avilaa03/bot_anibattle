@@ -37,6 +37,7 @@ module.exports = class IdiomaSlashCommand extends BaseSlashCommand {
                     .addChoices(
                         { name: '🇧🇷 Português (Brasil)', value: 'pt-BR' },
                         { name: '🇺🇸 English (US)', value: 'en-US' },
+                        { name: '🇪🇸 Español', value: 'es-ES' },
                         escolha('idioma.opcao_automatico', 'auto')
                     )
             )
