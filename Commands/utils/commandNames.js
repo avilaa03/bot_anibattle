@@ -93,7 +93,8 @@ const OPCOES = {
     fee: { 'pt-BR': 'inscricao', 'es-ES': 'inscripcion' },
     number: { 'pt-BR': 'numero', 'es-ES': 'numero' },
     remove: { 'pt-BR': 'remover', 'es-ES': 'quitar' },
-    missing: { 'pt-BR': 'faltantes', 'es-ES': 'faltantes' }
+    missing: { 'pt-BR': 'faltantes', 'es-ES': 'faltantes' },
+    code: { 'pt-BR': 'codigo', 'es-ES': 'codigo' }
 };
 
 /**

@@ -16,6 +16,7 @@
     "beta:marcar": "node scripts/marcarBeta.js",
     "telemetria:suspeitos": "node scripts/suspeitos.js",
     "vip:grant": "node scripts/grantVip.js",
+    "codigos:gerar": "node scripts/gerarCodigos.js",
     "cards:grant": "node scripts/grantCards.js",
     "pokedex:grant": "node scripts/grantPokedex.js",
     "check:db": "node scripts/checkDb.js",
