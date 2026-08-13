@@ -449,7 +449,7 @@
     "tempo_restante": "Tiempo restante",
     "seu_intervalo": "Tu intervalo",
     "rodape_vip": "{plano}: cooldown reducido un {porcento}%",
-    "rodape_sem_vip": "Los suscriptores tiran con hasta un 40% menos de espera — mira /vip",
+    "rodape_sem_vip": "Los suscriptores tiran con hasta un {porcento}% menos de espera — mira /vip",
     "autor": "{jogador} tiró una carta",
     "linha_raridade": "Rareza {raridade} • Overall **{overall}**",
     "valor_mercado": "Valor de mercado",
@@ -494,6 +494,7 @@
     "bonus_marco_texto": "¡Recompensa multiplicada por **{multiplicador}x**!",
     "bonus_vip": "Bonus VIP",
     "bonus_vip_texto": "**{plano}** — {multiplicador}x (la base era {base})",
+    "bonus_vip_roll_extra": "🎟️ +{quantidade} {item} en tu bolsa — úsalo con `/roll extra:True`",
     "rodape_proximo": "Día {dia}: {nome} ({multiplicador}x) — faltan {faltam} día(s)",
     "rodape_volte": "Vuelve mañana para mantener la racha",
     "erro": "Hubo un error al procesar tu recompensa diaria."
@@ -1113,8 +1114,12 @@
             "desc": "Equipa tus marcos de carta y el color de perfil."
           },
           {
+            "nome": "/redeem",
+            "desc": "Activa un código de canje — VIP, cajas, objetos o monedas."
+          },
+          {
             "nome": "​",
-            "desc": "🛡️ **Ningún plan da ventaja de combate.** Los atributos, la probabilidad de rareza y el resultado de batalla son iguales para todos. Lo que cambia es la apariencia (marcos, colores, emblemas) y la comodidad (cooldown y diaria)."
+            "desc": "🛡️ **Ningún plan da ventaja de combate.** Los atributos, la probabilidad de rareza y el resultado de batalla son iguales para todos. Lo que cambia es la cantidad (cooldown, cargas, tiradas extras) y la comodidad (comisión del mercado, venta rápida) — nunca la suerte."
           }
         ]
       },
@@ -1146,15 +1151,53 @@
       }
     ]
   },
+  "resgate": {
+    "sucesso_titulo": "¡Código activado!",
+    "sucesso_texto": "Todo lo que traía ya está en tu cuenta.",
+    "voce_recebeu": "Has recibido",
+    "pokedex": "📖 Pokédex",
+    "pokedex_texto": "¡{n} carta(s) inédita(s) registrada(s) en tu Pokédex!",
+    "rodape_restantes": "A este código todavía le quedan {n} uso(s)",
+    "rodape_usado": "Este código era solo tuyo — ¡gracias por el apoyo!",
+    "recompensa_vip": "{emoji} **VIP {plano}** por {meses} mes(es)",
+    "recompensa_moedas": "🪙 **{quantidade}** monedas",
+    "recompensa_item": "{emoji} **{nome}** x{quantidade}",
+    "recompensa_caixa": "{emoji} **{nome}** x{quantidade}",
+    "recompensa_carta": "🎴 **{quantidade}** carta(s) exclusiva(s)",
+    "formato_titulo": "Ese código no parece correcto",
+    "formato_texto": "Los códigos de AniBattle son así: `ANI-0000-0000-0000`.\n\nRevisa que lo hayas copiado entero — puedes pegarlo con o sin los guiones.",
+    "invalido_titulo": "Código no encontrado",
+    "invalido_texto": "No existe ningún código con ese texto, o fue cancelado.\n\nSi pagaste por él y crees que es un error, habla con soporte con el comprobante a mano.",
+    "expirado_titulo": "Código vencido",
+    "expirado_texto": "Este código pasó su fecha de validez y ya no puede usarse.",
+    "esgotado_titulo": "Código agotado",
+    "esgotado_texto": "Este código ya se usó el número máximo de veces.",
+    "ja_resgatado_titulo": "Ya usaste este código",
+    "ja_resgatado_texto": "Cada código vale una vez por jugador — y este ya entró en tu cuenta.",
+    "pendente_titulo": "Ese canje quedó a medias",
+    "pendente_texto": "Una entrega de este código se trabó a mitad de camino y no puedes reintentarlo por tu cuenta: recibirías por duplicado lo que ya salió.\n\nHabla con soporte: el canje está registrado y se termina desde donde paró.",
+    "parcial_titulo": "Solo entregué una parte",
+    "parcial_texto": "Algo falló a mitad de la entrega. Lo que ya llegó está en tu cuenta y **no** se pierde.\n\nHabla con soporte para recibir el resto — el código ya está registrado a tu nombre.",
+    "ja_recebeu": "Ya está en tu cuenta",
+    "muitas_tentativas": "Demasiados intentos",
+    "muitas_tentativas_texto": "Has fallado el código demasiadas veces. Espera unos minutos y vuelve a intentarlo — la cuenta se reinicia en {minutos} minutos.",
+    "erro": "No pude procesar el código ahora. Inténtalo de nuevo en un momento; si sigue fallando, habla con soporte."
+  },
   "vip_ui": {
     "titulo": "✨ Planes VIP de AniBattle",
     "ativo": "¡Eres **{emoji} {plano}**!\nTu suscripción expira {quando}.\n\nUsa `/cosmeticos` para equipar tus marcos.",
     "vitalicio": "nunca (de por vida)",
-    "inativo": "Apoya al bot y consigue ventajas de apariencia y comodidad.\n\n🛡️ **Ningún plan da ventaja de combate.** Los atributos de las cartas, la probabilidad de rareza y el resultado de batalla son exactamente iguales para todo el mundo — quien paga se lleva estilo y comodidad, no poder.",
+    "inativo": "Apoya al bot y juega más: tiradas más rápidas, cargas acumuladas, mercado sin comisión y todos los marcos.\n\n🛡️ **Ningún plan da ventaja de combate.** Los atributos de las cartas, la probabilidad de rareza y el resultado de batalla son exactamente iguales para todo el mundo — quien paga juega más veces, no con más suerte.",
     "seu_plano": " ← tu plan",
     "cabecalho_plano": "{emoji} {plano} — R$ {preco}/mes{marcador}",
     "vantagem_cooldown": "⏱️ Cooldown de `/roll` **-{porcento}%**",
+    "vantagem_cargas": "🎴 **+{n}** carga(s) de tirada acumulada(s)",
     "vantagem_daily": "🎁 Recompensa diaria **{multiplicador}x**",
+    "vantagem_roll_extra": "🎟️ **{n}** tirada(s) extra(s) al día, en `/daily`",
+    "vantagem_taxa": "🏪 Comisión del mercado **{porcento}%** (lo normal es 5%)",
+    "vantagem_taxa_zero": "🏪 Mercado **sin comisión** (lo normal es 5%)",
+    "vantagem_venda_rapida": "🪙 Venta rápida **+{porcento}%**",
+    "vantagem_desejos": "💭 **{n}** cartas en la lista de deseos",
     "vantagem_molduras": "🖼️ {n} marco(s) de carta: {lista}",
     "vantagem_emblema": "{emoji} Emblema **{plano}** en el perfil y en los rankings",
     "vantagem_cor": "🎨 Color de perfil personalizado",
@@ -1589,6 +1632,10 @@
     },
     "vip": {
       "descricao": "Muestra los planes VIP y el estado de tu suscripción"
+    },
+    "redeem": {
+      "descricao": "Activa un código de canje (VIP, cajas, objetos...)",
+      "opcao_code": "El código que recibiste, con el formato ANI-0000-0000-0000"
     }
   },
   "nivel": {

@@ -4,19 +4,62 @@
  * REGRA DE OURO DESTE ARQUIVO: nada aqui pode dar vantagem de combate.
  *
  * Nenhuma vantagem altera ATA/LIF/POW, chance de raridade no /roll, ou o
- * resultado de uma batalha. O que se vende é aparência (molduras, cores,
- * emblemas) e conveniência (cooldown menor, daily melhor). Isso é
- * proposital: bot de carta que vende poder esvazia a base gratuita, que é
- * justamente quem faz o bot crescer — e, no caso do AniBattle, moeda
- * comprada que virasse poder em batalha com aposta traria um problema
- * bem maior que pay-to-win.
+ * resultado de uma batalha. Isso é proposital: bot de carta que vende
+ * poder esvazia a base gratuita, que é justamente quem faz o bot crescer —
+ * e, no caso do AniBattle, moeda comprada que virasse poder em batalha
+ * com aposta traria um problema bem maior que pay-to-win.
  *
- * A única vantagem que encosta na economia é a redução de cooldown do
- * /roll, porque rolar mais gera mais moeda. Por isso ela é modesta e
- * limitada — ver ROLL_COOLDOWN_MULTIPLIER de cada plano.
+ * ## Os três eixos que um plano PODE acelerar
+ *
+ * **Quantidade** — quantas vezes o jogador age por dia. Cooldown menor,
+ * cargas acumuladas, roll extra no diário. É o eixo mais rentável e o
+ * menos contestado, porque é *visível e verificável*: o assinante joga
+ * mais, não tem sorte melhor. É o mesmo eixo que o Mudae vende.
+ *
+ * **Conveniência** — quanto atrito o jogador paga para fazer o que já
+ * faria. Taxa de mercado menor, venda rápida melhor, lista de desejos
+ * maior. Não cria carta nem poder: reduz pedágio.
+ *
+ * **Cosmético** — molduras, cor, banner, emblema, destaque. Margem
+ * infinita e risco zero de desequilíbrio.
+ *
+ * ## O que continua fora, e por quê
+ *
+ * Chance de raridade não se compra. Está escrito em `rollRun.js` que "o
+ * sorteio é igual para todo mundo", e é o argumento mais forte que o bot
+ * tem contra os concorrentes pay-to-win — odds compradas é exatamente o
+ * que faz jogador acusar bot de ser rigged.
+ *
+ * ## Os dois freios que sobraram na economia
+ *
+ * Cooldown e bônus de venda rápida encostam na economia, porque rolar
+ * mais e vender melhor geram moeda. Por isso os dois são limitados e
+ * travados por teste: o cooldown não passa de -45% (ver
+ * `LIMITE_COOLDOWN`) e a venda rápida não passa de +20%.
+ *
+ * Repare que a taxa de mercado zerada do Master vai na direção contrária:
+ * ela REMOVE um sink. É aceitável porque assinante é minoria, mas se a
+ * inflação apertar, este é o primeiro lugar a revisar — não a taxa de
+ * quem joga de graça.
  */
 
 const { traduzir, DEFAULT_LOCALE } = require('./i18n');
+
+/**
+ * O piso do multiplicador de cooldown — ou seja, o desconto máximo que
+ * qualquer plano pode dar no `/roll`.
+ *
+ * Existe como constante, e não como número solto no plano mais caro,
+ * porque é ele que o teste trava. Mexer aqui é uma decisão de economia
+ * (mais rolls = mais moeda entrando no jogo), não um ajuste de preço.
+ */
+const LIMITE_COOLDOWN = 0.55;   // -45%
+
+/** O bônus máximo de venda rápida. Mesmo motivo: é torneira de moeda. */
+const LIMITE_BONUS_VENDA = 1.20;  // +20%
+
+/** Lista de desejos de quem não assina. O VIP multiplica isso. */
+const LIMITE_DESEJOS_GRATIS = 10;
 
 const TIERS = {
     bronze: {
@@ -25,9 +68,16 @@ const TIERS = {
         cor: 0xCD7F32,
         precoBRL: 5,
         ordem: 1,
-        rollCooldownMultiplier: 0.90,  // -10%
-        cargasExtras: 0,
-        dailyMultiplier: 1.25,
+        // --- Quantidade ---
+        rollCooldownMultiplier: 0.85,  // -15%
+        cargasExtras: 1,
+        dailyMultiplier: 1.5,
+        rollExtraDiario: 0,
+        // --- Conveniência ---
+        taxaMercadoMultiplier: 0.8,    // 5% -> 4%
+        bonusVendaRapida: 1.05,        // +5%
+        limiteDesejos: 25,
+        // --- Cosmético ---
         molduras: ['bronze'],
         podeCorPerfil: true,
         podeBanner: false,
@@ -39,9 +89,13 @@ const TIERS = {
         cor: 0xC0C0C0,
         precoBRL: 15,
         ordem: 2,
-        rollCooldownMultiplier: 0.80,  // -20%
-        cargasExtras: 0,
-        dailyMultiplier: 1.5,
+        rollCooldownMultiplier: 0.75,  // -25%
+        cargasExtras: 1,
+        dailyMultiplier: 2,
+        rollExtraDiario: 1,
+        taxaMercadoMultiplier: 0.6,    // 5% -> 3%
+        bonusVendaRapida: 1.10,        // +10%
+        limiteDesejos: 40,
         molduras: ['bronze', 'prata'],
         podeCorPerfil: true,
         podeBanner: true,
@@ -53,9 +107,13 @@ const TIERS = {
         cor: 0xFFD700,
         precoBRL: 30,
         ordem: 3,
-        rollCooldownMultiplier: 0.70,  // -30%
-        cargasExtras: 1,
-        dailyMultiplier: 2,
+        rollCooldownMultiplier: 0.65,  // -35%
+        cargasExtras: 2,
+        dailyMultiplier: 2.5,
+        rollExtraDiario: 2,
+        taxaMercadoMultiplier: 0.3,    // 5% -> 1,5%
+        bonusVendaRapida: 1.15,        // +15%
+        limiteDesejos: 60,
         molduras: ['bronze', 'prata', 'ouro', 'sakura'],
         podeCorPerfil: true,
         podeBanner: true,
@@ -67,9 +125,13 @@ const TIERS = {
         cor: 0xE91E63,
         precoBRL: 50,
         ordem: 4,
-        rollCooldownMultiplier: 0.60,  // -40%
-        cargasExtras: 1,
+        rollCooldownMultiplier: LIMITE_COOLDOWN,  // -45%
+        cargasExtras: 3,
         dailyMultiplier: 3,
+        rollExtraDiario: 3,
+        taxaMercadoMultiplier: 0,      // isento
+        bonusVendaRapida: LIMITE_BONUS_VENDA,     // +20%
+        limiteDesejos: 100,
         molduras: ['bronze', 'prata', 'ouro', 'sakura', 'holografica', 'neon'],
         podeCorPerfil: true,
         podeBanner: true,
@@ -111,6 +173,15 @@ function getTier(user) {
 /**
  * Vantagens efetivas do usuário. Sempre devolve valores utilizáveis,
  * mesmo para quem não é VIP (multiplicadores neutros).
+ *
+ * ## Por que os neutros importam tanto
+ *
+ * Quem chama nunca deve precisar perguntar "é VIP?" antes de multiplicar.
+ * `getPerks(null).bonusVendaRapida` é 1, `taxaMercadoMultiplier` é 1,
+ * `rollExtraDiario` é 0 — então o caminho do jogador grátis e o do
+ * assinante são o MESMO código, e não dois que precisam concordar.
+ *
+ * Foi assim que o cooldown nunca teve bug de VIP: `rollRun` só multiplica.
  */
 function getPerks(user) {
     const tier = getTier(user);
@@ -121,6 +192,10 @@ function getPerks(user) {
             rollCooldownMultiplier: 1,
             cargasExtras: 0,
             dailyMultiplier: 1,
+            rollExtraDiario: 0,
+            taxaMercadoMultiplier: 1,
+            bonusVendaRapida: 1,
+            limiteDesejos: LIMITE_DESEJOS_GRATIS,
             moldurasDisponiveis: ['nenhuma'],
             podeCorPerfil: false,
             podeBanner: false,
@@ -135,6 +210,13 @@ function getPerks(user) {
         // usados, e continua com exatamente a mesma chance de raridade.
         cargasExtras: tier.cargasExtras || 0,
         dailyMultiplier: tier.dailyMultiplier,
+        // Bilhetes de roll extra entregues junto com o /daily. É o eixo de
+        // quantidade mais direto que existe — e passa pelo item que já
+        // existe na bolsa, então não abre caminho novo para carta entrar.
+        rollExtraDiario: tier.rollExtraDiario || 0,
+        taxaMercadoMultiplier: tier.taxaMercadoMultiplier ?? 1,
+        bonusVendaRapida: tier.bonusVendaRapida ?? 1,
+        limiteDesejos: tier.limiteDesejos || LIMITE_DESEJOS_GRATIS,
         moldurasDisponiveis: ['nenhuma', ...tier.molduras],
         podeCorPerfil: tier.podeCorPerfil,
         podeBanner: tier.podeBanner,
@@ -206,6 +288,9 @@ module.exports = {
     TIERS,
     ORDEM_TIERS,
     MOLDURAS,
+    LIMITE_COOLDOWN,
+    LIMITE_BONUS_VENDA,
+    LIMITE_DESEJOS_GRATIS,
     isVipAtivo,
     getTier,
     getPerks,

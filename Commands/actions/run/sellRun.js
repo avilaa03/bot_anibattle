@@ -2,7 +2,7 @@ const { ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags } = require('
 const ui = require('../../utils/embeds');
 const valores = require('../../utils/cardValues');
 const negociabilidade = require('../../utils/tradability');
-const { applyMarketTax, MARKET_TAX_RATE } = require('../../utils/economy');
+const { applyMarketTax } = require('../../utils/economy');
 const User = require('../../utils/userSchema');
 const { sellCollect } = require('../collect/sellCollect.js');
 const { sellEnd } = require('../end/sellEnd.js');
@@ -11,7 +11,16 @@ const { molduraEfetiva } = require('../../utils/vip');
 const { criarT, DEFAULT_LOCALE } = require('../../utils/i18n');
 const { tDaInteracao } = require('../../utils/language');
 
-async function buildSellEmbed(card, listingPrice, moldura = 'nenhuma', t = criarT(DEFAULT_LOCALE)) {
+/**
+ * @param {object} card
+ * @param {number} listingPrice
+ * @param {object|null} vendedor documento de quem está anunciando — a
+ *   moldura da prévia e a alíquota da taxa saem os dois dele. Passar o
+ *   usuário inteiro em vez da moldura evita que a prévia mostre a taxa de
+ *   um plano e a moldura de outro.
+ */
+async function buildSellEmbed(card, listingPrice, vendedor = null, t = criarT(DEFAULT_LOCALE)) {
+    const moldura = molduraEfetiva(vendedor);
     // Copiar campos explicitamente do subdocument (como no /show), sem spread que perde characterImage/baseImage
     const cardData = {
         name: card.name,
@@ -28,6 +37,8 @@ async function buildSellEmbed(card, listingPrice, moldura = 'nenhuma', t = criar
     const render = await renderCard(cardData, { moldura });
     const attachment = render.attachment;
 
+    const taxa = applyMarketTax(listingPrice, vendedor);
+
     const meta = ui.getRarity(card.rarity, t.locale);
     const embed = ui.base(meta.color)
         .setTitle(t('sell.titulo', { carta: ui.cardName(card) }))
@@ -38,8 +49,8 @@ async function buildSellEmbed(card, listingPrice, moldura = 'nenhuma', t = criar
             '',
             t('sell.preco_anuncio', { valor: ui.coins(listingPrice, t.locale) }),
             t('sell.voce_recebe', {
-                valor: ui.coins(applyMarketTax(listingPrice).sellerReceives, t.locale),
-                porcento: Math.round(MARKET_TAX_RATE * 100)
+                valor: ui.coins(taxa.sellerReceives, t.locale),
+                porcento: ui.percent(taxa.rate, t.locale)
             })
         ].join('\n'))
         .setImage(render.url);
@@ -81,8 +92,7 @@ async function sellRun(client, interaction) {
     await interaction.deferReply();
 
     let indexRef = { currentIndex: 0 };
-    const moldura = molduraEfetiva(user);
-    const montarEmbed = (card, preco) => buildSellEmbed(card, preco, moldura, t);
+    const montarEmbed = (card, preco) => buildSellEmbed(card, preco, user, t);
 
     let embed, attachment;
     try {

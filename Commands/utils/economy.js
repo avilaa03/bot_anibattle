@@ -1,4 +1,5 @@
 const User = require('./userSchema');
+const { getPerks } = require('./vip');
 
 /**
  * Regras de economia do bot.
@@ -18,11 +19,34 @@ const MARKET_TAX_RATE = Number(process.env.MARKET_TAX_RATE) >= 0 && Number(proce
 // Aposta mínima obrigatória em uma batalha.
 const MIN_WAGER = Number(process.env.MIN_WAGER) > 0 ? Number(process.env.MIN_WAGER) : 10;
 
-/** Quanto o vendedor recebe de fato, e quanto foi retido de taxa. */
-function applyMarketTax(price) {
+/**
+ * A alíquota que vale para um vendedor específico.
+ *
+ * O VIP reduz a taxa — é conveniência, não poder: o assinante paga menos
+ * pedágio para fazer exatamente o que qualquer um já faz.
+ *
+ * ⚠️ Quem manda é o VENDEDOR, não o comprador. É ele que arca com a taxa
+ * (`sellerReceives = total - tax`), então cobrar pelo plano de quem
+ * compra faria o mesmo anúncio render valores diferentes conforme quem
+ * clicasse — impossível de explicar e impossível de prever ao anunciar.
+ *
+ * @param {object|null} vendedor documento do usuário que está vendendo
+ */
+function marketTaxRate(vendedor = null) {
+    return MARKET_TAX_RATE * getPerks(vendedor).taxaMercadoMultiplier;
+}
+
+/**
+ * Quanto o vendedor recebe de fato, e quanto foi retido de taxa.
+ *
+ * @param {number} price
+ * @param {object|null} vendedor documento do vendedor; ausente = alíquota cheia
+ */
+function applyMarketTax(price, vendedor = null) {
     const total = Math.max(0, Math.floor(Number(price) || 0));
-    const tax = Math.floor(total * MARKET_TAX_RATE);
-    return { total, tax, sellerReceives: total - tax };
+    const rate = marketTaxRate(vendedor);
+    const tax = Math.floor(total * rate);
+    return { total, tax, rate, sellerReceives: total - tax };
 }
 
 /**
@@ -56,6 +80,7 @@ async function addBalance(userId, amount) {
 module.exports = {
     MARKET_TAX_RATE,
     MIN_WAGER,
+    marketTaxRate,
     applyMarketTax,
     trySpend,
     addBalance

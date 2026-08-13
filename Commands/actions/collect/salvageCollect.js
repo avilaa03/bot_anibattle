@@ -14,7 +14,7 @@ async function desmancharCollect(i, indexRef, matchingCards, user, rowNavigation
 
         const card = matchingCards[indexRef.currentIndex];
         await i.update({
-            embeds: [updateEmbed(card, contarCopias(user, card), t)],
+            embeds: [updateEmbed(card, contarCopias(user, card), t, user)],
             components: [rowNavigation, buildConfirmationRow(card, t)]
         });
         return;

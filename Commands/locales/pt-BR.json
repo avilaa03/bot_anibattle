@@ -449,7 +449,7 @@
     "tempo_restante": "Tempo restante",
     "seu_intervalo": "Seu intervalo",
     "rodape_vip": "{plano}: cooldown reduzido em {porcento}%",
-    "rodape_sem_vip": "Assinantes rolam com até 40% menos espera — veja /vip",
+    "rodape_sem_vip": "Assinantes rolam com até {porcento}% menos espera — veja /vip",
     "autor": "{jogador} rolou uma carta",
     "linha_raridade": "Raridade {raridade} • Overall **{overall}**",
     "valor_mercado": "Valor de mercado",
@@ -494,6 +494,7 @@
     "bonus_marco_texto": "Recompensa multiplicada por **{multiplicador}x**!",
     "bonus_vip": "Bônus VIP",
     "bonus_vip_texto": "**{plano}** — {multiplicador}x (base era {base})",
+    "bonus_vip_roll_extra": "🎟️ +{quantidade} {item} na sua bolsa — use com `/roll extra:True`",
     "rodape_proximo": "Dia {dia}: {nome} ({multiplicador}x) — faltam {faltam} dia(s)",
     "rodape_volte": "Volte amanhã para manter a sequência",
     "erro": "Houve um erro ao processar sua recompensa diária."
@@ -1113,8 +1114,12 @@
             "desc": "Equipa suas molduras de carta e cor de perfil."
           },
           {
+            "nome": "/redeem",
+            "desc": "Ativa um código de resgate — VIP, caixas, itens ou moedas."
+          },
+          {
             "nome": "​",
-            "desc": "🛡️ **Nenhum plano dá vantagem de combate.** Atributos, chance de raridade e resultado de batalha são iguais para todos. O que muda é aparência (molduras, cores, emblemas) e conveniência (cooldown e daily)."
+            "desc": "🛡️ **Nenhum plano dá vantagem de combate.** Atributos, chance de raridade e resultado de batalha são iguais para todos. O que muda é quantidade (cooldown, cargas, rolls extras) e conveniência (taxa do mercado, venda rápida) — nunca sorte."
           }
         ]
       },
@@ -1146,15 +1151,53 @@
       }
     ]
   },
+  "resgate": {
+    "sucesso_titulo": "Código ativado!",
+    "sucesso_texto": "Tudo que ele carregava já está na sua conta.",
+    "voce_recebeu": "Você recebeu",
+    "pokedex": "📖 Pokédex",
+    "pokedex_texto": "{n} carta(s) inédita(s) registrada(s) na sua Pokédex!",
+    "rodape_restantes": "Este código ainda tem {n} uso(s)",
+    "rodape_usado": "Este código era só seu — obrigado pelo apoio!",
+    "recompensa_vip": "{emoji} **VIP {plano}** por {meses} mês(es)",
+    "recompensa_moedas": "🪙 **{quantidade}** moedas",
+    "recompensa_item": "{emoji} **{nome}** x{quantidade}",
+    "recompensa_caixa": "{emoji} **{nome}** x{quantidade}",
+    "recompensa_carta": "🎴 **{quantidade}** carta(s) exclusiva(s)",
+    "formato_titulo": "Esse código não parece certo",
+    "formato_texto": "Os códigos do AniBattle são assim: `ANI-0000-0000-0000`.\n\nConfira se você copiou tudo — pode colar com ou sem os hífens.",
+    "invalido_titulo": "Código não encontrado",
+    "invalido_texto": "Não existe código com esse texto, ou ele foi cancelado.\n\nSe você comprou e acha que é engano, fale com o suporte com o comprovante em mãos.",
+    "expirado_titulo": "Código vencido",
+    "expirado_texto": "Esse código passou da validade e não pode mais ser usado.",
+    "esgotado_titulo": "Código esgotado",
+    "esgotado_texto": "Esse código já foi usado o número máximo de vezes.",
+    "ja_resgatado_titulo": "Você já usou este código",
+    "ja_resgatado_texto": "Cada código vale uma vez por jogador — e este já entrou na sua conta.",
+    "pendente_titulo": "Esse resgate ficou pela metade",
+    "pendente_texto": "Uma entrega deste código travou no meio e não dá para tentar de novo sozinho, senão você receberia em dobro o que já saiu.\n\nFale com o suporte: o resgate está registrado e é finalizado de onde parou.",
+    "parcial_titulo": "Entreguei só uma parte",
+    "parcial_texto": "Algo falhou no meio da entrega. O que já chegou está na sua conta e **não** se perde.\n\nFale com o suporte para receber o resto — o código já está registrado no seu nome.",
+    "ja_recebeu": "Já entrou na sua conta",
+    "muitas_tentativas": "Muitas tentativas",
+    "muitas_tentativas_texto": "Você errou o código vezes demais. Espere alguns minutos e tente de novo — a contagem zera em {minutos} minutos.",
+    "erro": "Não consegui processar o código agora. Tente de novo em instantes; se persistir, fale com o suporte."
+  },
   "vip_ui": {
     "titulo": "✨ Planos VIP do AniBattle",
     "ativo": "Você é **{emoji} {plano}**!\nSua assinatura expira {quando}.\n\nUse `/cosmeticos` para equipar suas molduras.",
     "vitalicio": "nunca (vitalício)",
-    "inativo": "Apoie o bot e leve vantagens de aparência e conveniência.\n\n🛡️ **Nenhum plano dá vantagem de combate.** Atributos das cartas, chance de raridade e resultado de batalha são exatamente iguais para todo mundo — quem paga leva estilo e comodidade, não poder.",
+    "inativo": "Apoie o bot e jogue mais: rolls mais rápidos, cargas acumuladas, mercado sem pedágio e o visual todo.\n\n🛡️ **Nenhum plano dá vantagem de combate.** Atributos das cartas, chance de raridade e resultado de batalha são exatamente iguais para todo mundo — quem paga joga mais vezes, não com mais sorte.",
     "seu_plano": " ← seu plano",
     "cabecalho_plano": "{emoji} {plano} — R$ {preco}/mês{marcador}",
     "vantagem_cooldown": "⏱️ Cooldown do `/roll` **-{porcento}%**",
+    "vantagem_cargas": "🎴 **+{n}** carga(s) de roll acumulada(s)",
     "vantagem_daily": "🎁 Recompensa diária **{multiplicador}x**",
+    "vantagem_roll_extra": "🎟️ **{n}** roll(s) extra(s) por dia, no `/daily`",
+    "vantagem_taxa": "🏪 Taxa do mercado **{porcento}%** (normal é 5%)",
+    "vantagem_taxa_zero": "🏪 Mercado **sem taxa** (normal é 5%)",
+    "vantagem_venda_rapida": "🪙 Venda rápida **+{porcento}%**",
+    "vantagem_desejos": "💭 **{n}** cartas na lista de desejos",
     "vantagem_molduras": "🖼️ {n} moldura(s) de carta: {lista}",
     "vantagem_emblema": "{emoji} Emblema **{plano}** no perfil e nos rankings",
     "vantagem_cor": "🎨 Cor personalizada de perfil",
@@ -1589,6 +1632,10 @@
     },
     "vip": {
       "descricao": "Mostra os planos VIP e o status da sua assinatura"
+    },
+    "redeem": {
+      "descricao": "Ativa um código de resgate (VIP, caixas, itens...)",
+      "opcao_code": "O código que você recebeu, no formato ANI-0000-0000-0000"
     }
   },
   "nivel": {

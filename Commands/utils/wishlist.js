@@ -1,5 +1,5 @@
 const User = require('./userSchema');
-const { getPerks } = require('./vip');
+const { getPerks, LIMITE_DESEJOS_GRATIS } = require('./vip');
 
 /**
  * Lista de desejos.
@@ -26,14 +26,19 @@ const { getPerks } = require('./vip');
  * cópia: mede procura, ou seja, quanto ela deve valer numa troca.
  */
 
-// Limite por jogador. VIP leva mais — é conveniência, não poder.
-const LIMITE_BASE = 10;
-const LIMITE_VIP = { bronze: 15, prata: 20, ouro: 30, master: 50 };
+/**
+ * Limite por jogador. VIP leva mais — é conveniência, não poder.
+ *
+ * O número de cada plano mora em `vip.js`, junto das outras vantagens.
+ * Antes havia um mapa próprio aqui, e o site tinha um terceiro: três
+ * cópias do mesmo número, que já estavam divergindo. `getPerks` devolve o
+ * limite do plano e o limite grátis para quem não assina, então este
+ * arquivo não precisa mais saber que planos existem.
+ */
+const LIMITE_BASE = LIMITE_DESEJOS_GRATIS;
 
 function limiteDe(user) {
-    const perks = getPerks(user);
-    if (!perks.vip) return LIMITE_BASE;
-    return LIMITE_VIP[perks.tier.key] || LIMITE_BASE;
+    return getPerks(user).limiteDesejos;
 }
 
 /** Já está na lista? */
@@ -102,7 +107,6 @@ async function contarDesejos(cardId) {
 
 module.exports = {
     LIMITE_BASE,
-    LIMITE_VIP,
     limiteDe,
     contem,
     adicionar,

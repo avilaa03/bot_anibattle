@@ -1,6 +1,6 @@
 const User = require('../../utils/userSchema');
 const Market = require('../../utils/marketSchema');
-const { trySpend, addBalance, applyMarketTax, MARKET_TAX_RATE } = require('../../utils/economy');
+const { trySpend, addBalance, applyMarketTax } = require('../../utils/economy');
 const { registerDiscovery } = require('../../utils/discovery');
 const { registrar } = require('../../utils/progress');
 const ui = require('../../utils/embeds');
@@ -45,7 +45,17 @@ module.exports = async (message, selectedCard, interaction, t = criarT(DEFAULT_L
                 // O vendedor recebe o preço menos a taxa. A taxa não vai
                 // para ninguém — ela é destruída, e é justamente esse sink
                 // que segura a inflação da economia do bot.
-                const { tax, sellerReceives } = applyMarketTax(reserved.listingPrice);
+                //
+                // A alíquota é a do VENDEDOR, e é lida AGORA: um plano que
+                // venceu entre anunciar e vender cobra a taxa cheia, e um
+                // assinado no meio do caminho já vale. Congelar a alíquota
+                // no anúncio criaria isenção vitalícia para quem anunciasse
+                // tudo no último dia da assinatura.
+                const vendedor = await User.findOne({ id: reserved.sellerId })
+                    .select('vip')
+                    .lean()
+                    .catch(() => null);
+                const { tax, rate, sellerReceives } = applyMarketTax(reserved.listingPrice, vendedor);
                 await addBalance(reserved.sellerId, sellerReceives);
 
                 const catalogoId = reserved.originalCardId || reserved.cardId;
@@ -100,7 +110,7 @@ module.exports = async (message, selectedCard, interaction, t = criarT(DEFAULT_L
                         { name: t('market.voce_pagou'), value: ui.coins(reserved.listingPrice, t.locale), inline: true },
                         { name: t('market.vendedor_recebeu'), value: ui.coins(sellerReceives, t.locale), inline: true },
                         {
-                            name: t('market.taxa', { porcento: Math.round(MARKET_TAX_RATE * 100) }),
+                            name: t('market.taxa', { porcento: ui.percent(rate, t.locale) }),
                             value: ui.coins(tax, t.locale),
                             inline: true
                         },
