@@ -4,18 +4,22 @@ const valores = require('../../utils/cardValues');
 const { criarT, DEFAULT_LOCALE } = require('../../utils/i18n');
 
 /**
- * O quanto a venda rápida paga.
+ * O quanto a venda rápida paga para ESTE jogador.
  *
  * Cartas anteriores à migração de valores podem não ter `valueToSell`
- * gravado; nesse caso recalculamos pela raridade em vez de dividir o
- * valor de mercado, que só valia sob a fórmula antiga.
+ * gravado; nesse caso o valor é recalculado pela raridade em vez de
+ * dividir o valor de mercado, que só valia sob a fórmula antiga.
+ *
+ * O bônus de VIP entra aqui, e não no campo salvo — ver
+ * `cardValues.vendaRapidaPara`. Por isso o `user` precisa chegar até as
+ * telas: a que mostra o valor e a que credita têm que dar o mesmo número.
  */
-function getValueToSell(card) {
-    return card.valueToSell ?? valores.valoresDaCarta(card).valueToSell;
+function getValueToSell(card, user = null) {
+    return valores.vendaRapidaPara(card, user);
 }
 
-function updateEmbed(card, t = criarT(DEFAULT_LOCALE)) {
-    const value = getValueToSell(card);
+function updateEmbed(card, t = criarT(DEFAULT_LOCALE), user = null) {
+    const value = getValueToSell(card, user);
     const meta = ui.getRarity(card.rarity, t.locale);
 
     const embed = ui.base(meta.color)
@@ -34,8 +38,8 @@ function updateEmbed(card, t = criarT(DEFAULT_LOCALE)) {
     return embed;
 }
 
-function buildConfirmationRow(card, t = criarT(DEFAULT_LOCALE)) {
-    const value = getValueToSell(card);
+function buildConfirmationRow(card, t = criarT(DEFAULT_LOCALE), user = null) {
+    const value = getValueToSell(card, user);
     return new ActionRowBuilder().addComponents(
         new ButtonBuilder().setCustomId('confirm_sell').setLabel(t('roll.botao_vender', { valor: ui.number(value, t.locale) })).setEmoji('🪙').setStyle(ButtonStyle.Success),
         new ButtonBuilder().setCustomId('cancel_sell').setLabel(t('comum.cancelar')).setStyle(ButtonStyle.Secondary)
@@ -54,8 +58,8 @@ async function quicksellRun(client, interaction, user, matchingCards, t = criarT
         );
 
     const message = await interaction.editReply({
-        embeds: [updateEmbed(matchingCards[0], t)],
-        components: [rowNavigation, buildConfirmationRow(matchingCards[0], t)]
+        embeds: [updateEmbed(matchingCards[0], t, user)],
+        components: [rowNavigation, buildConfirmationRow(matchingCards[0], t, user)]
     });
 
     return { message, indexRef, rowNavigation };

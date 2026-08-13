@@ -62,7 +62,10 @@ async function showRun(client, interaction) {
                 { name: t('roll.valor_mercado'), value: ui.coins(card.marketValue || 0, t.locale), inline: true },
                 {
                     name: t('roll.venda_rapida'),
-                    value: ui.coins(card.valueToSell ?? valores.valoresDaCarta(card).valueToSell, t.locale),
+                    // Com o bônus do plano: é o número que o /quicksell vai
+                    // pagar de fato, e mostrar o natural aqui faria as duas
+                    // telas discordarem.
+                    value: ui.coins(valores.vendaRapidaPara(card, user), t.locale),
                     inline: true
                 }
             )

@@ -10,8 +10,8 @@ async function quicksellCollect(i, indexRef, matchingCards, user, rowNavigation,
         indexRef.currentIndex = (indexRef.currentIndex - 1 + matchingCards.length) % matchingCards.length;
         const card = matchingCards[indexRef.currentIndex];
         await i.update({
-            embeds: [updateEmbed(card, t)],
-            components: [rowNavigation, buildConfirmationRow(card, t)]
+            embeds: [updateEmbed(card, t, user)],
+            components: [rowNavigation, buildConfirmationRow(card, t, user)]
         });
         return;
     }
@@ -19,14 +19,14 @@ async function quicksellCollect(i, indexRef, matchingCards, user, rowNavigation,
         indexRef.currentIndex = (indexRef.currentIndex + 1) % matchingCards.length;
         const card = matchingCards[indexRef.currentIndex];
         await i.update({
-            embeds: [updateEmbed(card, t)],
-            components: [rowNavigation, buildConfirmationRow(card, t)]
+            embeds: [updateEmbed(card, t, user)],
+            components: [rowNavigation, buildConfirmationRow(card, t, user)]
         });
         return;
     }
     if (i.customId === 'confirm_sell') {
         const card = matchingCards[indexRef.currentIndex];
-        const value = getValueToSell(card);
+        const value = getValueToSell(card, user);
 
         // Remoção atômica pelo _id da subdocument: se a carta já não estiver
         // mais no inventário (ex: já foi vendida por outro clique/canal),

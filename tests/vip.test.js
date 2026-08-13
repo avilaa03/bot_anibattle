@@ -35,23 +35,71 @@ const perksPorTier = vip.ORDEM_TIERS.map((t) =>
     vip.getPerks(usuario({ vip: { tier: t, expiresAt: new Date(Date.now() + DIA) } })));
 const semVip = vip.getPerks(usuario());
 
+// Os neutros são o que permite o resto do bot multiplicar sem perguntar
+// "é VIP?". Um neutro errado não quebra nada visivelmente: só faz o
+// jogador grátis pagar taxa zero, ou receber bônus de venda que não tem.
 check('sem vip tem multiplicadores neutros',
-    semVip.rollCooldownMultiplier === 1 && semVip.dailyMultiplier === 1);
+    semVip.rollCooldownMultiplier === 1
+    && semVip.dailyMultiplier === 1
+    && semVip.taxaMercadoMultiplier === 1
+    && semVip.bonusVendaRapida === 1);
+check('sem vip nao acumula carga nem ganha roll extra',
+    semVip.cargasExtras === 0 && semVip.rollExtraDiario === 0);
+check('sem vip usa o limite gratis de desejos',
+    semVip.limiteDesejos === vip.LIMITE_DESEJOS_GRATIS,
+    `(${semVip.limiteDesejos})`);
 check('sem vip so tem moldura padrao',
     semVip.moldurasDisponiveis.length === 1 && semVip.moldurasDisponiveis[0] === 'nenhuma');
 
-let cooldownOk = true, dailyOk = true, molduraOk = true;
-for (let i = 1; i < perksPorTier.length; i++) {
-    if (!(perksPorTier[i].rollCooldownMultiplier < perksPorTier[i - 1].rollCooldownMultiplier)) cooldownOk = false;
-    if (!(perksPorTier[i].dailyMultiplier > perksPorTier[i - 1].dailyMultiplier)) dailyOk = false;
-    if (!(perksPorTier[i].moldurasDisponiveis.length >= perksPorTier[i - 1].moldurasDisponiveis.length)) molduraOk = false;
-}
-check('cooldown diminui a cada plano', cooldownOk);
-check('daily aumenta a cada plano', dailyOk);
-check('molduras nunca diminuem', molduraOk);
-check('reducao de cooldown limitada a 40%',
-    Math.min(...perksPorTier.map((p) => p.rollCooldownMultiplier)) >= 0.6,
-    `(menor multiplicador = ${Math.min(...perksPorTier.map((p) => p.rollCooldownMultiplier))})`);
+// Cada eixo precisa MELHORAR (ou pelo menos não piorar) conforme o preço
+// sobe. Um plano mais caro que entrega menos numa linha só é o erro mais
+// fácil de cometer mexendo em quatro números de uma vez — e o mais caro
+// de descobrir, porque quem paga é que percebe.
+const monotonico = (campo, comparar) => {
+    for (let i = 1; i < perksPorTier.length; i++) {
+        if (!comparar(perksPorTier[i][campo], perksPorTier[i - 1][campo])) return false;
+    }
+    return true;
+};
+const sobe = (atual, anterior) => atual > anterior;
+const naoDesce = (atual, anterior) => atual >= anterior;
+const naoSobe = (atual, anterior) => atual <= anterior;
+
+check('cooldown diminui a cada plano', monotonico('rollCooldownMultiplier', (a, b) => a < b));
+check('daily aumenta a cada plano', monotonico('dailyMultiplier', sobe));
+check('cargas nunca diminuem', monotonico('cargasExtras', naoDesce));
+check('roll extra diario nunca diminui', monotonico('rollExtraDiario', naoDesce));
+check('taxa de mercado nunca aumenta', monotonico('taxaMercadoMultiplier', naoSobe));
+check('bonus de venda rapida nunca diminui', monotonico('bonusVendaRapida', naoDesce));
+check('limite de desejos aumenta a cada plano', monotonico('limiteDesejos', sobe));
+check('molduras nunca diminuem',
+    monotonico('moldurasDisponiveis', (a, b) => a.length >= b.length));
+
+// ---------------------------------------------------------------------
+// Os dois tetos que protegem a ECONOMIA (não o combate)
+// ---------------------------------------------------------------------
+//
+// Cooldown menor e venda rápida melhor são as duas vantagens que geram
+// moeda. Elas podem existir — é o eixo de quantidade que o plano vende —
+// mas o limite é decisão de economia, e decisão de economia não pode ser
+// mudada sem alguém reparar. Os números vivem em `vip.js`; aqui a gente
+// confere que nenhum plano passou deles.
+const menorCooldown = Math.min(...perksPorTier.map((p) => p.rollCooldownMultiplier));
+check(`reducao de cooldown limitada a ${Math.round((1 - vip.LIMITE_COOLDOWN) * 100)}%`,
+    menorCooldown >= vip.LIMITE_COOLDOWN,
+    `(menor multiplicador = ${menorCooldown})`);
+
+const maiorVenda = Math.max(...perksPorTier.map((p) => p.bonusVendaRapida));
+check(`bonus de venda rapida limitado a +${Math.round((vip.LIMITE_BONUS_VENDA - 1) * 100)}%`,
+    maiorVenda <= vip.LIMITE_BONUS_VENDA,
+    `(maior bonus = ${maiorVenda})`);
+
+// A taxa é um SINK: ela destrói moeda. Zerar para o plano mais caro é
+// aceitável (assinante é minoria), mas taxa negativa transformaria o
+// mercado em torneira — o vendedor receberia mais do que o comprador
+// pagou, e a diferença sairia do nada.
+check('taxa de mercado nunca fica negativa',
+    perksPorTier.every((p) => p.taxaMercadoMultiplier >= 0));
 
 console.log('\n=== Precos crescentes ===');
 const precos = vip.ORDEM_TIERS.map((t) => vip.TIERS[t].precoBRL);
@@ -94,6 +142,59 @@ check('assinar do zero da ~30 dias', doZero >= 29 && doZero <= 31, `(${doZero} d
 const vencidoNaoAcumula = Math.round((vip.calcularExpiracao(
     usuario({ vip: { tier: 'ouro', expiresAt: new Date(Date.now() - 100 * DIA) } }), 1).getTime() - Date.now()) / DIA);
 check('vip vencido ha muito tempo nao vira credito', vencidoNaoAcumula >= 29 && vencidoNaoAcumula <= 31, `(${vencidoNaoAcumula} dias)`);
+
+// ---------------------------------------------------------------------
+// A vantagem CHEGA na economia?
+// ---------------------------------------------------------------------
+//
+// Este é o bug que os testes acima não pegam: o plano promete taxa
+// reduzida e bônus de venda, os números estão certos na tabela, e nenhum
+// dos dois é aplicado em lugar nenhum. Nada quebra, nada aparece no log —
+// o assinante só paga por uma vantagem que não existe, e descobre
+// conferindo a conta na mão.
+//
+// Por isso aqui a gente atravessa a fronteira e chama as funções que os
+// comandos chamam de verdade.
+console.log('\n=== As vantagens chegam na economia ===');
+
+const economia = require(path.join(__dirname, '..', 'Commands', 'utils', 'economy.js'));
+const valores = require(path.join(__dirname, '..', 'Commands', 'utils', 'cardValues.js'));
+
+const vipDe = (tier) => usuario({ vip: { tier, expiresAt: new Date(Date.now() + DIA) } });
+
+const taxaGratis = economia.applyMarketTax(10000, usuario());
+const taxaBronze = economia.applyMarketTax(10000, vipDe('bronze'));
+const taxaMaster = economia.applyMarketTax(10000, vipDe('master'));
+
+check('sem vip paga a taxa cheia',
+    taxaGratis.rate === economia.MARKET_TAX_RATE, `(${taxaGratis.rate})`);
+check('bronze paga menos taxa que quem nao assina',
+    taxaBronze.tax < taxaGratis.tax, `(${taxaBronze.tax} < ${taxaGratis.tax})`);
+check('master nao paga taxa nenhuma',
+    taxaMaster.tax === 0 && taxaMaster.sellerReceives === 10000,
+    `(recebe ${taxaMaster.sellerReceives} de 10000)`);
+check('usuario ausente cai na taxa cheia',
+    economia.applyMarketTax(10000, null).rate === economia.MARKET_TAX_RATE);
+
+// A carta é a mesma nos três casos: o que muda é só quem está vendendo.
+const cartaDeTeste = { rarity: 'rare', overall: 60, valueToSell: 1000 };
+const vendaGratis = valores.vendaRapidaPara(cartaDeTeste, usuario());
+const vendaMaster = valores.vendaRapidaPara(cartaDeTeste, vipDe('master'));
+
+check('sem vip a venda rapida paga o valor natural',
+    vendaGratis === 1000, `(${vendaGratis})`);
+check('master vende melhor que quem nao assina',
+    vendaMaster > vendaGratis, `(${vendaMaster} > ${vendaGratis})`);
+check('o bonus da venda bate com o do plano',
+    vendaMaster === Math.round(1000 * vip.TIERS.master.bonusVendaRapida),
+    `(${vendaMaster})`);
+
+// O valor GRAVADO na carta nunca pode carregar o bônus: ele viaja no
+// mercado e na troca, e transformaria o plano de quem rolou num aumento
+// permanente para todos os donos seguintes.
+check('o bonus nao contamina o valor natural da carta',
+    valores.valoresDaCarta(cartaDeTeste).valueToSell
+        === valores.valorDeVenda('rare', 60));
 
 console.log('\n=== NENHUM PLANO PODE DAR VANTAGEM DE COMBATE ===');
 const CAMPOS_PROIBIDOS = ['ATA', 'LIF', 'POW', 'overall', 'rarity', 'raridade', 'dano', 'critico', 'vitoria', 'battle', 'combate'];

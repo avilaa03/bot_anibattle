@@ -30,8 +30,16 @@ function gemasDe(card) {
     return itens.gemasDoDesmanche(card.rarity);
 }
 
-function valorDeVendaDe(card) {
-    return card.valueToSell ?? valores.valoresDaCarta(card).valueToSell;
+/**
+ * O valor que a venda rápida pagaria — já com o bônus do plano.
+ *
+ * A tela existe para o jogador comparar "vender" com "desmanchar", então
+ * ela precisa mostrar o número que ele receberia DE VERDADE. Mostrar o
+ * valor natural para um assinante faria o desmanche parecer melhor do que
+ * é, justamente para quem paga.
+ */
+function valorDeVendaDe(card, user = null) {
+    return valores.vendaRapidaPara(card, user);
 }
 
 /**
@@ -52,11 +60,11 @@ function contarGemas(n, t) {
     });
 }
 
-function updateEmbed(card, copias = 1, t = criarT(DEFAULT_LOCALE)) {
+function updateEmbed(card, copias = 1, t = criarT(DEFAULT_LOCALE), user = null) {
     const gemas = gemasDe(card);
     const meta = ui.getRarity(card.rarity, t.locale);
     const item = itens.localizarPorChave('gema', t.locale);
-    const vendaRapida = valorDeVendaDe(card);
+    const vendaRapida = valorDeVendaDe(card, user);
 
     const linhas = [
         `${meta.emoji} ${ui.rarityTag(card.rarity, t.locale)} • *${card.series || t('comum.traco')}*`,
@@ -123,7 +131,7 @@ async function desmancharRun(client, interaction, user, matchingCards, t = criar
     );
 
     const message = await interaction.editReply({
-        embeds: [updateEmbed(matchingCards[0], contarCopias(user, matchingCards[0]), t)],
+        embeds: [updateEmbed(matchingCards[0], contarCopias(user, matchingCards[0]), t, user)],
         components: [rowNavigation, buildConfirmationRow(matchingCards[0], t)]
     });
 

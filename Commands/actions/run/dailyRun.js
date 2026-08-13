@@ -4,6 +4,9 @@ const { getPerks, nomeTier } = require('../../utils/vip');
 const { tDaInteracao } = require('../../utils/language');
 const { registrar } = require('../../utils/progress');
 const { chaveDoDia } = require('../../utils/missions');
+const bolsa = require('../../utils/bag');
+const rollExtra = require('../../utils/extraRoll');
+const itens = require('../../utils/items');
 const { MessageFlags } = require('discord.js');
 
 /**
@@ -124,6 +127,30 @@ async function dailyRun(client, interaction) {
         user.stats.diasAtivos = (user.stats.diasAtivos || 0) + 1;
         await user.save();
 
+        // Bilhetes de roll extra do plano.
+        //
+        // Entram DEPOIS do save: `bolsa.adicionar` faz o próprio
+        // findOneAndUpdate, e rodar antes deixaria o documento em memória
+        // com uma bolsa desatualizada esperando para ser regravada.
+        //
+        // Reusa o item que a /loja já vende, de propósito. Um bilhete novo
+        // e exclusivo do VIP significaria outro caminho para carta entrar
+        // no jogo, com outro limite para manter em dia; assim o teto
+        // diário de rolls continua tendo um dono só.
+        //
+        // A falha é engolida: o diário já foi creditado e salvo, e não
+        // devolver moeda por causa de um brinde seria trocar um problema
+        // pequeno por um grande.
+        let bilhetes = 0;
+        if (perks.rollExtraDiario > 0) {
+            bilhetes = perks.rollExtraDiario;
+            await bolsa.adicionar(interaction.user.id, rollExtra.CHAVE_BOLSA, bilhetes)
+                .catch((err) => {
+                    console.error('Falha ao entregar o roll extra do diário:', err.message);
+                    bilhetes = 0;
+                });
+        }
+
         const marco = MARCOS[novaSequencia];
 
         const embed = ui.base(marco ? 0xFFD700 : ui.STATUS_COLORS.success)
@@ -151,13 +178,25 @@ async function dailyRun(client, interaction) {
         }
 
         if (perks.vip) {
+            const linhas = [
+                `${perks.tier.emoji} ${t('daily.bonus_vip_texto', {
+                    plano: nomeTier(perks.tier.key, t.locale),
+                    multiplicador: ui.number(perks.dailyMultiplier, t.locale),
+                    base: ui.coins(base, t.locale)
+                })}`
+            ];
+
+            if (bilhetes > 0) {
+                const item = itens.localizarPorChave(rollExtra.CHAVE_BOLSA, t.locale);
+                linhas.push(t('daily.bonus_vip_roll_extra', {
+                    quantidade: ui.number(bilhetes, t.locale),
+                    item: `${item.emoji} **${item.nome}**`
+                }));
+            }
+
             embed.addFields({
                 name: t('daily.bonus_vip'),
-                value: `${perks.tier.emoji} ${t('daily.bonus_vip_texto', {
-                    plano: nomeTier(perks.tier.key, t.locale),
-                    multiplicador: perks.dailyMultiplier,
-                    base: ui.coins(base, t.locale)
-                })}`,
+                value: linhas.join('\n'),
                 inline: false
             });
         }

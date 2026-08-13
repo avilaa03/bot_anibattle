@@ -83,9 +83,10 @@ module.exports = async (client, interaction, rollCollect, rollEnd) => {
 
     const now = Date.now();
 
-    // VIP encurta o cooldown. É a única vantagem paga que encosta na
-    // economia, por isso é modesta (no máximo -40%) e nunca mexe na
-    // chance de raridade — o sorteio é igual para todo mundo.
+    // VIP encurta o cooldown. É vantagem de QUANTIDADE: o assinante rola
+    // mais vezes e nunca mexe na chance de raridade — o sorteio é igual
+    // para todo mundo. O teto do desconto é `vip.LIMITE_COOLDOWN`, e há
+    // teste que falha se algum plano passar dele.
     const perks = getPerks(user);
     const cooldownEfetivo = Math.round(ROLL_COOLDOWN_MS * perks.rollCooldownMultiplier);
 
@@ -154,7 +155,14 @@ module.exports = async (client, interaction, rollCollect, rollEnd) => {
                     })}`
                 });
             } else {
-                embed.setFooter({ text: `${ui.BRAND} • ${t('roll.rodape_sem_vip')}` });
+                // O número sai da tabela, não do dicionário: escrito na
+                // frase, ele sobreviveria à mudança do plano e viraria
+                // propaganda enganosa em três idiomas de uma vez.
+                embed.setFooter({
+                    text: `${ui.BRAND} • ${t('roll.rodape_sem_vip', {
+                        porcento: Math.round((1 - vip.LIMITE_COOLDOWN) * 100)
+                    })}`
+                });
             }
             return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
         }
@@ -204,6 +212,11 @@ module.exports = async (client, interaction, rollCollect, rollEnd) => {
     // dentro da faixa. Ver `utils/valores.js` para o porquê.
     const { marketValue, valueToSell } = valores.valoresDaCarta(card);
 
+    // Dois valores, de propósito: `valueToSell` é o natural da carta e é o
+    // que fica GRAVADO no inventário; `vendaRapida` já tem o bônus de VIP
+    // e é o que aparece no botão e o que o `rollCollect` credita.
+    const vendaRapida = valores.vendaRapidaPara({ ...card, valueToSell }, user);
+
     const render = await renderCard(card, { moldura: molduraEfetiva(user) });
 
     const rarityMeta = ui.getRarity(card.rarity, t.locale);
@@ -219,7 +232,7 @@ module.exports = async (client, interaction, rollCollect, rollEnd) => {
         .addComponents(
             new ButtonBuilder()
                 .setCustomId(`vender_${card._id}_${interaction.user.id}`)
-                .setLabel(t('roll.botao_vender', { valor: ui.number(valueToSell, t.locale) }))
+                .setLabel(t('roll.botao_vender', { valor: ui.number(vendaRapida, t.locale) }))
                 .setEmoji('🪙')
                 .setStyle(ButtonStyle.Secondary)
         );
@@ -242,7 +255,7 @@ module.exports = async (client, interaction, rollCollect, rollEnd) => {
         ].join('\n'))
         .addFields(
             { name: t('roll.valor_mercado'), value: ui.coins(marketValue, t.locale), inline: true },
-            { name: t('roll.venda_rapida'), value: ui.coins(valueToSell, t.locale), inline: true }
+            { name: t('roll.venda_rapida'), value: ui.coins(vendaRapida, t.locale), inline: true }
         )
         .setImage(render.url);
 

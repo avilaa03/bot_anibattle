@@ -41,6 +41,10 @@
  * uma variável nova é mais rápido que abrir PR.
  */
 
+// `vip.js` só depende de `i18n.js`, então não há ciclo aqui — e o bônus de
+// venda rápida precisa da mesma fonte de vantagens que o resto do bot usa.
+const { getPerks } = require('./vip');
+
 const RARIDADE_PADRAO = 'common';
 
 /** Valor de referência de cada raridade, para uma carta de overall 50. */
@@ -141,6 +145,34 @@ function valoresDaCarta(card) {
 }
 
 /**
+ * Quanto a venda rápida paga DE FATO para um jogador específico.
+ *
+ * ## Por que o bônus do VIP não é gravado na carta
+ *
+ * `valueToSell` fica salvo no inventário (ver `rollCollect.js`). Se o
+ * bônus entrasse ali, a carta rolada durante a assinatura pagaria a mais
+ * para sempre — inclusive depois do plano vencer, e inclusive para o
+ * jogador seguinte, porque o campo viaja no mercado e na troca.
+ *
+ * Então o que fica gravado é sempre o valor NATURAL da carta, e o bônus é
+ * aplicado no instante do crédito, contra o plano de quem está vendendo
+ * naquele momento. É a mesma regra da taxa do mercado.
+ *
+ * ⚠️ Toda tela que MOSTRA o valor da venda rápida tem que passar por aqui
+ * também. Mostrar o valor natural e creditar o valor com bônus (ou o
+ * contrário) é o tipo de divergência que ninguém reporta como bug — o
+ * jogador só acha que o bot errou a conta.
+ *
+ * @param {object} card
+ * @param {object|null} user quem está vendendo
+ */
+function vendaRapidaPara(card, user = null) {
+    const base = card?.valueToSell ?? valoresDaCarta(card).valueToSell;
+    const bonus = getPerks(user).bonusVendaRapida;
+    return Math.max(1, Math.round((Number(base) || 0) * bonus));
+}
+
+/**
  * Recupera o overall de uma carta antiga, salva antes da migração.
  *
  * SÓ para o script de migração. Sob a fórmula ANTIGA (`overall * 10`), a
@@ -166,5 +198,6 @@ module.exports = {
     valorDeMercado,
     valorDeVenda,
     valoresDaCarta,
+    vendaRapidaPara,
     overallLegado
 };

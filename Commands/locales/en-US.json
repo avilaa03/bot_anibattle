@@ -449,7 +449,7 @@
     "tempo_restante": "Time left",
     "seu_intervalo": "Your interval",
     "rodape_vip": "{plano}: cooldown reduced by {porcento}%",
-    "rodape_sem_vip": "Subscribers roll with up to 40% less waiting — see /vip",
+    "rodape_sem_vip": "Subscribers roll with up to {porcento}% less waiting — see /vip",
     "autor": "{jogador} rolled a card",
     "linha_raridade": "Rarity {raridade} • Overall **{overall}**",
     "valor_mercado": "Market value",
@@ -494,6 +494,7 @@
     "bonus_marco_texto": "Reward multiplied by **{multiplicador}x**!",
     "bonus_vip": "VIP bonus",
     "bonus_vip_texto": "**{plano}** — {multiplicador}x (base was {base})",
+    "bonus_vip_roll_extra": "🎟️ +{quantidade} {item} in your bag — use it with `/roll extra:True`",
     "rodape_proximo": "Day {dia}: {nome} ({multiplicador}x) — {faltam} day(s) to go",
     "rodape_volte": "Come back tomorrow to keep the streak",
     "erro": "Something went wrong processing your daily reward."
@@ -1113,8 +1114,12 @@
             "desc": "Equip your card frames and profile color."
           },
           {
+            "nome": "/redeem",
+            "desc": "Redeem a code — VIP, boxes, items or coins."
+          },
+          {
             "nome": "​",
-            "desc": "🛡️ **No plan grants a combat advantage.** Stats, rarity odds and battle outcomes are the same for everyone. What changes is looks (frames, colors, badges) and convenience (cooldown and daily)."
+            "desc": "🛡️ **No plan grants a combat advantage.** Stats, rarity odds and battle outcomes are the same for everyone. What changes is quantity (cooldown, charges, extra rolls) and convenience (market fee, quick sell) — never luck."
           }
         ]
       },
@@ -1146,15 +1151,53 @@
       }
     ]
   },
+  "resgate": {
+    "sucesso_titulo": "Code redeemed!",
+    "sucesso_texto": "Everything it carried is already on your account.",
+    "voce_recebeu": "You got",
+    "pokedex": "📖 Pokédex",
+    "pokedex_texto": "{n} new card(s) registered in your Pokédex!",
+    "rodape_restantes": "This code still has {n} use(s) left",
+    "rodape_usado": "This code was yours alone — thanks for the support!",
+    "recompensa_vip": "{emoji} **{plano} VIP** for {meses} month(s)",
+    "recompensa_moedas": "🪙 **{quantidade}** coins",
+    "recompensa_item": "{emoji} **{nome}** x{quantidade}",
+    "recompensa_caixa": "{emoji} **{nome}** x{quantidade}",
+    "recompensa_carta": "🎴 **{quantidade}** exclusive card(s)",
+    "formato_titulo": "That code doesn't look right",
+    "formato_texto": "AniBattle codes look like this: `ANI-0000-0000-0000`.\n\nCheck that you copied all of it — you can paste it with or without the dashes.",
+    "invalido_titulo": "Code not found",
+    "invalido_texto": "There's no code with that text, or it has been cancelled.\n\nIf you paid for it and think this is a mistake, contact support with your receipt.",
+    "expirado_titulo": "Code expired",
+    "expirado_texto": "This code is past its expiry date and can't be used anymore.",
+    "esgotado_titulo": "Code used up",
+    "esgotado_texto": "This code has already been used the maximum number of times.",
+    "ja_resgatado_titulo": "You already used this code",
+    "ja_resgatado_texto": "Each code works once per player — and this one is already on your account.",
+    "pendente_titulo": "That redemption stopped halfway",
+    "pendente_texto": "One delivery from this code got stuck, and you can't retry it on your own — you'd receive twice what already went through.\n\nContact support: the redemption is on record and gets finished from where it stopped.",
+    "parcial_titulo": "Only part of it went through",
+    "parcial_texto": "Something failed mid-delivery. What already arrived is on your account and is **not** lost.\n\nContact support to get the rest — the code is already registered under your name.",
+    "ja_recebeu": "Already on your account",
+    "muitas_tentativas": "Too many attempts",
+    "muitas_tentativas_texto": "You've entered a wrong code too many times. Wait a few minutes and try again — the count resets in {minutos} minutes.",
+    "erro": "I couldn't process the code right now. Try again in a moment; if it keeps failing, contact support."
+  },
   "vip_ui": {
     "titulo": "✨ AniBattle VIP plans",
     "ativo": "You're **{emoji} {plano}**!\nYour subscription expires {quando}.\n\nUse `/cosmetics` to equip your frames.",
     "vitalicio": "never (lifetime)",
-    "inativo": "Support the bot and get perks for looks and convenience.\n\n🛡️ **No plan grants a combat advantage.** Card stats, rarity odds and battle outcomes are exactly the same for everyone — paying gets you style and comfort, not power.",
+    "inativo": "Support the bot and play more: faster rolls, stored charges, no market fee and every frame.\n\n🛡️ **No plan grants a combat advantage.** Card stats, rarity odds and battle outcomes are exactly the same for everyone — paying gets you more turns, not better luck.",
     "seu_plano": " ← your plan",
     "cabecalho_plano": "{emoji} {plano} — R$ {preco}/month{marcador}",
     "vantagem_cooldown": "⏱️ `/roll` cooldown **-{porcento}%**",
+    "vantagem_cargas": "🎴 **+{n}** stored roll charge(s)",
     "vantagem_daily": "🎁 Daily reward **{multiplicador}x**",
+    "vantagem_roll_extra": "🎟️ **{n}** extra roll(s) every day, from `/daily`",
+    "vantagem_taxa": "🏪 Market fee **{porcento}%** (normally 5%)",
+    "vantagem_taxa_zero": "🏪 **No market fee** (normally 5%)",
+    "vantagem_venda_rapida": "🪙 Quick sell **+{porcento}%**",
+    "vantagem_desejos": "💭 **{n}** cards on your wishlist",
     "vantagem_molduras": "🖼️ {n} card frame(s): {lista}",
     "vantagem_emblema": "{emoji} **{plano}** badge on your profile and leaderboards",
     "vantagem_cor": "🎨 Custom profile color",
@@ -1589,6 +1632,10 @@
     },
     "vip": {
       "descricao": "Shows the VIP plans and your subscription status"
+    },
+    "redeem": {
+      "descricao": "Redeem a code (VIP, boxes, items...)",
+      "opcao_code": "The code you received, like ANI-0000-0000-0000"
     }
   },
   "nivel": {

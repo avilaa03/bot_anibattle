@@ -6,6 +6,7 @@ const { registerDiscovery } = require('../../utils/discovery');
 const { registrar } = require('../../utils/progress');
 const { notificarProgresso } = require('../../utils/notifications');
 const telemetria = require('../../utils/telemetry');
+const valores = require('../../utils/cardValues');
 const { criarT, DEFAULT_LOCALE } = require('../../utils/i18n');
 
 module.exports = (interaction, card, user, marketValue, valueToSell, rollEnd, mostradoEm = null, t = criarT(DEFAULT_LOCALE)) => {
@@ -45,6 +46,9 @@ module.exports = (interaction, card, user, marketValue, valueToSell, rollEnd, mo
                 comercializavel: card.comercializavel !== false,
                 obtainedAt: new Date(),
                 marketValue: marketValue,
+                // O valor NATURAL da carta, sem o bônus de VIP de quem
+                // rolou. Ver `cardValues.vendaRapidaPara`: gravar o bônus
+                // aqui o tornaria permanente e transferível.
                 valueToSell: valueToSell
             };
 
@@ -73,11 +77,15 @@ module.exports = (interaction, card, user, marketValue, valueToSell, rollEnd, mo
                 components: []
             });
         } else if (i.customId.startsWith('vender_')) {
-            const updated = await addBalance(interaction.user.id, valueToSell);
+            // O bônus de VIP entra AQUI, no crédito, e não no valor gravado.
+            // `user` é o documento que o rollRun já carregou, então não
+            // custa consulta nova.
+            const pago = valores.vendaRapidaPara({ ...card, valueToSell }, user);
+            const updated = await addBalance(interaction.user.id, pago);
             await i.update({
                 content: t('roll.vendida', {
                     carta: ui.cardName(card),
-                    valor: ui.coins(valueToSell, t.locale),
+                    valor: ui.coins(pago, t.locale),
                     saldo: ui.coins(updated?.balance ?? 0, t.locale)
                 }),
                 components: []

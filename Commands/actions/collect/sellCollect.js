@@ -3,7 +3,7 @@ const User = require('../../utils/userSchema');
 const ui = require('../../utils/embeds');
 const valores = require('../../utils/cardValues');
 const aprimoramento = require('../../utils/upgrading');
-const { applyMarketTax, MARKET_TAX_RATE } = require('../../utils/economy');
+const { applyMarketTax } = require('../../utils/economy');
 const { registrar } = require('../../utils/progress');
 const { criarT, DEFAULT_LOCALE } = require('../../utils/i18n');
 
@@ -69,7 +69,10 @@ async function sellCollect(interaction, collector, matchingCards, indexRef, list
 
             await listing.save();
 
-            const { tax, sellerReceives } = applyMarketTax(listingPrice);
+            // A alíquota é a de quem anuncia. Esta é só a PRÉVIA — quem
+            // cobra de verdade é o `marketEnd`, na hora da venda, com o
+            // plano que o vendedor tiver naquele momento.
+            const { tax, rate, sellerReceives } = applyMarketTax(listingPrice, user);
             const successEmbed = ui.success(t('sell.anunciada'), t('sell.anunciada_texto', {
                 emoji: ui.getRarity(card.rarity, t.locale).emoji,
                 carta: ui.cardName(card),
@@ -78,7 +81,7 @@ async function sellCollect(interaction, collector, matchingCards, indexRef, list
                 .addFields(
                     { name: t('sell.recebe_na_venda'), value: ui.coins(sellerReceives, t.locale), inline: true },
                     {
-                        name: t('sell.taxa_mercado', { porcento: Math.round(MARKET_TAX_RATE * 100) }),
+                        name: t('sell.taxa_mercado', { porcento: ui.percent(rate, t.locale) }),
                         value: ui.coins(tax, t.locale),
                         inline: true
                     }

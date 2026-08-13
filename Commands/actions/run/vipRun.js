@@ -5,20 +5,56 @@ const {
     TIERS, ORDEM_TIERS, isVipAtivo, getTier,
     nomeTier, localizarMoldura
 } = require('../../utils/vip');
+const { MARKET_TAX_RATE } = require('../../utils/economy');
 const { tDaInteracao } = require('../../utils/language');
 
 const LOJA_URL = process.env.LOJA_URL || null;
 
+/**
+ * As vantagens de um plano, agrupadas pelos três eixos que o `vip.js`
+ * define: quantidade, conveniência e cosmético.
+ *
+ * A ordem não é decorativa. Quantidade vem primeiro porque é o que o
+ * jogador sente todo dia — cooldown e cargas são o motivo real de
+ * assinar. Cosmético fecha, porque é o que ele mostra para os outros.
+ */
 function descreverVantagens(tier, t) {
+    const pct = (multiplicador) => Math.round((1 - multiplicador) * 100);
+
     const linhas = [
-        t('vip_ui.vantagem_cooldown', { porcento: Math.round((1 - tier.rollCooldownMultiplier) * 100) }),
-        t('vip_ui.vantagem_daily', { multiplicador: tier.dailyMultiplier }),
+        // --- Quantidade ---
+        t('vip_ui.vantagem_cooldown', { porcento: pct(tier.rollCooldownMultiplier) }),
+        t('vip_ui.vantagem_cargas', { n: tier.cargasExtras }),
+        // `ui.number` e não o número cru: 2,5 é escrito com vírgula em
+        // português e espanhol, e "2.5x" numa página de vendas em
+        // português parece erro de digitação.
+        t('vip_ui.vantagem_daily', { multiplicador: ui.number(tier.dailyMultiplier, t.locale) })
+    ];
+
+    if (tier.rollExtraDiario > 0) {
+        linhas.push(t('vip_ui.vantagem_roll_extra', { n: tier.rollExtraDiario }));
+    }
+
+    // --- Conveniência ---
+    linhas.push(
+        tier.taxaMercadoMultiplier === 0
+            ? t('vip_ui.vantagem_taxa_zero')
+            : t('vip_ui.vantagem_taxa', {
+                porcento: ui.percent(MARKET_TAX_RATE * tier.taxaMercadoMultiplier, t.locale)
+            }),
+        t('vip_ui.vantagem_venda_rapida', { porcento: Math.round((tier.bonusVendaRapida - 1) * 100) }),
+        t('vip_ui.vantagem_desejos', { n: tier.limiteDesejos })
+    );
+
+    // --- Cosmético ---
+    linhas.push(
         t('vip_ui.vantagem_molduras', {
             n: tier.molduras.length,
             lista: tier.molduras.map((m) => localizarMoldura(m, t.locale).nome).join(', ')
         }),
         t('vip_ui.vantagem_emblema', { emoji: tier.emoji, plano: nomeTier(tier.key, t.locale) })
-    ];
+    );
+
     if (tier.podeCorPerfil) linhas.push(t('vip_ui.vantagem_cor'));
     if (tier.podeBanner) linhas.push(t('vip_ui.vantagem_banner'));
     if (tier.destaqueRanking) linhas.push(t('vip_ui.vantagem_destaque'));

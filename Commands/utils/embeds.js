@@ -82,6 +82,29 @@ function number(amount, locale = DEFAULT_LOCALE) {
 }
 
 /**
+ * Uma fração (0,015) como porcentagem legível ("1,5"), SEM o sinal de %.
+ *
+ * O `%` fica no dicionário junto da frase, porque a posição dele muda de
+ * idioma para idioma e a frase inteira precisa poder ser reescrita.
+ *
+ * ## Por que não é só Math.round(x * 100)
+ *
+ * Era, enquanto a taxa do mercado era 5% para todo mundo. Com a taxa
+ * reduzida do VIP existe 1,5%, e o arredondamento cego mostraria "2%" —
+ * um número que o jogador não consegue conferir com a conta que ele vê
+ * na tela, e que faz o suporte receber print de "cobrou errado".
+ *
+ * Casas decimais só aparecem quando existem: 5% não vira "5,0%".
+ */
+function percent(fracao, locale = DEFAULT_LOCALE, casas = 1) {
+    const valor = (Number(fracao) || 0) * 100;
+    return valor.toLocaleString(LOCALE_NUMERO[normalizar(locale)], {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: casas
+    });
+}
+
+/**
  * Barra de progresso em blocos, para atributos.
  * progressBar(71, 100) -> "▰▰▰▰▰▰▰▱▱▱"
  */
@@ -212,6 +235,7 @@ module.exports = {
     compareRarityDesc,
     coins,
     number,
+    percent,
     progressBar,
     statLines,
     cardName,
