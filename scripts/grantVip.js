@@ -19,7 +19,9 @@ const mongoose = require('mongoose');
 
 mongoose.set('strictQuery', false);
 const { concederVip, revogarVip } = require('../Commands/utils/vipService');
-const { TIERS } = require('../Commands/utils/vip');
+// `nomeTier` e não `tier.nome`: o nome do plano saiu do TIERS quando os
+// planos passaram a ser traduzidos, e esta linha imprimia "VIP undefined".
+const { TIERS, nomeTier } = require('../Commands/utils/vip');
 const User = require('../Commands/utils/userSchema');
 
 function parseArgs(argv) {
@@ -81,7 +83,7 @@ async function main() {
         console.log(`↷ Pagamento "${providerPaymentId}" já tinha sido processado. Nada foi alterado.`);
     } else {
         const expira = resultado.user.vip.expiresAt;
-        console.log(`✓ ${tier.emoji} VIP ${tier.nome} ativado para ${args.user}`);
+        console.log(`✓ ${tier.emoji} VIP ${nomeTier(args.tier)} ativado para ${args.user}`);
         console.log(`  ${args.meses} mês(es) — expira em ${expira ? new Date(expira).toLocaleString('pt-BR') : 'nunca'}`);
         console.log(`  id do pagamento: ${providerPaymentId}`);
     }

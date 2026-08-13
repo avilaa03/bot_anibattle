@@ -97,6 +97,11 @@ npm run migrate:pokedex     # preenche a Pokédex de quem já tinha cartas
 npm run vip:grant -- --user <id> --tier ouro    # ativa VIP manualmente (PIX na mão)
 npm run vip:grant -- --user <id> --revogar
 
+npm run codigos:gerar -- --vip ouro --meses 3   # gera código para o comprador ativar com /redeem
+npm run codigos:gerar -- --moedas 5000 --usos 200 --validade 30
+npm run codigos:gerar -- --listar               # códigos abertos e resgates travados
+npm run codigos:gerar -- --cancelar ANI-0000-0000-0000
+
 npm run backup              # exporta todas as coleções para backups/
 npm run restore -- --de backups/<pasta>    # simula; use --confirmar para executar
 ```
@@ -219,6 +224,8 @@ tests/         testes que rodam sem banco
 | `utils/battleState.js` | Batalhas persistidas, com devolução de aposta em caso de queda |
 | `utils/economy.js` | Débito/crédito atômico e taxa do mercado |
 | `utils/vip.js` | Planos e cosméticos. **Nada aqui pode dar vantagem de combate** |
+| `utils/rewards.js` | O que um código pode entregar. **Tipo novo entra numa entrada só** |
+| `utils/redeem.js` | Geração e resgate de código. A trava é o índice `(codigo, userId)` |
 | `utils/discovery.js` | Pokédex |
 | `utils/moderacao.js` | Leitura do banimento. **O porteiro fica no `interactionCreate`**, não dentro dos comandos |
 | `utils/presenca.js` | Publica servidores e sinal de vida na coleção `bot_status`, para o painel do site ler |
